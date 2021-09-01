@@ -1,5 +1,7 @@
 import type { FileMapping } from './source-mapper';
 import { readFileSync } from 'fs';
+import { Project } from 'ts-morph';
+
 
 const ASTRO_DEFINITION = readFileSync(require.resolve('../astro.d.ts'));
 
@@ -34,16 +36,22 @@ export function astro2tsx(code: string, options: Astro2TSXOptions): Astro2TSXRes
 // This is hacky but it works for now
 function addProps(content: string, dtsContent: string): string {
   let defaultExportType = 'Record<string, any>';
-  if(/interface Props/.test(content)) {
+
+  // See if this has an interface already
+  const project = new Project({});
+  const sourceFile = project.createSourceFile("testing.ts", content);
+  const declarations = sourceFile.getExportedDeclarations();
+  if(declarations.has('Props')) {
     defaultExportType = 'Props';
   }
   return dtsContent + '\n' + `export default function (props: ${defaultExportType}): string;`
 }
 
 function transformContent(content: string) {
+  const ts = content.replace(/---/g, '///');
   return (
-    content.replace(/---/g, '///') +
+    ts +
     // Add TypeScript definitions
-    addProps(content, ASTRO_DEFINITION.toString('utf-8'))
+    addProps(ts, ASTRO_DEFINITION.toString('utf-8'))
   );
 }

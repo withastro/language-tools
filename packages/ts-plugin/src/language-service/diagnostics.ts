@@ -12,7 +12,7 @@ function decorateSyntacticDiagnostics(ls: ts.LanguageService): void {
     const getSyntacticDiagnostics = ls.getSyntacticDiagnostics;
     ls.getSyntacticDiagnostics = (fileName: string) => {
         // Diagnostics inside Astro files are done
-        // by the svelte-language-server / Svelte for VS Code extension
+        // by the @astrojs/language-server / Astro for VS Code extension
         if (isAstroFilePath(fileName)) {
             return [];
         }
@@ -35,7 +35,7 @@ function decorateSemanticDiagnostics(ls: ts.LanguageService): void {
 function decorateSuggestionDiagnostics(ls: ts.LanguageService): void {
     const getSuggestionDiagnostics = ls.getSuggestionDiagnostics;
     ls.getSuggestionDiagnostics = (fileName: string) => {
-        // Diagnostics inside Svelte files are done
+        // Diagnostics inside Astro files are done
         // by the @astrojs/language-server / Astro for VS Code extension
         if (isAstroFilePath(fileName)) {
             return [];

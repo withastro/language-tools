@@ -45,13 +45,13 @@ class ModuleResolutionCache {
 }
 
 /**
- * Creates a module loader than can also resolve `.svelte` files.
+ * Creates a module loader than can also resolve `.astro` files.
  *
- * The typescript language service tries to look up other files that are referenced in the currently open svelte file.
- * For `.ts`/`.js` files this works, for `.svelte` files it does not by default.
- * Reason: The typescript language service does not know about the `.svelte` file ending,
- * so it assumes it's a normal typescript file and searches for files like `../Component.svelte.ts`, which is wrong.
- * In order to fix this, we need to wrap typescript's module resolution and reroute all `.svelte.ts` file lookups to .svelte.
+ * The typescript language service tries to look up other files that are referenced in the currently open astro file.
+ * For `.ts`/`.js` files this works, for `.astro` files it does not by default.
+ * Reason: The typescript language service does not know about the `.astro` file ending,
+ * so it assumes it's a normal typescript file and searches for files like `../Component.astro.ts`, which is wrong.
+ * In order to fix this, we need to wrap typescript's module resolution and reroute all `.astro.ts` file lookups to .astro.
  */
 export function patchModuleLoader(
     logger: Logger,
@@ -83,8 +83,8 @@ export function patchModuleLoader(
         logger.log('Resolving modules names for ' + containingFile);
         // Try resolving all module names with the original method first.
         // The ones that are undefined will be re-checked if they are a
-        // Svelte file and if so, are resolved, too. This way we can defer
-        // all module resolving logic except for Svelte files to TypeScript.
+        // astro file and if so, are resolved, too. This way we can defer
+        // all module resolving logic except for astro files to TypeScript.
         const resolved =
             origResolveModuleNames?.(
                 moduleNames,
@@ -130,7 +130,7 @@ export function patchModuleLoader(
         }
 
         const resolvedFileName = ensureRealAstroFilePath(astroResolvedModule.resolvedFileName);
-        logger.log('Resolved', name, 'to Svelte file', resolvedFileName);
+        logger.log('Resolved', name, 'to astro file', resolvedFileName);
         const snapshot = snapshotManager.create(resolvedFileName);
         if (!snapshot) {
             return undefined;

@@ -3,7 +3,7 @@ import { Logger } from './logger.js';
 import { ensureRealAstroFilePath, isVirtualAstroFilePath, toRealAstroFilePath } from './utils.js';
 
 /**
- * This should only be accessed by TS svelte module resolution.
+ * This should only be accessed by TS astro module resolution.
  */
 export function createAstroSys(logger: Logger) {
     const astroSys: ts.System = {

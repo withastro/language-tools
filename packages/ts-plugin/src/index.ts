@@ -35,27 +35,27 @@ function init(modules: { typescript: typeof ts }) {
 
   function getExternalFiles(_project: ts.server.ConfiguredProject) {
       // Needed so the ambient definitions are known inside the tsx files
-      /*const svelteTsPath = dirname(require.resolve('svelte2tsx'));
-      const svelteTsxFiles = [
-          './svelte-shims.d.ts',
-          './svelte-jsx.d.ts',
-          './svelte-native-jsx.d.ts'
-      ].map((f) => modules.typescript.sys.resolvePath(resolve(svelteTsPath, f)));
-      return svelteTsxFiles;*/
+      /*const astroTsPath = dirname(require.resolve('astro2tsx'));
+      const astroTsxFiles = [
+          './astro-shims.d.ts',
+          './astro-jsx.d.ts',
+          './astro-native-jsx.d.ts'
+      ].map((f) => modules.typescript.sys.resolvePath(resolve(astroTsPath, f)));
+      return astroTsxFiles;*/
       return [];
   }
 
   function patchCompilerOptions(project: ts.server.Project) {
       const compilerOptions = project.getCompilerOptions();
-      // Patch needed because svelte2tsx creates jsx/tsx files
+      // Patch needed because astro2tsx creates jsx/tsx files
       compilerOptions.jsx = modules.typescript.JsxEmit.Preserve;
 
       // detect which JSX namespace to use (astro | astronative) if not specified or not compatible
       if (!compilerOptions.jsxFactory?.startsWith('astro')) {
-          // Default to regular svelte, this causes the usage of the "astro.JSX" namespace
+          // Default to regular astro, this causes the usage of the "astro.JSX" namespace
           // We don't need to add a switch for astro-native because the jsx is only relevant
           // within Astro files, which this plugin does not deal with.
-          compilerOptions.jsxFactory = 'svelte.createElement';
+          compilerOptions.jsxFactory = 'astro.createElement';
       }
   }
 

@@ -262,7 +262,7 @@ export class AstroSnapshotManager {
                 this.logger.debug('Read Astro file:', path);
                 const astroCode = readFile(path) || '';
                 try {
-                    const isTsFile = true; // TODO check file contents? TS might be okay with importing ts into js.
+                    const isTsFile = true;
                     const result = astro2tsx(astroCode, {
                         filename: path.split('/').pop(),
                         isTsFile
