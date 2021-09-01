@@ -37,7 +37,7 @@ jobs:
         if: steps.changesets.outputs.published == 'true'
         uses: lannonbr/vsce-action@master
         with:
-          args: "publish -p $VSCE_TOKEN"
+          args: "publish -p $VSCE_TOKEN --yarn"
         env:
           VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
 
