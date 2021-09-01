@@ -25,13 +25,21 @@ jobs:
         env:
           CI: true
 
-      - name: Create Release Pull Request
+      - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@master
         with:
-          version: yarn version
+          publish: yarn cs-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to VSCode Marketplace
+        if: steps.changesets.outputs.published == 'true'
+        uses: lannonbr/vsce-action@master
+        with:
+          args: "publish -p $VSCE_TOKEN"
+        env:
+          VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
 
       - name: Send a Discord notification if a publish happens
         if: steps.changesets.outputs.published == 'true'

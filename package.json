@@ -7,7 +7,8 @@
     "url": "https://github.com/snowpackjs/astro-language-tools.git"
   },
   "scripts": {
-    "release": "yarn build:all && changeset publish",
+    "cs-release": "yarn build:all && echo 'Releasing'",
+    "release": "yarn build:all",
     "benchmark": "yarn workspace astro run benchmark",
     "build": "lerna run build --scope \"{@astrojs/language-server,astro-vscode,@astrojs/ts-plugin}\"",
     "dev": "lerna run dev --scope \"{@astrojs/language-server,astro-vscode,@astrojs/ts-plugin}\" --parallel --stream",
