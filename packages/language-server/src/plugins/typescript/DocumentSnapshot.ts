@@ -5,6 +5,7 @@ import { Document, DocumentMapper, IdentityMapper } from '../../core/documents';
 import { isInTag, positionAt, offsetAt } from '../../core/documents/utils';
 import { pathToUrl } from '../../utils';
 import { getScriptKindFromFileName, isAstroFilePath, toVirtualAstroFilePath } from './utils';
+import { Project } from 'ts-morph';
 
 const ASTRO_DEFINITION = readFileSync(require.resolve('../../../astro.d.ts'));
 
@@ -75,11 +76,25 @@ class AstroDocumentSnapshot implements DocumentSnapshot {
 
   /** @internal */
   private transformContent(content: string) {
+    let raw = content.replace(/---/g, '///');
     return (
-      content.replace(/---/g, '///') +
+      raw +
       // Add TypeScript definitions
-      ASTRO_DEFINITION
+      this.addProps(raw, ASTRO_DEFINITION.toString('utf-8'))
     );
+  }
+
+  private addProps(content: string, dtsContent: string): string {
+    let defaultExportType = 'Record<string, any>';
+
+    const project = new Project({});
+    const sourceFile = project.createSourceFile("testing.ts", content);
+    const declarations = sourceFile.getExportedDeclarations();
+    if(declarations.has('Props')) {
+      defaultExportType = 'Props';
+    }
+
+    return dtsContent + '\n' + `export default function (props: ${defaultExportType}): string;`
   }
 
   get filePath() {
