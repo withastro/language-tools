@@ -246,7 +246,6 @@ export class AstroPlugin implements CompletionsProvider, FoldingRangeProvider {
 
     for(const decl of sym?.getDeclarations() || []) {
       const fileName = decl.getSourceFile().fileName;
-      console.log(fileName)
       if(isVirtualAstroFilePath(fileName)) {
         if(!ts.isFunctionDeclaration(decl)) {
           console.error(`Unexpected: .astro files should export a default function for the component definition.`);

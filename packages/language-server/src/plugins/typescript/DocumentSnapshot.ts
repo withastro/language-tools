@@ -5,7 +5,6 @@ import { Document, DocumentMapper, IdentityMapper } from '../../core/documents';
 import { isInTag, positionAt, offsetAt } from '../../core/documents/utils';
 import { pathToUrl } from '../../utils';
 import { getScriptKindFromFileName, isAstroFilePath, toVirtualAstroFilePath } from './utils';
-import { Project } from 'ts-morph';
 
 const ASTRO_DEFINITION = readFileSync(require.resolve('../../../astro.d.ts'));
 
@@ -86,14 +85,11 @@ class AstroDocumentSnapshot implements DocumentSnapshot {
 
   private addProps(content: string, dtsContent: string): string {
     let defaultExportType = 'Record<string, any>';
-
-    const project = new Project({});
-    const sourceFile = project.createSourceFile("testing.ts", content);
-    const declarations = sourceFile.getExportedDeclarations();
-    if(declarations.has('Props')) {
+    // Using TypeScript to parse here would cause a double-parse, slowing down the extension
+    // This needs to be done a different way when the new compiler is added.
+    if(/(interface|type) Props/.test(content)) {
       defaultExportType = 'Props';
     }
-
     return dtsContent + '\n' + `export default function (props: ${defaultExportType}): string;`
   }
 
