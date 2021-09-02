@@ -150,7 +150,7 @@ export function convertToLocationRange(defDoc: SnapshotFragment, textSpan: ts.Te
 type FrameworkExt = 'astro' | 'vue' | 'jsx' | 'tsx' | 'svelte';
 
 export function isVirtualFrameworkFilePath(ext: FrameworkExt, filePath: string) {
-  return filePath.endsWith('.' + ext + '.ts');
+  return filePath.endsWith('.' + ext + '.tsx');
 }
 
 export function isAstroFilePath(filePath: string) {
@@ -181,14 +181,14 @@ export function toVirtualAstroFilePath(filePath: string) {
   if (isVirtualAstroFilePath(filePath)) {
     return filePath;
   } else if(isAstroFilePath(filePath)) {
-    return `${filePath}.ts`;
+    return `${filePath}.tsx`;
   } else {
     return filePath;
   }
 }
 
 export function toRealAstroFilePath(filePath: string) {
-  return filePath.slice(0, -'.ts'.length);
+  return filePath.slice(0, -'.tsx'.length);
 }
 
 export function ensureRealAstroFilePath(filePath: string) {

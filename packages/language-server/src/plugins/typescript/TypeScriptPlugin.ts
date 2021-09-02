@@ -1,6 +1,12 @@
 import type { ConfigManager } from '../../core/config';
 import type { CompletionsProvider, AppCompletionItem, AppCompletionList } from '../interfaces';
-import type { CancellationToken, Hover, SignatureHelp, SignatureHelpContext } from 'vscode-languageserver';
+import type {
+  CancellationToken,
+  Diagnostic,
+  Hover,
+  SignatureHelp,
+  SignatureHelpContext
+} from 'vscode-languageserver';
 import { join as pathJoin, dirname as pathDirname } from 'path';
 import { Document, DocumentManager, isInsideFrontmatter } from '../../core/documents';
 import { SourceFile, ImportDeclaration, Node, SyntaxKind } from 'typescript';
@@ -12,6 +18,7 @@ import { convertToLocationRange, isVirtualAstroFilePath, isVirtualFilePath, getS
 import { isNotNullOrUndefined, pathToUrl } from '../../utils';
 import { CompletionsProviderImpl, CompletionEntryWithIdentifer } from './features/CompletionsProvider';
 import { HoverProviderImpl } from './features/HoverProvider';
+import { DiagnosticsProviderImpl } from './features/DiagnosticsProvider';
 import { isNoTextSpanInGeneratedCode, SnapshotFragmentMap } from './features/utils';
 import { SignatureHelpProviderImpl } from './features/SignatureHelpProvider';
 
@@ -28,6 +35,7 @@ export class TypeScriptPlugin implements CompletionsProvider {
   private readonly completionProvider: CompletionsProviderImpl;
   private readonly hoverProvider: HoverProviderImpl;
   private readonly signatureHelpProvider: SignatureHelpProviderImpl;
+  private readonly diagnosticsProvider: DiagnosticsProviderImpl;
 
   constructor(docManager: DocumentManager, configManager: ConfigManager, workspaceUris: string[]) {
     this.docManager = docManager;
@@ -37,6 +45,7 @@ export class TypeScriptPlugin implements CompletionsProvider {
     this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager);
     this.hoverProvider = new HoverProviderImpl(this.languageServiceManager);
     this.signatureHelpProvider = new SignatureHelpProviderImpl(this.languageServiceManager);
+    this.diagnosticsProvider = new DiagnosticsProviderImpl(this.languageServiceManager);
   }
 
   async doHover(document: Document, position: Position): Promise<Hover | null> {
@@ -101,6 +110,17 @@ export class TypeScriptPlugin implements CompletionsProvider {
       })
     );
     return result.filter(isNotNullOrUndefined);
+  }
+
+  async getDiagnostics(
+    document: Document,
+    cancellationToken?: CancellationToken
+  ): Promise<Diagnostic[]> {
+      if (!this.featureEnabled('diagnostics')) {
+          return [];
+      }
+
+      return this.diagnosticsProvider.getDiagnostics(document, cancellationToken);
   }
 
   async onWatchFileChanges(onWatchFileChangesParams: any[]): Promise<void> {
@@ -186,4 +206,12 @@ export class TypeScriptPlugin implements CompletionsProvider {
       }
     }
   }
+
+  // This exists so we can make features toggleable in the future.
+  private featureEnabled(feature: string) {
+    return (
+      this.configManager.enabled('typescript.enable') &&
+      this.configManager.enabled(`typescript.${feature}.enable`)
+    );
+}
 }
