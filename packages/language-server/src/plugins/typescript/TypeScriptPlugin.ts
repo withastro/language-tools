@@ -14,7 +14,7 @@ import { CompletionContext, DefinitionLink, FileChangeType, Position, LocationLi
 import * as ts from 'typescript';
 import { LanguageServiceManager } from './LanguageServiceManager';
 import { SnapshotManager } from './SnapshotManager';
-import { convertToLocationRange, isVirtualAstroFilePath, isVirtualFilePath, getScriptKindFromFileName } from './utils';
+import { convertToLocationRange, isVirtualAstroFilePath, isVirtualFilePath, getScriptKindFromFileName, toVirtualAstroFilePath } from './utils';
 import { isNotNullOrUndefined, pathToUrl } from '../../utils';
 import { CompletionsProviderImpl, CompletionEntryWithIdentifer } from './features/CompletionsProvider';
 import { HoverProviderImpl } from './features/HoverProvider';
@@ -63,15 +63,11 @@ export class TypeScriptPlugin implements CompletionsProvider {
   }
 
   async getDefinitions(document: Document, position: Position): Promise<DefinitionLink[]> {
-    if (!this.isInsideFrontmatter(document, position)) {
-      return [];
-    }
-
     const { lang, tsDoc } = await this.languageServiceManager.getTypeScriptDoc(document);
     const mainFragment = await tsDoc.getFragment();
 
     const filePath = tsDoc.filePath;
-    const tsFilePath = filePath.endsWith('.ts') ? filePath : filePath + '.ts';
+    const tsFilePath = toVirtualAstroFilePath(filePath);
 
     const fragmentPosition = mainFragment.getGeneratedPosition(position);
     const fragmentOffset = mainFragment.offsetAt(fragmentPosition);

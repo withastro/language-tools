@@ -6,8 +6,7 @@ import { isInTag, positionAt, offsetAt } from '../../core/documents/utils';
 import { pathToUrl } from '../../utils';
 import { getScriptKindFromFileName, isAstroFilePath, toVirtualAstroFilePath } from './utils';
 import { EOL } from 'os';
-
-const ASTRO_DEFINITION = readFileSync(require.resolve('../../../astro.d.ts'));
+import astro2tsx from './astro2tsx';
 
 /**
  * The mapper to get from original snapshot positions to generated and vice versa.
@@ -82,27 +81,7 @@ class AstroDocumentSnapshot implements DocumentSnapshot {
 
   get text() {
     let raw = this.doc.getText();
-    return this.transformContent(raw);
-  }
-
-  /** @internal */
-  private transformContent(content: string) {
-    let raw = content.replace(/---/g, '///');
-    return (
-      raw + EOL +
-      // Add TypeScript definitions
-      this.addProps(raw, ASTRO_DEFINITION.toString('utf-8'))
-    );
-  }
-
-  private addProps(content: string, dtsContent: string): string {
-    let defaultExportType = 'Record<string, any>';
-    // Using TypeScript to parse here would cause a double-parse, slowing down the extension
-    // This needs to be done a different way when the new compiler is added.
-    if(/(interface|type) Props/.test(content)) {
-      defaultExportType = 'Props';
-    }
-    return dtsContent + EOL + `export default function (_props: ${defaultExportType}): string { return ''; }`
+    return astro2tsx(raw);
   }
 
   get filePath() {
@@ -160,16 +139,7 @@ export class DocumentFragmentSnapshot implements Omit<DocumentSnapshot, 'getFrag
     this.version = parent.version;
     this.filePath = toVirtualAstroFilePath(filePath);
     this.url = toVirtualAstroFilePath(filePath);
-    this.text = this.transformContent(text);
-  }
-
-  /** @internal */
-  private transformContent(content: string) {
-    return (
-      content.replace(/---/g, '///') +
-      // Add TypeScript definitions
-      ASTRO_DEFINITION
-    );
+    this.text = astro2tsx(text);
   }
 
   getText(start: number, end: number) {
