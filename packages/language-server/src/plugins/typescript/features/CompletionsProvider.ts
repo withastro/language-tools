@@ -1,8 +1,9 @@
 import type { CompletionContext, CompletionItem, Position, TextDocumentIdentifier, MarkupContent } from 'vscode-languageserver';
 import type { LanguageServiceManager } from '../LanguageServiceManager';
+import { isInsideFrontmatter } from '../../../core/documents/utils';
 import { Document } from '../../../core/documents';
 import * as ts from 'typescript';
-import { CompletionList, MarkupKind, CompletionTriggerKind } from 'vscode-languageserver';
+import { CompletionList, MarkupKind } from 'vscode-languageserver';
 import { AppCompletionItem, AppCompletionList, CompletionsProvider } from '../../interfaces';
 import { scriptElementKindToCompletionItemKind, getCommitCharactersForScriptElement, toVirtualAstroFilePath } from '../utils';
 
@@ -19,13 +20,14 @@ export interface CompletionEntryWithIdentifer extends ts.CompletionEntry, TextDo
 export class CompletionsProviderImpl implements CompletionsProvider<CompletionEntryWithIdentifer> {
   constructor(private lang: LanguageServiceManager) {}
 
-  async getCompletions(document: Document, position: Position, completionContext?: CompletionContext): Promise<AppCompletionList<CompletionEntryWithIdentifer> | null> {
-    const filePath = document.getFilePath();
-    if (!filePath) throw new Error();
-
-    if(completionContext?.triggerKind === CompletionTriggerKind.TriggerCharacter && completionContext?.triggerCharacter === '>') {
+  async getCompletions(document: Document, position: Position, _completionContext?: CompletionContext): Promise<AppCompletionList<CompletionEntryWithIdentifer> | null> {
+    // TODO: handle inside expression
+    if (!isInsideFrontmatter(document.getText(), document.offsetAt(position))) {
       return null;
     }
+
+    const filePath = document.getFilePath();
+    if (!filePath) throw new Error();
 
     const { tsDoc, lang } = await this.lang.getTypeScriptDoc(document);
     const fragment = await tsDoc.getFragment();
