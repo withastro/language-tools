@@ -14,7 +14,7 @@ import { CompletionContext, DefinitionLink, FileChangeType, Position, LocationLi
 import * as ts from 'typescript';
 import { LanguageServiceManager } from './LanguageServiceManager';
 import { SnapshotManager } from './SnapshotManager';
-import { convertToLocationRange, isVirtualAstroFilePath, isVirtualFilePath, getScriptKindFromFileName, toVirtualAstroFilePath } from './utils';
+import { convertToLocationRange, isVirtualAstroFilePath, ensureRealAstroFilePath, getScriptKindFromFileName, toVirtualAstroFilePath } from './utils';
 import { isNotNullOrUndefined, pathToUrl } from '../../utils';
 import { CompletionsProviderImpl, CompletionEntryWithIdentifer } from './features/CompletionsProvider';
 import { HoverProviderImpl } from './features/HoverProvider';
@@ -94,7 +94,7 @@ export class TypeScriptPlugin implements CompletionsProvider {
         const { fragment, snapshot } = await docs.retrieve(def.fileName);
 
         if (isNoTextSpanInGeneratedCode(snapshot.getFullText(), def.textSpan)) {
-          const fileName = isVirtualFilePath(def.fileName) ? def.fileName.substr(0, def.fileName.length - 3) : def.fileName;
+          const fileName = ensureRealAstroFilePath(def.fileName);
           const textSpan = isVirtualAstroFilePath(tsFilePath) ? { start: 0, length: 0 } : def.textSpan;
           return LocationLink.create(
             pathToUrl(fileName),
