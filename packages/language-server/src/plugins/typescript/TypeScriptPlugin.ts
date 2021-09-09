@@ -8,7 +8,7 @@ import type {
   SignatureHelpContext
 } from 'vscode-languageserver';
 import { join as pathJoin, dirname as pathDirname } from 'path';
-import { Document, DocumentManager, isInsideFrontmatter } from '../../core/documents';
+import { Document, DocumentManager } from '../../core/documents';
 import { SourceFile, ImportDeclaration, Node, SyntaxKind } from 'typescript';
 import { CompletionContext, DefinitionLink, FileChangeType, Position, LocationLink } from 'vscode-languageserver';
 import * as ts from 'typescript';
@@ -155,10 +155,6 @@ export class TypeScriptPlugin implements CompletionsProvider {
    */
   public async getSnapshotManager(fileName: string) {
     return this.languageServiceManager.getSnapshotManager(fileName);
-  }
-
-  private isInsideFrontmatter(document: Document, position: Position) {
-    return isInsideFrontmatter(document.getText(), document.offsetAt(position));
   }
 
   private goToDefinitionFoundOnlyAlias(tsFileName: string, defs: readonly ts.DefinitionInfo[]) {

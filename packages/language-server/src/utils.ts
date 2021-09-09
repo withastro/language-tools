@@ -38,7 +38,14 @@ export function isPossibleComponent(node: Node): boolean {
  * the same name like a html tag.
  */
 export function isPossibleClientComponent(node: Node): boolean {
-  return isPossibleComponent(node) && (node.tag?.indexOf(':') ?? -1) > -1;
+  if(isPossibleComponent(node) && node.attributes) {
+    for(let [name] of Object.entries(node.attributes)) {
+      if(name.startsWith('client:')) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 /** Flattens an array */

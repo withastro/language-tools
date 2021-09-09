@@ -76,6 +76,11 @@ export class CompletionProvider {
         insertText: 'visible',
         commitCharacters: ['v'],
       },
+      {
+        label: ':media',
+        insertText: 'media',
+        commitCharacters: ['m']
+      }
     ];
   }
 

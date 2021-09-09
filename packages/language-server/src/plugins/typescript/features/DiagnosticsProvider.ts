@@ -12,6 +12,8 @@ import { convertRange, mapSeverity, toVirtualAstroFilePath } from '../utils';
 import { DocumentFragmentSnapshot } from '../DocumentSnapshot';
 import { isInGeneratedCode } from './utils';
 
+type BoundaryTuple = [number, number];
+
 export class DiagnosticsProviderImpl implements DiagnosticsProvider {
   private readonly languageServiceManager: LanguageServiceManager;
 
@@ -38,8 +40,6 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
         }
 
         const { lang, tsDoc } = await this.getLSAndTSDoc(document);
-
-
         const isTypescript = tsDoc.scriptKind === ts.ScriptKind.TSX;
 
         // Document preprocessing failed, show parser error instead
@@ -57,9 +57,13 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 
         const filePath = toVirtualAstroFilePath(tsDoc.filePath);
 
+        const scriptBoundaries = this.getScriptBoundaries(lang, filePath);
+
         const syntaxDiagnostics = lang.getSyntacticDiagnostics(filePath);
         const suggestionDiagnostics = lang.getSuggestionDiagnostics(filePath);
-        const semanticDiagnostics = lang.getSemanticDiagnostics(filePath);
+        const semanticDiagnostics = lang.getSemanticDiagnostics(filePath).filter(d => {
+            return isNoWithinScript(scriptBoundaries, d);
+        });
 
         const diagnostics: ts.Diagnostic[] = [
             ...syntaxDiagnostics,
@@ -86,7 +90,11 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
                     hasNoNegativeLines(diag) &&
                     isNoFalsePositiveInst(diag) &&
                     isNoJSXImplicitRuntimeWarning(diag) &&
-                    isNoJSXMustHaveOneParent(diag)
+                    isNoJSXMustHaveOneParent(diag) &&
+                    isNoCantUseJSX(diag) &&
+                    isNoCantEndWithTS(diag) &&
+                    isNoSpreadExpected(diag) &&
+                    isNoCantResolveJSONModule(diag)
                 );
             })
             .map(enhanceIfNecessary);
@@ -94,6 +102,28 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 
     private async getLSAndTSDoc(document: Document) {
       return this.languageServiceManager.getTypeScriptDoc(document);
+    }
+
+    private getScriptBoundaries(lang: ts.LanguageService, tsFilePath: string): BoundaryTuple[] {
+        const program = lang.getProgram();
+        const sourceFile = program?.getSourceFile(tsFilePath);
+        if(!sourceFile) {
+            return [];
+        }
+
+        const boundaries: BoundaryTuple[] = [];
+
+        function findScript(parent: ts.Node) {
+            ts.forEachChild(parent, node => {
+                if(ts.isJsxElement(node) && node.openingElement.tagName.getText() === 'script') {
+                    boundaries.push([node.getStart(), node.getEnd()]);
+                }
+                findScript(node);
+            });
+        }
+
+        findScript(sourceFile);
+        return boundaries;
     }
 }
 
@@ -110,7 +140,7 @@ function getDiagnosticTag(diagnostic: ts.Diagnostic): DiagnosticTag[] {
 
 function mapRange(
     fragment: DocumentFragmentSnapshot,
-    document: Document
+    _document: Document
 ): (value: Diagnostic) => Diagnostic {
     return (diagnostic) => {
         let range = mapRangeToOriginal(fragment, diagnostic.range);
@@ -152,11 +182,39 @@ function isNoJsxCannotHaveMultipleAttrsError(diagnostic: Diagnostic) {
 }
 
 function isNoJSXImplicitRuntimeWarning(diagnostic: Diagnostic) {
-    return diagnostic.code !== 7016;
+    return diagnostic.code !== 7016 && diagnostic.code !== 2792;
 }
 
 function isNoJSXMustHaveOneParent(diagnostic: Diagnostic) {
     return diagnostic.code !== 2657;
+}
+
+function isNoCantUseJSX(diagnostic: Diagnostic) {
+    return diagnostic.code !== 17004 && diagnostic.code !== 6142;
+}
+
+function isNoCantEndWithTS(diagnostic: Diagnostic) {
+    return diagnostic.code !== 2691;
+}
+
+function isNoSpreadExpected(diagnostic: Diagnostic) {
+    return diagnostic.code !== 1005;
+}
+
+function isNoWithinScript(boundaries: BoundaryTuple[], diagnostic: ts.Diagnostic) {
+    if(diagnostic.start) {
+        for(let [start, end] of boundaries) {
+            if(diagnostic.start > start && diagnostic.start < end) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+function isNoCantResolveJSONModule(diagnostic: Diagnostic) {
+    return diagnostic.code !== 2732;
 }
 
 /**

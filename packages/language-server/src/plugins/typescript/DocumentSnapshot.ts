@@ -81,7 +81,7 @@ class AstroDocumentSnapshot implements DocumentSnapshot {
 
   get text() {
     let raw = this.doc.getText();
-    return astro2tsx(raw);
+    return astro2tsx(raw).code;
   }
 
   get filePath() {
@@ -139,7 +139,7 @@ export class DocumentFragmentSnapshot implements Omit<DocumentSnapshot, 'getFrag
     this.version = parent.version;
     this.filePath = toVirtualAstroFilePath(filePath);
     this.url = toVirtualAstroFilePath(filePath);
-    this.text = astro2tsx(text);
+    this.text = astro2tsx(text).code;
   }
 
   getText(start: number, end: number) {
