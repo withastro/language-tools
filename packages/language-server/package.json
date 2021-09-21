@@ -5,7 +5,6 @@
   "license": "MIT",
   "type": "commonjs",
   "main": "dist/index.js",
-  "types": "types/index.d.ts",
   "bin": {
     "astro-ls": "./bin/server.js"
   },
