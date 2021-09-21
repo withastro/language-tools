@@ -16,7 +16,7 @@
     "types"
   ],
   "scripts": {
-    "build": "astro-scripts build \"src/**/*.ts\"",
+    "build": "tsc",
     "dev": "astro-scripts dev \"src/**/*.ts\"",
     "test": "tap --no-coverage test/**"
   },
