@@ -12,10 +12,6 @@ declare global {
 
 type AstroRenderedHTML = string;
 
-interface Example {
-  func(...args: any[]): void;
-}
-
 type AstroElement = JSX.Element;
 declare const Fragment: (...args: any[]) => AstroElement;
 
