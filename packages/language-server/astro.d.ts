@@ -12,8 +12,8 @@ declare global {
 
 type AstroRenderedHTML = string;
 
-type AstroElement = JSX.Element;
-declare const Fragment: (...args: any[]) => AstroElement;
+type AstroElement = any;
+type Fragment = (...a: any[]) => AstroElement;
 
 type FetchContentResultBase = {
   astro: {
@@ -50,4 +50,6 @@ interface Astro {
   site: URL;
 }
 
+// @ts-ignore
 declare const Astro: Astro;
+declare const Fragment: Fragment;
