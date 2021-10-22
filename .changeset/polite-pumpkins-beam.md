@@ -1,6 +1,6 @@
 ---
-"@astrojs/language-server": minor
-"astro-vscode": minor
+"@astrojs/language-server": patch
+"astro-vscode": patch
 ---
 
 Add support for at-prefixed attributes
