@@ -241,7 +241,7 @@
           "text.html.markdown"
         ],
         "embeddedLanguages": {
-          "meta.embedded.block.css": "astro"
+          "meta.embedded.block.astro": "astro"
         }
       }
     ]
