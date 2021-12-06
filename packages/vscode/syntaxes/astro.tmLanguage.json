@@ -223,8 +223,8 @@
         },
         {
           "name": "source.js.embedded.html",
-          "begin": "(?<=<(?i:script|style)[^>]*>)(?!\\G)",
-          "end": "(?=</(?i:script|style))",
+          "begin": "(?<=<(?i:script)[^>]*>)(?!\\G)",
+          "end": "(?=</(?i:script))",
           "patterns": [
             {
               "include": "source.js"
@@ -233,8 +233,8 @@
         },
         {
           "name": "source.css.embedded.html",
-          "begin": "(?<=<(?i:script|style)[^>]*>)(?!\\G)",
-          "end": "(?=</(?i:script|style))",
+          "begin": "(?<=<(?i:style)[^>]*>)(?!\\G)",
+          "end": "(?=</(?i:style))",
           "patterns": [
             {
               "include": "source.css"
