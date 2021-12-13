@@ -14,4 +14,4 @@ checker.upsertDocument({
 (async function() {
   let [{diagnostics}] = await checker.getDiagnostics();
   t.equal(diagnostics.length, 0, 'No errors found');
-});
+})();
