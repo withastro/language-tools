@@ -51,8 +51,8 @@ interface Astro {
   slots: Record<string, true | undefined>;
 }
 
-// @ts-ignore
 declare var Astro: Astro;
+declare var Fragment: string;
 
-// @ts-ignore
-declare var Fragment: symbol;
+void Astro;
+void Fragment;

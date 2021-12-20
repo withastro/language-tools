@@ -22,8 +22,8 @@ interface Astro {
   site: URL;
 }
 
-// @ts-ignore
 declare var Astro: Astro;
+declare var Fragment: string;
 
-// @ts-ignore
-declare var Fragment: symbol;
+void Astro;
+void Fragment;
