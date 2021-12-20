@@ -22,4 +22,8 @@ interface Astro {
   site: URL;
 }
 
-declare const Astro: Astro;
+// @ts-ignore
+declare var Astro: Astro;
+
+// @ts-ignore
+declare var Fragment: symbol;

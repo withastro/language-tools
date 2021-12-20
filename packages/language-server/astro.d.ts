@@ -52,5 +52,7 @@ interface Astro {
 }
 
 // @ts-ignore
-declare const Astro: Astro;
-declare const Fragment: Fragment;
+declare var Astro: Astro;
+
+// @ts-ignore
+declare var Fragment: symbol;
