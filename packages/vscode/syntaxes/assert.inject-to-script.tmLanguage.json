@@ -1,0 +1,29 @@
+{
+	"name": "Import Assertions",
+	"injectionSelector": "meta.import",
+	"scopeName": "meta.import",
+	"patterns": [
+		{
+			"begin": "\\s+(assert)\\s+(\\{)",
+			"beginCaptures": {
+				"1": {
+					"name": "keyword.control.${1:/downcase}.js"
+				},
+				"2": {
+					"name": "punctuation.definition.block.js"
+				}
+			},
+			"end": "\\}",
+			"endCaptures": {
+				"0": {
+					"name": "punctuation.definition.block.js"
+				}
+			},
+			"patterns": [
+				{
+					"include": "source.js#object-member"
+				}
+			]
+		}
+	]
+}

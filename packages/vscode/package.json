@@ -244,6 +244,11 @@
         "embeddedLanguages": {
           "meta.embedded.block.astro": "astro"
         }
+      },
+      {
+        "injectTo": ["source.js", "source.ts", "source.tsx", "text.html.astro"],
+        "scopeName": "meta.import",
+        "path": "./syntaxes/assert.inject-to-script.tmLanguage.json"
       }
     ]
   }
