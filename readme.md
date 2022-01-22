@@ -1,11 +1,20 @@
 # Astro Language Tools
 
-This repository contains tooling for the [Astro](https://astro.build/) language, powering the [VSCode extension](https://marketplace.visualstudio.com/items?itemName=astro-build.astro-vscode). The packages included are:
+This repository contains all the editor tooling required for the [Astro](https://astro.build/) language (`.astro` files).
 
-* The Astro VSCode Extension
-* The Astro Language Server
+Notably, it contains an implementation of the [Language Server Protocol (LSP)](https://microsoft.github.io/language-server-protocol/) which as of now is used for the [official VSCode Extension](https://marketplace.visualstudio.com/items?itemName=astro-build.astro-vscode) but could also be used to power a plugin for your favorite IDE in the future.
 
-This enables all of the editing features you depend on in VSCode. Any time you open a `.astro` file these tools power editing functionality such as:
+## Packages
+
+### [`@astrojs/language-server`](packages/language-server)
+
+The Astro language server, the structure is inspired by the [Svelte Language Server](https://github.com/sveltejs/language-tools).
+
+### [`astro-vscode`](packages/vscode)
+
+The official VS Code extension for Astro. This enables all of the editing features you depend on in VSCode.
+
+Any time you open a `.astro` file these tools power editing functionality such as:
 
 * [Go to Definition](https://code.visualstudio.com/docs/editor/editingevolved#_go-to-definition)
 * Code hover hints
@@ -15,69 +24,8 @@ This enables all of the editing features you depend on in VSCode. Any time you o
 * Code folding
 * Emmet
 
-Soon we hope to port these to other editors compatible with the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/).
+## Contributing
 
-## Development
+Pull requests of any size and any skill level are welcome, no contribution is too small. Changes to the Astro Language Tools are subject to [Astro Governance](https://github.com/withastro/astro/blob/main/GOVERNANCE.md) and should adhere to the [Astro Style Guide](https://github.com/withastro/astro/blob/main/STYLE_GUIDE.md)
 
-> See the [overview video](https://www.loom.com/share/609f7b61795349328730f14e1ae2166e) on how the extension works.
-
-Changes to the Astro Language Tools are subject to [Astro Governance](https://github.com/snowpackjs/astro/blob/main/GOVERNANCE.md).
-
-### Setup
-
-All Astro projects use Yarn and [Lerna](https://lerna.js.org/) to enable development in a monorepo. Once you've cloned the project install dependencies and do an initial build:
-
-```shell
-yarn
-yarn build
-```
-
-### Debugging
-
-During the normal course of development on the VSCode extension you'll want to run the debugger. First run the build in watch mode with:
-
-```shell
-yarn dev
-```
-
-#### Turn Off Extension
-
-If you have the Extension installed you'll need to turn it off, or your development extension will not be used and you'll be confused why your changes are not working.
-
-1. Click on __Extensions__.
-2. Search for *astro*.
-3. Click the extension and then click __Disable__.
-
-<img width="1530" alt="Show the steps of disabling the extension" src="https://user-images.githubusercontent.com/361671/130800518-177b2e9f-f2e0-46ff-adac-31ff099b67fe.png">
-
-#### Start Debugger
-
-Then in VSCode:
-
-1. Switch to __Run and Debug__.
-2. Click __Launch Extension__.
-
-<img width="406" alt="Showing the steps to launching the debugger" src="https://user-images.githubusercontent.com/361671/130799724-aa724b67-9d15-4c79-8ff5-0b90e398e147.png">
-
-This will launch a new window for your editor. Here you can navigate to a test Astro project that you will use to develop your changes.
-
-#### Open Debug Console
-
-The Debug console in the main editor is where you will get logging information. When developing in the language server, logging is helpful to figure out what is going on.
-
-1. Ctrl+Shift+P (CMD+Shift+P on OSX) opens the command palette.
-2. Select __Debug Console__.
-3. At the bottom, switch to __Attach to Server__. This is most of the information you'll want to see.
-
-<img width="1628" alt="Steps to open the command palette" src="https://user-images.githubusercontent.com/361671/130805127-83e3935f-39a3-435d-9116-64eb53e115f4.png">
-
-#### Make changes and set breakpoints
-
-Now you can start developing your changes. You can set breakpoints or add `debugger;` statements. To see your changes reflect you'll need to take these steps:
-
-1. In the extension editor window, go to __Run and Debug__ if you are not already there.
-2. Click on the __Restart__ button under __Launch Client__.
-
-This will restart the extension and reload your test window.
-
-<img width="406" alt="Shows how to restart the extension" src="https://user-images.githubusercontent.com/361671/130806011-c36b6b50-d2f1-4ef3-a2da-ca7e9ab2a8fe.png">
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for instructions on how to setup your development environnement
