@@ -29,3 +29,47 @@ Any time you open a `.astro` file these tools power editing functionality such a
 Pull requests of any size and any skill level are welcome, no contribution is too small. Changes to the Astro Language Tools are subject to [Astro Governance](https://github.com/withastro/astro/blob/main/GOVERNANCE.md) and should adhere to the [Astro Style Guide](https://github.com/withastro/astro/blob/main/STYLE_GUIDE.md)
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for instructions on how to setup your development environnement
+
+## Sponsors
+
+You can sponsor Astro's development on [Open Collective](https://opencollective.com/astrodotbuild). Astro is generously supported by the following companies and individuals:
+
+### Platinum Sponsors
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center"><a href="https://www.netlify.com/#gh-light-mode-only" target="_blank"><img width="147" height="40" src="https://raw.githubusercontent.com/withastro/astro/main/.github/assets/netlify.svg#gh-light-mode-only" alt="Netlify" /></a><a href="https://www.netlify.com/#gh-dark-mode-only" target="_blank"><img width="147" height="40" src="https://raw.githubusercontent.com/withastro/astro/main/.github/assets/netlify-dark.svg#gh-dark-mode-only" alt="Netlify" />
+      </a></td>
+      <td align="center"><a href="https://www.vercel.com/#gh-light-mode-only" target="_blank"><img width="150" height="34" src="https://raw.githubusercontent.com/withastro/astro/main/.github/assets/vercel.svg#gh-light-mode-only" alt="Vercel" /></a><a href="https://www.vercel.com/#gh-dark-mode-only"><img width="150" height="34" src="https://raw.githubusercontent.com/withastro/astro/main/.github/assets/vercel-dark.svg#gh-dark-mode-only" alt="Vercel" />
+      </a></td>
+    </tr>
+  </tbody>
+</table>
+
+### Gold Sponsors
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center">
+        <a href="https://divRIOTS.com#gh-light-mode-only" target="_blank">
+        <img width="150" height="40" src="https://raw.githubusercontent.com/withastro/astro/main/.github/assets/divriots.svg#gh-light-mode-only" alt="‹div›RIOTS" />
+        </a>
+        <a href="https://divRIOTS.com#gh-dark-mode-only" target="_blank">
+        <img width="150" height="40" src="https://raw.githubusercontent.com/withastro/astro/main/.github/assets/divriots-dark.svg#gh-dark-mode-only" alt="‹div›RIOTS" />
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### Sponsors
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center"><a href="https://sentry.io" target="_blank"><img width="147" height="40" src="https://raw.githubusercontent.com/withastro/astro/main/.github/assets/sentry.svg" alt="Sentry" /></a></td><td align="center"><a href="https://qoddi.com" target="_blank"><img width="147" height="40" src="https://devcenter.qoddi.com/wp-content/uploads/2021/11/blog-transparent-logo-1.png" alt="Qoddi App Platform" /></a></td>
+    </tr>
+  </tbody>
+</table>
