@@ -8,13 +8,19 @@ Notably, it contains an implementation of the [Language Server Protocol (LSP)](h
 
 ### [`@astrojs/language-server`](packages/language-server)
 
-The Astro language server, the structure is inspired by the [Svelte Language Server](https://github.com/sveltejs/language-tools).
+The Astro language server, its structure is inspired by the [Svelte Language Server](https://github.com/sveltejs/language-tools).
 
 ### [`astro-vscode`](packages/vscode)
 
-The official VS Code extension for Astro. This enables all of the editing features you depend on in VSCode.
+The official VS Code extension for Astro. This enables all of the editing features you depend on in VSCode for `.astro files`
 
-Any time you open a `.astro` file these tools power editing functionality such as:
+### [`@astrojs/ts-plugin`](packages/ts-plugin)
+
+TypeScript plugin to add support for `.astro` imports in `.ts` files with proper typing
+
+### Features provided
+
+These packages power editing functionality such as:
 
 * [Go to Definition](https://code.visualstudio.com/docs/editor/editingevolved#_go-to-definition)
 * Code hover hints
