@@ -14,7 +14,7 @@ The Astro language server, its structure is inspired by the [Svelte Language Ser
 
 ### [`astro-vscode`](packages/vscode)
 
-The official VS Code extension for Astro. This enables all of the editing features you depend on in VSCode for `.astro files`
+The official VS Code extension for Astro. This enables all of the editing features you depend on in VSCode for `.astro` files
 
 ### [`@astrojs/ts-plugin`](packages/ts-plugin)
 
