@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { EOL } from 'os';
+import { parseAstro } from '../../core/documents/parseAstro';
 
 const ASTRO_DEFINITION_BYTES = readFileSync(require.resolve('../../../astro.d.ts'));
 const ASTRO_DEFINITION_STR = ASTRO_DEFINITION_BYTES.toString('utf-8');
@@ -27,13 +28,19 @@ export default function(content: string): Astro2TSXResult {
     code: ''
   };
 
-  // Replace frontmatter marks with comments
-  let raw = content
-    // Handle case where semicolons is not used in the frontmatter section
-    .replace(/((?!^)(?<!;)\n)(---)/g, (_whole, start, _dashes) => {
-      return start + ';' + '//';
-    })
-    .replace(/---/g, '///')
+	const astroDocument = parseAstro(content)
+
+	// Frontmatter replacements
+  let frontMatterRaw = content
+		// Handle case where semicolons is not used in the frontmatter section
+		.replace(/((?!^)(?<!;)\n)(---)/g, (_whole, start, _dashes) => {
+			return start + ';' + '//';
+		})
+		// Replace frontmatter marks with comments
+		.replace(/---/g, '///');
+
+	// Content replacement
+	let htmlRaw = content.substring(astroDocument.content.firstNonWhitespaceOffset ?? 0)
     // Turn comments into JS comments
     .replace(/<\s*!--([^-->]*)(.*?)-->/gs, (whole) => {
       return `{/*${whole}*/}`;
@@ -72,13 +79,14 @@ export default function(content: string): Astro2TSXResult {
       return `<${main.toLowerCase()}/>`;
     });
 
-  result.code = (
-    raw + EOL +
 
-    // Add TypeScript definitions
-    addProps(raw, ASTRO_DEFINITION_STR)
-  );
 
+  result.code =
+		frontMatterRaw +
+		htmlRaw +
+		EOL +
+		// Add TypeScript definitions
+		addProps(frontMatterRaw, ASTRO_DEFINITION_STR);
 
   return result;
 }
