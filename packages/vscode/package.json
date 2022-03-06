@@ -155,14 +155,22 @@
         "aliases": [
           "Astro"
         ],
-        "configuration": "./languages/astro-language-configuration.json"
+        "configuration": "./languages/astro-language-configuration.json",
+        "icon": {
+          "light": "./assets/lang-icon.svg",
+          "dark": "./assets/lang-icon.svg"
+        }
       },
       {
         "id": "astro-markdown",
         "aliases": [
           "Astro Markdown"
         ],
-        "configuration": "./languages/astro-markdown-language-configuration.json"
+        "configuration": "./languages/astro-markdown-language-configuration.json",
+        "icon": {
+          "light": "./assets/lang-icon.svg",
+          "dark": "./assets/lang-icon.svg"
+        }
       }
     ],
     "grammars": [
