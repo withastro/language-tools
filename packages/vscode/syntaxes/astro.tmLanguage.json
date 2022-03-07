@@ -5,7 +5,7 @@
   "foldingStopMarker": "(?x)\n(</(?i:head|body|table|thead|tbody|tfoot|tr|div|select|fieldset|style|script|ul|ol|li|form|dl)>\n|^(?!.*?<!--).*?--\\s*>\n|^<!--\\ end\\ tminclude\\ -->$\n|<\\?(?:php)?.*\\bend(if|for(each)?|while)\\b\n|\\{\\{?/(if|foreach|capture|literal|foreach|php|section|strip)\n|^[^{]*\\}\n)",
   "keyEquivalent": "^~H",
   "name": "Astro",
-  "scopeName": "text.html.astro",
+  "scopeName": "source.astro",
   "patterns": [
     {
       "include": "#astro:markdown"
@@ -478,7 +478,6 @@
       ]
     },
     "astro:markdown": {
-      "name": "text.html.astro.markdown",
       "begin": "(<)(Markdown)(>)",
       "beginCaptures": {
         "1": {
@@ -505,7 +504,7 @@
       },
       "patterns": [
         {
-          "include": "text.html.markdown.astro"
+          "include": "text.html.markdown"
         }
       ]
     },
