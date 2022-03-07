@@ -184,7 +184,8 @@
           "source.astro"
         ],
         "embeddedLanguages": {
-          "meta.embedded.block.astro": "astro"
+          "meta.embedded.block.astro": "astro",
+          "meta.embedded.block.astro.frontmatter": "typescriptreact"
         }
       }
     ]

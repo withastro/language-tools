@@ -32,9 +32,29 @@
         {
           "begin": "(^|\\G)(\\s*)(.*)",
           "while": "(^|\\G)(?!\\s*([`~]{3,})\\s*$)",
-          "contentName": "meta.embedded.block.astro",
           "patterns": [
             {
+              "begin": "^\\s*---\\s*$",
+              "end": "^\\s*---\\s*$",
+              "beginCaptures": {
+                "0": {
+                  "name": "punctuation.definition.tag.xi.begin.t"
+                }
+              },
+              "endCaptures": {
+                "0": {
+                  "name": "punctuation.definition.tag.xi.end.t"
+                }
+              },
+              "contentName": "meta.embedded.block.astro.frontmatter",
+              "patterns": [
+                {
+                  "include": "source.tsx"
+                }
+              ]
+            },
+            {
+              "contentName": "meta.embedded.block.astro",
               "include": "source.astro"
             }
           ]
