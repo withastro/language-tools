@@ -172,8 +172,12 @@
         "path": "./syntaxes/astro.tmLanguage.json",
         "embeddedLanguages": {
           "source.css": "css",
+          "source.css.less": "less",
+          "source.css.scss": "scss",
           "source.sass": "sass",
-          "source.scss": "scss",
+          "source.stylus": "stylus",
+          "source.js": "javascript",
+          "source.jsx": "javascriptreact",
           "source.ts": "typescript",
           "source.tsx": "typescriptreact",
           "text.html.astro": "astro",
