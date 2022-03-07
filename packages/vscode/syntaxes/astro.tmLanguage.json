@@ -132,7 +132,7 @@
       },
       "patterns": [
         {
-          "begin": "\\G(?=\\s*[^>]*?lang\\s*=\\s*(['\"]|)(?i:js|javascript)\\1)",
+          "begin": "\\G(?=\\s*[^>]*?lang\\s*=\\s*(['\"]|)(?i:jsx?|javascript)\\1)",
           "end": "(?=</|/>)",
           "patterns": [
             {
@@ -140,19 +140,6 @@
               "end": "(?=</)",
               "contentName": "source.js",
               "patterns": [{ "include": "source.js" }]
-            },
-            { "include": "#html:tag-attributes" }
-          ]
-        },
-        {
-          "begin": "\\G(?=\\s*[^>]*?lang\\s*=\\s*(['\"]|)(?i:jsx)\\1)",
-          "end": "(?=</|/>)",
-          "patterns": [
-            {
-              "begin": "(?<=>)(?!</)",
-              "end": "(?=</)",
-              "contentName": "source.jsx",
-              "patterns": [{ "include": "source.jsx" }]
             },
             { "include": "#html:tag-attributes" }
           ]

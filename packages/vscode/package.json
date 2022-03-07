@@ -172,7 +172,6 @@
           "source.sass": "sass",
           "source.stylus": "stylus",
           "source.js": "javascript",
-          "source.jsx": "javascriptreact",
           "source.ts": "typescript",
           "source.tsx": "typescriptreact"
         }
