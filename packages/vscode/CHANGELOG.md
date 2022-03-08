@@ -1,5 +1,21 @@
 # astro-vscode
 
+## 0.9.3
+
+### Patch Changes
+
+- c4d43b4: Deploy to OpenVSX
+- Updated dependencies [c4d43b4]
+  - @astrojs/language-server@0.9.3
+
+## 0.9.2
+
+### Patch Changes
+
+- 91404d1: Enable publishing to OpenVSX
+- Updated dependencies [91404d1]
+  - @astrojs/language-server@0.9.2
+
 ## 0.9.1
 
 ### Patch Changes
