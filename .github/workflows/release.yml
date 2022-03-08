@@ -11,17 +11,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0 # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
-
-      - name: Set up Node.js 14.x
-        uses: actions/setup-node@v2
+      
+      - name: Setup pnpm 
+        uses: pnpm/action-setup@v2.2.1
         with:
-          node-version: 14.x
+          node-version: 6.x.x
+
+      - name: Set up Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
           
       - name: Install dependencies
-        run: yarn --frozen-lockfile --ignore-engines
+        run: pnpm install --frozen-lockfile
         env:
           CI: true
 
@@ -29,7 +34,7 @@ jobs:
         id: changesets
         uses: changesets/action@master
         with:
-          publish: yarn release
+          publish: pnpm release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -38,15 +43,15 @@ jobs:
         if: steps.changesets.outputs.published == 'true'
         working-directory: ./packages/vscode
         run: |
-          npm i
-          npx vsce publish -p ${{ secrets.VSCE_TOKEN }}
+          pnpm install --frozen-lockfile
+          pnpx vsce publish -p ${{ secrets.VSCE_TOKEN }}
 
       - name: Publish to OpenVSX
         if: steps.changesets.outputs.published == 'true'
         working-directory: ./packages/vscode
         run: |
-          npm i
-          npx ovsx publish -p ${{ secrets.OVSX_TOKEN }}
+          pnpm install --frozen-lockfile
+          pnpx ovsx publish -p ${{ secrets.OVSX_TOKEN }}
 
       - name: Send a Discord notification if a publish happens
         if: steps.changesets.outputs.published == 'true'
