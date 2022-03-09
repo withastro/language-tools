@@ -7,6 +7,7 @@ importers:
       '@changesets/cli': ^2.16.0
       '@typescript-eslint/eslint-plugin': ^4.22.0
       '@typescript-eslint/parser': ^4.18.0
+      astro: ^0.23.5
       astro-scripts: workspace:*
       eslint: ^7.25.0
       eslint-config-prettier: ^8.3.0
@@ -18,6 +19,7 @@ importers:
       '@changesets/cli': 2.16.0
       '@typescript-eslint/eslint-plugin': 4.29.2_26fc12074192d6ab6237a0abb4645b9b
       '@typescript-eslint/parser': 4.29.2_eslint@7.32.0+typescript@4.5.5
+      astro: 0.23.7_typescript@4.5.5
       astro-scripts: link:scripts
       eslint: 7.32.0
       eslint-config-prettier: 8.3.0_eslint@7.32.0
