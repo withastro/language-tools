@@ -17,8 +17,6 @@ jobs:
       
       - name: Setup pnpm 
         uses: pnpm/action-setup@v2.2.1
-        with:
-          node-version: 6.x.x
 
       - name: Set up Node.js 16.x
         uses: actions/setup-node@v3
@@ -26,9 +24,7 @@ jobs:
           node-version: 16.x
           
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-        env:
-          CI: true
+        run: pnpm install
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets

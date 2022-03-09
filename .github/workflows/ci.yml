@@ -27,8 +27,6 @@ jobs:
 
       - name: Setup pnpm 
         uses: pnpm/action-setup@v2.2.1
-        with:
-          node-version: 6.x.x
 
       - name: Set node version to ${{ matrix.node_version }}
         uses: actions/setup-node@v3
@@ -37,9 +35,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-        env:
-          CI: true
+        run: pnpm install
 
       - name: Build the packages
         run: pnpm build
