@@ -30,7 +30,7 @@ importers:
 
   packages/language-server:
     specifiers:
-      '@astrojs/svelte-language-integration': '*'
+      '@astrojs/svelte-language-integration': ^0.1.0
       '@types/lodash': ^4.14.179
       '@vscode/emmet-helper': ^2.8.4
       astro: ^0.23.7
