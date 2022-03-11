@@ -1,115 +1,197 @@
-import type { CompletionsProvider } from '../interfaces';
-import type { Document, DocumentManager } from '../../core/documents';
-import type { ConfigManager } from '../../core/config';
+import {
+	Color,
+	ColorInformation,
+	ColorPresentation,
+	CompletionContext,
+	CompletionList,
+	Position,
+	Range,
+} from 'vscode-languageserver';
+import { ConfigManager } from '../../core/config/ConfigManager';
+import { LSCSSConfig } from '../../core/config/interfaces';
+import {
+	AstroDocument,
+	isInsideFrontmatter,
+	isInTag,
+	mapColorPresentationToOriginal,
+	mapCompletionItemToOriginal,
+	mapObjWithRangeToOriginal,
+	mapRangeToGenerated,
+	TagInformation,
+} from '../../core/documents';
 import { doComplete as getEmmetCompletions } from '@vscode/emmet-helper';
-import { CompletionContext, CompletionList, CompletionTriggerKind, Position } from 'vscode-languageserver';
-import { isInsideFrontmatter } from '../../core/documents/utils';
+import type { Plugin } from '../interfaces';
 import { CSSDocument, CSSDocumentBase } from './CSSDocument';
-import { getLanguage, getLanguageService } from './service';
+import { getLanguageService } from './languageService';
+import { AttributeContext, getAttributeContextAtPosition } from '../../core/documents/parseHTML';
 import { StyleAttributeDocument } from './StyleAttributeDocument';
-import { mapCompletionItemToOriginal } from '../../core/documents';
-import { AttributeContext, getAttributeContextAtPosition } from '../../core/documents/parseHtml';
-import { getIdClassCompletion } from './features/getIdClassCompletion';
+import { getIdClassCompletion } from './features/getIdClassCompletions';
+import { flatten } from 'lodash';
 
-export class CSSPlugin implements CompletionsProvider {
-  private docManager: DocumentManager;
-  private configManager: ConfigManager;
-  private documents = new WeakMap<Document, CSSDocument>();
-  private triggerCharacters = new Set(['.', ':', '-', '/']);
-  public pluginName = 'CSS';
+export class CSSPlugin implements Plugin {
+	__name = 'css';
 
-  constructor(docManager: DocumentManager, configManager: ConfigManager) {
-    this.docManager = docManager;
-    this.configManager = configManager;
+	private configManager: ConfigManager;
+	private cssDocuments = new WeakMap<TagInformation, CSSDocument>();
 
-    this.docManager.on('documentChange', (document) => {
-      this.documents.set(document, new CSSDocument(document));
-    });
-  }
+	constructor(configManager: ConfigManager) {
+		this.configManager = configManager;
+	}
 
-  getCompletions(document: Document, position: Position, completionContext?: CompletionContext): CompletionList | null {
-    const triggerCharacter = completionContext?.triggerCharacter;
-    const triggerKind = completionContext?.triggerKind;
-    const isCustomTriggerCharacter = triggerKind === CompletionTriggerKind.TriggerCharacter;
+	getCompletions(
+		document: AstroDocument,
+		position: Position,
+		completionContext?: CompletionContext
+	): CompletionList | null {
+		if (!this.featureEnabled('completions')) {
+			return null;
+		}
 
-    if (isCustomTriggerCharacter && triggerCharacter && !this.triggerCharacters.has(triggerCharacter)) {
-      return null;
-    }
+		if (isInsideFrontmatter(document.getText(), document.offsetAt(position))) {
+			return null;
+		}
 
-    if (this.isInsideFrontmatter(document, position)) {
-      return null;
-    }
+		const styleTag = this.getStyleTagForPosition(document, position);
 
-    const cssDocument = this.getCSSDoc(document);
+		// If we don't have a style tag at this position, we might be in a style property instead, let's check
+		if (!styleTag) {
+			const attributeContext = getAttributeContextAtPosition(document, position);
+			if (!attributeContext) {
+				return null;
+			}
 
-    if (cssDocument.isInGenerated(position)) {
-      return this.getCompletionsInternal(document, position, cssDocument);
-    }
+			if (this.inStyleAttributeWithoutInterpolation(attributeContext, document.getText())) {
+				const [start, end] = attributeContext.valueRange;
+				return this.getCompletionsInternal(document, position, new StyleAttributeDocument(document, start, end));
+			}
+			// If we're not in a style attribute, instead give completions for ids and classes used in the current document
+			else if ((attributeContext.name == 'id' || attributeContext.name == 'class') && attributeContext.inValue) {
+				const stylesheets = this.getStylesheetsForDocument(document);
+				return getIdClassCompletion(document, stylesheets, attributeContext);
+			}
 
-    const attributeContext = getAttributeContextAtPosition(document, position);
-    if (!attributeContext) {
-      return null;
-    }
+			return null;
+		}
 
-    if (this.inStyleAttributeWithoutInterpolation(attributeContext, document.getText())) {
-      const [start, end] = attributeContext.valueRange;
-      return this.getCompletionsInternal(document, position, new StyleAttributeDocument(document, start, end));
-    } else {
-      return getIdClassCompletion(cssDocument, attributeContext);
-    }
-  }
+		const cssDocument = this.getCSSDocumentForStyleTag(styleTag, document);
+		return this.getCompletionsInternal(document, position, cssDocument);
+	}
 
-  private getCompletionsInternal(document: Document, position: Position, cssDocument: CSSDocumentBase) {
-    if (isSASS(cssDocument)) {
-      // the css language service does not support sass, still we can use
-      // the emmet helper directly to at least get emmet completions
-      return getEmmetCompletions(document, position, 'sass', this.configManager.getEmmetConfig()) || null;
-    }
+	getDocumentColors(document: AstroDocument): ColorInformation[] {
+		const allColorInfo = this.getCSSDocumentsForDocument(document).map((cssDoc) => {
+			const cssLang = extractLanguage(cssDoc);
+			const langService = getLanguageService(cssLang);
 
-    const type = extractLanguage(cssDocument);
+			return langService
+				.findDocumentColors(cssDoc, cssDoc.stylesheet)
+				.map((colorInfo) => mapObjWithRangeToOriginal(cssDoc, colorInfo));
+		});
 
-    const lang = getLanguageService(type);
-    const emmetResults: CompletionList = {
-      isIncomplete: true,
-      items: [],
-    };
+		return flatten(allColorInfo);
+	}
 
-    const results = lang.doComplete(cssDocument, cssDocument.getGeneratedPosition(position), cssDocument.stylesheet);
-    return CompletionList.create(
-      [...(results ? results.items : []), ...emmetResults.items].map((completionItem) => mapCompletionItemToOriginal(cssDocument, completionItem)),
-      // Emmet completions change on every keystroke, so they are never complete
-      emmetResults.items.length > 0
-    );
-  }
+	getColorPresentations(document: AstroDocument, range: Range, color: Color): ColorPresentation[] {
+		const allColorPres = this.getCSSDocumentsForDocument(document).map((cssDoc) => {
+			const cssLang = extractLanguage(cssDoc);
+			const langService = getLanguageService(cssLang);
 
-  private inStyleAttributeWithoutInterpolation(attrContext: AttributeContext, text: string): attrContext is Required<AttributeContext> {
-    return attrContext.name === 'style' && !!attrContext.valueRange && !text.substring(attrContext.valueRange[0], attrContext.valueRange[1]).includes('{');
-  }
+			if (!cssDoc.isInGenerated(range.start) && !cssDoc.isInGenerated(range.end)) {
+				return [];
+			}
 
-  private getCSSDoc(document: Document) {
-    let cssDoc = this.documents.get(document);
-    if (!cssDoc || cssDoc.version < document.version) {
-      cssDoc = new CSSDocument(document);
-      this.documents.set(document, cssDoc);
-    }
-    return cssDoc;
-  }
+			return langService
+				.getColorPresentations(cssDoc, cssDoc.stylesheet, color, mapRangeToGenerated(cssDoc, range))
+				.map((colorPres) => mapColorPresentationToOriginal(cssDoc, colorPres));
+		});
 
-  private isInsideFrontmatter(document: Document, position: Position) {
-    return isInsideFrontmatter(document.getText(), document.offsetAt(position));
-  }
+		return flatten(allColorPres);
+	}
+
+	private inStyleAttributeWithoutInterpolation(
+		attrContext: AttributeContext,
+		text: string
+	): attrContext is Required<AttributeContext> {
+		return (
+			attrContext.name === 'style' &&
+			!!attrContext.valueRange &&
+			!text.substring(attrContext.valueRange[0], attrContext.valueRange[1]).includes('{')
+		);
+	}
+
+	private getCompletionsInternal(document: AstroDocument, position: Position, cssDocument: CSSDocumentBase) {
+		if (isSASS(cssDocument)) {
+			// The CSS language service does not support SASS (not to be confused with SCSS)
+			// however we can at least still get Emmet completions
+			return getEmmetCompletions(document, position, 'sass', this.configManager.getEmmetConfig()) || null;
+		}
+
+		const cssLang = extractLanguage(cssDocument);
+		const langService = getLanguageService(cssLang);
+
+		const emmetResults: CompletionList = {
+			isIncomplete: true,
+			items: [],
+		};
+
+		const results = langService.doComplete(
+			cssDocument,
+			cssDocument.getGeneratedPosition(position),
+			cssDocument.stylesheet
+		);
+		return CompletionList.create(
+			[...(results ? results.items : []), ...emmetResults.items].map((completionItem) =>
+				mapCompletionItemToOriginal(cssDocument, completionItem)
+			),
+			// Emmet completions change on every keystroke, so they are never complete
+			emmetResults.items.length > 0
+		);
+	}
+
+	/**
+	 * Get the associated CSS Document for a style tag
+	 */
+	private getCSSDocumentForStyleTag(tag: TagInformation, document: AstroDocument): CSSDocument {
+		let cssDoc = this.cssDocuments.get(tag);
+		if (!cssDoc || cssDoc.version < document.version) {
+			cssDoc = new CSSDocument(document, tag);
+			this.cssDocuments.set(tag, cssDoc);
+		}
+
+		return cssDoc;
+	}
+
+	private getCSSDocumentsForDocument(document: AstroDocument) {
+		return document.styleTags.map((tag) => this.getCSSDocumentForStyleTag(tag, document));
+	}
+
+	private getStylesheetsForDocument(document: AstroDocument) {
+		return this.getCSSDocumentsForDocument(document).map((cssDoc) => cssDoc.stylesheet);
+	}
+
+	/**
+	 * Get style tag at position for a document
+	 */
+	private getStyleTagForPosition(document: AstroDocument, position: Position): TagInformation | undefined {
+		return document.styleTags.find((styleTag) => {
+			return isInTag(position, styleTag);
+		});
+	}
+
+	private featureEnabled(feature: keyof LSCSSConfig) {
+		return this.configManager.enabled('css.enabled') && this.configManager.enabled(`css.${feature}.enabled`);
+	}
 }
 
 function isSASS(document: CSSDocumentBase) {
-  switch (extractLanguage(document)) {
-    case 'sass':
-      return true;
-    default:
-      return false;
-  }
+	switch (extractLanguage(document)) {
+		case 'sass':
+			return true;
+		default:
+			return false;
+	}
 }
 
 function extractLanguage(document: CSSDocumentBase): string {
-  const lang = document.languageId;
-  return lang.replace(/^text\//, '');
+	const lang = document.languageId;
+	return lang.replace(/^text\//, '');
 }

@@ -6,7 +6,7 @@ import { activateTagClosing } from './html/autoClose.js';
 const TagCloseRequest: RequestType<TextDocumentPositionParams, string, any> = new RequestType('html/tag');
 
 export async function activate(context: ExtensionContext) {
-	const serverModule = require.resolve('@astrojs/language-server/bin/server.js');
+	const serverModule = require.resolve('@astrojs/language-server/bin/nodeServer.js');
 
 	const port = 6040;
 	const debugOptions = { execArgv: ['--nolazy', '--inspect=' + port] };
@@ -35,6 +35,7 @@ export async function activate(context: ExtensionContext) {
 				javascript: workspace.getConfiguration('javascript'),
 			},
 			dontFilterIncompleteCompletions: true, // VSCode filters client side and is smarter at it than us
+			isTrusted: workspace.isTrusted
 		},
 	};
 
