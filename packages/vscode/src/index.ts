@@ -1,5 +1,11 @@
 import { window, commands, workspace, ExtensionContext, TextDocument, Position } from 'vscode';
-import { LanguageClient, RequestType, TextDocumentPositionParams, ServerOptions, TransportKind } from 'vscode-languageclient/node';
+import {
+	LanguageClient,
+	RequestType,
+	TextDocumentPositionParams,
+	ServerOptions,
+	TransportKind,
+} from 'vscode-languageclient/node';
 import { LanguageClientOptions } from 'vscode-languageclient';
 import { activateTagClosing } from './html/autoClose.js';
 
@@ -35,7 +41,7 @@ export async function activate(context: ExtensionContext) {
 				javascript: workspace.getConfiguration('javascript'),
 			},
 			dontFilterIncompleteCompletions: true, // VSCode filters client side and is smarter at it than us
-			isTrusted: workspace.isTrusted
+			isTrusted: workspace.isTrusted,
 		},
 	};
 
@@ -52,14 +58,16 @@ export async function activate(context: ExtensionContext) {
 			const disposable = activateTagClosing(tagRequestor, { astro: true }, 'html.autoClosingTags');
 			context.subscriptions.push(disposable);
 		})
-		.catch((err) => {
+		.catch(err => {
 			console.error('Astro, unable to load language server.', err);
 		});
 
 	// Restart the language server if any critical files that are outside our jurisdiction got changed (tsconfig, jsconfig etc)
 	workspace.onDidSaveTextDocument(async (doc: TextDocument) => {
 		const fileName = doc.fileName.split(/\/|\\/).pop() ?? doc.fileName;
-		if ([/^tsconfig\.json$/, /^jsconfig\.json$/, /^astro\.config\.(js|cjs|mjs|ts)$/].some((regex) => regex.test(fileName))) {
+		if (
+			[/^tsconfig\.json$/, /^jsconfig\.json$/, /^astro\.config\.(js|cjs|mjs|ts)$/].some(regex => regex.test(fileName))
+		) {
 			await restartClient(false);
 		}
 	});
