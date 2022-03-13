@@ -2,10 +2,12 @@ import * as vscode from 'vscode-languageserver';
 import { TextDocumentIdentifier } from 'vscode-languageserver';
 import { ConfigManager } from './core/config/ConfigManager';
 import { DocumentManager } from './core/documents/DocumentManager';
+import { AstroPlugin } from './plugins/astro/AstroPlugin';
 import { CSSPlugin } from './plugins/css/CSSPlugin';
 import { HTMLPlugin } from './plugins/html/HTMLPlugin';
 import { AppCompletionItem } from './plugins/interfaces';
 import { PluginHost } from './plugins/PluginHost';
+import { TypeScriptPlugin } from './plugins/typescript/TypeScriptPlugin';
 
 const TagCloseRequest: vscode.RequestType<vscode.TextDocumentPositionParams, string | null, any> =
 	new vscode.RequestType('html/tag');
@@ -22,7 +24,13 @@ export function startLanguageServer(connection: vscode.Connection) {
 		pluginHost.registerPlugin(new HTMLPlugin(configManager));
 		pluginHost.registerPlugin(new CSSPlugin(configManager));
 
-		// Update language-server config with what the user's supplied to us at launch
+		// We don't currently support running the TypeScript and Astro plugin in the browser
+		if (params.initializationOptions.environment !== 'browser') {
+			pluginHost.registerPlugin(new AstroPlugin(configManager));
+			pluginHost.registerPlugin(new TypeScriptPlugin(configManager));
+		}
+
+		// Update language-server config with what the user supplied to us at launch
 		configManager.updateConfig(params.initializationOptions.configuration.astro);
 		configManager.updateEmmetConfig(params.initializationOptions.configuration.emmet);
 

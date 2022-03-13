@@ -79,7 +79,9 @@ export class HTMLPlugin implements Plugin {
 		return this.lang.doTagComplete(document, position, html);
 	}
 
-	// Add lang completions to style tag (ex: <style lang="scss"></style>)
+	/**
+	 * Get lang completions for style tags (ex: `<style lang="scss">`)
+	 */
 	private getLangCompletions(completions: CompletionItem[]): CompletionItem[] {
 		const styleScriptTemplateCompletions = completions.filter(
 			(completion) => completion.kind === CompletionItemKind.Property && this.styleScriptTemplate.has(completion.label)

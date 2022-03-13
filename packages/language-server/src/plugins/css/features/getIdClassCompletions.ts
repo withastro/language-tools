@@ -1,10 +1,8 @@
 import { CompletionItem, CompletionItemKind, CompletionList } from 'vscode-languageserver';
-import { AstroDocument } from '../../../core/documents';
 import { AttributeContext } from '../../../core/documents/parseHTML';
 import { Stylesheet } from 'vscode-css-languageservice';
 
 export function getIdClassCompletion(
-	document: AstroDocument,
 	stylesheets: Stylesheet[],
 	attributeContext: AttributeContext
 ): CompletionList | null {

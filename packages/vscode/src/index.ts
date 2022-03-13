@@ -40,6 +40,7 @@ export async function activate(context: ExtensionContext) {
 				typescript: workspace.getConfiguration('typescript'),
 				javascript: workspace.getConfiguration('javascript'),
 			},
+			environment: 'node',
 			dontFilterIncompleteCompletions: true, // VSCode filters client side and is smarter at it than us
 			isTrusted: workspace.isTrusted,
 		},
@@ -58,7 +59,7 @@ export async function activate(context: ExtensionContext) {
 			const disposable = activateTagClosing(tagRequestor, { astro: true }, 'html.autoClosingTags');
 			context.subscriptions.push(disposable);
 		})
-		.catch(err => {
+		.catch((err) => {
 			console.error('Astro, unable to load language server.', err);
 		});
 
@@ -66,7 +67,7 @@ export async function activate(context: ExtensionContext) {
 	workspace.onDidSaveTextDocument(async (doc: TextDocument) => {
 		const fileName = doc.fileName.split(/\/|\\/).pop() ?? doc.fileName;
 		if (
-			[/^tsconfig\.json$/, /^jsconfig\.json$/, /^astro\.config\.(js|cjs|mjs|ts)$/].some(regex => regex.test(fileName))
+			[/^tsconfig\.json$/, /^jsconfig\.json$/, /^astro\.config\.(js|cjs|mjs|ts)$/].some((regex) => regex.test(fileName))
 		) {
 			await restartClient(false);
 		}

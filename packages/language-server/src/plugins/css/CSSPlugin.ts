@@ -67,7 +67,7 @@ export class CSSPlugin implements Plugin {
 			// If we're not in a style attribute, instead give completions for ids and classes used in the current document
 			else if ((attributeContext.name == 'id' || attributeContext.name == 'class') && attributeContext.inValue) {
 				const stylesheets = this.getStylesheetsForDocument(document);
-				return getIdClassCompletion(document, stylesheets, attributeContext);
+				return getIdClassCompletion(stylesheets, attributeContext);
 			}
 
 			return null;

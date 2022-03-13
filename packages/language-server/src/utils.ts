@@ -6,6 +6,14 @@ export function normalizeUri(uri: string): string {
 	return URI.parse(uri).toString();
 }
 
+/**
+ * Some paths (on windows) start with a upper case driver letter, some don't.
+ * This is normalized here.
+ */
+export function normalizePath(path: string): string {
+	return URI.file(path).fsPath.replace(/\\/g, '/');
+}
+
 /** Turns a URL into a normalized FS Path */
 export function urlToPath(stringUrl: string): string | null {
 	const url = URI.parse(stringUrl);

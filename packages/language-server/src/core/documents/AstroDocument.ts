@@ -1,12 +1,13 @@
 import { HTMLDocument } from 'vscode-html-languageservice';
-import { CSSDocument } from '../../plugins/css/CSSDocument';
 import { urlToPath } from '../../utils';
 import { WritableDocument } from './DocumentBase';
+import { AstroMetadata, parseAstro } from './parseAstro';
 import { parseHtml } from './parseHTML';
 import { extractStyleTags, TagInformation } from './utils';
 
 export class AstroDocument extends WritableDocument {
 	languageId = 'astro';
+	astroMeta!: AstroMetadata;
 	html!: HTMLDocument;
 	styleTags!: TagInformation[];
 
@@ -17,6 +18,7 @@ export class AstroDocument extends WritableDocument {
 	}
 
 	private updateDocInfo() {
+		this.astroMeta = parseAstro(this.content);
 		this.html = parseHtml(this.content);
 		this.styleTags = extractStyleTags(this.content, this.html);
 	}

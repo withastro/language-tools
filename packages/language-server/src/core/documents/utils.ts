@@ -216,3 +216,10 @@ export function getLineOffsets(text: string) {
 
 	return lineOffsets;
 }
+
+/**
+ * Gets index of first-non-whitespace character.
+ */
+export function getFirstNonWhitespaceIndex(str: string): number {
+	return str.length - str.trimStart().length;
+}
