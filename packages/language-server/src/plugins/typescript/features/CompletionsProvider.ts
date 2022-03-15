@@ -8,7 +8,7 @@ import type {
 import type { LanguageServiceManager } from '../LanguageServiceManager';
 import { isInsideFrontmatter } from '../../../core/documents/utils';
 import { AstroDocument } from '../../../core/documents';
-import * as ts from 'typescript';
+import ts from 'typescript';
 import { CompletionList, MarkupKind } from 'vscode-languageserver';
 import { AppCompletionItem, AppCompletionList, CompletionsProvider } from '../../interfaces';
 import {
@@ -19,7 +19,7 @@ import {
 
 const completionOptions: ts.GetCompletionsAtPositionOptions = Object.freeze({
 	importModuleSpecifierPreference: 'relative',
-	importModuleSpecifierEnding: 'js',
+	importModuleSpecifierEnding: 'auto',
 	quotePreference: 'single',
 });
 
