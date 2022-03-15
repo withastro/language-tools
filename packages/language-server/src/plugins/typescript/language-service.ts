@@ -5,7 +5,7 @@ import { TextDocumentContentChangeEvent } from 'vscode-languageserver';
 import { normalizePath } from '../../utils';
 import { createAstroModuleLoader } from './module-loader';
 import { GlobalSnapshotManager, SnapshotManager } from './snapshots/SnapshotManager';
-import { ensureRealAstroFilePath, findTsConfigPath } from './utils';
+import { ensureRealFilePath, findTsConfigPath } from './utils';
 import { DocumentSnapshot } from './snapshots/DocumentSnapshot';
 import * as DocumentSnapshotUtils from './snapshots/utils';
 
@@ -171,7 +171,7 @@ async function createLanguageService(tsconfigPath: string, docContext: LanguageS
 	}
 
 	function getScriptSnapshot(fileName: string): DocumentSnapshot {
-		fileName = ensureRealAstroFilePath(fileName);
+		fileName = ensureRealFilePath(fileName);
 
 		let doc = snapshotManager.get(fileName);
 		if (doc) {

@@ -31,10 +31,7 @@ export function createFromFilePath(
 ) {
 	if (isAstroFilePath(filePath)) {
 		return createFromAstroFilePath(filePath, createDocument);
-	} else if (
-		isVirtualFrameworkFilePath('vue', 'tsx', filePath) ||
-		isVirtualFrameworkFilePath('svelte', 'tsx', filePath)
-	) {
+	} else if (isFrameworkFilePath(filePath)) {
 		const framework = getFrameworkFromFilePath(filePath);
 		return createFromFrameworkFilePath(filePath, framework);
 	} else {

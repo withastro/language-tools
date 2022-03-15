@@ -1,4 +1,4 @@
-import { window, commands, workspace, ExtensionContext, TextDocument, Position } from 'vscode';
+import { window, commands, workspace, ExtensionContext, TextDocument, Position, TextDocumentChangeEvent } from 'vscode';
 import {
 	LanguageClient,
 	RequestType,
@@ -70,6 +70,28 @@ export async function activate(context: ExtensionContext) {
 			[/^tsconfig\.json$/, /^jsconfig\.json$/, /^astro\.config\.(js|cjs|mjs|ts)$/].some((regex) => regex.test(fileName))
 		) {
 			await restartClient(false);
+		}
+	});
+
+	workspace.onDidChangeTextDocument((params: TextDocumentChangeEvent) => {
+		if (
+			['vue', 'svelte', 'javascript', 'typescript', 'javascriptreact', 'typescriptreact'].includes(
+				params.document.languageId
+			)
+		) {
+			getLSClient().sendNotification('$/onDidChangeNonAstroFile', {
+				uri: params.document.uri.toString(true),
+				// We only support partial changes for JS/TS files
+				changes: ['vue', 'svelte'].includes(params.document.languageId)
+					? undefined
+					: params.contentChanges.map((c) => ({
+							range: {
+								start: { line: c.range.start.line, character: c.range.start.character },
+								end: { line: c.range.end.line, character: c.range.end.character },
+							},
+							text: c.text,
+					  })),
+			});
 		}
 	});
 

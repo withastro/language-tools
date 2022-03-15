@@ -207,24 +207,12 @@ export function isVirtualVueFilePath(filePath: string) {
 	return isVirtualFrameworkFilePath('vue', VirtualExtension.tsx, filePath);
 }
 
-export function isVirtualJsxFilePath(filePath: string) {
-	return (
-		isVirtualFrameworkFilePath('jsx', VirtualExtension.ts, filePath) ||
-		isVirtualFrameworkFilePath('tsx', VirtualExtension.ts, filePath)
-	);
-}
-
 export function isVirtualSvelteFilePath(filePath: string) {
 	return isVirtualFrameworkFilePath('svelte', VirtualExtension.tsx, filePath);
 }
 
 export function isVirtualFilePath(filePath: string) {
-	return (
-		isVirtualAstroFilePath(filePath) ||
-		isVirtualVueFilePath(filePath) ||
-		isVirtualSvelteFilePath(filePath) ||
-		isVirtualJsxFilePath(filePath)
-	);
+	return isVirtualAstroFilePath(filePath) || isVirtualVueFilePath(filePath) || isVirtualSvelteFilePath(filePath);
 }
 
 export function toVirtualAstroFilePath(filePath: string) {

@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { DocumentSnapshot } from './snapshots/DocumentSnapshot';
-import { ensureRealAstroFilePath, isVirtualAstroFilePath, toRealAstroFilePath } from './utils';
+import { ensureRealFilePath, isVirtualFilePath } from './utils';
 
 /**
  * This should only be accessed by TS Astro module resolution.
@@ -11,7 +11,7 @@ export function createAstroSys(getSnapshot: (fileName: string) => DocumentSnapsh
 	const AstroSys: ts.System & { deleteFromCache: (path: string) => void } = {
 		...ts.sys,
 		fileExists(path: string) {
-			path = ensureRealAstroFilePath(path);
+			path = ensureRealFilePath(path);
 			const exists = fileExistsCache.get(path) ?? ts.sys.fileExists(path);
 			fileExistsCache.set(path, exists);
 			return exists;
@@ -26,19 +26,19 @@ export function createAstroSys(getSnapshot: (fileName: string) => DocumentSnapsh
 			return result;
 		},
 		deleteFile(path) {
-			fileExistsCache.delete(ensureRealAstroFilePath(path));
+			fileExistsCache.delete(ensureRealFilePath(path));
 			return ts.sys.deleteFile?.(path);
 		},
 		deleteFromCache(path) {
-			fileExistsCache.delete(ensureRealAstroFilePath(path));
+			fileExistsCache.delete(ensureRealFilePath(path));
 		},
 	};
 
 	if (ts.sys.realpath) {
 		const realpath = ts.sys.realpath;
 		AstroSys.realpath = function (path) {
-			if (isVirtualAstroFilePath(path)) {
-				return realpath(toRealAstroFilePath(path)) + '.tsx';
+			if (isVirtualFilePath(path)) {
+				return realpath(ensureRealFilePath(path)) + '.tsx';
 			}
 			return realpath(path);
 		};

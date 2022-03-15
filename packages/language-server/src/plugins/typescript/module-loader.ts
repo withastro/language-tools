@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import type { DocumentSnapshot } from './snapshots/DocumentSnapshot';
-import { isVirtualAstroFilePath, ensureRealAstroFilePath, getExtensionFromScriptKind } from './utils';
+import { getExtensionFromScriptKind, ensureRealFilePath, isVirtualFilePath } from './utils';
 import { createAstroSys } from './astro-sys';
 import { getLastPartOfPath } from '../../utils';
 
@@ -58,16 +58,16 @@ class ModuleResolutionCache {
 	}
 
 	private getKey(moduleName: string, containingFile: string) {
-		return containingFile + ':::' + ensureRealAstroFilePath(moduleName);
+		return containingFile + ':::' + ensureRealFilePath(moduleName);
 	}
 }
 
 /**
- * Creates a module loader specifically for `.astro` files.
+ * Creates a module loader specifically for `.astro` and other frameworks files.
  *
  * The typescript language service tries to look up other files that are referenced in the currently open astro file.
- * For `.ts`/`.js` files this works, for `.astro` files it does not by default.
- * Reason: The typescript language service does not know about the `.astro` file ending,
+ * For `.ts`/`.js` files this works, for `.astro` and frameworks files it does not by default.
+ * Reason: The typescript language service does not know about those file endings,
  * so it assumes it's a normal typescript file and searches for files like `../Component.astro.ts`, which is wrong.
  * In order to fix this, we need to wrap typescript's module resolution and reroute all `.astro.ts` file lookups to .astro.
  *
@@ -111,19 +111,19 @@ export function createAstroModuleLoader(
 	function resolveModuleName(name: string, containingFile: string): ts.ResolvedModule | undefined {
 		// Delegate to the TS resolver first.
 		// If that does not bring up anything, try the Astro Module loader
-		// which is able to deal with .astro files.
+		// which is able to deal with .astro and other frameworks files.
 
 		const tsResolvedModule = ts.resolveModuleName(name, containingFile, compilerOptions, ts.sys).resolvedModule;
-		if (tsResolvedModule && !isVirtualAstroFilePath(tsResolvedModule.resolvedFileName)) {
+		if (tsResolvedModule && !isVirtualFilePath(tsResolvedModule.resolvedFileName)) {
 			return tsResolvedModule;
 		}
 
 		const astroResolvedModule = ts.resolveModuleName(name, containingFile, compilerOptions, astroSys).resolvedModule;
-		if (!astroResolvedModule || !isVirtualAstroFilePath(astroResolvedModule.resolvedFileName)) {
+		if (!astroResolvedModule || !isVirtualFilePath(astroResolvedModule.resolvedFileName)) {
 			return astroResolvedModule;
 		}
 
-		const resolvedFileName = ensureRealAstroFilePath(astroResolvedModule.resolvedFileName);
+		const resolvedFileName = ensureRealFilePath(astroResolvedModule.resolvedFileName);
 		const snapshot = getSnapshot(resolvedFileName);
 
 		const resolvedAstroModule: ts.ResolvedModuleFull = {
