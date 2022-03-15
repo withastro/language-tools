@@ -6,7 +6,9 @@ import {
 	CompletionContext,
 	CompletionItem,
 	CompletionList,
+	DefinitionLink,
 	Diagnostic,
+	FoldingRange,
 	Hover,
 	Position,
 	Range,
@@ -85,6 +87,29 @@ export class PluginHost {
 		const document = this.getDocument(textDocument.uri);
 
 		return this.execute<string | null>('doTagComplete', [document, position], ExecuteMode.FirstNonNull);
+	}
+
+	async getFoldingRanges(textDocument: TextDocumentIdentifier): Promise<FoldingRange[] | null> {
+		const document = this.getDocument(textDocument.uri);
+
+		const foldingRanges = flatten(
+			await this.execute<FoldingRange[]>('getFoldingRanges', [document], ExecuteMode.Collect)
+		).filter((completion) => completion != null);
+
+		return foldingRanges;
+	}
+
+	async getDefinitions(
+		textDocument: TextDocumentIdentifier,
+		position: Position
+	): Promise<DefinitionLink[] | Location[]> {
+		const document = this.getDocument(textDocument.uri);
+
+		const definitions = flatten(
+			await this.execute<DefinitionLink[]>('getDefinitions', [document, position], ExecuteMode.Collect)
+		);
+
+		return definitions;
 	}
 
 	async getDocumentColors(textDocument: TextDocumentIdentifier): Promise<ColorInformation[]> {

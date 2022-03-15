@@ -54,6 +54,11 @@ export abstract class ReadableDocument implements TextDocument {
 		return offsetAt(position, this.getText(), this.getLineOffsets());
 	}
 
+	getLineUntilOffset(offset: number): string {
+		const { line, character } = this.positionAt(offset);
+		return this.lines[line].slice(0, character);
+	}
+
 	private getLineOffsets() {
 		if (!this.lineOffsets) {
 			this.lineOffsets = getLineOffsets(this.getText());
@@ -68,8 +73,12 @@ export abstract class ReadableDocument implements TextDocument {
 		return this.getURL();
 	}
 
+	get lines(): string[] {
+		return this.getText().split(/\r?\n/);
+	}
+
 	get lineCount(): number {
-		return this.getText().split(/\r?\n/).length;
+		return this.lines.length;
 	}
 
 	abstract languageId: string;

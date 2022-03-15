@@ -1,5 +1,6 @@
 import { URI } from 'vscode-uri';
 import { Position, Range } from 'vscode-languageserver';
+import { Node } from 'vscode-html-languageservice';
 
 /** Normalizes a document URI */
 export function normalizeUri(uri: string): string {
@@ -34,6 +35,33 @@ export function pathToUrl(path: string) {
  */
 export function getLastPartOfPath(path: string): string {
 	return path.replace(/\\/g, '/').split('/').pop() || '';
+}
+
+/**
+ *
+ * The language service is case insensitive, and would provide
+ * hover info for Svelte components like `Option` which have
+ * the same name like a html tag.
+ */
+export function isPossibleComponent(node: Node): boolean {
+	return !!node.tag?.[0].match(/[A-Z]/);
+}
+
+/**
+ *
+ * The language service is case insensitive, and would provide
+ * hover info for Svelte components like `Option` which have
+ * the same name like a html tag.
+ */
+export function isPossibleClientComponent(node: Node): boolean {
+	if (isPossibleComponent(node) && node.attributes) {
+		for (let [name] of Object.entries(node.attributes)) {
+			if (name.startsWith('client:')) {
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 /** Flattens an array */

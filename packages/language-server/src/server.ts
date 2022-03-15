@@ -31,7 +31,7 @@ export function startLanguageServer(connection: vscode.Connection) {
 
 		// We don't currently support running the TypeScript and Astro plugin in the browser
 		if (params.initializationOptions.environment !== 'browser') {
-			pluginHost.registerPlugin(new AstroPlugin(configManager));
+			pluginHost.registerPlugin(new AstroPlugin(documentManager, configManager, workspaceUris));
 			pluginHost.registerPlugin(new TypeScriptPlugin(documentManager, configManager, workspaceUris));
 		}
 
@@ -42,6 +42,9 @@ export function startLanguageServer(connection: vscode.Connection) {
 		return {
 			capabilities: {
 				textDocumentSync: vscode.TextDocumentSyncKind.Incremental,
+				foldingRangeProvider: true,
+				definitionProvider: true,
+				renameProvider: true,
 				completionProvider: {
 					resolveProvider: true,
 					triggerCharacters: [
@@ -123,6 +126,9 @@ export function startLanguageServer(connection: vscode.Connection) {
 
 	// Features
 	connection.onHover((params: vscode.HoverParams) => pluginHost.doHover(params.textDocument, params.position));
+
+	connection.onDefinition((evt) => pluginHost.getDefinitions(evt.textDocument, evt.position));
+	connection.onFoldingRanges((evt) => pluginHost.getFoldingRanges(evt.textDocument));
 
 	connection.onCompletion(async (evt) => {
 		const promise = pluginHost.getCompletions(evt.textDocument, evt.position, evt.context);
