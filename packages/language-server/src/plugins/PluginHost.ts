@@ -130,24 +130,6 @@ export class PluginHost {
 		}
 	}
 
-	async getDocumentColors(textDocument: TextDocumentIdentifier): Promise<ColorInformation[]> {
-		const document = this.getDocument(textDocument.uri);
-
-		return flatten(await this.execute<ColorInformation[]>('getDocumentColors', [document], ExecuteMode.Collect));
-	}
-
-	async getColorPresentations(
-		textDocument: TextDocumentIdentifier,
-		range: Range,
-		color: Color
-	): Promise<ColorPresentation[]> {
-		const document = this.getDocument(textDocument.uri);
-
-		return flatten(
-			await this.execute<ColorPresentation[]>('getColorPresentations', [document, range, color], ExecuteMode.Collect)
-		);
-	}
-
 	async getSignatureHelp(
 		textDocument: TextDocumentIdentifier,
 		position: Position,

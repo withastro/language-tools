@@ -77,36 +77,6 @@ export class CSSPlugin implements Plugin {
 		return this.getCompletionsInternal(document, position, cssDocument);
 	}
 
-	getDocumentColors(document: AstroDocument): ColorInformation[] {
-		const allColorInfo = this.getCSSDocumentsForDocument(document).map((cssDoc) => {
-			const cssLang = extractLanguage(cssDoc);
-			const langService = getLanguageService(cssLang);
-
-			return langService
-				.findDocumentColors(cssDoc, cssDoc.stylesheet)
-				.map((colorInfo) => mapObjWithRangeToOriginal(cssDoc, colorInfo));
-		});
-
-		return flatten(allColorInfo);
-	}
-
-	getColorPresentations(document: AstroDocument, range: Range, color: Color): ColorPresentation[] {
-		const allColorPres = this.getCSSDocumentsForDocument(document).map((cssDoc) => {
-			const cssLang = extractLanguage(cssDoc);
-			const langService = getLanguageService(cssLang);
-
-			if (!cssDoc.isInGenerated(range.start) && !cssDoc.isInGenerated(range.end)) {
-				return [];
-			}
-
-			return langService
-				.getColorPresentations(cssDoc, cssDoc.stylesheet, color, mapRangeToGenerated(cssDoc, range))
-				.map((colorPres) => mapColorPresentationToOriginal(cssDoc, colorPres));
-		});
-
-		return flatten(allColorPres);
-	}
-
 	private inStyleAttributeWithoutInterpolation(
 		attrContext: AttributeContext,
 		text: string
