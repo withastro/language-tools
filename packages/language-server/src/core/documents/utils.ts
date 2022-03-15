@@ -29,9 +29,9 @@ export function* walk(node: Node): Generator<Node, void, unknown> {
  */
 function extractTags(text: string, tag: 'script' | 'style' | 'template', html?: HTMLDocument): TagInformation[] {
 	const rootNodes = html?.roots || parseHtml(text).roots;
-	const matchedNodes = rootNodes.filter((node) => node.tag === tag);
+	const matchedNodes = rootNodes.filter(node => node.tag === tag);
 
-	if (tag === 'style' && !matchedNodes.length && rootNodes.length && rootNodes[0].tag === 'html') {
+	if (tag === 'style' && !matchedNodes.length && rootNodes.length) {
 		for (let child of walk(rootNodes[0])) {
 			if (child.tag === 'style') {
 				matchedNodes.push(child);
@@ -80,7 +80,7 @@ function parseAttributes(rawAttrs: Record<string, string | null> | undefined): R
 		return attrs;
 	}
 
-	Object.keys(rawAttrs).forEach((attrName) => {
+	Object.keys(rawAttrs).forEach(attrName => {
 		const attrValue = rawAttrs[attrName];
 		attrs[attrName] = attrValue === null ? attrName : removeOuterQuotes(attrValue);
 	});
@@ -135,8 +135,14 @@ export function isInsideExpression(html: string, tagStart: number, position: num
  * Returns if a given offset is inside of the document frontmatter
  */
 export function isInsideFrontmatter(text: string, offset: number): boolean {
-	let start = text.slice(0, offset).trim().split('---').length;
-	let end = text.slice(offset).trim().split('---').length;
+	let start = text
+		.slice(0, offset)
+		.trim()
+		.split('---').length;
+	let end = text
+		.slice(offset)
+		.trim()
+		.split('---').length;
 
 	return start > 1 && start < 3 && end >= 1;
 }

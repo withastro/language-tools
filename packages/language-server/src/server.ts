@@ -47,6 +47,34 @@ export function startLanguageServer(connection: vscode.Connection) {
 				textDocumentSync: vscode.TextDocumentSyncKind.Incremental,
 				completionProvider: {
 					resolveProvider: true,
+					triggerCharacters: [
+						'.',
+						'"',
+						"'",
+						'`',
+						'/',
+						'@',
+						'<',
+						' ',
+
+						// Emmet
+						'>',
+						'*',
+						'#',
+						'$',
+						'+',
+						'^',
+						'(',
+						'[',
+						'@',
+						'-',
+						// No whitespace because
+						// it makes for weird/too many completions
+						// of other completion providers
+
+						// Astro
+						':',
+					],
 				},
 				colorProvider: true,
 				hoverProvider: true,
@@ -95,8 +123,9 @@ export function startLanguageServer(connection: vscode.Connection) {
 	// Features
 	connection.onHover((params: vscode.HoverParams) => pluginHost.doHover(params.textDocument, params.position));
 
-	connection.onCompletion((params: vscode.CompletionParams, cancellationToken) => {
-		return pluginHost.getCompletions(params.textDocument, params.position, params.context, cancellationToken);
+	connection.onCompletion(async evt => {
+		const promise = pluginHost.getCompletions(evt.textDocument, evt.position, evt.context);
+		return promise;
 	});
 	connection.onCompletionResolve(completionItem => {
 		const data = (completionItem as AppCompletionItem).data as TextDocumentIdentifier;

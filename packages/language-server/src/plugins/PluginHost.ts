@@ -39,42 +39,18 @@ export class PluginHost {
     return this.execute<Hover>('doHover', [document, position], ExecuteMode.FirstNonNull);
   }
 
-	async getCompletions(
-		textDocument: TextDocumentIdentifier,
-		position: Position,
-		completionContext?: CompletionContext,
-		cancellationToken?: CancellationToken
-	): Promise<CompletionList> {
-		const document = this.getDocument(textDocument.uri);
+  async getCompletions(textDocument: TextDocumentIdentifier, position: Position, completionContext?: CompletionContext): Promise<CompletionList> {
+    const document = this.getDocument(textDocument.uri);
 
-		// Ask all the plugins if they have completions for us at the current position
-		const completions = await Promise.all(
-			this.plugins.map(async (plugin) => {
-				const result = await this.tryExecutePlugin(
-					plugin,
-					'getCompletions',
-					[document, position, completionContext, cancellationToken],
-					null
-				);
-				if (result) {
-					return { result: result as CompletionList, plugin: plugin.__name };
-				}
-			})
-		).then((fullCompletions) => fullCompletions.filter(isNotNullOrUndefined));
+    const completions = (await this.execute<CompletionList>('getCompletions', [document, position, completionContext], ExecuteMode.Collect)).filter(
+      (completion) => completion != null
+    );
 
-		// This is not relevant for us for now, but the reason we execute the plugins in this fashion here compared to other
-		// methods is to eventually be able to filter out certain completions depending on which plugin executed it.
-		// Notably, if we were to provide types for TSX, we'd get duplicate completions from the HTML and the TypeScript plugin
+    let flattenedCompletions = flatten(completions.map((completion) => completion.items));
+    const isIncomplete = completions.reduce((incomplete, completion) => incomplete || completion.isIncomplete, false as boolean);
 
-		// Flatten completions to create list
-		let flattenedCompletions = flatten(completions.map((completion) => completion.result.items));
-		const isIncomplete = completions.reduce(
-			(incomplete, completion) => incomplete || completion.result.isIncomplete,
-			false as boolean
-		);
-
-		return CompletionList.create(flattenedCompletions, isIncomplete);
-	}
+    return CompletionList.create(flattenedCompletions, isIncomplete);
+  }
 
 	async resolveCompletion(
 		textDocument: TextDocumentIdentifier,
