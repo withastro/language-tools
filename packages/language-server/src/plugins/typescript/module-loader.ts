@@ -118,19 +118,19 @@ export function createAstroModuleLoader(
 			return tsResolvedModule;
 		}
 
-		const svelteResolvedModule = ts.resolveModuleName(name, containingFile, compilerOptions, astroSys).resolvedModule;
-		if (!svelteResolvedModule || !isVirtualAstroFilePath(svelteResolvedModule.resolvedFileName)) {
-			return svelteResolvedModule;
+		const astroResolvedModule = ts.resolveModuleName(name, containingFile, compilerOptions, astroSys).resolvedModule;
+		if (!astroResolvedModule || !isVirtualAstroFilePath(astroResolvedModule.resolvedFileName)) {
+			return astroResolvedModule;
 		}
 
-		const resolvedFileName = ensureRealAstroFilePath(svelteResolvedModule.resolvedFileName);
+		const resolvedFileName = ensureRealAstroFilePath(astroResolvedModule.resolvedFileName);
 		const snapshot = getSnapshot(resolvedFileName);
 
-		const resolvedSvelteModule: ts.ResolvedModuleFull = {
+		const resolvedAstroModule: ts.ResolvedModuleFull = {
 			extension: getExtensionFromScriptKind(snapshot && snapshot.scriptKind),
 			resolvedFileName,
-			isExternalLibraryImport: svelteResolvedModule.isExternalLibraryImport,
+			isExternalLibraryImport: astroResolvedModule.isExternalLibraryImport,
 		};
-		return resolvedSvelteModule;
+		return resolvedAstroModule;
 	}
 }

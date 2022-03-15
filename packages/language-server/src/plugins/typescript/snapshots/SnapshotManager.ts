@@ -4,7 +4,7 @@ import { TextDocumentContentChangeEvent } from 'vscode-languageserver';
 import { normalizePath } from '../../../utils';
 import { EventEmitter } from 'events';
 import * as DocumentSnapshotUtils from './utils';
-import { toVirtualAstroFilePath } from '../utils';
+import { toVirtualFilePath } from '../utils';
 
 /**
  * Every snapshot corresponds to a unique file on disk.
@@ -164,16 +164,18 @@ export class SnapshotManager {
 
 	delete(fileName: string): void {
 		fileName = normalizePath(fileName);
-		this.projectFiles = this.projectFiles.filter((s) => s !== fileName);
+		this.projectFiles = this.projectFiles.filter(s => s !== fileName);
 		this.globalSnapshotsManager.delete(fileName);
 	}
 
-	getFileNames(): string[] {
-		return Array.from(this.documents.keys()).map((fileName) => toVirtualAstroFilePath(fileName));
+	getFileNames() {
+		return Array.from(this.documents.keys()).map(fileName => toVirtualFilePath(fileName));
 	}
 
-	getProjectFileNames(): string[] {
-		return [...this.projectFiles];
+	getProjectFileNames() {
+		return this.projectFiles.map(file => {
+			return toVirtualFilePath(file);
+		});
 	}
 
 	private logStatistics() {
@@ -187,8 +189,8 @@ export class SnapshotManager {
 			console.log(
 				'SnapshotManager File Statistics:\n' +
 					`Project files: ${projectFiles.length}\n` +
-					`Astro files: ${allFiles.filter((name) => name.endsWith('.astro')).length}\n` +
-					`From node_modules: ${allFiles.filter((name) => name.includes('node_modules')).length}\n` +
+					`Astro files: ${allFiles.filter(name => name.endsWith('.astro')).length}\n` +
+					`From node_modules: ${allFiles.filter(name => name.includes('node_modules')).length}\n` +
 					`Total: ${allFiles.length}`
 			);
 		}

@@ -2,7 +2,13 @@ import ts from 'typescript';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { AstroDocument } from '../../../core/documents';
 import astro2tsx from '../astro2tsx';
-import { FrameworkExt, getFrameworkFromFilePath, isAstroFilePath, isFrameworkFilePath } from '../utils';
+import {
+	FrameworkExt,
+	getFrameworkFromFilePath,
+	isAstroFilePath,
+	isFrameworkFilePath,
+	isVirtualFrameworkFilePath,
+} from '../utils';
 import { AstroSnapshot, TypeScriptDocumentSnapshot } from './DocumentSnapshot';
 import { toTSX as svelte2tsx } from '@astrojs/svelte-language-integration';
 
@@ -25,7 +31,10 @@ export function createFromFilePath(
 ) {
 	if (isAstroFilePath(filePath)) {
 		return createFromAstroFilePath(filePath, createDocument);
-	} else if (isFrameworkFilePath(filePath)) {
+	} else if (
+		isVirtualFrameworkFilePath('vue', 'tsx', filePath) ||
+		isVirtualFrameworkFilePath('svelte', 'tsx', filePath)
+	) {
 		const framework = getFrameworkFromFilePath(filePath);
 		return createFromFrameworkFilePath(filePath, framework);
 	} else {
