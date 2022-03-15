@@ -33,9 +33,11 @@ export class PluginHost {
 		this.plugins.push(plugin);
 	}
 
-	async doHover(textDocument: TextDocumentIdentifier, position: Position): Promise<Hover | null> {
-		return null;
-	}
+  async doHover(textDocument: TextDocumentIdentifier, position: Position): Promise<Hover | null> {
+    const document = this.getDocument(textDocument.uri);
+
+    return this.execute<Hover>('doHover', [document, position], ExecuteMode.FirstNonNull);
+  }
 
 	async getCompletions(
 		textDocument: TextDocumentIdentifier,

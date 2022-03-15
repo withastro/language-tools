@@ -12,8 +12,11 @@ import { TypeScriptPlugin } from './plugins/typescript/TypeScriptPlugin';
 import { debounceThrottle, urlToPath } from './utils';
 import { AstroDocument } from './core/documents';
 
-const TagCloseRequest: vscode.RequestType<vscode.TextDocumentPositionParams, string | null, any> =
-	new vscode.RequestType('html/tag');
+const TagCloseRequest: vscode.RequestType<
+	vscode.TextDocumentPositionParams,
+	string | null,
+	any
+> = new vscode.RequestType('html/tag');
 
 // Start the language server
 export function startLanguageServer(connection: vscode.Connection) {
@@ -23,7 +26,7 @@ export function startLanguageServer(connection: vscode.Connection) {
 	const pluginHost = new PluginHost(documentManager);
 
 	connection.onInitialize((params: vscode.InitializeParams) => {
-		const workspaceUris = params.workspaceFolders?.map((folder) => folder.uri.toString()) ?? [params.rootUri ?? ''];
+		const workspaceUris = params.workspaceFolders?.map(folder => folder.uri.toString()) ?? [params.rootUri ?? ''];
 
 		// Register plugins
 		pluginHost.registerPlugin(new HTMLPlugin(configManager));
@@ -46,6 +49,7 @@ export function startLanguageServer(connection: vscode.Connection) {
 					resolveProvider: true,
 				},
 				colorProvider: true,
+				hoverProvider: true,
 			},
 		};
 	});
@@ -76,13 +80,13 @@ export function startLanguageServer(connection: vscode.Connection) {
 
 	const updateAllDiagnostics = debounceThrottle(() => diagnosticsManager.updateAll(), 1000);
 
-	connection.onDidChangeWatchedFiles((evt) => {
+	connection.onDidChangeWatchedFiles(evt => {
 		const params = evt.changes
-			.map((change) => ({
+			.map(change => ({
 				fileName: urlToPath(change.uri),
 				changeType: change.type,
 			}))
-			.filter((change) => !!change.fileName);
+			.filter(change => !!change.fileName);
 
 		pluginHost.onWatchFileChanges(params);
 		updateAllDiagnostics();
@@ -94,7 +98,7 @@ export function startLanguageServer(connection: vscode.Connection) {
 	connection.onCompletion((params: vscode.CompletionParams, cancellationToken) => {
 		return pluginHost.getCompletions(params.textDocument, params.position, params.context, cancellationToken);
 	});
-	connection.onCompletionResolve((completionItem) => {
+	connection.onCompletionResolve(completionItem => {
 		const data = (completionItem as AppCompletionItem).data as TextDocumentIdentifier;
 
 		if (!data) {
