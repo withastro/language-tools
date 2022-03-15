@@ -69,7 +69,7 @@ export async function getLanguageServiceForTsconfig(
 }
 
 async function createLanguageService(tsconfigPath: string, docContext: LanguageServiceDocumentContext) {
-	const workspaceRoot = tsconfigPath ? dirname(tsconfigPath) : '';
+	const workspaceRoot = tsconfigPath ? dirname(tsconfigPath) : process.cwd();
 
 	// `raw` here represent the tsconfig merged with any extended config
 	const { compilerOptions, fileNames: files, raw: fullConfig } = getParsedTSConfig();
@@ -207,18 +207,20 @@ async function createLanguageService(tsconfigPath: string, docContext: LanguageS
 	}
 
 	function getParsedTSConfig() {
-		let configJson = (tsconfigPath && ts.readConfigFile(tsconfigPath, ts.sys.readFile).config) || getDefaultTSConfig();
+		let configJson = (tsconfigPath && ts.readConfigFile(tsconfigPath, ts.sys.readFile).config) || {};
 
-		// Add astro/env types if the user doesn't have them
-		if (!configJson.compilerOptions?.types) {
-			configJson.compilerOptions ?? (configJson.compilerOptions = {});
-			configJson.compilerOptions.types = [];
+		// If our user has types in their config but it doesn't include the types needed for Astro, add them to the config
+		if (configJson.compilerOptions?.types && !configJson.compilerOptions?.types.includes('astro/env')) {
 			configJson.compilerOptions.types.push('astro/env');
-		} else {
-			if (!configJson.compilerOptions?.types.includes('astro/env')) {
-				configJson.compilerOptions.types.push('astro/env');
-			}
 		}
+
+		configJson.compilerOptions = Object.assign(getDefaultCompilerOptions(), configJson.compilerOptions);
+
+		// If the user supplied exclude, let's use theirs
+		configJson.exclude ?? (configJson.exclude = getDefaultExclude());
+
+		// Delete include so that .astro files don't get mistakenly excluded by the user
+		delete configJson.include;
 
 		// If the user supplied exclude, let's use theirs otherwise, use ours
 		configJson.exclude ?? (configJson.exclude = getDefaultExclude());
@@ -227,6 +229,9 @@ async function createLanguageService(tsconfigPath: string, docContext: LanguageS
 		const forcedCompilerOptions: ts.CompilerOptions = {
 			// Our TSX is currently not typed, which unfortunately means that we can't support `noImplicitAny`
 			noImplicitAny: false,
+			// Most of the code people write in an .astro file is in the frontmatter which is executed server side
+			// Thus, we don't want the DOM lib. We'll need to overwrite this for script tags however
+			lib: ['ESNext'],
 
 			noEmit: true,
 			declaration: false,
@@ -236,6 +241,7 @@ async function createLanguageService(tsconfigPath: string, docContext: LanguageS
 			jsx: ts.JsxEmit.Preserve,
 			module: ts.ModuleKind.ESNext,
 			target: ts.ScriptTarget.ESNext,
+			moduleResolution: ts.ModuleResolutionKind.NodeJs,
 		};
 
 		const project = ts.parseJsonConfigFileContent(
@@ -264,17 +270,12 @@ async function createLanguageService(tsconfigPath: string, docContext: LanguageS
 }
 
 /**
- * Default configuration used when the user didn't supply any
+ * Default configuration used as a base and when the user doesn't have any
  */
-function getDefaultTSConfig(): {
-	compilerOptions: ts.CompilerOptions;
-	types: string[];
-} {
+function getDefaultCompilerOptions(): ts.CompilerOptions {
 	return {
-		compilerOptions: {
-			maxNodeModuleJsDepth: 2,
-			allowSyntheticDefaultImports: true,
-		},
+		maxNodeModuleJsDepth: 2,
+		allowSyntheticDefaultImports: true,
 		types: ['astro/env'],
 	};
 }

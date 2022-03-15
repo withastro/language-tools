@@ -164,16 +164,16 @@ export class SnapshotManager {
 
 	delete(fileName: string): void {
 		fileName = normalizePath(fileName);
-		this.projectFiles = this.projectFiles.filter(s => s !== fileName);
+		this.projectFiles = this.projectFiles.filter((s) => s !== fileName);
 		this.globalSnapshotsManager.delete(fileName);
 	}
 
 	getFileNames() {
-		return Array.from(this.documents.keys()).map(fileName => toVirtualFilePath(fileName));
+		return Array.from(this.documents.keys()).map((fileName) => toVirtualFilePath(fileName));
 	}
 
 	getProjectFileNames() {
-		return this.projectFiles.map(file => {
+		return this.projectFiles.map((file) => {
 			return toVirtualFilePath(file);
 		});
 	}
@@ -189,8 +189,8 @@ export class SnapshotManager {
 			console.log(
 				'SnapshotManager File Statistics:\n' +
 					`Project files: ${projectFiles.length}\n` +
-					`Astro files: ${allFiles.filter(name => name.endsWith('.astro')).length}\n` +
-					`From node_modules: ${allFiles.filter(name => name.includes('node_modules')).length}\n` +
+					`Astro files: ${allFiles.filter((name) => name.endsWith('.astro')).length}\n` +
+					`From node_modules: ${allFiles.filter((name) => name.includes('node_modules')).length}\n` +
 					`Total: ${allFiles.length}`
 			);
 		}

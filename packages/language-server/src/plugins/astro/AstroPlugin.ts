@@ -7,6 +7,6 @@ export class AstroPlugin implements Plugin {
 	private configManager: ConfigManager;
 
 	constructor(configManager: ConfigManager) {
-		this.configManager = configManager
+		this.configManager = configManager;
 	}
 }

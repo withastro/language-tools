@@ -10,11 +10,12 @@ import {
 	Hover,
 	Position,
 	Range,
+	SignatureHelp,
+	SignatureHelpContext,
 	TextDocumentContentChangeEvent,
 	TextDocumentIdentifier,
 } from 'vscode-languageserver';
 import type { AppCompletionItem, Plugin, LSProvider } from './interfaces';
-import { isNotNullOrUndefined } from '../utils';
 import { flatten } from 'lodash';
 import { DocumentManager } from '../core/documents/DocumentManager';
 
@@ -33,24 +34,31 @@ export class PluginHost {
 		this.plugins.push(plugin);
 	}
 
-  async doHover(textDocument: TextDocumentIdentifier, position: Position): Promise<Hover | null> {
-    const document = this.getDocument(textDocument.uri);
+	async doHover(textDocument: TextDocumentIdentifier, position: Position): Promise<Hover | null> {
+		const document = this.getDocument(textDocument.uri);
 
-    return this.execute<Hover>('doHover', [document, position], ExecuteMode.FirstNonNull);
-  }
+		return this.execute<Hover>('doHover', [document, position], ExecuteMode.FirstNonNull);
+	}
 
-  async getCompletions(textDocument: TextDocumentIdentifier, position: Position, completionContext?: CompletionContext): Promise<CompletionList> {
-    const document = this.getDocument(textDocument.uri);
+	async getCompletions(
+		textDocument: TextDocumentIdentifier,
+		position: Position,
+		completionContext?: CompletionContext
+	): Promise<CompletionList> {
+		const document = this.getDocument(textDocument.uri);
 
-    const completions = (await this.execute<CompletionList>('getCompletions', [document, position, completionContext], ExecuteMode.Collect)).filter(
-      (completion) => completion != null
-    );
+		const completions = (
+			await this.execute<CompletionList>('getCompletions', [document, position, completionContext], ExecuteMode.Collect)
+		).filter((completion) => completion != null);
 
-    let flattenedCompletions = flatten(completions.map((completion) => completion.items));
-    const isIncomplete = completions.reduce((incomplete, completion) => incomplete || completion.isIncomplete, false as boolean);
+		let flattenedCompletions = flatten(completions.map((completion) => completion.items));
+		const isIncomplete = completions.reduce(
+			(incomplete, completion) => incomplete || completion.isIncomplete,
+			false as boolean
+		);
 
-    return CompletionList.create(flattenedCompletions, isIncomplete);
-  }
+		return CompletionList.create(flattenedCompletions, isIncomplete);
+	}
 
 	async resolveCompletion(
 		textDocument: TextDocumentIdentifier,
@@ -94,6 +102,24 @@ export class PluginHost {
 
 		return flatten(
 			await this.execute<ColorPresentation[]>('getColorPresentations', [document, range, color], ExecuteMode.Collect)
+		);
+	}
+
+	async getSignatureHelp(
+		textDocument: TextDocumentIdentifier,
+		position: Position,
+		context: SignatureHelpContext | undefined,
+		cancellationToken: CancellationToken
+	): Promise<SignatureHelp | null> {
+		const document = this.getDocument(textDocument.uri);
+		if (!document) {
+			throw new Error('Cannot call methods on an unopened document');
+		}
+
+		return await this.execute<any>(
+			'getSignatureHelp',
+			[document, position, context, cancellationToken],
+			ExecuteMode.FirstNonNull
 		);
 	}
 

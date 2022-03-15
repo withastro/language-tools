@@ -18,7 +18,7 @@ export class DocumentManager {
 
 	constructor(private createDocument?: (textDocument: Pick<TextDocumentItem, 'text' | 'uri'>) => AstroDocument) {
 		if (!createDocument) {
-			this.createDocument = textDocument => new AstroDocument(textDocument.uri, textDocument.text);
+			this.createDocument = (textDocument) => new AstroDocument(textDocument.uri, textDocument.text);
 		}
 	}
 
@@ -49,7 +49,7 @@ export class DocumentManager {
 	}
 
 	getAllOpenedByClient() {
-		return Array.from(this.documents.entries()).filter(doc => this.openedInClient.has(doc[0]));
+		return Array.from(this.documents.entries()).filter((doc) => this.openedInClient.has(doc[0]));
 	}
 
 	releaseDocument(uri: string): void {

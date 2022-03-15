@@ -32,7 +32,7 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 
 		const syntaxDiagnostics = lang.getSyntacticDiagnostics(filePath);
 		const suggestionDiagnostics = lang.getSuggestionDiagnostics(filePath);
-		const semanticDiagnostics = lang.getSemanticDiagnostics(filePath).filter(d => {
+		const semanticDiagnostics = lang.getSemanticDiagnostics(filePath).filter((d) => {
 			return isNoWithinScript(scriptBoundaries, d);
 		});
 
@@ -43,7 +43,7 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 
 		const isNoFalsePositiveInst = isNoFalsePositive();
 		return diagnostics
-			.map<Diagnostic>(diagnostic => ({
+			.map<Diagnostic>((diagnostic) => ({
 				range: convertRange(tsDoc, diagnostic),
 				severity: mapSeverity(diagnostic.category),
 				source: 'ts',
@@ -52,7 +52,7 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 				tags: getDiagnosticTag(diagnostic),
 			}))
 			.map(mapRange(fragment, document))
-			.filter(diag => {
+			.filter((diag) => {
 				return (
 					hasNoNegativeLines(diag) &&
 					isNoFalsePositiveInst(diag) &&
@@ -82,7 +82,7 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 		}
 
 		function findScript(parent: ts.Node) {
-			ts.forEachChild(parent, node => {
+			ts.forEachChild(parent, (node) => {
 				if (ts.isJsxElement(node)) {
 					let tagName = node.openingElement.tagName.getText();
 
@@ -119,7 +119,7 @@ function getDiagnosticTag(diagnostic: ts.Diagnostic): DiagnosticTag[] {
 }
 
 function mapRange(fragment: SnapshotFragment, _document: AstroDocument): (value: Diagnostic) => Diagnostic {
-	return diagnostic => {
+	return (diagnostic) => {
 		let range = mapRangeToOriginal(fragment, diagnostic.range);
 
 		if (range.start.line < 0) {

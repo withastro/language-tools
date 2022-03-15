@@ -1,6 +1,6 @@
 import { Position } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { getLineOffsets, offsetAt, positionAt } from './utils'
+import { getLineOffsets, offsetAt, positionAt } from './utils';
 
 /**
  * Represents a textual document.

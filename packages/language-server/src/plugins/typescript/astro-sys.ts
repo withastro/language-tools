@@ -36,7 +36,7 @@ export function createAstroSys(getSnapshot: (fileName: string) => DocumentSnapsh
 
 	if (ts.sys.realpath) {
 		const realpath = ts.sys.realpath;
-		AstroSys.realpath = function(path) {
+		AstroSys.realpath = function (path) {
 			if (isVirtualAstroFilePath(path)) {
 				return realpath(toRealAstroFilePath(path)) + '.tsx';
 			}
