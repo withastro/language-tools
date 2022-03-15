@@ -12,6 +12,7 @@ import {
 	Hover,
 	Position,
 	Range,
+	Location,
 	SignatureHelp,
 	SignatureHelpContext,
 	TextDocumentContentChangeEvent,
@@ -27,10 +28,23 @@ enum ExecuteMode {
 	Collect,
 }
 
+interface PluginHostConfig {
+	filterIncompleteCompletions: boolean;
+	definitionLinkSupport: boolean;
+}
+
 export class PluginHost {
 	private plugins: Plugin[] = [];
+	private pluginHostConfig: PluginHostConfig = {
+		filterIncompleteCompletions: true,
+		definitionLinkSupport: false,
+	};
 
 	constructor(private docManager: DocumentManager) {}
+
+	initialize(pluginHostConfig: PluginHostConfig) {
+		this.pluginHostConfig = pluginHostConfig;
+	}
 
 	registerPlugin(plugin: Plugin) {
 		this.plugins.push(plugin);
@@ -109,7 +123,11 @@ export class PluginHost {
 			await this.execute<DefinitionLink[]>('getDefinitions', [document, position], ExecuteMode.Collect)
 		);
 
-		return definitions;
+		if (this.pluginHostConfig.definitionLinkSupport) {
+			return definitions;
+		} else {
+			return definitions.map((def) => <Location>{ range: def.targetSelectionRange, uri: def.targetUri });
+		}
 	}
 
 	async getDocumentColors(textDocument: TextDocumentIdentifier): Promise<ColorInformation[]> {

@@ -2,6 +2,8 @@ import ts from 'typescript';
 import { dirname, extname } from 'path';
 import { pathToUrl } from '../../utils';
 import { CompletionItemKind, DiagnosticSeverity, Position, Range } from 'vscode-languageserver';
+import { mapRangeToOriginal } from '../../core/documents';
+import { SnapshotFragment } from './snapshots/DocumentSnapshot';
 
 export function scriptElementKindToCompletionItemKind(kind: ts.ScriptElementKind): CompletionItemKind {
 	switch (kind) {
@@ -148,6 +150,20 @@ export function convertRange(
 		document.positionAt(range.start || 0),
 		document.positionAt((range.start || 0) + (range.length || 0))
 	);
+}
+
+export function convertToLocationRange(defDoc: SnapshotFragment, textSpan: ts.TextSpan): Range {
+	const range = mapRangeToOriginal(defDoc, convertRange(defDoc, textSpan));
+	// Some definition like the svelte component class definition don't exist in the original, so we map to 0,1
+	if (range.start.line < 0) {
+		range.start.line = 0;
+		range.start.character = 1;
+	}
+	if (range.end.line < 0) {
+		range.end = range.start;
+	}
+
+	return range;
 }
 
 export type FrameworkExt = 'astro' | 'vue' | 'jsx' | 'tsx' | 'svelte';

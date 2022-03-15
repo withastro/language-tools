@@ -25,6 +25,11 @@ export function startLanguageServer(connection: vscode.Connection) {
 	connection.onInitialize((params: vscode.InitializeParams) => {
 		const workspaceUris = params.workspaceFolders?.map((folder) => folder.uri.toString()) ?? [params.rootUri ?? ''];
 
+		pluginHost.initialize({
+			filterIncompleteCompletions: !params.initializationOptions?.dontFilterIncompleteCompletions,
+			definitionLinkSupport: !!params.capabilities.textDocument?.definition?.linkSupport,
+		});
+
 		// Register plugins
 		pluginHost.registerPlugin(new HTMLPlugin(configManager));
 		pluginHost.registerPlugin(new CSSPlugin(configManager));
@@ -134,6 +139,7 @@ export function startLanguageServer(connection: vscode.Connection) {
 		const promise = pluginHost.getCompletions(evt.textDocument, evt.position, evt.context);
 		return promise;
 	});
+
 	connection.onCompletionResolve((completionItem) => {
 		const data = (completionItem as AppCompletionItem).data as TextDocumentIdentifier;
 
