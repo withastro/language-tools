@@ -1,6 +1,6 @@
 import { Stylesheet } from 'vscode-css-languageservice';
 import { Position } from 'vscode-languageserver';
-import { getLanguageService } from './languageService';
+import { getLanguageService } from './language-service';
 import { AstroDocument, DocumentMapper, ReadableDocument } from '../../core/documents';
 
 const PREFIX = '__ {';

@@ -22,8 +22,8 @@ import {
 import { doComplete as getEmmetCompletions } from '@vscode/emmet-helper';
 import type { Plugin } from '../interfaces';
 import { CSSDocument, CSSDocumentBase } from './CSSDocument';
-import { getLanguageService } from './languageService';
-import { AttributeContext, getAttributeContextAtPosition } from '../../core/documents/parseHTML';
+import { getLanguageService } from './language-service';
+import { AttributeContext, getAttributeContextAtPosition } from '../../core/documents/parseHtml';
 import { StyleAttributeDocument } from './StyleAttributeDocument';
 import { getIdClassCompletion } from './features/getIdClassCompletions';
 import { flatten } from 'lodash';

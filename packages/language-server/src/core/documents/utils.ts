@@ -1,7 +1,7 @@
 import { Position, Range } from 'vscode-languageserver';
 import { HTMLDocument, Node } from 'vscode-html-languageservice';
 import { clamp, isInRange } from '../../utils';
-import { parseHtml } from './parseHTML';
+import { parseHtml } from './parseHtml';
 
 export interface TagInformation {
 	content: string;

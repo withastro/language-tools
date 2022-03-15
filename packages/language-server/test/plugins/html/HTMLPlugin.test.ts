@@ -33,12 +33,12 @@ describe('HTML Plugin', () => {
 		});
 
 		it('does not provide completions inside of moustache tag', () => {
-			const { plugin, document } = setup('<div on:click={() =>');
+			const { plugin, document } = setup('<div class={');
 
-			const completions = plugin.getCompletions(document, Position.create(0, 20));
+			const completions = plugin.getCompletions(document, Position.create(0, 12));
 			expect(completions).to.be.null;
 
-			const tagCompletion = plugin.doTagComplete(document, Position.create(0, 20));
+			const tagCompletion = plugin.doTagComplete(document, Position.create(0, 12));
 			expect(completions).to.be.null;
 		});
 	});

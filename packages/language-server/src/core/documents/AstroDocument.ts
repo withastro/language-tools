@@ -2,7 +2,7 @@ import { HTMLDocument } from 'vscode-html-languageservice';
 import { urlToPath } from '../../utils';
 import { WritableDocument } from './DocumentBase';
 import { AstroMetadata, parseAstro } from './parseAstro';
-import { parseHtml } from './parseHTML';
+import { parseHtml } from './parseHtml';
 import { extractStyleTags, TagInformation } from './utils';
 
 export class AstroDocument extends WritableDocument {

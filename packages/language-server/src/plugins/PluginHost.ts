@@ -6,9 +6,11 @@ import {
 	CompletionContext,
 	CompletionItem,
 	CompletionList,
+	Diagnostic,
 	Hover,
 	Position,
 	Range,
+	TextDocumentContentChangeEvent,
 	TextDocumentIdentifier,
 } from 'vscode-languageserver';
 import type { AppCompletionItem, Plugin, LSProvider } from './interfaces';
@@ -87,6 +89,12 @@ export class PluginHost {
 		return result ?? completionItem;
 	}
 
+	async getDiagnostics(textDocument: TextDocumentIdentifier): Promise<Diagnostic[]> {
+		const document = this.getDocument(textDocument.uri);
+
+		return flatten(await this.execute<Diagnostic[]>('getDiagnostics', [document], ExecuteMode.Collect));
+	}
+
 	async doTagComplete(textDocument: TextDocumentIdentifier, position: Position): Promise<string | null> {
 		const document = this.getDocument(textDocument.uri);
 
@@ -109,6 +117,18 @@ export class PluginHost {
 		return flatten(
 			await this.execute<ColorPresentation[]>('getColorPresentations', [document, range, color], ExecuteMode.Collect)
 		);
+	}
+
+	onWatchFileChanges(onWatchFileChangesParams: any[]): void {
+		for (const support of this.plugins) {
+			support.onWatchFileChanges?.(onWatchFileChangesParams);
+		}
+	}
+
+	updateNonAstroFile(fileName: string, changes: TextDocumentContentChangeEvent[]): void {
+		for (const support of this.plugins) {
+			support.updateNonAstroFile?.(fileName, changes);
+		}
 	}
 
 	private getDocument(uri: string) {

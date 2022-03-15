@@ -1,6 +1,6 @@
 import { Stylesheet, TextDocument } from 'vscode-css-languageservice';
 import { Position } from 'vscode-languageserver';
-import { getLanguageService } from './languageService';
+import { getLanguageService } from './language-service';
 import { AstroDocument, DocumentMapper, ReadableDocument, TagInformation } from '../../core/documents';
 
 export interface CSSDocumentBase extends DocumentMapper, TextDocument {
@@ -55,7 +55,7 @@ export class CSSDocument extends ReadableDocument implements DocumentMapper {
 	}
 
 	/**
-	 * Returns the length of the fragment as calculated from the start and end positon
+	 * Returns the length of the fragment as calculated from the start and end position
 	 */
 	getTextLength(): number {
 		return this.styleInfo.end - this.styleInfo.start;

@@ -1,5 +1,5 @@
 import { CompletionItem, CompletionItemKind, CompletionList } from 'vscode-languageserver';
-import { AttributeContext } from '../../../core/documents/parseHTML';
+import { AttributeContext } from '../../../core/documents/parseHtml';
 import { Stylesheet } from 'vscode-css-languageservice';
 
 export function getIdClassCompletion(

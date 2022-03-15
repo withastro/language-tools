@@ -22,6 +22,7 @@ import {
 	SignatureHelp,
 	SignatureHelpContext,
 	SymbolInformation,
+	TextDocumentContentChangeEvent,
 	TextDocumentIdentifier,
 	TextEdit,
 	WorkspaceEdit,
@@ -140,6 +141,10 @@ export interface OnWatchFileChangesProvider {
 	onWatchFileChanges(onWatchFileChangesParams: OnWatchFileChangesParam[]): void;
 }
 
+export interface UpdateNonAstroFile {
+	updateNonAstroFile(fileName: string, changes: TextDocumentContentChangeEvent[]): void;
+}
+
 type ProviderBase = DiagnosticsProvider &
 	HoverProvider &
 	CompletionsProvider &
@@ -158,7 +163,8 @@ type ProviderBase = DiagnosticsProvider &
 	SemanticTokensProvider &
 	SelectionRangeProvider &
 	OnWatchFileChangesProvider &
-	LinkedEditingRangesProvider;
+	LinkedEditingRangesProvider &
+	UpdateNonAstroFile;
 
 export type LSProvider = ProviderBase;
 

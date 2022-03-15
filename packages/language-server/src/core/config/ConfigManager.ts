@@ -60,7 +60,7 @@ type DeepPartial<T> = T extends Record<string, unknown>
 /**
  * Manager class to facilitate accessing and updating the user's config
  * Not to be confused with other kind of configurations (such as the Astro project configuration and the TypeScript/Javascript one)
- * For more info on this, see the [internal docs](../../../../../docs/internal/config.md)
+ * For more info on this, see the [internal docs](../../../../../docs/internal/language-server/config.md)
  */
 export class ConfigManager {
 	private config: LSConfig = defaultLSConfig;

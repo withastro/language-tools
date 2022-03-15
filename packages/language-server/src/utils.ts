@@ -28,6 +28,14 @@ export function pathToUrl(path: string) {
 	return URI.file(path).toString();
 }
 
+/**
+ * Given a path like foo/bar or foo/bar.astro , returns its last path
+ * (bar or bar.astro in this example).
+ */
+export function getLastPartOfPath(path: string): string {
+	return path.replace(/\\/g, '/').split('/').pop() || '';
+}
+
 /** Flattens an array */
 export function flatten<T>(arr: T[][]): T[] {
 	return arr.reduce((all, item) => [...all, ...item], []);
@@ -51,4 +59,62 @@ export function isBeforeOrEqualToPosition(position: Position, positionToTest: Po
 		positionToTest.line < position.line ||
 		(positionToTest.line === position.line && positionToTest.character <= position.character)
 	);
+}
+
+/**
+ * Debounces a function but cancels previous invocation only if
+ * a second function determines it should.
+ *
+ * @param fn The function with it's argument
+ * @param determineIfSame The function which determines if the previous invocation should be canceld or not
+ * @param milliseconds Number of miliseconds to debounce
+ */
+export function debounceSameArg<T>(
+	fn: (arg: T) => void,
+	shouldCancelPrevious: (newArg: T, prevArg?: T) => boolean,
+	milliseconds: number
+): (arg: T) => void {
+	let timeout: any;
+	let prevArg: T | undefined;
+
+	return (arg: T) => {
+		if (shouldCancelPrevious(arg, prevArg)) {
+			clearTimeout(timeout);
+		}
+
+		prevArg = arg;
+		timeout = setTimeout(() => {
+			fn(arg);
+			prevArg = undefined;
+		}, milliseconds);
+	};
+}
+
+/**
+ * Debounces a function but also waits at minimum the specified number of milliseconds until
+ * the next invocation. This avoids needless calls when a synchronous call (like diagnostics)
+ * took too long and the whole timeout of the next call was eaten up already.
+ *
+ * @param fn The function with it's argument
+ * @param milliseconds Number of milliseconds to debounce/throttle
+ */
+export function debounceThrottle<T extends (...args: any) => void>(fn: T, milliseconds: number): T {
+	let timeout: any;
+	let lastInvocation = Date.now() - milliseconds;
+
+	function maybeCall(...args: any) {
+		clearTimeout(timeout);
+
+		timeout = setTimeout(() => {
+			if (Date.now() - lastInvocation < milliseconds) {
+				maybeCall(...args);
+				return;
+			}
+
+			fn(...args);
+			lastInvocation = Date.now();
+		}, milliseconds);
+	}
+
+	return maybeCall as any;
 }
