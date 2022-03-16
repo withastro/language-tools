@@ -18,7 +18,7 @@ describe('Astro Check', async () => {
 		const [{ diagnostics }] = await checker.getDiagnostics();
 
 		expect(diagnostics.length, 'Expected diagnostics to be empty').to.equal(0);
-	});
+	}).timeout(10000);
 
 	it('should not find errors in documents with comments', async () => {
 		checker.upsertDocument({
