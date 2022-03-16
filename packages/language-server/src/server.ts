@@ -152,6 +152,7 @@ export function startLanguageServer(connection: vscode.Connection) {
 	connection.onSignatureHelp((evt, cancellationToken) =>
 		pluginHost.getSignatureHelp(evt.textDocument, evt.position, evt.context, cancellationToken)
 	);
+	connection.onRenameRequest((evt) => pluginHost.rename(evt.textDocument, evt.position, evt.newName));
 
 	connection.onDidSaveTextDocument(updateAllDiagnostics);
 	connection.onNotification('$/onDidChangeNonAstroFile', async (e: any) => {
