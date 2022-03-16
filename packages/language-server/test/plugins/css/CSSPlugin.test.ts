@@ -34,7 +34,7 @@ describe('CSS Plugin', () => {
 			const completions = plugin.getCompletions(document, Position.create(0, 9), {
 				triggerCharacter: ':',
 			} as CompletionContext);
-			const globalCompletion = completions?.items.find(item => item.label === ':global()');
+			const globalCompletion = completions?.items.find((item) => item.label === ':global()');
 
 			expect(globalCompletion, 'Expected completions to contain :global modifier').to.not.be.undefined;
 		});
