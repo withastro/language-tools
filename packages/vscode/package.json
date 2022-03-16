@@ -16,8 +16,7 @@
     "vscode:prepublish": "yarn build",
     "build": "astro-scripts build \"src/**/*.ts\" && tsc -p tsconfig.json",
     "dev": "astro-scripts dev \"src/**/*.ts\"",
-    "pretest": "tsc -p ./test",
-    "test": "node ./test/dist/runTest.js"
+    "test": "node ./test/runTest.js"
   },
   "engines": {
     "vscode": "^1.52.0"

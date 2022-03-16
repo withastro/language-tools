@@ -31,7 +31,6 @@ const defaultLSConfig: LSConfig = {
 	},
 	css: {
 		enabled: true,
-		globals: '',
 		diagnostics: { enabled: true },
 		hover: { enabled: true },
 		completions: { enabled: true, emmet: true },

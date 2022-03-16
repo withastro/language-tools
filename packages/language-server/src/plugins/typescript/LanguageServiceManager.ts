@@ -1,8 +1,14 @@
 import ts from 'typescript';
+import { TextDocumentContentChangeEvent } from 'vscode-languageserver';
 import { ConfigManager } from '../../core/config';
 import { AstroDocument, DocumentManager } from '../../core/documents';
-import { debounceSameArg, pathToUrl } from '../../utils';
-import { getLanguageService, LanguageServiceContainer, LanguageServiceDocumentContext } from './language-service';
+import { debounceSameArg, normalizePath, pathToUrl } from '../../utils';
+import {
+	forAllLanguageServices,
+	getLanguageService,
+	LanguageServiceContainer,
+	LanguageServiceDocumentContext,
+} from './language-service';
 import { DocumentSnapshot } from './snapshots/DocumentSnapshot';
 import { GlobalSnapshotManager } from './snapshots/SnapshotManager';
 
@@ -50,6 +56,46 @@ export class LanguageServiceManager {
 		const filePath = typeof pathOrDoc === 'string' ? pathOrDoc : pathOrDoc.getFilePath() || '';
 		const tsService = await this.getTypeScriptLanguageService(filePath);
 		return tsService.updateSnapshot(pathOrDoc);
+	}
+
+	/**
+	 * Updates snapshot path in all existing ts services and retrieves snapshot
+	 */
+	async updateSnapshotPath(oldPath: string, newPath: string): Promise<DocumentSnapshot> {
+		await this.deleteSnapshot(oldPath);
+		return this.getSnapshot(newPath);
+	}
+
+	/**
+	 * Deletes snapshot in all existing ts services
+	 */
+	async deleteSnapshot(filePath: string) {
+		await forAllLanguageServices((service) => service.deleteSnapshot(filePath));
+		this.docManager.releaseDocument(pathToUrl(filePath));
+	}
+
+	/**
+	 * Updates project files in all existing ts services
+	 */
+	async updateProjectFiles() {
+		await forAllLanguageServices((service) => service.updateProjectFiles());
+	}
+
+	/**
+	 * Updates file in all ts services where it exists
+	 */
+	async updateExistingNonAstroFile(path: string, changes?: TextDocumentContentChangeEvent[]): Promise<void> {
+		path = normalizePath(path);
+		// Only update once because all snapshots are shared between
+		// services. Since we don't have a current version of TS/JS
+		// files, the operation wouldn't be idempotent.
+		let didUpdate = false;
+		await forAllLanguageServices((service) => {
+			if (service.hasFile(path) && !didUpdate) {
+				didUpdate = true;
+				service.updateNonAstroFile(path, changes);
+			}
+		});
 	}
 
 	async getLSAndTSDoc(document: AstroDocument): Promise<{

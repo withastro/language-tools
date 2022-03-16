@@ -12,7 +12,7 @@ describe('HTML Plugin', () => {
 		const plugin = new HTMLPlugin(configManager);
 		docManager.openDocument(<any>'some doc');
 
-		return { plugin, document };
+		return { plugin, document, configManager };
 	}
 
 	describe('provide completions', () => {
@@ -39,7 +39,26 @@ describe('HTML Plugin', () => {
 			expect(completions).to.be.null;
 
 			const tagCompletion = plugin.doTagComplete(document, Position.create(0, 12));
-			expect(completions).to.be.null;
+			expect(tagCompletion).to.be.null;
+		});
+
+		it('should not provide completions if feature is disabled', () => {
+			const { plugin, document, configManager } = setup('<');
+
+			// Disable completions
+			configManager.updateConfig(<any>{
+				html: {
+					completions: {
+						enabled: false,
+					},
+				},
+			});
+
+			const completions = plugin.getCompletions(document, Position.create(0, 7));
+
+			expect(configManager.enabled(`html.completions.enabled`), 'Expected completions to be disabled in configManager')
+				.to.be.false;
+			expect(completions, 'Expected completions to be null').to.be.null;
 		});
 	});
 });

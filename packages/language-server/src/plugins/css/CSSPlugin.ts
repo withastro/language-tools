@@ -1,22 +1,11 @@
-import {
-	Color,
-	ColorInformation,
-	ColorPresentation,
-	CompletionContext,
-	CompletionList,
-	Position,
-	Range,
-} from 'vscode-languageserver';
+import { CompletionContext, CompletionList, CompletionTriggerKind, Position } from 'vscode-languageserver';
 import { ConfigManager } from '../../core/config/ConfigManager';
 import { LSCSSConfig } from '../../core/config/interfaces';
 import {
 	AstroDocument,
 	isInsideFrontmatter,
 	isInTag,
-	mapColorPresentationToOriginal,
 	mapCompletionItemToOriginal,
-	mapObjWithRangeToOriginal,
-	mapRangeToGenerated,
 	TagInformation,
 } from '../../core/documents';
 import { doComplete as getEmmetCompletions } from '@vscode/emmet-helper';
@@ -26,13 +15,13 @@ import { getLanguageService } from './language-service';
 import { AttributeContext, getAttributeContextAtPosition } from '../../core/documents/parseHtml';
 import { StyleAttributeDocument } from './StyleAttributeDocument';
 import { getIdClassCompletion } from './features/getIdClassCompletions';
-import { flatten } from 'lodash';
 
 export class CSSPlugin implements Plugin {
 	__name = 'css';
 
 	private configManager: ConfigManager;
 	private cssDocuments = new WeakMap<TagInformation, CSSDocument>();
+	private triggerCharacters = new Set(['.', ':', '-', '/']);
 
 	constructor(configManager: ConfigManager) {
 		this.configManager = configManager;
@@ -48,6 +37,14 @@ export class CSSPlugin implements Plugin {
 		}
 
 		if (isInsideFrontmatter(document.getText(), document.offsetAt(position))) {
+			return null;
+		}
+
+		const triggerCharacter = completionContext?.triggerCharacter;
+		const triggerKind = completionContext?.triggerKind;
+		const isCustomTriggerCharacter = triggerKind === CompletionTriggerKind.TriggerCharacter;
+
+		if (isCustomTriggerCharacter && triggerCharacter && !this.triggerCharacters.has(triggerCharacter)) {
 			return null;
 		}
 
@@ -77,21 +74,10 @@ export class CSSPlugin implements Plugin {
 		return this.getCompletionsInternal(document, position, cssDocument);
 	}
 
-	private inStyleAttributeWithoutInterpolation(
-		attrContext: AttributeContext,
-		text: string
-	): attrContext is Required<AttributeContext> {
-		return (
-			attrContext.name === 'style' &&
-			!!attrContext.valueRange &&
-			!text.substring(attrContext.valueRange[0], attrContext.valueRange[1]).includes('{')
-		);
-	}
-
 	private getCompletionsInternal(document: AstroDocument, position: Position, cssDocument: CSSDocumentBase) {
 		if (isSASS(cssDocument)) {
 			// The CSS language service does not support SASS (not to be confused with SCSS)
-			// however we can at least still get Emmet completions
+			// however we can at least still at least provide Emmet completions in SASS blocks
 			return getEmmetCompletions(document, position, 'sass', this.configManager.getEmmetConfig()) || null;
 		}
 
@@ -108,12 +94,24 @@ export class CSSPlugin implements Plugin {
 			cssDocument.getGeneratedPosition(position),
 			cssDocument.stylesheet
 		);
+
 		return CompletionList.create(
 			[...(results ? results.items : []), ...emmetResults.items].map((completionItem) =>
 				mapCompletionItemToOriginal(cssDocument, completionItem)
 			),
 			// Emmet completions change on every keystroke, so they are never complete
 			emmetResults.items.length > 0
+		);
+	}
+
+	private inStyleAttributeWithoutInterpolation(
+		attrContext: AttributeContext,
+		text: string
+	): attrContext is Required<AttributeContext> {
+		return (
+			attrContext.name === 'style' &&
+			!!attrContext.valueRange &&
+			!text.substring(attrContext.valueRange[0], attrContext.valueRange[1]).includes('{')
 		);
 	}
 

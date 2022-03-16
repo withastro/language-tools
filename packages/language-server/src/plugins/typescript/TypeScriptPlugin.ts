@@ -4,24 +4,33 @@ import {
 	CompletionContext,
 	DefinitionLink,
 	Diagnostic,
+	FileChangeType,
 	Hover,
 	LocationLink,
 	Position,
 	SignatureHelp,
 	SignatureHelpContext,
+	TextDocumentContentChangeEvent,
+	WorkspaceEdit,
 } from 'vscode-languageserver';
 import { join as pathJoin, dirname as pathDirname } from 'path';
 import { ConfigManager, LSTypescriptConfig } from '../../core/config';
 import { AstroDocument, DocumentManager } from '../../core/documents';
 import { isNotNullOrUndefined, pathToUrl } from '../../utils';
-import { AppCompletionList, Plugin } from '../interfaces';
+import { AppCompletionItem, AppCompletionList, OnWatchFileChangesParam, Plugin } from '../interfaces';
 import { CompletionEntryWithIdentifer, CompletionsProviderImpl } from './features/CompletionsProvider';
 import { DiagnosticsProviderImpl } from './features/DiagnosticsProvider';
 import { HoverProviderImpl } from './features/HoverProvider';
 import { SignatureHelpProviderImpl } from './features/SignatureHelpProvider';
 import { SnapshotFragmentMap } from './features/utils';
 import { LanguageServiceManager } from './LanguageServiceManager';
-import { convertToLocationRange, ensureRealFilePath, isVirtualFilePath, toVirtualAstroFilePath } from './utils';
+import {
+	convertToLocationRange,
+	ensureRealFilePath,
+	getScriptKindFromFileName,
+	isVirtualFilePath,
+	toVirtualAstroFilePath,
+} from './utils';
 
 type BetterTS = typeof ts & {
 	getTouchingPropertyName(sourceFile: SourceFile, pos: number): Node;
@@ -52,6 +61,36 @@ export class TypeScriptPlugin implements Plugin {
 		return this.hoverProvider.doHover(document, position);
 	}
 
+	async rename(document: AstroDocument, position: Position, newName: string): Promise<WorkspaceEdit | null> {
+		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
+		const fragment = await tsDoc.createFragment();
+
+		const offset = fragment.offsetAt(fragment.getGeneratedPosition(position));
+
+		let renames = lang.findRenameLocations(toVirtualAstroFilePath(tsDoc.filePath), offset, false, false, true);
+		if (!renames) {
+			return null;
+		}
+
+		let edit = {
+			changes: {},
+		} as WorkspaceEdit;
+
+		renames.forEach((rename) => {
+			const filePath = ensureRealFilePath(rename.fileName);
+			if (!(filePath in edit.changes!)) {
+				edit.changes![filePath] = [];
+			}
+
+			edit.changes![filePath].push({
+				newText: newName,
+				range: convertToLocationRange(fragment, rename.textSpan),
+			});
+		});
+
+		return edit;
+	}
+
 	async getCompletions(
 		document: AstroDocument,
 		position: Position,
@@ -60,6 +99,13 @@ export class TypeScriptPlugin implements Plugin {
 		const completions = await this.completionProvider.getCompletions(document, position, completionContext);
 
 		return completions;
+	}
+
+	async resolveCompletion(
+		document: AstroDocument,
+		completionItem: AppCompletionItem<CompletionEntryWithIdentifer>
+	): Promise<AppCompletionItem<CompletionEntryWithIdentifer>> {
+		return this.completionProvider.resolveCompletion(document, completionItem);
 	}
 
 	async getDefinitions(document: AstroDocument, position: Position): Promise<DefinitionLink[]> {
@@ -115,6 +161,31 @@ export class TypeScriptPlugin implements Plugin {
 		}
 
 		return this.diagnosticsProvider.getDiagnostics(document, cancellationToken);
+	}
+
+	async onWatchFileChanges(onWatchFileChangesParas: OnWatchFileChangesParam[]): Promise<void> {
+		let doneUpdateProjectFiles = false;
+
+		for (const { fileName, changeType } of onWatchFileChangesParas) {
+			const scriptKind = getScriptKindFromFileName(fileName);
+
+			if (scriptKind === ts.ScriptKind.Unknown) {
+				continue;
+			}
+
+			if (changeType === FileChangeType.Created && !doneUpdateProjectFiles) {
+				doneUpdateProjectFiles = true;
+				await this.languageServiceManager.updateProjectFiles();
+			} else if (changeType === FileChangeType.Deleted) {
+				await this.languageServiceManager.deleteSnapshot(fileName);
+			} else {
+				await this.languageServiceManager.updateExistingNonAstroFile(fileName);
+			}
+		}
+	}
+
+	async updateNonAstroFile(fileName: string, changes: TextDocumentContentChangeEvent[]): Promise<void> {
+		await this.languageServiceManager.updateExistingNonAstroFile(fileName, changes);
 	}
 
 	async getSignatureHelp(

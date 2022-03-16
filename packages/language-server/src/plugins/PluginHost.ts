@@ -17,6 +17,7 @@ import {
 	SignatureHelpContext,
 	TextDocumentContentChangeEvent,
 	TextDocumentIdentifier,
+	WorkspaceEdit,
 } from 'vscode-languageserver';
 import type { AppCompletionItem, Plugin, LSProvider } from './interfaces';
 import { flatten } from 'lodash';
@@ -48,12 +49,6 @@ export class PluginHost {
 
 	registerPlugin(plugin: Plugin) {
 		this.plugins.push(plugin);
-	}
-
-	async doHover(textDocument: TextDocumentIdentifier, position: Position): Promise<Hover | null> {
-		const document = this.getDocument(textDocument.uri);
-
-		return this.execute<Hover>('doHover', [document, position], ExecuteMode.FirstNonNull);
 	}
 
 	async getCompletions(
@@ -97,6 +92,12 @@ export class PluginHost {
 		return flatten(await this.execute<Diagnostic[]>('getDiagnostics', [document], ExecuteMode.Collect));
 	}
 
+	async doHover(textDocument: TextDocumentIdentifier, position: Position): Promise<Hover | null> {
+		const document = this.getDocument(textDocument.uri);
+
+		return this.execute<Hover>('doHover', [document, position], ExecuteMode.FirstNonNull);
+	}
+
 	async doTagComplete(textDocument: TextDocumentIdentifier, position: Position): Promise<string | null> {
 		const document = this.getDocument(textDocument.uri);
 
@@ -128,6 +129,16 @@ export class PluginHost {
 		} else {
 			return definitions.map((def) => <Location>{ range: def.targetSelectionRange, uri: def.targetUri });
 		}
+	}
+
+	async rename(
+		textDocument: TextDocumentIdentifier,
+		position: Position,
+		newName: string
+	): Promise<WorkspaceEdit | null> {
+		const document = this.getDocument(textDocument.uri);
+
+		return this.execute<any>('rename', [document, position, newName], ExecuteMode.FirstNonNull);
 	}
 
 	async getSignatureHelp(

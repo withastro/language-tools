@@ -48,6 +48,12 @@ export async function getLanguageService(
 	return getLanguageServiceForTsconfig(tsconfigPath, docContext);
 }
 
+export async function forAllLanguageServices(cb: (service: LanguageServiceContainer) => any): Promise<void> {
+	for (const service of services.values()) {
+		cb(await service);
+	}
+}
+
 /**
  * @param tsconfigPath has to be absolute
  * @param docContext

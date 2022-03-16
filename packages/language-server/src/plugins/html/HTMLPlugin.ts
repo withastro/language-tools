@@ -1,4 +1,11 @@
-import { CompletionItem, CompletionList, Position, TextEdit, CompletionItemKind } from 'vscode-languageserver';
+import {
+	CompletionItem,
+	CompletionList,
+	Position,
+	TextEdit,
+	CompletionItemKind,
+	FoldingRange,
+} from 'vscode-languageserver';
 import { doComplete as getEmmetCompletions } from '@vscode/emmet-helper';
 import { getLanguageService } from 'vscode-html-languageservice';
 import type { Plugin } from '../interfaces';
@@ -64,7 +71,21 @@ export class HTMLPlugin implements Plugin {
 		);
 	}
 
+	getFoldingRanges(document: AstroDocument): FoldingRange[] | null {
+		const html = document.html;
+
+		if (!html) {
+			return null;
+		}
+
+		return this.lang.getFoldingRanges(document);
+	}
+
 	doTagComplete(document: AstroDocument, position: Position): string | null {
+		if (!this.featureEnabled('tagComplete')) {
+			return null;
+		}
+
 		const html = document.html;
 		const offset = document.offsetAt(position);
 

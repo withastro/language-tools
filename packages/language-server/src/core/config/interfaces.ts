@@ -102,7 +102,6 @@ export interface LSHTMLConfig {
 
 export interface LSCSSConfig {
 	enabled: boolean;
-	globals: string;
 	diagnostics: {
 		enabled: boolean;
 	};
