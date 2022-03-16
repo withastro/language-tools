@@ -116,4 +116,8 @@ export class DocumentManager {
 	private notify(name: DocumentEvent, document: AstroDocument) {
 		this.emitter.emit(name, document);
 	}
+
+	static newInstance() {
+		return new DocumentManager(({ uri, text }: { uri: string; text: string }) => new AstroDocument(uri, text));
+	}
 }
