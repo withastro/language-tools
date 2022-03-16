@@ -27,9 +27,8 @@
       "args": [
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceRoot}/packages/vscode",
-        "--extensionTestsPath=${workspaceRoot}/packages/vscode/test/dist/suite/index"
-      ],
-      "outFiles": ["${workspaceRoot}/packages/vscode/test/dist/**/*.js"]
+        "--extensionTestsPath=${workspaceRoot}/packages/vscode/test/suite/index.js"
+      ]
     }
   ],
   "compounds": [
