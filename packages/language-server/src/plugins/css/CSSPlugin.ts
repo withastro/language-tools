@@ -1,11 +1,23 @@
-import { CompletionContext, CompletionList, CompletionTriggerKind, Position } from 'vscode-languageserver';
+import {
+	Color,
+	ColorInformation,
+	ColorPresentation,
+	CompletionContext,
+	CompletionList,
+	CompletionTriggerKind,
+	Position,
+	Range,
+} from 'vscode-languageserver';
 import { ConfigManager } from '../../core/config/ConfigManager';
 import { LSCSSConfig } from '../../core/config/interfaces';
 import {
 	AstroDocument,
 	isInsideFrontmatter,
 	isInTag,
+	mapColorPresentationToOriginal,
 	mapCompletionItemToOriginal,
+	mapObjWithRangeToOriginal,
+	mapRangeToGenerated,
 	TagInformation,
 } from '../../core/documents';
 import { doComplete as getEmmetCompletions } from '@vscode/emmet-helper';
@@ -15,6 +27,7 @@ import { getLanguageService } from './language-service';
 import { AttributeContext, getAttributeContextAtPosition } from '../../core/documents/parseHtml';
 import { StyleAttributeDocument } from './StyleAttributeDocument';
 import { getIdClassCompletion } from './features/getIdClassCompletions';
+import { flatten } from 'lodash';
 
 export class CSSPlugin implements Plugin {
 	__name = 'css';
@@ -102,6 +115,36 @@ export class CSSPlugin implements Plugin {
 			// Emmet completions change on every keystroke, so they are never complete
 			emmetResults.items.length > 0
 		);
+	}
+
+	getDocumentColors(document: AstroDocument): ColorInformation[] {
+		const allColorInfo = this.getCSSDocumentsForDocument(document).map((cssDoc) => {
+			const cssLang = extractLanguage(cssDoc);
+			const langService = getLanguageService(cssLang);
+
+			return langService
+				.findDocumentColors(cssDoc, cssDoc.stylesheet)
+				.map((colorInfo) => mapObjWithRangeToOriginal(cssDoc, colorInfo));
+		});
+
+		return flatten(allColorInfo);
+	}
+
+	getColorPresentations(document: AstroDocument, range: Range, color: Color): ColorPresentation[] {
+		const allColorPres = this.getCSSDocumentsForDocument(document).map((cssDoc) => {
+			const cssLang = extractLanguage(cssDoc);
+			const langService = getLanguageService(cssLang);
+
+			if (!cssDoc.isInGenerated(range.start) && !cssDoc.isInGenerated(range.end)) {
+				return [];
+			}
+
+			return langService
+				.getColorPresentations(cssDoc, cssDoc.stylesheet, color, mapRangeToGenerated(cssDoc, range))
+				.map((colorPres) => mapColorPresentationToOriginal(cssDoc, colorPres));
+		});
+
+		return flatten(allColorPres);
 	}
 
 	private inStyleAttributeWithoutInterpolation(
