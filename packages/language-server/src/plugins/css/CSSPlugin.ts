@@ -118,9 +118,17 @@ export class CSSPlugin implements Plugin {
 	}
 
 	getDocumentColors(document: AstroDocument): ColorInformation[] {
+		if (!this.featureEnabled('documentColors')) {
+			return [];
+		}
+
 		const allColorInfo = this.getCSSDocumentsForDocument(document).map((cssDoc) => {
 			const cssLang = extractLanguage(cssDoc);
 			const langService = getLanguageService(cssLang);
+
+			if (shouldExcludeColor(cssLang)) {
+				return [];
+			}
 
 			return langService
 				.findDocumentColors(cssDoc, cssDoc.stylesheet)
@@ -131,11 +139,15 @@ export class CSSPlugin implements Plugin {
 	}
 
 	getColorPresentations(document: AstroDocument, range: Range, color: Color): ColorPresentation[] {
+		if (!this.featureEnabled('colorPresentations')) {
+			return [];
+		}
+
 		const allColorPres = this.getCSSDocumentsForDocument(document).map((cssDoc) => {
 			const cssLang = extractLanguage(cssDoc);
 			const langService = getLanguageService(cssLang);
 
-			if (!cssDoc.isInGenerated(range.start) && !cssDoc.isInGenerated(range.end)) {
+			if ((!cssDoc.isInGenerated(range.start) && !cssDoc.isInGenerated(range.end)) || shouldExcludeColor(cssLang)) {
 				return [];
 			}
 
@@ -190,6 +202,23 @@ export class CSSPlugin implements Plugin {
 
 	private featureEnabled(feature: keyof LSCSSConfig) {
 		return this.configManager.enabled('css.enabled') && this.configManager.enabled(`css.${feature}.enabled`);
+	}
+}
+
+/**
+ * Exclude certain language when getting colors
+ * The CSS language service only supports CSS, LESS and SCSS,
+ * which mean that we cannot support colors in other languages
+ */
+function shouldExcludeColor(document: CSSDocument | string) {
+	const language = typeof document === 'string' ? document : extractLanguage(document);
+	switch (language) {
+		case 'sass':
+		case 'stylus':
+		case 'styl':
+			return true;
+		default:
+			return false;
 	}
 }
 
