@@ -11,10 +11,13 @@ export function toTSX(code: string): string {
 
 		let Props = render().props;
 
-		export default function(props: typeof Props) {
-			<></>
+		export default function(props: typeof Props): any {
+			<div></div>
 		}
 	`;
+
+	// Remove default class export from Svelte2TSX since we don't use it and instead add our own
+	result = result.replace('export default class', 'export class');
 	} catch(e: any) {
 		return result
 	}
