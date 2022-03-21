@@ -4,7 +4,7 @@ export const languageId = 'svelte';
 export const extension = '.svelte';
 
 export function toTSX(code: string): string {
-	let result = 'export default function() {}';
+	let result = 'export default function(): any {}';
 
 	try {
 		result = `${svelte2tsx(code).code}
@@ -16,10 +16,10 @@ export function toTSX(code: string): string {
 		}
 	`;
 
-	// Remove default class export from Svelte2TSX since we don't use it and instead add our own
-	result = result.replace('export default class', 'export class');
-	} catch(e: any) {
-		return result
+		// Remove default class export from Svelte2TSX since we don't use it and instead add our own
+		result = result.replace('export default class', 'export class');
+	} catch (e: any) {
+		return result;
 	}
 
 	return result;

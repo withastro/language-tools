@@ -233,5 +233,5 @@ function isNoMarkdownBlockQuoteWithinMarkdown(
  * Some diagnostics have JSX-specific nomenclature. Enhance them for more clarity.
  */
 function enhanceIfNecessary(diagnostic: Diagnostic): Diagnostic {
-	return diagnostic
+	return diagnostic;
 }

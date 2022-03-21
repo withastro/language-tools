@@ -247,6 +247,7 @@ async function createLanguageService(tsconfigPath: string, docContext: LanguageS
 			allowNonTsExtensions: true,
 			allowJs: true,
 			jsx: ts.JsxEmit.Preserve,
+			jsxImportSource: undefined,
 			jsxFactory: 'astroHTML',
 			module: ts.ModuleKind.ESNext,
 			target: ts.ScriptTarget.ESNext,
