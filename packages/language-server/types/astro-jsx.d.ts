@@ -11,13 +11,17 @@
  */
 declare namespace astroHTML.JSX {
 	/* html jsx */
-	export type Child = Node | Node[] | string | number;
+	export type Child = Node | Node[] | string | number | boolean | null | undefined | unknown;
 	export type Children = Child | Child[];
 
-	type NativeElement = HTMLElement;
+	interface ElementChildrenAttribute {
+		// eslint-disable-next-line @typescript-eslint/ban-types
+		children: {};
+	}
 
 	interface IntrinsicAttributes extends AstroBuiltinProps, AstroBuiltinAttributes {
 		slot?: string;
+		children?: Children;
 	}
 
 	interface AstroBuiltinProps {
@@ -29,13 +33,17 @@ declare namespace astroHTML.JSX {
 	}
 
 	interface AstroBuiltinAttributes {
-		'class:list'?: Record<string, boolean> | Iterable<string> | Iterable<any> | string;
+		'class:list'?: Record<string, boolean> | Record<any, any> | Iterable<string> | Iterable<any> | string;
+		'set:html'?: any;
+		'set:text'?: any;
 	}
 
-	// TypeScript SVGElement has no `dataset` (Chrome 55+, Firefox 51+).
-	type Element = NativeElement & {
-		dataset: DOMStringMap;
-	};
+	// Usable exclusively on script and style tags
+	interface AstroDefineVars {
+		'define:vars'?: any;
+	}
+
+	type Element = HTMLElement;
 
 	//
 	// Event Handler Types
@@ -75,11 +83,7 @@ declare namespace astroHTML.JSX {
 	// unit-less numbers are listed here (see CSSProperty.js in React)
 
 	interface DOMAttributes<T extends EventTarget> {
-		// jsx-dom specific
-		/* children?: Children;
-      innerText?: string;
-      namespaceURI?: string;
-      ref?: ((e: T) => void) | Ref<T>; */
+		children?: Children;
 
 		// Clipboard Events
 		oncopy?: ClipboardEventHandler<T> | undefined | null;
@@ -461,7 +465,7 @@ declare namespace astroHTML.JSX {
 		contextmenu?: string | undefined | null;
 		controls?: boolean | undefined | null;
 		coords?: string | undefined | null;
-		crossorigin?: string | undefined | null;
+		crossorigin?: string | boolean | undefined | null;
 		currenttime?: number | undefined | null;
 		decoding?: 'async' | 'sync' | 'auto' | undefined | null;
 		data?: string | undefined | null;
@@ -489,7 +493,7 @@ declare namespace astroHTML.JSX {
 		height?: number | string | undefined | null;
 		hidden?: boolean | undefined | null;
 		high?: number | undefined | null;
-		href?: string | undefined | null;
+		href?: string | URL | undefined | null;
 		hreflang?: string | undefined | null;
 		htmlfor?: string | undefined | null;
 		httpequiv?: string | undefined | null;
@@ -983,14 +987,14 @@ declare namespace astroHTML.JSX {
 		ruby: HTMLProps<HTMLElement>;
 		s: HTMLProps<HTMLElement>;
 		samp: HTMLProps<HTMLElement>;
-		script: HTMLProps<HTMLElement>;
+		script: HTMLProps<HTMLElement> & AstroDefineVars;
 		section: HTMLProps<HTMLElement>;
 		select: HTMLProps<HTMLSelectElement>;
 		small: HTMLProps<HTMLElement>;
 		source: HTMLProps<HTMLSourceElement>;
 		span: HTMLProps<HTMLSpanElement>;
 		strong: HTMLProps<HTMLElement>;
-		style: HTMLProps<HTMLStyleElement>;
+		style: HTMLProps<HTMLStyleElement> & AstroDefineVars;
 		sub: HTMLProps<HTMLElement>;
 		summary: HTMLProps<HTMLElement>;
 		sup: HTMLProps<HTMLElement>;

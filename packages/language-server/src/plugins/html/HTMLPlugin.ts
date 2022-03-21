@@ -15,11 +15,18 @@ import { AstroDocument } from '../../core/documents/AstroDocument';
 import { isInComponentStartTag, isInsideExpression, isInsideFrontmatter } from '../../core/documents/utils';
 import { LSHTMLConfig } from '../../core/config/interfaces';
 import { isPossibleComponent } from '../../utils';
+import { astroAttributes, astroDirectives } from './features/astro-attributes';
 
 export class HTMLPlugin implements Plugin {
 	__name = 'html';
 
-	private lang = getLanguageService();
+	private lang = getLanguageService({
+		customDataProviders: [astroAttributes],
+	});
+	private componentLang = getLanguageService({
+		customDataProviders: [astroAttributes, astroDirectives],
+		useDefaultDataProvider: false,
+	});
 	private styleScriptTemplate = new Set(['style']);
 	private configManager: ConfigManager;
 
@@ -38,8 +45,13 @@ export class HTMLPlugin implements Plugin {
 		}
 
 		const node = html.findNodeAt(document.offsetAt(position));
-		if (!node || isPossibleComponent(node)) {
+		if (!node) {
 			return null;
+		}
+
+		// If the node we're hovering on is a component, instead only provide astro-specific hover info
+		if (isPossibleComponent(node)) {
+			return this.componentLang.doHover(document, position, html);
 		}
 
 		return this.lang.doHover(document, position, html);

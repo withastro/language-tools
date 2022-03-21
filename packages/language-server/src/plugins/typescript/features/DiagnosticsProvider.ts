@@ -233,5 +233,14 @@ function isNoMarkdownBlockQuoteWithinMarkdown(
  * Some diagnostics have JSX-specific nomenclature. Enhance them for more clarity.
  */
 function enhanceIfNecessary(diagnostic: Diagnostic): Diagnostic {
+	if (diagnostic.code === 2322) {
+		// For the rare case where an user might try to put a client directive on something that is not a component
+		if (diagnostic.message.includes("Property 'client:") && diagnostic.message.includes("to type 'HTMLProps")) {
+			return {
+				...diagnostic,
+				message: 'Client directives are only available on framework components',
+			};
+		}
+	}
 	return diagnostic;
 }
