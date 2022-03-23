@@ -62,6 +62,10 @@ export class TypeScriptPlugin implements Plugin {
 	}
 
 	async doHover(document: AstroDocument, position: Position): Promise<Hover | null> {
+		if (!this.featureEnabled('hover')) {
+			return null;
+		}
+
 		return this.hoverProvider.doHover(document, position);
 	}
 
@@ -96,6 +100,10 @@ export class TypeScriptPlugin implements Plugin {
 	}
 
 	async getDocumentSymbols(document: AstroDocument): Promise<SymbolInformation[]> {
+		if (!this.featureEnabled('documentSymbols')) {
+			return [];
+		}
+
 		const symbols = await this.documentSymbolsProvider.getDocumentSymbols(document);
 
 		return symbols;
@@ -106,6 +114,10 @@ export class TypeScriptPlugin implements Plugin {
 		position: Position,
 		completionContext?: CompletionContext
 	): Promise<AppCompletionList<CompletionEntryWithIdentifer> | null> {
+		if (!this.featureEnabled('completions')) {
+			return null;
+		}
+
 		const completions = await this.completionProvider.getCompletions(document, position, completionContext);
 
 		return completions;
