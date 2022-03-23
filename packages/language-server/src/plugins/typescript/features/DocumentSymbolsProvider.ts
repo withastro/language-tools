@@ -1,10 +1,11 @@
-import { NavigationTree } from 'typescript';
+import { NavigationTree, ScriptElementKindModifier } from 'typescript';
 import { SymbolInformation, Range, SymbolKind } from 'vscode-languageserver-types';
 import { AstroDocument, mapSymbolInformationToOriginal } from '../../../core/documents';
 import { DocumentSymbolsProvider } from '../../interfaces';
 import { LanguageServiceManager } from '../LanguageServiceManager';
 import { SnapshotFragment } from '../snapshots/DocumentSnapshot';
 import { symbolKindFromString } from '../utils';
+import { SymbolTag } from 'vscode-languageserver-types';
 
 export class DocumentSymbolsProviderImpl implements DocumentSymbolsProvider {
 	constructor(private languageServiceManager: LanguageServiceManager) {}
@@ -14,13 +15,16 @@ export class DocumentSymbolsProviderImpl implements DocumentSymbolsProvider {
 		const fragment = await tsDoc.createFragment();
 
 		const navTree = lang.getNavigationTree(tsDoc.filePath);
+		if (!navTree) {
+			return [];
+		}
 
 		const symbols: SymbolInformation[] = [];
 		this.collectSymbols(navTree, fragment, undefined, (symbol) => symbols.push(symbol));
 
 		const result: SymbolInformation[] = [];
 
-		// Add a "frontmatter" namespace for the frontmatter if we have a closed one
+		// Add a "Frontmatter" namespace for the frontmatter if we have a closed one
 		if (document.astroMeta.frontmatter.state === 'closed') {
 			result.push(
 				SymbolInformation.create(
@@ -34,13 +38,13 @@ export class DocumentSymbolsProviderImpl implements DocumentSymbolsProvider {
 			);
 		}
 
-		// Add a template namespace
+		// Add a "Template" namespace for everything under the frontmatter
 		result.push(
 			SymbolInformation.create(
 				'Template',
 				SymbolKind.Namespace,
 				Range.create(
-					document.positionAt(document.astroMeta.content.firstNonWhitespaceOffset ?? 0),
+					document.positionAt(document.astroMeta.frontmatter.endOffset ?? 0),
 					document.positionAt(document.getTextLength())
 				)
 			)
@@ -73,27 +77,33 @@ export class DocumentSymbolsProviderImpl implements DocumentSymbolsProvider {
 	}
 
 	private collectSymbols(
-		tree: NavigationTree,
+		item: NavigationTree,
 		fragment: SnapshotFragment,
 		container: string | undefined,
 		cb: (symbol: SymbolInformation) => void
 	) {
-		const start = tree.spans[0];
-		const end = tree.spans[tree.spans.length - 1];
-		if (start && end) {
-			cb(
-				SymbolInformation.create(
-					tree.text,
-					symbolKindFromString(tree.kind),
-					Range.create(fragment.positionAt(start.start), fragment.positionAt(end.start + end.length)),
-					fragment.getURL(),
-					container
-				)
+		for (const span of item.spans) {
+			const symbol = SymbolInformation.create(
+				item.text,
+				symbolKindFromString(item.kind),
+				Range.create(fragment.positionAt(span.start), fragment.positionAt(span.start + span.length)),
+				fragment.getURL(),
+				container
 			);
+
+			// TypeScript gives us kind modifiers as a string instead of an array
+			const kindModifiers = new Set(item.kindModifiers.split(/,|\s+/g));
+			if (kindModifiers.has(ScriptElementKindModifier.deprecatedModifier)) {
+				if (!symbol.tags) symbol.tags = [];
+				symbol.tags.push(SymbolTag.Deprecated);
+			}
+
+			cb(symbol);
 		}
-		if (tree.childItems) {
-			for (const child of tree.childItems) {
-				this.collectSymbols(child, fragment, tree.text, cb);
+
+		if (item.childItems) {
+			for (const child of item.childItems) {
+				this.collectSymbols(child, fragment, item.text, cb);
 			}
 		}
 	}
