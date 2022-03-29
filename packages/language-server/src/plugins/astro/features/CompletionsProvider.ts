@@ -15,12 +15,18 @@ import {
 } from 'vscode-languageserver';
 import ts from 'typescript';
 import { LanguageServiceManager as TypeScriptLanguageServiceManager } from '../../typescript/LanguageServiceManager';
+<<<<<<< HEAD
 import { isInComponentStartTag, isInsideFrontmatter } from '../../../core/documents/utils';
 import { isPossibleComponent } from '../../../utils';
 import { toVirtualAstroFilePath, toVirtualFilePath } from '../../typescript/utils';
 import { getLanguageService, Node } from 'vscode-html-languageservice';
 import { astroDirectives } from '../../html/features/astro-attributes';
 import { removeDataAttrCompletion } from '../../html/utils';
+=======
+import { isInsideFrontmatter } from '../../../core/documents/utils';
+import { isPossibleClientComponent, urlToPath } from '../../../utils';
+import { toVirtualAstroFilePath, toVirtualFilePath } from '../../typescript/utils';
+>>>>>>> acaeed2 (Add tests for the Astro plugin)
 
 export class CompletionsProviderImpl {
 	private readonly docManager: DocumentManager;

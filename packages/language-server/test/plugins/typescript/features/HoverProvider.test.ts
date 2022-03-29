@@ -2,12 +2,12 @@ import { expect } from 'chai';
 import { Hover, Position, Range } from 'vscode-languageserver-types';
 import { HoverProviderImpl } from '../../../../src/plugins/typescript/features/HoverProvider';
 import { LanguageServiceManager } from '../../../../src/plugins/typescript/LanguageServiceManager';
-import { createEnvironment } from '../utils';
+import { createEnvironment } from '../../../utils';
 
 describe('TypeScript Plugin#HoverProvider', () => {
 	function setup(filePath: string) {
-		const env = createEnvironment(filePath);
-		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.testDir], env.configManager);
+		const env = createEnvironment(filePath, 'typescript');
+		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager);
 		const provider = new HoverProviderImpl(languageServiceManager);
 
 		return {

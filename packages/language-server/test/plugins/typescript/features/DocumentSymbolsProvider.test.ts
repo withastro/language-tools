@@ -1,14 +1,13 @@
 import { expect } from 'chai';
 import { Range, SymbolInformation } from 'vscode-languageserver-types';
-import { createEnvironment } from '../utils';
+import { createEnvironment } from '../../../utils';
 import { DocumentSymbolsProviderImpl } from '../../../../src/plugins/typescript/features/DocumentSymbolsProvider';
 import { LanguageServiceManager } from '../../../../src/plugins/typescript/LanguageServiceManager';
 
 describe('TypeScript Plugin#DocumentSymbolsProvider', () => {
 	function setup(filePath: string) {
-		filePath = 'documentSymbols/' + filePath;
-		const env = createEnvironment(filePath);
-		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.testDir], env.configManager);
+		const env = createEnvironment(filePath, 'typescript', 'documentSymbols');
+		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager);
 		const provider = new DocumentSymbolsProviderImpl(languageServiceManager);
 
 		return {

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { createEnvironment } from './utils';
+import { createEnvironment } from '../../utils';
 import { TypeScriptPlugin } from '../../../src/plugins';
 import { Position } from 'vscode-languageserver-types';
 
@@ -8,8 +8,8 @@ import { Position } from 'vscode-languageserver-types';
 
 describe('TypeScript Plugin', () => {
 	function setup(filePath: string) {
-		const env = createEnvironment(filePath);
-		const plugin = new TypeScriptPlugin(env.docManager, env.configManager, [env.testDir]);
+		const env = createEnvironment(filePath, 'typescript');
+		const plugin = new TypeScriptPlugin(env.docManager, env.configManager, [env.fixturesDir]);
 
 		return {
 			...env,
