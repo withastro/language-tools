@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Range } from 'vscode-languageserver-types';
+import { Range, SymbolInformation } from 'vscode-languageserver-types';
 import { createEnvironment } from '../utils';
 import { DocumentSymbolsProviderImpl } from '../../../../src/plugins/typescript/features/DocumentSymbolsProvider';
 import { LanguageServiceManager } from '../../../../src/plugins/typescript/LanguageServiceManager';
@@ -22,7 +22,7 @@ describe('TypeScript Plugin#DocumentSymbolsProvider', () => {
 
 		const symbols = await provider.getDocumentSymbols(document);
 
-		expect(symbols).to.deep.equal([
+		expect(symbols).to.deep.equal(<SymbolInformation[]>[
 			{
 				kind: 3,
 				location: {
@@ -47,7 +47,7 @@ describe('TypeScript Plugin#DocumentSymbolsProvider', () => {
 
 		const symbols = await provider.getDocumentSymbols(document);
 
-		expect(symbols).to.deep.equal([
+		expect(symbols).to.deep.equal(<SymbolInformation[]>[
 			{
 				kind: 3,
 				location: {
@@ -91,7 +91,7 @@ describe('TypeScript Plugin#DocumentSymbolsProvider', () => {
 
 		const symbols = await provider.getDocumentSymbols(document);
 
-		expect(symbols).to.deep.equal([
+		expect(symbols).to.deep.equal(<SymbolInformation[]>[
 			{
 				kind: 3,
 				location: {

@@ -11,7 +11,7 @@ export function createEnvironment(filePath: string) {
 	const configManager = new ConfigManager();
 	const document = openDocument(filePath, docManager);
 
-	return { document, docManager, configManager, testDir };
+	return { document, docManager, configManager, testDir: pathToUrl(testDir) };
 }
 
 function openDocument(filePath: string, docManager: DocumentManager) {
