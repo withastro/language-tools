@@ -57,6 +57,13 @@ export class CSSPlugin implements Plugin {
 
 		const styleTag = this.getStyleTagForPosition(document, position);
 
+		// We technically can return results even for open tags, however, a lot of the info returned is not valid
+		// Since most people close their tags before working in them, It should be okay to only return stuff if closed
+		if (styleTag && !styleTag.closed) {
+			return null;
+		}
+
+		// If we don't have a style tag at this position, we might be in a style property instead, let's check
 		if (!styleTag) {
 			const attributeContext = getAttributeContextAtPosition(document, position);
 
@@ -114,7 +121,10 @@ export class CSSPlugin implements Plugin {
 
 		const styleTag = this.getStyleTagForPosition(document, position);
 
-		// If we don't have a style tag at this position, we might be in a style property instead, let's check
+		if (styleTag && !styleTag.closed) {
+			return null;
+		}
+
 		if (!styleTag) {
 			const attributeContext = getAttributeContextAtPosition(document, position);
 			if (!attributeContext) {
@@ -156,7 +166,7 @@ export class CSSPlugin implements Plugin {
 		const results = langService.doComplete(
 			cssDocument,
 			cssDocument.getGeneratedPosition(position),
-			cssDocument.stylesheet
+			cssDocument.stylesheet,
 		);
 
 		return CompletionList.create(

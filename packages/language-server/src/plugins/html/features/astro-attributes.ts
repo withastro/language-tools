@@ -55,6 +55,16 @@ export const astroAttributes = newHTMLDataProvider('astro-attributes', {
 						},
 					],
 				},
+				{
+					name: 'hoist',
+					description: 'Builds, optimizes, and bundles your script with the other JavaScript on the page',
+					references: [
+						{
+							name: 'Astro documentation',
+							url: 'https://docs.astro.build/en/core-concepts/astro-components/#using-hoisted-scripts',
+						},
+					],
+				},
 			],
 		},
 		{
