@@ -43,6 +43,10 @@ declare namespace astroHTML.JSX {
 		'define:vars'?: any;
 	}
 
+	interface StyleExclusiveAttributes {
+		global?: boolean;
+	}
+
 	type Element = HTMLElement;
 
 	//
@@ -545,7 +549,6 @@ declare namespace astroHTML.JSX {
 		rowspan?: number | undefined | null;
 		sandbox?: string | undefined | null;
 		scope?: string | undefined | null;
-		scoped?: boolean | undefined | null;
 		scrolling?: string | undefined | null;
 		seamless?: boolean | undefined | null;
 		selected?: boolean | undefined | null;
@@ -995,7 +998,7 @@ declare namespace astroHTML.JSX {
 		source: HTMLProps<HTMLSourceElement>;
 		span: HTMLProps<HTMLSpanElement>;
 		strong: HTMLProps<HTMLElement>;
-		style: HTMLProps<HTMLStyleElement> & AstroDefineVars;
+		style: HTMLProps<HTMLStyleElement> & AstroDefineVars & StyleExclusiveAttributes;
 		sub: HTMLProps<HTMLElement>;
 		summary: HTMLProps<HTMLElement>;
 		sup: HTMLProps<HTMLElement>;

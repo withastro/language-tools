@@ -58,7 +58,7 @@ export class CSSPlugin implements Plugin {
 		const styleTag = this.getStyleTagForPosition(document, position);
 
 		// We technically can return results even for open tags, however, a lot of the info returned is not valid
-		// Since most people close their tags before working in them, It should be okay to only return stuff if closed
+		// Since most people close their tags before working in them, it should be okay to only return stuff if closed
 		if (styleTag && !styleTag.closed) {
 			return null;
 		}
@@ -166,7 +166,7 @@ export class CSSPlugin implements Plugin {
 		const results = langService.doComplete(
 			cssDocument,
 			cssDocument.getGeneratedPosition(position),
-			cssDocument.stylesheet,
+			cssDocument.stylesheet
 		);
 
 		return CompletionList.create(
