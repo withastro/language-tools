@@ -7,7 +7,7 @@ export const classListAttribute = newHTMLDataProvider('class-list', {
 			name: 'class:list',
 			description: 'Utility to provide a list of class',
 		},
-	]
+	],
 });
 
 export const astroAttributes = newHTMLDataProvider('astro-attributes', {
@@ -83,7 +83,7 @@ export const astroAttributes = newHTMLDataProvider('astro-attributes', {
 				},
 				{
 					name: 'global',
-					description: 'Apply this style globally',
+					description: 'Opts-out of automatic CSS scoping, all contents will be available globally',
 					valueSet: 'v',
 					references: [
 						{
