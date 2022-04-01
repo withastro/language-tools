@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { createEnvironment } from '../../utils';
 import { TypeScriptPlugin } from '../../../src/plugins';
-import { Position } from 'vscode-languageserver-types';
+import { Position, Range } from 'vscode-languageserver-types';
 
 // This file only contain basic tests to ensure that the TypeScript plugin does in fact calls the proper methods
 // and returns something. For validity tests, please check the providers themselves in the 'features' folder
@@ -66,6 +66,38 @@ describe('TypeScript Plugin', () => {
 
 			expect(configManager.enabled(`typescript.hover.enabled`)).to.be.false;
 			expect(hoverInfo).to.be.null;
+		});
+	});
+
+	describe('provide semantic tokens', async () => {
+		it('return semantic tokens for full document', async () => {
+			const { plugin, document } = setup('semanticTokens/tokens.astro');
+
+			const semanticTokens = await plugin.getSemanticTokens(document);
+			expect(semanticTokens).to.not.be.null;
+		});
+
+		it('return semantic tokens for range', async () => {
+			const { plugin, document } = setup('semanticTokens/tokens.astro');
+
+			const semanticTokens = await plugin.getSemanticTokens(document, Range.create(0, 0, 7, 0));
+			expect(semanticTokens).to.not.be.null;
+		});
+
+		it('should not provide semantic tokens if feature is disabled', async () => {
+			const { plugin, document, configManager } = setup('semanticTokens/tokens.astro');
+
+			configManager.updateConfig(<any>{
+				typescript: {
+					semanticTokens: {
+						enabled: false,
+					},
+				},
+			});
+
+			const semanticTokens = await plugin.getSemanticTokens(document);
+			expect(configManager.enabled(`typescript.semanticTokens.enabled`)).to.be.false;
+			expect(semanticTokens).to.be.null;
 		});
 	});
 });
