@@ -71,21 +71,21 @@ describe('TypeScript Plugin', () => {
 
 	describe('provide semantic tokens', async () => {
 		it('return semantic tokens for full document', async () => {
-			const { plugin, document } = setup('semanticTokens/tokens.astro');
+			const { plugin, document } = setup('semanticTokens/frontmatter.astro');
 
 			const semanticTokens = await plugin.getSemanticTokens(document);
 			expect(semanticTokens).to.not.be.null;
 		});
 
 		it('return semantic tokens for range', async () => {
-			const { plugin, document } = setup('semanticTokens/tokens.astro');
+			const { plugin, document } = setup('semanticTokens/frontmatter.astro');
 
-			const semanticTokens = await plugin.getSemanticTokens(document, Range.create(0, 0, 7, 0));
+			const semanticTokens = await plugin.getSemanticTokens(document, Range.create(0, 0, 12, 0));
 			expect(semanticTokens).to.not.be.null;
 		});
 
 		it('should not provide semantic tokens if feature is disabled', async () => {
-			const { plugin, document, configManager } = setup('semanticTokens/tokens.astro');
+			const { plugin, document, configManager } = setup('semanticTokens/frontmatter.astro');
 
 			configManager.updateConfig(<any>{
 				typescript: {

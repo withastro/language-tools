@@ -41,37 +41,65 @@ describe('TypeScript Plugin#SemanticTokenProvider', () => {
 	}
 
 	it('provides semantic tokens', async () => {
-		const { provider, document } = setup('tokens.astro');
+		const { provider, document } = setup('frontmatter.astro');
 
 		const semanticTokens = await provider.getSemanticTokens(document);
 		const expectedTokens = buildTokens([
 			{
-				line: 2,
+				line: 1,
 				character: 7,
 				length: 'constant'.length,
 				type: TokenType.variable,
 				modifiers: [TokenModifier.declaration, TokenModifier.readonly],
 			},
 			{
-				line: 3,
+				line: 2,
 				character: 5,
 				length: 'variable'.length,
 				type: TokenType.variable,
 				modifiers: [TokenModifier.declaration],
 			},
 			{
-				line: 5,
+				line: 4,
 				character: 1,
 				length: 'console'.length,
 				type: TokenType.variable,
 				modifiers: [TokenModifier.defaultLibrary],
 			},
 			{
-				line: 5,
+				line: 4,
 				character: 9,
 				length: 'log'.length,
 				type: TokenType.method,
 				modifiers: [TokenModifier.defaultLibrary],
+			},
+			{
+				line: 6,
+				character: 11,
+				length: 'Props'.length,
+				type: TokenType.interface,
+				modifiers: [TokenModifier.declaration],
+			},
+			{
+				line: 7,
+				character: 2,
+				length: 'hello'.length,
+				type: TokenType.property,
+				modifiers: [TokenModifier.declaration],
+			},
+			{
+				line: 10,
+				character: 9,
+				length: 'hello'.length,
+				type: TokenType.variable,
+				modifiers: [TokenModifier.declaration, TokenModifier.readonly],
+			},
+			{
+				line: 10,
+				character: 34,
+				length: 'Props'.length,
+				type: TokenType.interface,
+				modifiers: [],
 			},
 		]);
 
