@@ -127,3 +127,45 @@ export function debounceThrottle<T extends (...args: any) => void>(fn: T, millis
 
 	return maybeCall as any;
 }
+
+export interface AstroVersion {
+	full: string;
+	major: number;
+	minor: number;
+	patch: number;
+	beta: number;
+	exist: boolean;
+}
+
+export function getUserAstroVersion(basePath: string): AstroVersion {
+	let version = '0.0.0';
+	let exist = true;
+
+	try {
+		const astroPackageJson = require.resolve('astro/package.json', { paths: [basePath] });
+		version = require(astroPackageJson).version;
+	} catch (e) {
+		exist = false;
+		console.error(e);
+	}
+
+	let [major, minor, patch] = version.split('.');
+	let beta = undefined;
+
+	if (patch.includes('-')) {
+		const patchParts = patch.split('-');
+		patch = patchParts[0];
+
+		const full: string = version.toString();
+		beta = full.split('.').pop();
+	}
+
+	return {
+		full: version,
+		major: Number(major),
+		minor: Number(minor),
+		patch: Number(patch),
+		beta: Number(beta),
+		exist,
+	};
+}
