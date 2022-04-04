@@ -55,17 +55,6 @@ export const astroAttributes = newHTMLDataProvider('astro-attributes', {
 						},
 					],
 				},
-				{
-					name: 'hoist',
-					description: 'Builds, optimizes, and bundles your script with the other JavaScript on the page',
-					valueSet: 'v',
-					references: [
-						{
-							name: 'Astro documentation',
-							url: 'https://docs.astro.build/en/core-concepts/astro-components/#using-hoisted-scripts',
-						},
-					],
-				},
 			],
 		},
 		{
@@ -78,17 +67,6 @@ export const astroAttributes = newHTMLDataProvider('astro-attributes', {
 						{
 							name: 'Astro documentation',
 							url: 'https://docs.astro.build/en/guides/styling/#variables-in-scripts--styles',
-						},
-					],
-				},
-				{
-					name: 'global',
-					description: 'Opts-out of automatic CSS scoping, all contents will be available globally',
-					valueSet: 'v',
-					references: [
-						{
-							name: 'Astro documentation',
-							url: 'https://docs.astro.build/en/guides/styling/#global-styles',
 						},
 					],
 				},
