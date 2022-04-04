@@ -81,20 +81,6 @@ declare namespace astroHTML.JSX {
 	type TransitionEventHandler<T extends EventTarget> = EventHandler<TransitionEvent, T>;
 	type MessageEventHandler<T extends EventTarget> = EventHandler<MessageEvent, T>;
 
-	// See CSS 3 CSS-wide keywords https://www.w3.org/TR/css3-values/#common-keywords
-	// See CSS 3 Explicit Defaulting https://www.w3.org/TR/css-cascade-3/#defaulting-keywords
-	// "all CSS properties can accept these values"
-	type CSSWideKeyword = 'initial' | 'inherit' | 'unset';
-
-	// See CSS 3 <percentage> type https://drafts.csswg.org/css-values-3/#percentages
-	type CSSPercentage = string;
-
-	// See CSS 3 <length> type https://drafts.csswg.org/css-values-3/#lengths
-	type CSSLength = number | string;
-
-	// This interface is not complete. Only properties accepting
-	// unit-less numbers are listed here (see CSSProperty.js in React)
-
 	interface DOMAttributes<T extends EventTarget> {
 		children?: Children;
 
