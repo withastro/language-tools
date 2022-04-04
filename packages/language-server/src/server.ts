@@ -39,14 +39,12 @@ export function startLanguageServer(connection: vscode.Connection) {
 
 			if (astroVersion.exist === false) {
 				connection.sendNotification(ShowMessageNotification.type, {
-					message: `Couldn't find Astro in workspace "${uri}". Please make sure it is installed and then restart the language server using the Restart Language Server command or restart your editor`,
-					type: MessageType.Error,
+					message: `Couldn't find Astro in workspace "${uri}". Experience might be degraded. For the best experience, please make sure Astro is installed and then restart the language server`,
+					type: MessageType.Warning,
 				});
-
-				return {};
 			}
 
-			if (astroVersion.major === 0 && astroVersion.minor < 24 && astroVersion.patch < 5) {
+			if (astroVersion.exist && astroVersion.major === 0 && astroVersion.minor < 24 && astroVersion.patch < 5) {
 				connection.sendNotification(ShowMessageNotification.type, {
 					message: `The version of Astro you're using (${astroVersion.full}) is not supported by this version of the Astro language server. Please upgrade Astro to any version higher than 0.23.4 or if using the VS Code extension, downgrade the extension to 0.8.10`,
 					type: MessageType.Error,
