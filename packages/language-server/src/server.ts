@@ -77,6 +77,7 @@ export function startLanguageServer(connection: vscode.Connection) {
 				foldingRangeProvider: true,
 				definitionProvider: true,
 				renameProvider: true,
+				codeActionProvider: true,
 				completionProvider: {
 					resolveProvider: true,
 					triggerCharacters: [
@@ -166,7 +167,12 @@ export function startLanguageServer(connection: vscode.Connection) {
 	connection.onHover((params: vscode.HoverParams) => pluginHost.doHover(params.textDocument, params.position));
 
 	connection.onDefinition((evt) => pluginHost.getDefinitions(evt.textDocument, evt.position));
+
 	connection.onFoldingRanges((evt) => pluginHost.getFoldingRanges(evt.textDocument));
+
+	connection.onCodeAction((evt, cancellationToken) =>
+		pluginHost.getCodeActions(evt.textDocument, evt.range, evt.context, cancellationToken)
+	);
 
 	connection.onCompletion(async (evt) => {
 		const promise = pluginHost.getCompletions(evt.textDocument, evt.position, evt.context);

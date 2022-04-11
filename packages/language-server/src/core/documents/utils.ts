@@ -28,7 +28,7 @@ export function* walk(node: Node): Generator<Node, void, unknown> {
  * @param source text content to extract tag from
  * @param tag the tag to extract
  */
-function extractTags(text: string, tag: 'script' | 'style' | 'template', html?: HTMLDocument): TagInformation[] {
+function extractTags(text: string, tag: 'script' | 'style' | 'Markdown', html?: HTMLDocument): TagInformation[] {
 	const rootNodes = html?.roots || parseHtml(text).roots;
 	const matchedNodes = rootNodes.filter((node) => node.tag === tag);
 
@@ -67,8 +67,18 @@ function extractTags(text: string, tag: 'script' | 'style' | 'template', html?: 
 	}
 }
 
-export function extractStyleTags(source: string, html?: HTMLDocument): TagInformation[] {
+export function extractStyleTags(source: string, html: HTMLDocument): TagInformation[] {
 	const styles = extractTags(source, 'style', html);
+
+	if (!styles.length) {
+		return [];
+	}
+
+	return styles;
+}
+
+export function extractMarkdownTag(source: string, html?: HTMLDocument): TagInformation[] {
+	const styles = extractTags(source, 'Markdown', html);
 
 	if (!styles.length) {
 		return [];

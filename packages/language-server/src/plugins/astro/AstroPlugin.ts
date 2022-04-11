@@ -1,7 +1,11 @@
 import ts from 'typescript';
 import {
+	CancellationToken,
+	CodeAction,
+	CodeActionContext,
 	CompletionContext,
 	DefinitionLink,
+	Diagnostic,
 	FoldingRange,
 	FoldingRangeKind,
 	LocationLink,
@@ -16,6 +20,7 @@ import { LanguageServiceManager } from '../typescript/LanguageServiceManager';
 import { ensureRealFilePath, toVirtualAstroFilePath } from '../typescript/utils';
 import { CompletionsProviderImpl } from './features/CompletionsProvider';
 import { Node } from 'vscode-html-languageservice';
+import { MarkdownLintSupport } from './features/MarkdownLintSupport';
 
 export class AstroPlugin implements Plugin {
 	__name = 'astro';
@@ -24,12 +29,14 @@ export class AstroPlugin implements Plugin {
 	private readonly languageServiceManager: LanguageServiceManager;
 
 	private readonly completionProvider: CompletionsProviderImpl;
+	private readonly markdownlintProvider: MarkdownLintSupport;
 
 	constructor(docManager: DocumentManager, configManager: ConfigManager, workspaceUris: string[]) {
 		this.configManager = configManager;
 		this.languageServiceManager = new LanguageServiceManager(docManager, workspaceUris, configManager);
 
 		this.completionProvider = new CompletionsProviderImpl(docManager, this.languageServiceManager);
+		this.markdownlintProvider = new MarkdownLintSupport();
 	}
 
 	async getCompletions(
@@ -39,6 +46,14 @@ export class AstroPlugin implements Plugin {
 	): Promise<AppCompletionList | null> {
 		const completions = this.completionProvider.getCompletions(document, position, completionContext);
 		return completions;
+	}
+
+	async getDiagnostics(document: AstroDocument, cancellationToken?: CancellationToken): Promise<Diagnostic[]> {
+		return this.markdownlintProvider.getDiagnostics(document);
+	}
+
+	async getCodeActions(document: AstroDocument, range: Range, context: CodeActionContext): Promise<CodeAction[]> {
+		return this.markdownlintProvider.getCodeActions(document, range, context);
 	}
 
 	getFoldingRanges(document: AstroDocument): FoldingRange[] {
