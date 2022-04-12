@@ -4,3 +4,5 @@ tsconfig.json
 CONTRIBUTING.md
 test/
 scripts/
+.turbo
+.vscode-test

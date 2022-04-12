@@ -14,8 +14,10 @@
   "publisher": "astro-build",
   "scripts": {
     "vscode:prepublish": "yarn build",
-    "build": "astro-scripts build \"src/**/*.ts\"",
-    "dev": "astro-scripts dev \"src/**/*.ts\"",
+    "build": "yarn run build:node & yarn run build:browser",
+    "dev": "yarn run build:node --watch & yarn run build:browser --watch",
+    "build:node": "node ./scripts/build-node.js",
+    "build:browser": "node ./scripts/build-browser.js",
     "test": "node ./test/runTest.js"
   },
   "engines": {
@@ -34,10 +36,11 @@
     "@types/vscode": "^1.52.0",
     "@vscode/test-electron": "^2.1.3",
     "astro-scripts": "0.0.1",
-    "glob": "^7.2.0"
+    "glob": "^7.2.0",
+    "path-browserify": "^1.0.1"
   },
   "main": "./dist/node/client.js",
-  "browser": "./dist/browser.js",
+  "browser": "./dist/browser/client.js",
   "files": [
     "dist/",
     "languages/",

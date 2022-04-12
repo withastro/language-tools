@@ -1,3 +1,5 @@
+const { watchMode } = require('./utils.js');
+
 require('esbuild')
 	.build({
 		entryPoints: {
@@ -12,14 +14,19 @@ require('esbuild')
 		platform: 'node',
 		tsconfig: './tsconfig.json',
 		minify: true,
-		watch: process.argv.includes('--watch'),
+		watch: process.argv.includes('--watch') ? watchMode : false,
 		plugins: [
 			{
 				name: 'umd2esm',
 				setup(build) {
 					build.onResolve({ filter: /^(vscode-.*|estree-walker|jsonc-parse)/ }, (args) => {
-						const pathUmdMay = require.resolve(args.path, { paths: [args.resolveDir] });
-						const pathEsm = pathUmdMay.replace('/umd/', '/esm/');
+						const pathUmd = require.resolve(args.path, { paths: [args.resolveDir] });
+						const pathEsm = pathUmd.replace('/umd/', '/esm/');
+						return { path: pathEsm };
+					});
+					build.onResolve({ filter: /^@vscode\/emmet-helper$/ }, (args) => {
+						const pathCjsMay = require.resolve(args.path, { paths: [args.resolveDir] });
+						const pathEsm = pathCjsMay.replace('/cjs/', '/esm/');
 						return { path: pathEsm };
 					});
 				},

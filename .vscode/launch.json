@@ -29,6 +29,14 @@
         "--extensionDevelopmentPath=${workspaceRoot}/packages/vscode",
         "--extensionTestsPath=${workspaceRoot}/packages/vscode/test/suite/index.js"
       ]
+    },
+    {
+      "name": "Launch Web Extension",
+      "type": "pwa-extensionHost",
+      "debugWebWorkerHost": true,
+      "request": "launch",
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}/packages/vscode", "--extensionDevelopmentKind=web"],
+      "outFiles": ["${workspaceFolder}/packages/vscode/dist/browser/*.js"]
     }
   ],
   "compounds": [
