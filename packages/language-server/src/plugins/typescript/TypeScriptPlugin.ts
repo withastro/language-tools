@@ -129,22 +129,29 @@ export class TypeScriptPlugin implements Plugin {
 	async getCompletions(
 		document: AstroDocument,
 		position: Position,
-		completionContext?: CompletionContext
+		completionContext?: CompletionContext,
+		cancellationToken?: CancellationToken
 	): Promise<AppCompletionList<CompletionEntryWithIdentifer> | null> {
 		if (!this.featureEnabled('completions')) {
 			return null;
 		}
 
-		const completions = await this.completionProvider.getCompletions(document, position, completionContext);
+		const completions = await this.completionProvider.getCompletions(
+			document,
+			position,
+			completionContext,
+			cancellationToken
+		);
 
 		return completions;
 	}
 
 	async resolveCompletion(
 		document: AstroDocument,
-		completionItem: AppCompletionItem<CompletionEntryWithIdentifer>
+		completionItem: AppCompletionItem<CompletionEntryWithIdentifer>,
+		cancellationToken?: CancellationToken
 	): Promise<AppCompletionItem<CompletionEntryWithIdentifer>> {
-		return this.completionProvider.resolveCompletion(document, completionItem);
+		return this.completionProvider.resolveCompletion(document, completionItem, cancellationToken);
 	}
 
 	async getDefinitions(document: AstroDocument, position: Position): Promise<DefinitionLink[]> {

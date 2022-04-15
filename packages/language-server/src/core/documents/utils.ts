@@ -101,6 +101,16 @@ function parseAttributes(rawAttrs: Record<string, string | null> | undefined): R
 }
 
 /**
+ * Returns the node if offset is inside a HTML start tag
+ */
+export function getNodeIfIsInHTMLStartTag(html: HTMLDocument, offset: number): Node | undefined {
+	const node = html.findNodeAt(offset);
+	if (!!node.tag && node.tag[0] === node.tag[0].toLowerCase() && (!node.startTagEnd || offset < node.startTagEnd)) {
+		return node;
+	}
+}
+
+/**
  * Return if a Node is a Component
  */
 export function isComponentTag(node: Node) {
@@ -195,6 +205,30 @@ export function offsetAt(position: Position, text: string, lineOffsets = getLine
 	const nextLineOffset = position.line + 1 < lineOffsets.length ? lineOffsets[position.line + 1] : text.length;
 
 	return clamp(nextLineOffset, lineOffset, lineOffset + position.character);
+}
+
+/**
+ * Gets word range at position.
+ * Delimiter is by default a whitespace, but can be adjusted.
+ */
+export function getWordRangeAt(
+	str: string,
+	pos: number,
+	delimiterRegex = { left: /\S+$/, right: /\s/ }
+): { start: number; end: number } {
+	let start = str.slice(0, pos).search(delimiterRegex.left);
+	if (start < 0) {
+		start = pos;
+	}
+
+	let end = str.slice(pos).search(delimiterRegex.right);
+	if (end < 0) {
+		end = str.length;
+	} else {
+		end = end + pos;
+	}
+
+	return { start, end };
 }
 
 export function getLineOffsets(text: string) {
