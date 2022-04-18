@@ -214,30 +214,6 @@ export function offsetAt(position: Position, text: string, lineOffsets = getLine
 	return clamp(nextLineOffset, lineOffset, lineOffset + position.character);
 }
 
-/**
- * Gets word range at position.
- * Delimiter is by default a whitespace, but can be adjusted.
- */
-export function getWordRangeAt(
-	str: string,
-	pos: number,
-	delimiterRegex = { left: /\S+$/, right: /\s/ }
-): { start: number; end: number } {
-	let start = str.slice(0, pos).search(delimiterRegex.left);
-	if (start < 0) {
-		start = pos;
-	}
-
-	let end = str.slice(pos).search(delimiterRegex.right);
-	if (end < 0) {
-		end = str.length;
-	} else {
-		end = end + pos;
-	}
-
-	return { start, end };
-}
-
 export function getLineOffsets(text: string) {
 	const lineOffsets = [];
 	let isLineStart = true;

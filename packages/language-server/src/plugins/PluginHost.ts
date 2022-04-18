@@ -20,8 +20,6 @@ import {
 	WorkspaceEdit,
 	SymbolInformation,
 	SemanticTokens,
-	CodeActionContext,
-	CodeAction,
 } from 'vscode-languageserver';
 import type { AppCompletionItem, Plugin, LSProvider } from './interfaces';
 import { flatten } from 'lodash';
