@@ -54,9 +54,7 @@ describe('TypeScript Plugin#CompletionsProvider', () => {
 		const item = completions?.items.find((completion) => completion.label === 'Component');
 		const { additionalTextEdits, detail } = await provider.resolveCompletion(document, item!);
 
-		expect(detail).to.equal(
-			'Auto import from ./imports/component.astro\nfunction Component(_props: Record<string, any>): any'
-		);
+		expect(detail).to.equal('./imports/component.astro');
 		expect(additionalTextEdits[0].newText).to.equal(
 			`---${newLine}import Component from './imports/component.astro'${newLine}---${newLine}${newLine}`
 		);
@@ -70,9 +68,7 @@ describe('TypeScript Plugin#CompletionsProvider', () => {
 
 		const { additionalTextEdits, detail } = await provider.resolveCompletion(document, item!);
 
-		expect(detail).to.equal(
-			'Auto import from ./imports/component.astro\nfunction Component(_props: Record<string, any>): any'
-		);
+		expect(detail).to.equal('./imports/component.astro');
 		expect(additionalTextEdits[0].newText).to.equal(
 			`${newLine}import Component from './imports/component.astro';${newLine}`
 		);
@@ -115,6 +111,9 @@ describe('TypeScript Plugin#CompletionsProvider', () => {
 			insertTextFormat: 2,
 			kind: CompletionItemKind.Function,
 			label: 'MySuperFunction',
+			labelDetails: {
+				description: './imports/definitions',
+			},
 			preselect: undefined,
 			sortText: '11',
 			textEdit: {
