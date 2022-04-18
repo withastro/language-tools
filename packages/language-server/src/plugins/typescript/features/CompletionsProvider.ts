@@ -1,6 +1,5 @@
 import {
 	CompletionContext,
-	CompletionItem,
 	Position,
 	TextDocumentIdentifier,
 	MarkupContent,
@@ -8,12 +7,15 @@ import {
 	TextEdit,
 	Range,
 	CancellationToken,
+	CompletionItemTag,
+	InsertTextFormat,
 } from 'vscode-languageserver';
+import { CompletionItem, CompletionItemKind } from 'vscode-languageserver-protocol';
 import type { LanguageServiceManager } from '../LanguageServiceManager';
-import { getWordRangeAt, isInsideExpression, isInsideFrontmatter } from '../../../core/documents/utils';
+import { isComponentTag, isInsideExpression, isInsideFrontmatter } from '../../../core/documents/utils';
 import { AstroDocument, mapRangeToOriginal } from '../../../core/documents';
-import ts from 'typescript';
-import { CompletionList, MarkupKind } from 'vscode-languageserver';
+import ts, { ScriptElementKindModifier } from 'typescript';
+import { CompletionList } from 'vscode-languageserver';
 import { AppCompletionItem, AppCompletionList, CompletionsProvider } from '../../interfaces';
 import {
 	scriptElementKindToCompletionItemKind,
@@ -26,6 +28,8 @@ import {
 import { AstroSnapshotFragment, SnapshotFragment } from '../snapshots/DocumentSnapshot';
 import { getRegExpMatches, isNotNullOrUndefined } from '../../../utils';
 import { flatten } from 'lodash';
+import { getMarkdownDocumentation } from '../previewer';
+import { isPartOfImportStatement } from './utils';
 
 const completionOptions: ts.GetCompletionsAtPositionOptions = {
 	importModuleSpecifierPreference: 'relative',
@@ -33,13 +37,10 @@ const completionOptions: ts.GetCompletionsAtPositionOptions = {
 	quotePreference: 'single',
 	includeCompletionsForModuleExports: true,
 	includeCompletionsForImportStatements: true,
-	allowIncompleteCompletions: true,
 	includeCompletionsWithInsertText: true,
+	allowIncompleteCompletions: true,
+	includeCompletionsWithSnippetText: true,
 };
-
-export interface CompletionEntryWithIdentifer extends ts.CompletionEntry, TextDocumentIdentifier {
-	position: Position;
-}
 
 /**
  * The language service throws an error if the character is not a valid trigger character.
@@ -48,11 +49,23 @@ export interface CompletionEntryWithIdentifer extends ts.CompletionEntry, TextDo
  */
 type validTriggerCharacter = '.' | '"' | "'" | '`' | '/' | '@' | '<' | '#';
 
+type LastCompletion = {
+	key: string;
+	position: Position;
+	completionList: AppCompletionList<CompletionItemData> | null;
+};
+
 // `import {...} from '..'` or `import ... from '..'`
 // Note: Does not take into account if import is within a comment.
 const scriptImportRegex = /\bimport\s+{([^}]*?)}\s+?from\s+['"`].+?['"`]|\bimport\s+(\w+?)\s+from\s+['"`].+?['"`]/g;
 
-export class CompletionsProviderImpl implements CompletionsProvider<CompletionEntryWithIdentifer> {
+export interface CompletionItemData extends TextDocumentIdentifier {
+	filePath: string;
+	offset: number;
+	originalItem: ts.CompletionEntry;
+}
+
+export class CompletionsProviderImpl implements CompletionsProvider<CompletionItemData> {
 	constructor(private languageServiceManager: LanguageServiceManager) {}
 
 	private readonly validTriggerCharacters = ['.', '"', "'", '`', '/', '@', '<', '#'] as const;
@@ -61,23 +74,14 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionEn
 		return this.validTriggerCharacters.includes(character as validTriggerCharacter);
 	}
 
+	private lastCompletion?: LastCompletion;
+
 	async getCompletions(
 		document: AstroDocument,
 		position: Position,
 		completionContext?: CompletionContext,
 		cancellationToken?: CancellationToken
-	): Promise<AppCompletionList<CompletionEntryWithIdentifer> | null> {
-		// TODO: Add support for script tags
-		const html = document.html;
-		const offset = document.offsetAt(position);
-		const node = html.findNodeAt(offset);
-		if (node.tag === 'script') {
-			return null;
-		}
-
-		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
-
+	): Promise<AppCompletionList<CompletionItemData> | null> {
 		const triggerCharacter = completionContext?.triggerCharacter;
 		const triggerKind = completionContext?.triggerKind;
 
@@ -88,72 +92,111 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionEn
 			return null;
 		}
 
-		const fragment = await tsDoc.createFragment();
+		if (this.canReuseLastCompletion(this.lastCompletion, triggerKind, triggerCharacter, document, position)) {
+			this.lastCompletion.position = position;
+			return this.lastCompletion.completionList;
+		} else {
+			this.lastCompletion = undefined;
+		}
+
+		const html = document.html;
+		const offset = document.offsetAt(position);
+		const node = html.findNodeAt(offset);
+
+		// TODO: Add support for script tags
+		if (node.tag === 'script') {
+			return null;
+		}
+
 		const isCompletionInsideFrontmatter = isInsideFrontmatter(document.getText(), offset);
+		const isCompletionInsideExpression = isInsideExpression(document.getText(), node.start, offset);
+
+		// PERF: Getting TS completions is fairly slow and I am currently not sure how to speed it up
+		// As such, we'll try to avoid getting them when unneeded, such as when we're doing HTML stuff
 
 		// When at the root of the document TypeScript offer all kinds of completions, because it doesn't know yet that
-		// it's JSX and not JS. Not only do we don't care about those completions, this result in a pretty big performance hit.
-		// As such, people who are using Emmet to write their template suffer from a very degraded experience from what
-		// they're used to in HTML files (which is instant completions). So let's disable ourselves when we're at the root
-		if (!isCompletionInsideFrontmatter && !node.parent && !isInsideExpression(document.getText(), node.start, offset)) {
+		// it's JSX and not JS. As such, people who are using Emmet to write their template suffer from a very degraded experience
+		// from what they're used to in HTML files (which is instant completions). So let's disable ourselves when we're at the root
+		if (!isCompletionInsideFrontmatter && !node.parent && !isCompletionInsideExpression) {
 			return null;
 		}
 
-		const wordRange = getWordRangeAt(document.getText(), offset, {
-			left: /[^\s.]+$/,
-			right: /[^\w$:]/,
+		// If the user just typed `<` with nothing else, let's disable ourselves until we're more sure if the user wants TS completions
+		if (!isCompletionInsideFrontmatter && node.parent && node.tag === undefined && !isCompletionInsideExpression) {
+			return null;
+		}
+
+		// If the current node is not a component (aka, it doesn't start with a caps), let's disable ourselves as the user
+		// is most likely looking for HTML completions
+		if (!isCompletionInsideFrontmatter && !isComponentTag(node) && !isCompletionInsideExpression) {
+			return null;
+		}
+
+		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
+		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
+
+		const completions = lang.getCompletionsAtPosition(filePath, offset, {
+			...completionOptions,
+			triggerCharacter: validTriggerCharacter,
 		});
-		const wordRangeStartPosition = document.positionAt(wordRange.start);
 
-		const existingImports = this.getExistingImports(document);
-		const entries =
-			lang.getCompletionsAtPosition(filePath, offset, { ...completionOptions, triggerCharacter: validTriggerCharacter })
-				?.entries || [];
-
-		if (entries.length === 0) {
+		if (completions === undefined || completions.entries.length === 0) {
 			return null;
 		}
 
-		const completionItems = entries
+		const wordRange = completions.optionalReplacementSpan
+			? Range.create(
+					document.positionAt(completions.optionalReplacementSpan.start),
+					document.positionAt(completions.optionalReplacementSpan.start + completions.optionalReplacementSpan.length)
+			  )
+			: undefined;
+		const wordRangeStartPosition = wordRange?.start;
+
+		const fragment = await tsDoc.createFragment();
+		const existingImports = this.getExistingImports(document);
+		const completionItems = completions.entries
+			.filter(this.isValidCompletion)
 			.map((entry: ts.CompletionEntry) =>
-				this.toCompletionItem(fragment, entry, document.uri, position, isCompletionInsideFrontmatter, existingImports)
+				this.toCompletionItem(fragment, entry, filePath, offset, isCompletionInsideFrontmatter, existingImports)
 			)
 			.filter(isNotNullOrUndefined)
-			.map((entry) => this.fixTextEditRange(wordRangeStartPosition, entry));
+			.map((comp) => this.fixTextEditRange(wordRangeStartPosition, comp));
 
-		return CompletionList.create(completionItems, true);
+		const completionList = CompletionList.create(completionItems, true);
+		this.lastCompletion = { key: document.getFilePath() || '', position, completionList };
+
+		return completionList;
 	}
 
 	async resolveCompletion(
 		document: AstroDocument,
-		completionItem: AppCompletionItem<CompletionEntryWithIdentifer>,
+		item: AppCompletionItem<CompletionItemData>,
 		cancellationToken?: CancellationToken
-	): Promise<AppCompletionItem<CompletionEntryWithIdentifer>> {
-		const { data: comp } = completionItem;
+	): Promise<AppCompletionItem<CompletionItemData>> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
 
-		let filePath = toVirtualAstroFilePath(tsDoc.filePath);
+		const data: CompletionItemData | undefined = item.data as any;
 
-		if (!comp || !filePath || cancellationToken?.isCancellationRequested) {
-			return completionItem;
+		if (!data || !data.filePath || cancellationToken?.isCancellationRequested) {
+			return item;
 		}
 
 		const fragment = await tsDoc.createFragment();
 		const detail = lang.getCompletionEntryDetails(
-			filePath, // fileName
-			fragment.offsetAt(comp.position), // position
-			comp.name, // entryName
+			data.filePath, // fileName
+			data.offset, // position
+			data.originalItem.name, // entryName
 			{}, // formatOptions
-			comp.source, // source
+			data.originalItem.source, // source
 			completionOptions, // preferences
-			comp.data // data
+			data.originalItem.data // data
 		);
 
 		if (detail) {
 			const { detail: itemDetail, documentation: itemDocumentation } = this.getCompletionDocument(detail);
 
-			completionItem.detail = itemDetail;
-			completionItem.documentation = itemDocumentation;
+			item.detail = itemDetail;
+			item.documentation = itemDocumentation;
 		}
 
 		const actions = detail?.codeActions;
@@ -171,86 +214,141 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionEn
 				}
 			}
 
-			completionItem.additionalTextEdits = (completionItem.additionalTextEdits ?? []).concat(edit);
+			item.additionalTextEdits = (item.additionalTextEdits ?? []).concat(edit);
 		}
 
-		return completionItem;
+		return item;
 	}
 
 	private toCompletionItem(
 		fragment: SnapshotFragment,
 		comp: ts.CompletionEntry,
-		uri: string,
-		position: Position,
+		filePath: string,
+		offset: number,
 		insideFrontmatter: boolean,
 		existingImports: Set<string>
-	): AppCompletionItem<CompletionEntryWithIdentifer> | null {
-		const completionLabelAndInsert = this.getCompletionLabelAndInsert(comp);
-		if (!completionLabelAndInsert) {
-			return null;
-		}
+	): AppCompletionItem<CompletionItemData> | null {
+		let item = CompletionItem.create(comp.name);
 
-		const { label, insertText, isAstroComponent, replacementSpan } = completionLabelAndInsert;
+		const isAstroComponent = this.isAstroComponentImport(comp.name);
+		const isImport = comp.insertText?.includes('import');
 
-		const isImport = insertText?.includes('import');
-
+		// Avoid showing completions for using components as functions
 		if (isAstroComponent && !isImport && insideFrontmatter) {
 			return null;
 		}
 
+		if (isAstroComponent) {
+			item.label = removeAstroComponentSuffix(comp.name);
+
+			// Set component imports as file completion, that way we get cool icons
+			item.kind = CompletionItemKind.File;
+			item.detail = comp.data?.moduleSpecifier;
+		} else {
+			item.kind = scriptElementKindToCompletionItemKind(comp.kind);
+		}
+
 		// TS may suggest another component even if there already exists an import with the same.
 		// This happens because internally, components get suffixed with __AstroComponent_
-		if (isAstroComponent && existingImports.has(label)) {
+		if (isAstroComponent && existingImports.has(item.label)) {
 			return null;
 		}
 
-		const textEdit = replacementSpan
-			? TextEdit.replace(convertRange(fragment, replacementSpan), insertText ?? label)
-			: undefined;
+		if (comp.kindModifiers) {
+			const kindModifiers = new Set(comp.kindModifiers.split(/,|\s+/g));
+
+			if (kindModifiers.has(ScriptElementKindModifier.deprecatedModifier)) {
+				item.tags = [CompletionItemTag.Deprecated];
+			}
+		}
+
+		// Label details are currently unsupported, however, they'll be supported in the next version of LSP
+		if (comp.sourceDisplay) {
+			(item as any).labelDetails = { description: ts.displayPartsToString(comp.sourceDisplay) };
+		}
+
+		item.commitCharacters = getCommitCharactersForScriptElement(comp.kind);
+		item.sortText = comp.sortText;
+		item.preselect = comp.isRecommended;
+
+		if (comp.replacementSpan) {
+			item.insertText = comp.insertText ? removeAstroComponentSuffix(comp.insertText) : undefined;
+			item.insertTextFormat = comp.isSnippet ? InsertTextFormat.Snippet : InsertTextFormat.PlainText;
+			item.textEdit = comp.replacementSpan
+				? TextEdit.replace(convertRange(fragment, comp.replacementSpan), item.insertText ?? item.label)
+				: undefined;
+		}
 
 		return {
-			label,
-			insertText,
-			kind: scriptElementKindToCompletionItemKind(comp.kind),
-			commitCharacters: getCommitCharactersForScriptElement(comp.kind),
-			sortText: comp.sortText,
-			preselect: comp.isRecommended,
-			textEdit,
-			// pass essential data for resolving completion
+			...item,
 			data: {
-				...comp,
-				uri,
-				position,
+				uri: fragment.getURL(),
+				filePath,
+				offset,
+				originalItem: comp,
 			},
 		};
 	}
 
-	private getCompletionLabelAndInsert(comp: ts.CompletionEntry) {
-		let { name, insertText } = comp;
-		const isAstroComponent = this.isAstroComponentImport(name);
-
-		if (isAstroComponent) {
-			name = removeAstroComponentSuffix(name);
+	private isValidCompletion(completion: ts.CompletionEntry): boolean {
+		// Remove completion for default exported function
+		if (completion.name === 'default' && completion.kindModifiers == ScriptElementKindModifier.exportedModifier) {
+			return false;
 		}
 
-		if (comp.replacementSpan) {
-			return {
-				label: name,
-				isAstroComponent,
-				insertText: insertText ? removeAstroComponentSuffix(insertText) : undefined,
-				replacementSpan: comp.replacementSpan,
-			};
+		return true;
+	}
+
+	codeActionChangeToTextEdit(document: AstroDocument, fragment: AstroSnapshotFragment, change: ts.TextChange) {
+		change.newText = removeAstroComponentSuffix(change.newText);
+
+		// If we don't have a frontmatter already, create one with the import
+		const frontmatterState = document.astroMeta.frontmatter.state;
+		if (frontmatterState === null) {
+			return TextEdit.replace(
+				Range.create(Position.create(0, 0), Position.create(0, 0)),
+				`---${ts.sys.newLine}${change.newText}---${ts.sys.newLine}${ts.sys.newLine}`
+			);
 		}
+
+		const { span } = change;
+		let range: Range;
+		const virtualRange = convertRange(fragment, span);
+
+		range = mapRangeToOriginal(fragment, virtualRange);
+		range = ensureFrontmatterInsert(range, document);
+
+		return TextEdit.replace(range, change.newText);
+	}
+
+	private getCompletionDocument(compDetail: ts.CompletionEntryDetails) {
+		const { sourceDisplay, documentation: tsDocumentation, displayParts } = compDetail;
+		let detail: string = removeAstroComponentSuffix(ts.displayPartsToString(displayParts));
+
+		if (sourceDisplay) {
+			const importPath = ts.displayPartsToString(sourceDisplay);
+			detail = importPath;
+		}
+
+		const documentation: MarkupContent = {
+			kind: 'markdown',
+			value: getMarkdownDocumentation(tsDocumentation, compDetail.tags),
+		};
 
 		return {
-			label: name,
-			isAstroComponent,
+			documentation,
+			detail,
 		};
 	}
 
-	private fixTextEditRange(wordRangePosition: Position, completionItem: CompletionItem) {
+	/**
+	 * If the textEdit is out of the word range of the triggered position
+	 * vscode would refuse to show the completions
+	 * split those edits into additionalTextEdit to fix it
+	 */
+	private fixTextEditRange(wordRangePosition: Position | undefined, completionItem: CompletionItem) {
 		const { textEdit } = completionItem;
-		if (!textEdit || !TextEdit.is(textEdit)) {
+		if (!textEdit || !TextEdit.is(textEdit) || !wordRangePosition) {
 			return completionItem;
 		}
 
@@ -286,45 +384,23 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionEn
 		return completionItem;
 	}
 
-	codeActionChangeToTextEdit(document: AstroDocument, fragment: AstroSnapshotFragment, change: ts.TextChange) {
-		change.newText = removeAstroComponentSuffix(change.newText);
-
-		// If we don't have a frontmatter already, create one with the import
-		const frontmatterState = document.astroMeta.frontmatter.state;
-		if (frontmatterState === null) {
-			return TextEdit.replace(
-				Range.create(Position.create(0, 0), Position.create(0, 0)),
-				`---${ts.sys.newLine}${change.newText}---${ts.sys.newLine}${ts.sys.newLine}`
-			);
-		}
-
-		const { span } = change;
-		let range: Range;
-		const virtualRange = convertRange(fragment, span);
-
-		range = mapRangeToOriginal(fragment, virtualRange);
-		range = ensureFrontmatterInsert(range, document);
-
-		return TextEdit.replace(range, change.newText);
-	}
-
-	private getCompletionDocument(compDetail: ts.CompletionEntryDetails) {
-		const { sourceDisplay, documentation: tsDocumentation, displayParts } = compDetail;
-		let detail: string = removeAstroComponentSuffix(ts.displayPartsToString(displayParts));
-
-		if (sourceDisplay) {
-			const importPath = ts.displayPartsToString(sourceDisplay);
-			detail = `Auto import from ${importPath}\n${detail}`;
-		}
-
-		const documentation: MarkupContent | undefined = tsDocumentation
-			? { value: tsDocumentation.join('\n'), kind: MarkupKind.Markdown }
-			: undefined;
-
-		return {
-			documentation,
-			detail,
-		};
+	private canReuseLastCompletion(
+		lastCompletion: LastCompletion | undefined,
+		triggerKind: number | undefined,
+		triggerCharacter: string | undefined,
+		document: AstroDocument,
+		position: Position
+	): lastCompletion is LastCompletion {
+		return (
+			!!lastCompletion &&
+			lastCompletion.key === document.getFilePath() &&
+			lastCompletion.position.line === position.line &&
+			Math.abs(lastCompletion.position.character - position.character) < 2 &&
+			(triggerKind === CompletionTriggerKind.TriggerForIncompleteCompletions ||
+				// Special case: `.` is a trigger character, but inside import path completions
+				// it shouldn't trigger another completion because we can reuse the old one
+				(triggerCharacter === '.' && isPartOfImportStatement(document.getText(), position)))
+		);
 	}
 
 	private getExistingImports(document: AstroDocument) {

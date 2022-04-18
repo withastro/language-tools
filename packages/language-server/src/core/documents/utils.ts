@@ -100,6 +100,13 @@ function parseAttributes(rawAttrs: Record<string, string | null> | undefined): R
 	}
 }
 
+export function getLineAtPosition(position: Position, text: string) {
+	return text.substring(
+		offsetAt({ line: position.line, character: 0 }, text),
+		offsetAt({ line: position.line, character: Number.MAX_VALUE }, text)
+	);
+}
+
 /**
  * Returns the node if offset is inside a HTML start tag
  */

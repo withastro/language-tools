@@ -21,7 +21,7 @@ import { ConfigManager, LSTypescriptConfig } from '../../core/config';
 import { AstroDocument, DocumentManager } from '../../core/documents';
 import { isNotNullOrUndefined, pathToUrl } from '../../utils';
 import { AppCompletionItem, AppCompletionList, OnWatchFileChangesParam, Plugin } from '../interfaces';
-import { CompletionEntryWithIdentifer, CompletionsProviderImpl } from './features/CompletionsProvider';
+import { CompletionItemData, CompletionsProviderImpl } from './features/CompletionsProvider';
 import { DiagnosticsProviderImpl } from './features/DiagnosticsProvider';
 import { HoverProviderImpl } from './features/HoverProvider';
 import { SignatureHelpProviderImpl } from './features/SignatureHelpProvider';
@@ -131,7 +131,7 @@ export class TypeScriptPlugin implements Plugin {
 		position: Position,
 		completionContext?: CompletionContext,
 		cancellationToken?: CancellationToken
-	): Promise<AppCompletionList<CompletionEntryWithIdentifer> | null> {
+	): Promise<AppCompletionList<CompletionItemData> | null> {
 		if (!this.featureEnabled('completions')) {
 			return null;
 		}
@@ -148,9 +148,9 @@ export class TypeScriptPlugin implements Plugin {
 
 	async resolveCompletion(
 		document: AstroDocument,
-		completionItem: AppCompletionItem<CompletionEntryWithIdentifer>,
+		completionItem: AppCompletionItem<CompletionItemData>,
 		cancellationToken?: CancellationToken
-	): Promise<AppCompletionItem<CompletionEntryWithIdentifer>> {
+	): Promise<AppCompletionItem<CompletionItemData>> {
 		return this.completionProvider.resolveCompletion(document, completionItem, cancellationToken);
 	}
 

@@ -111,13 +111,14 @@ describe('TypeScript Plugin#CompletionsProvider', () => {
 
 		expect(item).to.deep.equal({
 			commitCharacters: ['.', ',', '('],
-			insertText: "import { MySuperFunction } from './imports/definitions';",
+			insertText: "import { MySuperFunction$1 } from './imports/definitions';",
+			insertTextFormat: 2,
 			kind: CompletionItemKind.Function,
 			label: 'MySuperFunction',
 			preselect: undefined,
 			sortText: '11',
 			textEdit: {
-				newText: "import { MySuperFunction } from './imports/definitions';",
+				newText: "import { MySuperFunction$1 } from './imports/definitions';",
 				range: Range.create(1, 1, 1, 10),
 			},
 		});
