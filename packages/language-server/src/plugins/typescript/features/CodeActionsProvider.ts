@@ -1,5 +1,5 @@
 import { flatten } from 'lodash';
-import ts, { CodeFixAction, FileTextChanges } from 'typescript';
+import ts, { CodeFixAction } from 'typescript';
 import { CancellationToken } from 'vscode-languageserver';
 import {
 	CodeAction,
@@ -7,7 +7,6 @@ import {
 	CodeActionKind,
 	Diagnostic,
 	OptionalVersionedTextDocumentIdentifier,
-	Position,
 	Range,
 	TextDocumentEdit,
 	TextEdit,
@@ -23,7 +22,6 @@ import { findContainingNode } from './utils';
 
 // These are VS Code specific CodeActionKind so they're not in the language server protocol
 export const sortImportKind = `${CodeActionKind.Source}.sortImports`;
-export const missingImportsKind = `${CodeActionKind.Source}.addMissingImports.ts`;
 
 export class CodeActionsProviderImpl implements CodeActionsProvider {
 	constructor(private languageServiceManager: LanguageServiceManager) {}
@@ -117,8 +115,6 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 		}
 	}
 
-	// The way TypeScript looks for import quick fixes is by looking for symbols with the same name
-	// This is all fine and nice for most things but our components purposely uses
 	private getComponentQuickFix(
 		start: number,
 		end: number,
@@ -147,6 +143,7 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 
 		const tagName = node.tagName;
 
+		// Unlike quick fixes, completions will be able to find the component, so let's use those to get it
 		const completion = lang.getCompletionsAtPosition(filePath, tagName.getEnd(), completionOptions);
 
 		if (!completion) {

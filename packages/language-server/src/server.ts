@@ -1,14 +1,11 @@
 import * as vscode from 'vscode-languageserver';
 import {
-	ApplyWorkspaceEditParams,
-	ApplyWorkspaceEditRequest,
 	CodeActionKind,
 	MessageType,
 	SemanticTokensRangeRequest,
 	SemanticTokensRequest,
 	ShowMessageNotification,
 	TextDocumentIdentifier,
-	WorkspaceEdit,
 } from 'vscode-languageserver';
 import { ConfigManager } from './core/config/ConfigManager';
 import { DocumentManager } from './core/documents/DocumentManager';
@@ -22,7 +19,7 @@ import { TypeScriptPlugin } from './plugins';
 import { debounceThrottle, getUserAstroVersion, urlToPath } from './utils';
 import { AstroDocument } from './core/documents';
 import { getSemanticTokenLegend } from './plugins/typescript/utils';
-import { missingImportsKind, sortImportKind } from './plugins/typescript/features/CodeActionsProvider';
+import { sortImportKind } from './plugins/typescript/features/CodeActionsProvider';
 
 const TagCloseRequest: vscode.RequestType<vscode.TextDocumentPositionParams, string | null, any> =
 	new vscode.RequestType('html/tag');
@@ -94,7 +91,6 @@ export function startLanguageServer(connection: vscode.Connection) {
 						CodeActionKind.SourceOrganizeImports,
 						// VS Code specific
 						sortImportKind,
-						missingImportsKind,
 					],
 				},
 				completionProvider: {
