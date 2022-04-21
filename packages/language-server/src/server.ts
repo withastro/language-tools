@@ -1,10 +1,14 @@
 import * as vscode from 'vscode-languageserver';
 import {
+	ApplyWorkspaceEditParams,
+	ApplyWorkspaceEditRequest,
+	CodeActionKind,
 	MessageType,
 	SemanticTokensRangeRequest,
 	SemanticTokensRequest,
 	ShowMessageNotification,
 	TextDocumentIdentifier,
+	WorkspaceEdit,
 } from 'vscode-languageserver';
 import { ConfigManager } from './core/config/ConfigManager';
 import { DocumentManager } from './core/documents/DocumentManager';
@@ -18,6 +22,7 @@ import { TypeScriptPlugin } from './plugins';
 import { debounceThrottle, getUserAstroVersion, urlToPath } from './utils';
 import { AstroDocument } from './core/documents';
 import { getSemanticTokenLegend } from './plugins/typescript/utils';
+import { missingImportsKind, sortImportKind } from './plugins/typescript/features/CodeActionsProvider';
 
 const TagCloseRequest: vscode.RequestType<vscode.TextDocumentPositionParams, string | null, any> =
 	new vscode.RequestType('html/tag');
@@ -73,10 +78,25 @@ export function startLanguageServer(connection: vscode.Connection) {
 
 		return {
 			capabilities: {
-				textDocumentSync: vscode.TextDocumentSyncKind.Incremental,
+				textDocumentSync: {
+					openClose: true,
+					change: vscode.TextDocumentSyncKind.Incremental,
+					save: {
+						includeText: true,
+					},
+				},
 				foldingRangeProvider: true,
 				definitionProvider: true,
 				renameProvider: true,
+				codeActionProvider: {
+					codeActionKinds: [
+						CodeActionKind.QuickFix,
+						CodeActionKind.SourceOrganizeImports,
+						// VS Code specific
+						sortImportKind,
+						missingImportsKind,
+					],
+				},
 				completionProvider: {
 					resolveProvider: true,
 					triggerCharacters: [
@@ -166,7 +186,12 @@ export function startLanguageServer(connection: vscode.Connection) {
 	connection.onHover((params: vscode.HoverParams) => pluginHost.doHover(params.textDocument, params.position));
 
 	connection.onDefinition((evt) => pluginHost.getDefinitions(evt.textDocument, evt.position));
+
 	connection.onFoldingRanges((evt) => pluginHost.getFoldingRanges(evt.textDocument));
+
+	connection.onCodeAction((evt, cancellationToken) =>
+		pluginHost.getCodeActions(evt.textDocument, evt.range, evt.context, cancellationToken)
+	);
 
 	connection.onCompletion(async (evt) => {
 		const promise = pluginHost.getCompletions(evt.textDocument, evt.position, evt.context);
