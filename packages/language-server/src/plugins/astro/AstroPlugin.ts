@@ -13,11 +13,11 @@ export class AstroPlugin implements Plugin {
 
 	private readonly completionProvider: CompletionsProviderImpl;
 
-	constructor(docManager: DocumentManager, configManager: ConfigManager, workspaceUris: string[]) {
+	constructor(languageServiceManager: LanguageServiceManager, configManager: ConfigManager) {
 		this.configManager = configManager;
-		this.languageServiceManager = new LanguageServiceManager(docManager, workspaceUris, configManager);
+		this.languageServiceManager = languageServiceManager;
 
-		this.completionProvider = new CompletionsProviderImpl(docManager, this.languageServiceManager);
+		this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager);
 	}
 
 	async getCompletions(

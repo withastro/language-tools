@@ -49,9 +49,9 @@ export class TypeScriptPlugin implements Plugin {
 	private readonly semanticTokensProvider: SemanticTokensProviderImpl;
 	private readonly foldingRangesProvider: FoldingRangesProviderImpl;
 
-	constructor(docManager: DocumentManager, configManager: ConfigManager, workspaceUris: string[]) {
+	constructor(languageServiceManager: LanguageServiceManager, configManager: ConfigManager) {
 		this.configManager = configManager;
-		this.languageServiceManager = new LanguageServiceManager(docManager, workspaceUris, configManager);
+		this.languageServiceManager = languageServiceManager;
 
 		this.codeActionsProvider = new CodeActionsProviderImpl(this.languageServiceManager, this.configManager);
 		this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager, this.configManager);
