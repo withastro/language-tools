@@ -25,7 +25,7 @@ import {
 	convertRange,
 	ensureFrontmatterInsert,
 } from '../utils';
-import { AstroSnapshotFragment, SnapshotFragment } from '../snapshots/DocumentSnapshot';
+import { AstroSnapshot, AstroSnapshotFragment, SnapshotFragment } from '../snapshots/DocumentSnapshot';
 import { getRegExpMatches, isNotNullOrUndefined } from '../../../utils';
 import { flatten } from 'lodash';
 import { getMarkdownDocumentation } from '../previewer';
@@ -93,50 +93,64 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 		const offset = document.offsetAt(position);
 		const node = html.findNodeAt(offset);
 
-		// TODO: Add support for script tags
-		if (node.tag === 'script') {
-			return null;
-		}
+		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
+		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
+
+		let completions: ts.CompletionInfo | undefined;
 
 		const isCompletionInsideFrontmatter = isInsideFrontmatter(document.getText(), offset);
 		const isCompletionInsideExpression = isInsideExpression(document.getText(), node.start, offset);
 
-		// PERF: Getting TS completions is fairly slow and I am currently not sure how to speed it up
-		// As such, we'll try to avoid getting them when unneeded, such as when we're doing HTML stuff
-
-		// When at the root of the document TypeScript offer all kinds of completions, because it doesn't know yet that
-		// it's JSX and not JS. As such, people who are using Emmet to write their template suffer from a very degraded experience
-		// from what they're used to in HTML files (which is instant completions). So let's disable ourselves when we're at the root
-		if (!isCompletionInsideFrontmatter && !node.parent && !isCompletionInsideExpression) {
-			return null;
-		}
-
-		// If the user just typed `<` with nothing else, let's disable ourselves until we're more sure if the user wants TS completions
-		if (!isCompletionInsideFrontmatter && node.parent && node.tag === undefined && !isCompletionInsideExpression) {
-			return null;
-		}
-
-		// If the current node is not a component (aka, it doesn't start with a caps), let's disable ourselves as the user
-		// is most likely looking for HTML completions
-		if (!isCompletionInsideFrontmatter && !isComponentTag(node) && !isCompletionInsideExpression) {
-			return null;
-		}
-
 		const tsPreferences = await this.configManager.getTSPreferences(document);
 		const formatOptions = await this.configManager.getTSFormatConfig(document);
 
-		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
+		if (node.tag === 'script') {
+			const index = document.scriptTags.findIndex((value) => value.container.start == node.start);
+			const scriptFilePath = tsDoc.filePath + `/script${index}.ts`;
+			const scriptTagSnapshot = (tsDoc as AstroSnapshot).scriptTagSnapshots[index];
+			const scriptOffset = scriptTagSnapshot.offsetAt(scriptTagSnapshot.getGeneratedPosition(position));
 
-		const completions = lang.getCompletionsAtPosition(
-			filePath,
-			offset,
-			{
-				...tsPreferences,
-				triggerCharacter: validTriggerCharacter,
-			},
-			formatOptions
-		);
+			completions = lang.getCompletionsAtPosition(
+				scriptFilePath,
+				scriptOffset,
+				{
+					...tsPreferences,
+					triggerCharacter: validTriggerCharacter,
+				},
+				formatOptions
+			);
+		} else {
+			// PERF: Getting TS completions is fairly slow and I am currently not sure how to speed it up
+			// As such, we'll try to avoid getting them when unneeded, such as when we're doing HTML stuff
+
+			// When at the root of the document TypeScript offer all kinds of completions, because it doesn't know yet that
+			// it's JSX and not JS. As such, people who are using Emmet to write their template suffer from a very degraded experience
+			// from what they're used to in HTML files (which is instant completions). So let's disable ourselves when we're at the root
+			if (!isCompletionInsideFrontmatter && !node.parent && !isCompletionInsideExpression) {
+				return null;
+			}
+
+			// If the user just typed `<` with nothing else, let's disable ourselves until we're more sure if the user wants TS completions
+			if (!isCompletionInsideFrontmatter && node.parent && node.tag === undefined && !isCompletionInsideExpression) {
+				return null;
+			}
+
+			// If the current node is not a component (aka, it doesn't start with a caps), let's disable ourselves as the user
+			// is most likely looking for HTML completions
+			if (!isCompletionInsideFrontmatter && !isComponentTag(node) && !isCompletionInsideExpression) {
+				return null;
+			}
+
+			completions = lang.getCompletionsAtPosition(
+				filePath,
+				offset,
+				{
+					...tsPreferences,
+					triggerCharacter: validTriggerCharacter,
+				},
+				formatOptions
+			);
+		}
 
 		if (completions === undefined || completions.entries.length === 0) {
 			return null;
@@ -174,6 +188,7 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
 
 		const tsPreferences = await this.configManager.getTSPreferences(document);
+		const formatOptions = await this.configManager.getTSFormatConfig(document);
 
 		const data: CompletionItemData | undefined = item.data as any;
 
@@ -186,7 +201,7 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 			data.filePath, // fileName
 			data.offset, // position
 			data.originalItem.name, // entryName
-			{}, // formatOptions
+			formatOptions, // formatOptions
 			data.originalItem.source, // source
 			tsPreferences, // preferences
 			data.originalItem.data // data
