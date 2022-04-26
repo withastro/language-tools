@@ -1,11 +1,13 @@
 import { expect } from 'chai';
 import { createEnvironment } from '../../utils';
 import { AstroPlugin } from '../../../src/plugins';
+import { LanguageServiceManager } from '../../../src/plugins/typescript/LanguageServiceManager';
 
 describe('Astro Plugin', () => {
 	function setup(filePath: string) {
 		const env = createEnvironment(filePath, 'astro');
-		const plugin = new AstroPlugin(env.docManager, env.configManager, [env.fixturesDir]);
+		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager);
+		const plugin = new AstroPlugin(languageServiceManager, env.configManager);
 
 		return {
 			...env,

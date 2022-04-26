@@ -2,6 +2,7 @@ import type { Diagnostic } from 'vscode-languageserver';
 import { DocumentManager } from './core/documents';
 import { ConfigManager } from './core/config';
 import { PluginHost, TypeScriptPlugin } from './plugins';
+import { LanguageServiceManager } from './plugins/typescript/LanguageServiceManager';
 export { DiagnosticSeverity } from 'vscode-languageserver-protocol';
 
 interface GetDiagnosticsResult {
@@ -14,8 +15,10 @@ export class AstroCheck {
 	private docManager = DocumentManager.newInstance();
 	private configManager = new ConfigManager();
 	private pluginHost = new PluginHost(this.docManager);
+	private languageServiceManager: LanguageServiceManager;
 
 	constructor(workspacePath: string) {
+		this.languageServiceManager = new LanguageServiceManager(this.docManager, [workspacePath], this.configManager);
 		this.initialize(workspacePath);
 	}
 
@@ -46,7 +49,7 @@ export class AstroCheck {
 	}
 
 	private initialize(workspacePath: string) {
-		this.pluginHost.registerPlugin(new TypeScriptPlugin(this.docManager, this.configManager, [workspacePath]));
+		this.pluginHost.registerPlugin(new TypeScriptPlugin(this.languageServiceManager, this.configManager));
 	}
 
 	private async getDiagnosticsForFile(uri: string) {

@@ -46,7 +46,7 @@ export class GlobalSnapshotManager {
 
 		if (changes) {
 			// We don't support incremental changes for Framework files, as they need to be rebuilt completely on every change
-			if (!(previousSnapshot instanceof TypeScriptDocumentSnapshot) || previousSnapshot.framework) {
+			if (!(previousSnapshot instanceof TypeScriptDocumentSnapshot)) {
 				return;
 			}
 			previousSnapshot.update(changes);
