@@ -1,11 +1,13 @@
-import ts from 'typescript';
-import { AstroDocument } from '../../../core/documents';
+import ts, { ScriptKind } from 'typescript';
+import { AstroDocument, offsetAt, TagInformation } from '../../../core/documents';
 import astro2tsx from '../astro2tsx';
 import { URI, Utils } from 'vscode-uri';
 import { FrameworkExt, getFrameworkFromFilePath, isAstroFilePath, isFrameworkFilePath } from '../utils';
-import { AstroSnapshot, TypeScriptDocumentSnapshot } from './DocumentSnapshot';
+import { AstroSnapshot, ScriptTagDocumentSnapshot, TypeScriptDocumentSnapshot } from './DocumentSnapshot';
 import { toTSX as svelte2tsx } from '@astrojs/svelte-language-integration';
 import { toPascalCase } from '../../../utils';
+import { Position } from 'vscode-languageserver-types';
+import { EOL } from 'os';
 
 // Utilities to create Snapshots from different contexts
 export function createFromDocument(document: AstroDocument) {

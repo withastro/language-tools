@@ -6,7 +6,7 @@ import { AstroVersion, getUserAstroVersion, normalizePath, urlToPath } from '../
 import { createAstroModuleLoader } from './module-loader';
 import { GlobalSnapshotManager, SnapshotManager } from './snapshots/SnapshotManager';
 import { ensureRealFilePath, findTsConfigPath } from './utils';
-import { DocumentSnapshot } from './snapshots/DocumentSnapshot';
+import { DocumentSnapshot, ScriptTagDocumentSnapshot } from './snapshots/DocumentSnapshot';
 import * as DocumentSnapshotUtils from './snapshots/utils';
 
 export interface LanguageServiceContainer {
@@ -183,6 +183,15 @@ async function createLanguageService(
 		const newSnapshot = DocumentSnapshotUtils.createFromDocument(document);
 
 		snapshotManager.set(filePath, newSnapshot);
+
+		document.scriptTags.forEach((scriptTag, index) => {
+			const scriptFilePath = filePath + `/script${index}.ts`;
+			const scriptSnapshot = new ScriptTagDocumentSnapshot(scriptTag, document, scriptFilePath);
+			snapshotManager.set(scriptFilePath, scriptSnapshot);
+
+			newSnapshot.scriptTagSnapshots?.push(scriptSnapshot);
+		});
+
 		if (prevSnapshot && prevSnapshot.scriptKind !== newSnapshot.scriptKind) {
 			// Restart language service as it doesn't handle script kind changes.
 			languageService.dispose();
