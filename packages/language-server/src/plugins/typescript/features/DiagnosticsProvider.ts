@@ -4,7 +4,7 @@ import { Diagnostic, DiagnosticTag } from 'vscode-languageserver-types';
 import { AstroDocument, mapRangeToOriginal } from '../../../core/documents';
 import { DiagnosticsProvider } from '../../interfaces';
 import { LanguageServiceManager } from '../LanguageServiceManager';
-import { SnapshotFragment } from '../snapshots/DocumentSnapshot';
+import { AstroSnapshot, SnapshotFragment } from '../snapshots/DocumentSnapshot';
 import { convertRange, mapSeverity, toVirtualAstroFilePath } from '../utils';
 
 type BoundaryTuple = [number, number];
@@ -27,18 +27,61 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
 
 		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
+		const fragment = await tsDoc.createFragment();
+
+		let scriptDiagnostics: ts.Diagnostic[] = [];
+
+		document.scriptTags.forEach((scriptTag) => {
+			const index = document.scriptTags.findIndex((value) => value.container.start == scriptTag.container.start);
+			const scriptFilePath = tsDoc.filePath + `/script${index}.ts`;
+			const scriptTagSnapshot = (tsDoc as AstroSnapshot).scriptTagSnapshots[index];
+
+			const scriptDiagnostic = [
+				...lang.getSyntacticDiagnostics(scriptFilePath),
+				...lang.getSuggestionDiagnostics(scriptFilePath),
+				...lang.getSemanticDiagnostics(scriptFilePath),
+			].map((diag) => {
+				if (diag.start && !diag.relatedInformation) {
+					diag.start = fragment.offsetAt(
+						scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(diag.start))
+					);
+				}
+
+				// HACK: There seems to be some sort of internal cache somewhere for diagnostics
+				// And as such, when mapping to the fragment, we might be operating on a already-mapped diagnostic
+				// I don't really get it but this works for now...
+				diag.relatedInformation = [
+					{
+						start: 0,
+						category: 0,
+						code: 0,
+						file: undefined,
+						length: 0,
+						messageText: '',
+					},
+				];
+
+				return diag;
+			});
+
+			scriptDiagnostics.push(...scriptDiagnostic);
+		});
 
 		const { script: scriptBoundaries } = this.getTagBoundaries(lang, filePath);
 
 		const syntaxDiagnostics = lang.getSyntacticDiagnostics(filePath);
 		const suggestionDiagnostics = lang.getSuggestionDiagnostics(filePath);
-		const semanticDiagnostics = lang.getSemanticDiagnostics(filePath).filter((d) => {
-			return isNoWithinBoundary(scriptBoundaries, d);
+		const semanticDiagnostics = lang.getSemanticDiagnostics(filePath);
+
+		const diagnostics: ts.Diagnostic[] = [
+			...syntaxDiagnostics,
+			...suggestionDiagnostics,
+			...semanticDiagnostics,
+		].filter((diag) => {
+			return isNoWithinBoundary(scriptBoundaries, diag);
 		});
 
-		const diagnostics: ts.Diagnostic[] = [...syntaxDiagnostics, ...suggestionDiagnostics, ...semanticDiagnostics];
-
-		const fragment = await tsDoc.createFragment();
+		diagnostics.push(...scriptDiagnostics);
 
 		return diagnostics
 			.map<Diagnostic>((diagnostic) => ({
