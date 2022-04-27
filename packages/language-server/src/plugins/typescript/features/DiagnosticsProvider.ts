@@ -225,8 +225,16 @@ function isNoCantResolveJSONModule(diagnostic: Diagnostic) {
  * Some diagnostics have JSX-specific nomenclature or unclear description. Enhance them for more clarity.
  */
 function enhanceIfNecessary(diagnostic: Diagnostic): Diagnostic {
+	// JSX element has no closing tag. JSX -> HTML
+	if (diagnostic.code === 17008) {
+		return {
+			...diagnostic,
+			message: diagnostic.message.replace('JSX', 'HTML'),
+		};
+	}
+
+	// For the rare case where an user might try to put a client directive on something that is not a component
 	if (diagnostic.code === 2322) {
-		// For the rare case where an user might try to put a client directive on something that is not a component
 		if (diagnostic.message.includes("Property 'client:") && diagnostic.message.includes("to type 'HTMLProps")) {
 			return {
 				...diagnostic,

@@ -3,6 +3,7 @@ import { FoldingRange, FoldingRangeKind, Position } from 'vscode-languageserver'
 import { AstroDocument } from '../../../core/documents';
 import { FoldingRangesProvider } from '../../interfaces';
 import { LanguageServiceManager } from '../LanguageServiceManager';
+import { AstroSnapshot } from '../snapshots/DocumentSnapshot';
 import { toVirtualAstroFilePath } from '../utils';
 
 export class FoldingRangesProviderImpl implements FoldingRangesProvider {
@@ -14,19 +15,35 @@ export class FoldingRangesProviderImpl implements FoldingRangesProvider {
 
 		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
 
-		const outliningSpans = lang.getOutliningSpans(filePath);
-
-		const foldingRanges: FoldingRange[] = [];
-
-		for (const span of outliningSpans) {
+		const outliningSpans = lang.getOutliningSpans(filePath).filter((span) => {
 			const node = html.findNodeAt(span.textSpan.start);
 
 			// Due to how our TSX output transform those tags into function calls or template literals
 			// TypeScript thinks of those as outlining spans, which is fine but we don't want folding ranges for those
-			if (node.tag === 'script' || node.tag === 'Markdown' || node.tag === 'style') {
-				continue;
-			}
+			return node.tag !== 'script' && node.tag !== 'style' && node.tag !== 'Markdown';
+		});
 
+		const scriptOutliningSpans: ts.OutliningSpan[] = [];
+
+		document.scriptTags.forEach((scriptTag) => {
+			const index = document.scriptTags.findIndex((value) => value.container.start == scriptTag.container.start);
+			const scriptFilePath = tsDoc.filePath + `/script${index}.ts`;
+			const scriptTagSnapshot = (tsDoc as AstroSnapshot).scriptTagSnapshots[index];
+
+			scriptOutliningSpans.push(
+				...lang.getOutliningSpans(scriptFilePath).map((span) => {
+					span.textSpan.start = document.offsetAt(
+						scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(span.textSpan.start))
+					);
+
+					return span;
+				})
+			);
+		});
+
+		const foldingRanges: FoldingRange[] = [];
+
+		for (const span of [...outliningSpans, ...scriptOutliningSpans]) {
 			const start = document.positionAt(span.textSpan.start);
 			const end = adjustFoldingEnd(start, document.positionAt(span.textSpan.start + span.textSpan.length), document);
 
