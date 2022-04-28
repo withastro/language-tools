@@ -14,6 +14,7 @@ import {
 import { AstroDocument } from '../../../core/documents';
 import { getMarkdownDocumentation } from '../previewer';
 import { toVirtualAstroFilePath } from '../utils';
+import { AstroSnapshot } from '../snapshots/DocumentSnapshot';
 
 export class SignatureHelpProviderImpl implements SignatureHelpProvider {
 	constructor(private readonly languageServiceManager: LanguageServiceManager) {}
@@ -36,8 +37,24 @@ export class SignatureHelpProviderImpl implements SignatureHelpProvider {
 
 		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
 		const offset = fragment.offsetAt(fragment.getGeneratedPosition(position));
+		const node = document.html.findNodeAt(offset);
+
+		let info: ts.SignatureHelpItems | undefined;
+
 		const triggerReason = this.toTsTriggerReason(context);
-		const info = lang.getSignatureHelpItems(filePath, offset, triggerReason ? { triggerReason } : undefined);
+
+		if (node.tag === 'script') {
+			const index = document.scriptTags.findIndex((value) => value.container.start == node.start);
+
+			const scriptFilePath = tsDoc.filePath + `/script${index}.ts`;
+			const scriptTagSnapshot = (tsDoc as AstroSnapshot).scriptTagSnapshots[index];
+			const scriptOffset = scriptTagSnapshot.offsetAt(scriptTagSnapshot.getGeneratedPosition(position));
+
+			info = lang.getSignatureHelpItems(scriptFilePath, scriptOffset, triggerReason ? { triggerReason } : undefined);
+		} else {
+			info = lang.getSignatureHelpItems(filePath, offset, triggerReason ? { triggerReason } : undefined);
+		}
+
 		if (!info) {
 			return null;
 		}
