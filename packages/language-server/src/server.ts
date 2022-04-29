@@ -8,7 +8,7 @@ import {
 	ShowMessageNotification,
 	TextDocumentIdentifier,
 } from 'vscode-languageserver';
-import { ConfigManager } from './core/config/ConfigManager';
+import { ConfigManager, defaultLSConfig } from './core/config/ConfigManager';
 import { DocumentManager } from './core/documents/DocumentManager';
 import { DiagnosticsManager } from './core/DiagnosticsManager';
 import { AstroPlugin } from './plugins/astro/AstroPlugin';
@@ -21,6 +21,7 @@ import { debounceThrottle, getUserAstroVersion, urlToPath } from './utils';
 import { AstroDocument } from './core/documents';
 import { getSemanticTokenLegend } from './plugins/typescript/utils';
 import { sortImportKind } from './plugins/typescript/features/CodeActionsProvider';
+import { LSConfig } from './core/config';
 
 const TagCloseRequest: vscode.RequestType<vscode.TextDocumentPositionParams, string | null, any> =
 	new vscode.RequestType('html/tag');
@@ -31,6 +32,8 @@ export function startLanguageServer(connection: vscode.Connection) {
 	const documentManager = new DocumentManager();
 	const pluginHost = new PluginHost(documentManager);
 	const configManager = new ConfigManager(connection);
+
+	let hasConfigurationCapability = false;
 
 	connection.onInitialize((params: vscode.InitializeParams) => {
 		const workspaceUris = params.workspaceFolders?.map((folder) => folder.uri.toString()) ?? [params.rootUri ?? ''];
@@ -54,6 +57,8 @@ export function startLanguageServer(connection: vscode.Connection) {
 				});
 			}
 		});
+
+		hasConfigurationCapability = !!(params.capabilities.workspace && !!params.capabilities.workspace.configuration);
 
 		pluginHost.initialize({
 			filterIncompleteCompletions: !params.initializationOptions?.dontFilterIncompleteCompletions,
@@ -139,12 +144,16 @@ export function startLanguageServer(connection: vscode.Connection) {
 
 	// The params don't matter here because in "pull mode" it's always null, it's intended that when the config is updated
 	// you should just reset "your internal cache" and get the config again for relevant documents, weird API design
-	connection.onDidChangeConfiguration(async () => {
-		configManager.updateConfig();
+	connection.onDidChangeConfiguration(async (change) => {
+		if (hasConfigurationCapability) {
+			configManager.updateConfig();
 
-		documentManager.getAllOpenedByClient().forEach(async (document) => {
-			await configManager.getConfig('astro', document[1].uri);
-		});
+			documentManager.getAllOpenedByClient().forEach(async (document) => {
+				await configManager.getConfig('astro', document[1].uri);
+			});
+		} else {
+			configManager.updateGlobalConfig(<LSConfig>change.settings.astro || defaultLSConfig);
+		}
 	});
 
 	// Documents
@@ -250,7 +259,9 @@ export function startLanguageServer(connection: vscode.Connection) {
 		connection.console.log('Successfully initialized! 🚀');
 
 		// Register for all configuration changes.
-		connection.client.register(DidChangeConfigurationNotification.type);
+		if (hasConfigurationCapability) {
+			connection.client.register(DidChangeConfigurationNotification.type);
+		}
 	});
 
 	connection.listen();
