@@ -32,17 +32,6 @@ import { getMarkdownDocumentation } from '../previewer';
 import { isPartOfImportStatement } from './utils';
 import { ConfigManager } from '../../../core/config';
 
-// export const completionOptions: ts.GetCompletionsAtPositionOptions = {
-// 	importModuleSpecifierPreference: 'relative',
-// 	importModuleSpecifierEnding: 'auto',
-// 	quotePreference: 'single',
-// 	includeCompletionsForModuleExports: true,
-// 	includeCompletionsForImportStatements: true,
-// 	includeCompletionsWithInsertText: true,
-// 	allowIncompleteCompletions: true,
-// 	includeCompletionsWithSnippetText: true,
-// };
-
 /**
  * The language service throws an error if the character is not a valid trigger character.
  * Also, the completions are worse.
