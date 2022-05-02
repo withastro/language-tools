@@ -1,4 +1,4 @@
-import ts, { ImportDeclaration, SourceFile, SyntaxKind, Node } from 'typescript';
+import ts, { ImportDeclaration, SourceFile, SyntaxKind, Node, createTextSpan } from 'typescript';
 import {
 	CancellationToken,
 	CodeAction,
@@ -34,13 +34,16 @@ import {
 	convertToLocationRange,
 	ensureRealFilePath,
 	getScriptKindFromFileName,
-	isVirtualFilePath,
+	isAstroFilePath,
+	isFrameworkFilePath,
 	toVirtualAstroFilePath,
 } from './utils';
 import { DocumentSymbolsProviderImpl } from './features/DocumentSymbolsProvider';
 import { SemanticTokensProviderImpl } from './features/SemanticTokenProvider';
 import { FoldingRangesProviderImpl } from './features/FoldingRangesProvider';
 import { CodeActionsProviderImpl } from './features/CodeActionsProvider';
+import { AstroSnapshot } from './snapshots/DocumentSnapshot';
+import { DefinitionsProviderImpl } from './features/DefinitionsProvider';
 
 type BetterTS = typeof ts & {
 	getTouchingPropertyName(sourceFile: SourceFile, pos: number): Node;
@@ -55,6 +58,7 @@ export class TypeScriptPlugin implements Plugin {
 	private readonly codeActionsProvider: CodeActionsProviderImpl;
 	private readonly completionProvider: CompletionsProviderImpl;
 	private readonly hoverProvider: HoverProviderImpl;
+	private readonly definitionsProvider: DefinitionsProviderImpl;
 	private readonly signatureHelpProvider: SignatureHelpProviderImpl;
 	private readonly diagnosticsProvider: DiagnosticsProviderImpl;
 	private readonly documentSymbolsProvider: DocumentSymbolsProviderImpl;
@@ -68,6 +72,7 @@ export class TypeScriptPlugin implements Plugin {
 		this.codeActionsProvider = new CodeActionsProviderImpl(this.languageServiceManager, this.configManager);
 		this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager, this.configManager);
 		this.hoverProvider = new HoverProviderImpl(this.languageServiceManager);
+		this.definitionsProvider = new DefinitionsProviderImpl(this.languageServiceManager);
 		this.signatureHelpProvider = new SignatureHelpProviderImpl(this.languageServiceManager);
 		this.diagnosticsProvider = new DiagnosticsProviderImpl(this.languageServiceManager);
 		this.documentSymbolsProvider = new DocumentSymbolsProviderImpl(this.languageServiceManager);
@@ -181,50 +186,7 @@ export class TypeScriptPlugin implements Plugin {
 	}
 
 	async getDefinitions(document: AstroDocument, position: Position): Promise<DefinitionLink[]> {
-		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const mainFragment = await tsDoc.createFragment();
-
-		const filePath = tsDoc.filePath;
-		const tsFilePath = toVirtualAstroFilePath(filePath);
-
-		const fragmentPosition = mainFragment.getGeneratedPosition(position);
-		const fragmentOffset = mainFragment.offsetAt(fragmentPosition);
-
-		let defs = lang.getDefinitionAndBoundSpan(tsFilePath, fragmentOffset);
-
-		if (!defs || !defs.definitions) {
-			return [];
-		}
-
-		// Resolve all imports if we can
-		if (this.goToDefinitionFoundOnlyAlias(tsFilePath, defs.definitions!)) {
-			let importDef = this.getGoToDefinitionRefsForImportSpecifier(tsFilePath, fragmentOffset, lang);
-			if (importDef) {
-				defs = importDef;
-			}
-		}
-
-		const docs = new SnapshotFragmentMap(this.languageServiceManager);
-		docs.set(tsDoc.filePath, { fragment: mainFragment, snapshot: tsDoc });
-
-		const result = await Promise.all(
-			defs.definitions!.map(async (def) => {
-				const { fragment, snapshot } = await docs.retrieve(def.fileName);
-
-				const fileName = ensureRealFilePath(def.fileName);
-
-				// Since we converted our files to TSX and we don't have sourcemaps, we don't know where the function is, unfortunate
-				const textSpan = isVirtualFilePath(tsFilePath) ? { start: 0, length: 0 } : def.textSpan;
-
-				return LocationLink.create(
-					pathToUrl(fileName),
-					convertToLocationRange(fragment, textSpan),
-					convertToLocationRange(fragment, textSpan),
-					convertToLocationRange(mainFragment, defs!.textSpan)
-				);
-			})
-		);
-		return result.filter(isNotNullOrUndefined);
+		return this.definitionsProvider.getDefinitions(document, position);
 	}
 
 	async getDiagnostics(document: AstroDocument, cancellationToken?: CancellationToken): Promise<Diagnostic[]> {
@@ -267,52 +229,6 @@ export class TypeScriptPlugin implements Plugin {
 		cancellationToken?: CancellationToken
 	): Promise<SignatureHelp | null> {
 		return this.signatureHelpProvider.getSignatureHelp(document, position, context, cancellationToken);
-	}
-
-	private goToDefinitionFoundOnlyAlias(tsFileName: string, defs: readonly ts.DefinitionInfo[]) {
-		return !!(defs.length === 1 && defs[0].kind === 'alias' && defs[0].fileName === tsFileName);
-	}
-
-	private getGoToDefinitionRefsForImportSpecifier(
-		tsFilePath: string,
-		offset: number,
-		lang: ts.LanguageService
-	): ts.DefinitionInfoAndBoundSpan | undefined {
-		const program = lang.getProgram();
-		const sourceFile = program?.getSourceFile(tsFilePath);
-		if (sourceFile) {
-			let node = (ts as BetterTS).getTouchingPropertyName(sourceFile, offset);
-			if (node && node.kind === SyntaxKind.Identifier) {
-				if (node.parent.kind === SyntaxKind.ImportClause) {
-					let decl = node.parent.parent as ImportDeclaration;
-					let spec = ts.isStringLiteral(decl.moduleSpecifier) && decl.moduleSpecifier.text;
-					if (spec) {
-						let fileName = pathJoin(pathDirname(tsFilePath), spec);
-						let start = node.pos + 1;
-						let def: ts.DefinitionInfoAndBoundSpan = {
-							definitions: [
-								{
-									kind: 'alias',
-									fileName,
-									name: '',
-									containerKind: '',
-									containerName: '',
-									textSpan: {
-										start: 0,
-										length: 0,
-									},
-								} as ts.DefinitionInfo,
-							],
-							textSpan: {
-								start,
-								length: node.end - start,
-							},
-						};
-						return def;
-					}
-				}
-			}
-		}
 	}
 
 	private async featureEnabled(document: AstroDocument, feature: keyof LSTypescriptConfig) {
