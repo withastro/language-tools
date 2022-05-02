@@ -29,7 +29,7 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
 		const fragment = await tsDoc.createFragment();
 
-		let scriptDiagnostics: ts.Diagnostic[] = [];
+		let scriptDiagnostics: Diagnostic[] = [];
 
 		document.scriptTags.forEach((scriptTag) => {
 			const { filePath: scriptFilePath, snapshot: scriptTagSnapshot } = getScriptTagSnapshot(
@@ -42,29 +42,18 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 				...lang.getSyntacticDiagnostics(scriptFilePath),
 				...lang.getSuggestionDiagnostics(scriptFilePath),
 				...lang.getSemanticDiagnostics(scriptFilePath),
-			].map((diag) => {
-				if (diag.start && !diag.relatedInformation) {
-					diag.start = fragment.offsetAt(
-						scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(diag.start))
-					);
-				}
-
-				// HACK: There seems to be some sort of internal cache somewhere for diagnostics
-				// And as such, when mapping to the fragment, we might be operating on a already-mapped diagnostic
-				// I don't really get it but this works for now...
-				diag.relatedInformation = [
-					{
-						start: 0,
-						category: 0,
-						code: 0,
-						file: undefined,
-						length: 0,
-						messageText: '',
-					},
-				];
-
-				return diag;
-			});
+			]
+				// We need to duplicate the diagnostic creation here because we can't map TS's diagnostics range to the original
+				// file due to some internal cache inside TS that would cause it to being mapped twice in some cases
+				.map<Diagnostic>((diagnostic) => ({
+					range: convertRange(scriptTagSnapshot, diagnostic),
+					severity: mapSeverity(diagnostic.category),
+					source: 'ts',
+					message: ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'),
+					code: diagnostic.code,
+					tags: getDiagnosticTag(diagnostic),
+				}))
+				.map(mapRange(scriptTagSnapshot, document));
 
 			scriptDiagnostics.push(...scriptDiagnostic);
 		});
@@ -83,18 +72,19 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 			return isNoWithinBoundary(scriptBoundaries, diag);
 		});
 
-		diagnostics.push(...scriptDiagnostics);
-
-		return diagnostics
-			.map<Diagnostic>((diagnostic) => ({
-				range: convertRange(tsDoc, diagnostic),
-				severity: mapSeverity(diagnostic.category),
-				source: 'ts',
-				message: ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'),
-				code: diagnostic.code,
-				tags: getDiagnosticTag(diagnostic),
-			}))
-			.map(mapRange(fragment, document))
+		return [
+			...diagnostics
+				.map<Diagnostic>((diagnostic) => ({
+					range: convertRange(tsDoc, diagnostic),
+					severity: mapSeverity(diagnostic.category),
+					source: 'ts',
+					message: ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'),
+					code: diagnostic.code,
+					tags: getDiagnosticTag(diagnostic),
+				}))
+				.map(mapRange(fragment, document)),
+			...scriptDiagnostics,
+		]
 			.filter((diag) => {
 				return (
 					hasNoNegativeLines(diag) &&
