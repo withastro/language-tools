@@ -1,4 +1,4 @@
-import ts, { ImportDeclaration, SourceFile, SyntaxKind, Node, createTextSpan } from 'typescript';
+import ts from 'typescript';
 import {
 	CancellationToken,
 	CodeAction,
@@ -9,7 +9,6 @@ import {
 	FileChangeType,
 	FoldingRange,
 	Hover,
-	LocationLink,
 	Position,
 	Range,
 	SemanticTokens,
@@ -19,35 +18,20 @@ import {
 	TextDocumentContentChangeEvent,
 	WorkspaceEdit,
 } from 'vscode-languageserver';
-import { join as pathJoin, dirname as pathDirname } from 'path';
 import { ConfigManager, LSTypescriptConfig } from '../../core/config';
 import { AstroDocument, DocumentManager } from '../../core/documents';
-import { isNotNullOrUndefined, pathToUrl } from '../../utils';
 import { AppCompletionItem, AppCompletionList, OnWatchFileChangesParam, Plugin } from '../interfaces';
 import { CompletionItemData, CompletionsProviderImpl } from './features/CompletionsProvider';
 import { DiagnosticsProviderImpl } from './features/DiagnosticsProvider';
 import { HoverProviderImpl } from './features/HoverProvider';
 import { SignatureHelpProviderImpl } from './features/SignatureHelpProvider';
-import { SnapshotFragmentMap } from './features/utils';
 import { LanguageServiceManager } from './LanguageServiceManager';
-import {
-	convertToLocationRange,
-	ensureRealFilePath,
-	getScriptKindFromFileName,
-	isAstroFilePath,
-	isFrameworkFilePath,
-	toVirtualAstroFilePath,
-} from './utils';
+import { convertToLocationRange, ensureRealFilePath, getScriptKindFromFileName, toVirtualAstroFilePath } from './utils';
 import { DocumentSymbolsProviderImpl } from './features/DocumentSymbolsProvider';
 import { SemanticTokensProviderImpl } from './features/SemanticTokenProvider';
 import { FoldingRangesProviderImpl } from './features/FoldingRangesProvider';
 import { CodeActionsProviderImpl } from './features/CodeActionsProvider';
-import { AstroSnapshot } from './snapshots/DocumentSnapshot';
 import { DefinitionsProviderImpl } from './features/DefinitionsProvider';
-
-type BetterTS = typeof ts & {
-	getTouchingPropertyName(sourceFile: SourceFile, pos: number): Node;
-};
 
 export class TypeScriptPlugin implements Plugin {
 	__name = 'typescript';
