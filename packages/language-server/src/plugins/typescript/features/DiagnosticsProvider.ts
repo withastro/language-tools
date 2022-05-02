@@ -5,7 +5,7 @@ import { AstroDocument, mapRangeToOriginal } from '../../../core/documents';
 import { DiagnosticsProvider } from '../../interfaces';
 import { LanguageServiceManager } from '../LanguageServiceManager';
 import { AstroSnapshot, SnapshotFragment } from '../snapshots/DocumentSnapshot';
-import { convertRange, mapSeverity, toVirtualAstroFilePath } from '../utils';
+import { convertRange, getScriptTagSnapshot, mapSeverity, toVirtualAstroFilePath } from '../utils';
 
 type BoundaryTuple = [number, number];
 
@@ -32,9 +32,11 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 		let scriptDiagnostics: ts.Diagnostic[] = [];
 
 		document.scriptTags.forEach((scriptTag) => {
-			const index = document.scriptTags.findIndex((value) => value.container.start == scriptTag.container.start);
-			const scriptFilePath = tsDoc.filePath + `/script${index}.ts`;
-			const scriptTagSnapshot = (tsDoc as AstroSnapshot).scriptTagSnapshots[index];
+			const { filePath: scriptFilePath, snapshot: scriptTagSnapshot } = getScriptTagSnapshot(
+				tsDoc as AstroSnapshot,
+				document,
+				scriptTag.container
+			);
 
 			const scriptDiagnostic = [
 				...lang.getSyntacticDiagnostics(scriptFilePath),

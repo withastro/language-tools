@@ -4,7 +4,7 @@ import { Hover, Position } from 'vscode-languageserver';
 import { AstroDocument, getFirstNonWhitespaceIndex, mapObjWithRangeToOriginal } from '../../../core/documents';
 import { HoverProvider } from '../../interfaces';
 import { getMarkdownDocumentation } from '../previewer';
-import { convertRange, toVirtualAstroFilePath } from '../utils';
+import { convertRange, getScriptTagSnapshot, toVirtualAstroFilePath } from '../utils';
 import { AstroSnapshot } from '../snapshots/DocumentSnapshot';
 
 const partsMap = new Map([['JSX attribute', 'HTML attribute']]);
@@ -26,11 +26,11 @@ export class HoverProviderImpl implements HoverProvider {
 		let info: ts.QuickInfo | undefined;
 
 		if (node.tag === 'script') {
-			const index = document.scriptTags.findIndex((value) => value.container.start == node.start);
-
-			const scriptFilePath = tsDoc.filePath + `/script${index}.ts`;
-			const scriptTagSnapshot = (tsDoc as AstroSnapshot).scriptTagSnapshots[index];
-			const scriptOffset = scriptTagSnapshot.offsetAt(scriptTagSnapshot.getGeneratedPosition(position));
+			const {
+				snapshot: scriptTagSnapshot,
+				filePath: scriptFilePath,
+				offset: scriptOffset,
+			} = getScriptTagSnapshot(tsDoc as AstroSnapshot, document, node, position);
 
 			info = lang.getQuickInfoAtPosition(scriptFilePath, scriptOffset);
 

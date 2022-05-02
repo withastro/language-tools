@@ -24,6 +24,7 @@ import {
 	removeAstroComponentSuffix,
 	convertRange,
 	ensureFrontmatterInsert,
+	getScriptTagSnapshot,
 } from '../utils';
 import { AstroSnapshot, AstroSnapshotFragment, SnapshotFragment } from '../snapshots/DocumentSnapshot';
 import { getRegExpMatches, isNotNullOrUndefined } from '../../../utils';
@@ -105,10 +106,12 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 		const formatOptions = await this.configManager.getTSFormatConfig(document);
 
 		if (node.tag === 'script') {
-			const index = document.scriptTags.findIndex((value) => value.container.start == node.start);
-			const scriptFilePath = tsDoc.filePath + `/script${index}.ts`;
-			const scriptTagSnapshot = (tsDoc as AstroSnapshot).scriptTagSnapshots[index];
-			const scriptOffset = scriptTagSnapshot.offsetAt(scriptTagSnapshot.getGeneratedPosition(position));
+			const { filePath: scriptFilePath, offset: scriptOffset } = getScriptTagSnapshot(
+				tsDoc as AstroSnapshot,
+				document,
+				node,
+				position
+			);
 
 			completions = lang.getCompletionsAtPosition(
 				scriptFilePath,

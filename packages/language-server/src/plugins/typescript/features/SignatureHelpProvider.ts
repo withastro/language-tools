@@ -13,7 +13,7 @@ import {
 } from 'vscode-languageserver';
 import { AstroDocument } from '../../../core/documents';
 import { getMarkdownDocumentation } from '../previewer';
-import { toVirtualAstroFilePath } from '../utils';
+import { getScriptTagSnapshot, toVirtualAstroFilePath } from '../utils';
 import { AstroSnapshot } from '../snapshots/DocumentSnapshot';
 
 export class SignatureHelpProviderImpl implements SignatureHelpProvider {
@@ -44,11 +44,12 @@ export class SignatureHelpProviderImpl implements SignatureHelpProvider {
 		const triggerReason = this.toTsTriggerReason(context);
 
 		if (node.tag === 'script') {
-			const index = document.scriptTags.findIndex((value) => value.container.start == node.start);
-
-			const scriptFilePath = tsDoc.filePath + `/script${index}.ts`;
-			const scriptTagSnapshot = (tsDoc as AstroSnapshot).scriptTagSnapshots[index];
-			const scriptOffset = scriptTagSnapshot.offsetAt(scriptTagSnapshot.getGeneratedPosition(position));
+			const { filePath: scriptFilePath, offset: scriptOffset } = getScriptTagSnapshot(
+				tsDoc as AstroSnapshot,
+				document,
+				node,
+				position
+			);
 
 			info = lang.getSignatureHelpItems(scriptFilePath, scriptOffset, triggerReason ? { triggerReason } : undefined);
 		} else {

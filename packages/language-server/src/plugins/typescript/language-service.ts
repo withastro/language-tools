@@ -185,7 +185,7 @@ async function createLanguageService(
 		snapshotManager.set(filePath, newSnapshot);
 
 		document.scriptTags.forEach((scriptTag, index) => {
-			const scriptFilePath = filePath + `/script${index}.ts`;
+			const scriptFilePath = filePath + `/script${index}.js`;
 			const scriptSnapshot = new ScriptTagDocumentSnapshot(scriptTag, document, scriptFilePath);
 			snapshotManager.set(scriptFilePath, scriptSnapshot);
 

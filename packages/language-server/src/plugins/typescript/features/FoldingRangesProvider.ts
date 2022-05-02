@@ -4,7 +4,7 @@ import { AstroDocument } from '../../../core/documents';
 import { FoldingRangesProvider } from '../../interfaces';
 import { LanguageServiceManager } from '../LanguageServiceManager';
 import { AstroSnapshot } from '../snapshots/DocumentSnapshot';
-import { toVirtualAstroFilePath } from '../utils';
+import { getScriptTagSnapshot, toVirtualAstroFilePath } from '../utils';
 
 export class FoldingRangesProviderImpl implements FoldingRangesProvider {
 	constructor(private readonly languageServiceManager: LanguageServiceManager) {}
@@ -26,9 +26,11 @@ export class FoldingRangesProviderImpl implements FoldingRangesProvider {
 		const scriptOutliningSpans: ts.OutliningSpan[] = [];
 
 		document.scriptTags.forEach((scriptTag) => {
-			const index = document.scriptTags.findIndex((value) => value.container.start == scriptTag.container.start);
-			const scriptFilePath = tsDoc.filePath + `/script${index}.ts`;
-			const scriptTagSnapshot = (tsDoc as AstroSnapshot).scriptTagSnapshots[index];
+			const { snapshot: scriptTagSnapshot, filePath: scriptFilePath } = getScriptTagSnapshot(
+				tsDoc as AstroSnapshot,
+				document,
+				scriptTag.container
+			);
 
 			scriptOutliningSpans.push(
 				...lang.getOutliningSpans(scriptFilePath).map((span) => {

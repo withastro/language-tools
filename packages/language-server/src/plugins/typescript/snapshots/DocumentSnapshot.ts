@@ -141,7 +141,7 @@ export class ScriptTagDocumentSnapshot extends FragmentMapper implements Documen
 	constructor(public scriptTag: TagInformation, private readonly parent: AstroDocument, public filePath: string) {
 		super(parent.getText(), scriptTag, filePath);
 
-		this.scriptKind = ScriptKind.TS;
+		this.scriptKind = ScriptKind.JS;
 	}
 
 	positionAt(offset: number) {
