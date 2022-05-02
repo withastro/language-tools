@@ -14,7 +14,7 @@ import { CompletionItem, CompletionItemKind } from 'vscode-languageserver-protoc
 import type { LanguageServiceManager } from '../LanguageServiceManager';
 import { isComponentTag, isInsideExpression, isInsideFrontmatter } from '../../../core/documents/utils';
 import { AstroDocument, mapRangeToOriginal } from '../../../core/documents';
-import ts, { ScriptElementKindModifier } from 'typescript';
+import ts, { ScriptElementKind, ScriptElementKindModifier } from 'typescript';
 import { CompletionList } from 'vscode-languageserver';
 import { AppCompletionItem, AppCompletionList, CompletionsProvider } from '../../interfaces';
 import {
@@ -118,10 +118,30 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 				scriptOffset,
 				{
 					...tsPreferences,
+					// File extensions are required inside script tags, however TypeScript can't return completions with the `ts`
+					// extension, so what we'll do instead is force `minimal` (aka, no extension) and manually add the extensions
+					importModuleSpecifierEnding: 'minimal',
 					triggerCharacter: validTriggerCharacter,
 				},
 				formatOptions
 			);
+
+			if (completions) {
+				// Manually adds file extensions to js and ts files
+				completions.entries = completions?.entries.map((comp) => {
+					if (
+						comp.kind === ScriptElementKind.scriptElement &&
+						(comp.kindModifiers === '.js' || comp.kindModifiers === '.ts')
+					) {
+						return {
+							...comp,
+							name: comp.name + comp.kindModifiers,
+						};
+					} else {
+						return comp;
+					}
+				});
+			}
 		} else {
 			// PERF: Getting TS completions is fairly slow and I am currently not sure how to speed it up
 			// As such, we'll try to avoid getting them when unneeded, such as when we're doing HTML stuff

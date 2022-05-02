@@ -185,7 +185,7 @@ async function createLanguageService(
 		snapshotManager.set(filePath, newSnapshot);
 
 		document.scriptTags.forEach((scriptTag, index) => {
-			const scriptFilePath = filePath + `/script${index}.js`;
+			const scriptFilePath = filePath + `.__script${index}.js`;
 			const scriptSnapshot = new ScriptTagDocumentSnapshot(scriptTag, document, scriptFilePath);
 			snapshotManager.set(scriptFilePath, scriptSnapshot);
 
@@ -287,6 +287,7 @@ async function createLanguageService(
 			jsxFactory: 'astroHTML',
 			module: ts.ModuleKind.ESNext,
 			target: ts.ScriptTarget.ESNext,
+			isolatedModules: true,
 			moduleResolution: ts.ModuleResolutionKind.NodeJs,
 		};
 

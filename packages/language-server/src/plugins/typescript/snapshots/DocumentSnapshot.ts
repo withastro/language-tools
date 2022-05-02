@@ -133,7 +133,7 @@ export class AstroSnapshotFragment implements SnapshotFragment {
 
 export class ScriptTagDocumentSnapshot extends FragmentMapper implements DocumentSnapshot, SnapshotFragment {
 	readonly version = this.parent.version;
-	private text = '{' + this.parent.getText().slice(this.scriptTag.start, this.scriptTag.end) + '}';
+	private text = this.parent.getText().slice(this.scriptTag.start, this.scriptTag.end) + '\nexport {}';
 
 	scriptKind: ts.ScriptKind;
 	private lineOffsets?: number[];

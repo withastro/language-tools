@@ -409,7 +409,7 @@ export function getScriptTagSnapshot(
 	offset: number;
 } {
 	const index = document.scriptTags.findIndex((value) => value.container.start == tagInfo.start);
-	const scriptFilePath = snapshot.filePath + `/script${index}.js`;
+	const scriptFilePath = snapshot.filePath + `.__script${index}.js`;
 	const scriptTagSnapshot = snapshot.scriptTagSnapshots[index];
 
 	let offset = 0;
