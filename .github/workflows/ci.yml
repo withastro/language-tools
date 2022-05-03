@@ -8,15 +8,13 @@ on:
     paths-ignore:
       - '.vscode/**'
       - 'docs/**'
-      - 'examples/**'
-      - 'www/**'
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         node_version: [14, 16]
       fail-fast: false
 
