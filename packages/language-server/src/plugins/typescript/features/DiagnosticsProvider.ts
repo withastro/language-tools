@@ -94,6 +94,7 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 					isNoSpreadExpected(diag) &&
 					isNoCantResolveJSONModule(diag) &&
 					isNoCantReturnOutsideFunction(diag) &&
+					isNoIsolatedModuleError(diag) &&
 					isNoJsxCannotHaveMultipleAttrsError(diag)
 				);
 			})
@@ -211,6 +212,14 @@ function isNoCantReturnOutsideFunction(diagnostic: Diagnostic) {
  */
 function isNoCantResolveJSONModule(diagnostic: Diagnostic) {
 	return diagnostic.code !== 2732;
+}
+
+/**
+ * When the content of the file is invalid and can't be parsed properly for TSX generation, TS will show an error about
+ * how the current module can't be compiled under --isolatedModule, this is confusing to users so let's ignore this
+ */
+function isNoIsolatedModuleError(diagnostic: Diagnostic) {
+	return diagnostic.code !== 1208;
 }
 
 /**
