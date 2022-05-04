@@ -1,7 +1,7 @@
 import type { LanguageServiceManager } from '../LanguageServiceManager';
 import ts from 'typescript';
 import { Hover, Position } from 'vscode-languageserver';
-import { AstroDocument, getFirstNonWhitespaceIndex, mapObjWithRangeToOriginal } from '../../../core/documents';
+import { AstroDocument, mapObjWithRangeToOriginal } from '../../../core/documents';
 import { HoverProvider } from '../../interfaces';
 import { getMarkdownDocumentation } from '../previewer';
 import { convertRange, getScriptTagSnapshot, toVirtualAstroFilePath } from '../utils';

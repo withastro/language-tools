@@ -211,7 +211,6 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
 
 		const tsPreferences = await this.configManager.getTSPreferences(document);
-		const formatOptions = await this.configManager.getTSFormatConfig(document);
 
 		const data: CompletionItemData | undefined = item.data as any;
 
@@ -224,7 +223,7 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 			data.filePath, // fileName
 			data.offset, // position
 			data.originalItem.name, // entryName
-			formatOptions, // formatOptions
+			{}, // formatOptions
 			data.originalItem.source, // source
 			tsPreferences, // preferences
 			data.originalItem.data // data

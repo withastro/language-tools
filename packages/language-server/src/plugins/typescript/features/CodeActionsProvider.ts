@@ -54,19 +54,19 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 		}
 
 		if (context.only?.[0] === CodeActionKind.SourceOrganizeImports) {
-			return await this.organizeSortImports(document, false, tsPreferences, formatOptions, cancellationToken);
+			return await this.organizeSortImports(document, false, cancellationToken);
 		}
 
 		// The difference between Sort Imports and Organize Imports is that Sort Imports won't do anything destructive.
 		// For example, it won't remove unused imports whereas Organize Imports will
 		if (context.only?.[0] === sortImportKind) {
-			return await this.organizeSortImports(document, true, tsPreferences, formatOptions, cancellationToken);
+			return await this.organizeSortImports(document, true, cancellationToken);
 		}
 
 		if (context.only?.[0] === CodeActionKind.Source) {
 			return [
-				...(await this.organizeSortImports(document, true, tsPreferences, formatOptions, cancellationToken)),
-				...(await this.organizeSortImports(document, false, tsPreferences, formatOptions, cancellationToken)),
+				...(await this.organizeSortImports(document, true, cancellationToken)),
+				...(await this.organizeSortImports(document, false, cancellationToken)),
 			];
 		}
 
@@ -245,8 +245,6 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 	private async organizeSortImports(
 		document: AstroDocument,
 		skipDestructiveCodeActions = false,
-		tsPreferences: ts.UserPreferences,
-		formatOptions: ts.FormatCodeSettings,
 		cancellationToken: CancellationToken | undefined
 	): Promise<CodeAction[]> {
 		if (document.astroMeta.frontmatter.state !== 'closed') {
@@ -264,13 +262,7 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 
 		let changes: ts.FileTextChanges[] = [];
 
-		changes.push(
-			...lang.organizeImports(
-				{ fileName: filePath, type: 'file', skipDestructiveCodeActions },
-				formatOptions,
-				tsPreferences
-			)
-		);
+		changes.push(...lang.organizeImports({ fileName: filePath, type: 'file', skipDestructiveCodeActions }, {}, {}));
 
 		document.scriptTags.forEach((scriptTag) => {
 			const { filePath: scriptFilePath, snapshot: scriptTagSnapshot } = getScriptTagSnapshot(
@@ -281,8 +273,8 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 
 			const edits = lang.organizeImports(
 				{ fileName: scriptFilePath, type: 'file', skipDestructiveCodeActions },
-				formatOptions,
-				tsPreferences
+				{},
+				{}
 			);
 
 			edits.forEach((edit) => {

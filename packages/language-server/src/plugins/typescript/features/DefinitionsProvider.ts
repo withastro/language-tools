@@ -1,6 +1,6 @@
-import ts, { createTextSpan } from 'typescript';
+import ts from 'typescript';
 import { Position, LocationLink } from 'vscode-languageserver-types';
-import { AstroDocument, offsetAt } from '../../../core/documents';
+import { AstroDocument } from '../../../core/documents';
 import { pathToUrl, isNotNullOrUndefined } from '../../../utils';
 import { DefinitionsProvider } from '../../interfaces';
 import { LanguageServiceManager } from '../LanguageServiceManager';

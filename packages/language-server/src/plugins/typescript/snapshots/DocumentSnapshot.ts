@@ -1,4 +1,4 @@
-import ts, { ScriptKind } from 'typescript';
+import ts from 'typescript';
 import { Position, TextDocumentContentChangeEvent } from 'vscode-languageserver';
 import {
 	AstroDocument,
@@ -141,7 +141,7 @@ export class ScriptTagDocumentSnapshot extends FragmentMapper implements Documen
 	constructor(public scriptTag: TagInformation, private readonly parent: AstroDocument, public filePath: string) {
 		super(parent.getText(), scriptTag, filePath);
 
-		this.scriptKind = ScriptKind.JS;
+		this.scriptKind = ts.ScriptKind.JS;
 	}
 
 	positionAt(offset: number) {
@@ -196,7 +196,8 @@ export class TypeScriptDocumentSnapshot extends IdentityMapper implements Docume
 		public version: number,
 		public readonly filePath: string,
 		private text: string,
-		scriptKind?: ts.ScriptKind
+		scriptKind?: ts.ScriptKind,
+		public readonly framework?: FrameworkExt
 	) {
 		super(pathToUrl(filePath));
 
