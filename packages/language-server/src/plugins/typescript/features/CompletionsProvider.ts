@@ -12,7 +12,12 @@ import {
 } from 'vscode-languageserver';
 import { CompletionItem, CompletionItemKind } from 'vscode-languageserver-protocol';
 import type { LanguageServiceManager } from '../LanguageServiceManager';
-import { isComponentTag, isInsideExpression, isInsideFrontmatter } from '../../../core/documents/utils';
+import {
+	getLineAtPosition,
+	isComponentTag,
+	isInsideExpression,
+	isInsideFrontmatter,
+} from '../../../core/documents/utils';
 import { AstroDocument, mapRangeToOriginal } from '../../../core/documents';
 import ts, { ScriptElementKind, ScriptElementKindModifier } from 'typescript';
 import { CompletionList } from 'vscode-languageserver';
@@ -26,7 +31,12 @@ import {
 	ensureFrontmatterInsert,
 	getScriptTagSnapshot,
 } from '../utils';
-import { AstroSnapshot, AstroSnapshotFragment, SnapshotFragment } from '../snapshots/DocumentSnapshot';
+import {
+	AstroSnapshot,
+	AstroSnapshotFragment,
+	ScriptTagDocumentSnapshot,
+	SnapshotFragment,
+} from '../snapshots/DocumentSnapshot';
 import { getRegExpMatches, isNotNullOrUndefined } from '../../../utils';
 import { flatten } from 'lodash';
 import { getMarkdownDocumentation } from '../previewer';
@@ -53,6 +63,7 @@ const scriptImportRegex = /\bimport\s+{([^}]*?)}\s+?from\s+['"`].+?['"`]|\bimpor
 export interface CompletionItemData extends TextDocumentIdentifier {
 	filePath: string;
 	offset: number;
+	scriptTagIndex: number | undefined;
 	originalItem: ts.CompletionEntry;
 }
 
@@ -95,7 +106,7 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 		const node = html.findNodeAt(offset);
 
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
+		let filePath = toVirtualAstroFilePath(tsDoc.filePath);
 
 		let completions: ts.CompletionInfo | undefined;
 
@@ -105,13 +116,17 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 		const tsPreferences = await this.configManager.getTSPreferences(document);
 		const formatOptions = await this.configManager.getTSFormatConfig(document);
 
+		let scriptTagIndex: number | undefined = undefined;
+
 		if (node.tag === 'script') {
-			const { filePath: scriptFilePath, offset: scriptOffset } = getScriptTagSnapshot(
-				tsDoc as AstroSnapshot,
-				document,
-				node,
-				position
-			);
+			const {
+				filePath: scriptFilePath,
+				offset: scriptOffset,
+				index: scriptIndex,
+			} = getScriptTagSnapshot(tsDoc as AstroSnapshot, document, node, position);
+
+			filePath = scriptFilePath;
+			scriptTagIndex = scriptIndex;
 
 			completions = lang.getCompletionsAtPosition(
 				scriptFilePath,
@@ -192,7 +207,15 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 		const completionItems = completions.entries
 			.filter(this.isValidCompletion)
 			.map((entry: ts.CompletionEntry) =>
-				this.toCompletionItem(fragment, entry, filePath, offset, isCompletionInsideFrontmatter, existingImports)
+				this.toCompletionItem(
+					fragment,
+					entry,
+					filePath,
+					offset,
+					isCompletionInsideFrontmatter,
+					scriptTagIndex,
+					existingImports
+				)
 			)
 			.filter(isNotNullOrUndefined)
 			.map((comp) => this.fixTextEditRange(wordRangeStartPosition, comp));
@@ -238,14 +261,34 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 
 		const actions = detail?.codeActions;
 
+		const isInsideScriptTag = data.scriptTagIndex !== undefined;
+		let scriptTagSnapshot: ScriptTagDocumentSnapshot;
+		if (isInsideScriptTag) {
+			const { snapshot } = getScriptTagSnapshot(
+				tsDoc as AstroSnapshot,
+				document,
+				document.scriptTags[data.scriptTagIndex!].container
+			);
+
+			scriptTagSnapshot = snapshot;
+		}
+
 		if (actions) {
 			const edit: TextEdit[] = [];
 
 			for (const action of actions) {
 				for (const change of action.changes) {
+					if (isInsideScriptTag) {
+						change.textChanges.forEach((textChange) => {
+							textChange.span.start = fragment.offsetAt(
+								scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(textChange.span.start))
+							);
+						});
+					}
+
 					edit.push(
 						...change.textChanges.map((textChange) =>
-							codeActionChangeToTextEdit(document, fragment as AstroSnapshotFragment, textChange)
+							codeActionChangeToTextEdit(document, fragment as AstroSnapshotFragment, isInsideScriptTag, textChange)
 						)
 					);
 				}
@@ -263,6 +306,7 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 		filePath: string,
 		offset: number,
 		insideFrontmatter: boolean,
+		scriptTagIndex: number | undefined,
 		existingImports: Set<string>
 	): AppCompletionItem<CompletionItemData> | null {
 		let item = CompletionItem.create(comp.name);
@@ -321,6 +365,7 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 			data: {
 				uri: fragment.getURL(),
 				filePath,
+				scriptTagIndex,
 				offset,
 				originalItem: comp,
 			},
@@ -434,6 +479,7 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 export function codeActionChangeToTextEdit(
 	document: AstroDocument,
 	fragment: AstroSnapshotFragment,
+	isInsideScriptTag: boolean,
 	change: ts.TextChange
 ) {
 	change.newText = removeAstroComponentSuffix(change.newText);
@@ -453,13 +499,22 @@ export function codeActionChangeToTextEdit(
 
 	range = mapRangeToOriginal(fragment, virtualRange);
 
-	if (!isInsideFrontmatter(document.getText(), document.offsetAt(range.start))) {
-		range = ensureFrontmatterInsert(range, document);
-	}
+	if (!isInsideScriptTag) {
+		if (!isInsideFrontmatter(document.getText(), document.offsetAt(range.start))) {
+			range = ensureFrontmatterInsert(range, document);
+		}
 
-	// First import in a file will wrongly have a newline before it due to how the frontmatter is replaced by a comment
-	if (range.start.line === 1 && (change.newText.startsWith('\n') || change.newText.startsWith('\r\n'))) {
-		change.newText = change.newText.trimStart();
+		// First import in a file will wrongly have a newline before it due to how the frontmatter is replaced by a comment
+		if (range.start.line === 1 && (change.newText.startsWith('\n') || change.newText.startsWith('\r\n'))) {
+			change.newText = change.newText.trimStart();
+		}
+	} else {
+		const existingLine = getLineAtPosition(document.positionAt(span.start), document.getText());
+		const isNewImport = !existingLine.trim().startsWith('import');
+
+		if (!(change.newText.startsWith('\n') || change.newText.startsWith('\r\n')) && isNewImport) {
+			change.newText = ts.sys.newLine + change.newText;
+		}
 	}
 
 	return TextEdit.replace(range, change.newText);

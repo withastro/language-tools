@@ -141,7 +141,7 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 						// restricted to the area of the script tag by default
 						if (!isInsideScript) {
 							if (codeFix.fixName === 'import') {
-								return codeActionChangeToTextEdit(document, fragment as AstroSnapshotFragment, edit);
+								return codeActionChangeToTextEdit(document, fragment as AstroSnapshotFragment, false, edit);
 							}
 
 							if (codeFix.fixName === 'fixMissingFunctionDeclaration') {
