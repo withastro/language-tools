@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import { createEnvironment } from '../../utils';
 import { TypeScriptPlugin } from '../../../src/plugins';
 import { CodeActionKind, Position, Range } from 'vscode-languageserver-types';
-import { LanguageServiceManager } from '../../../src/plugins/typescript/LanguageServiceManager';
 
 // This file only contain basic tests to ensure that the TypeScript plugin does in fact calls the proper methods
 // and returns something. For validity tests, please check the providers themselves in the 'features' folder
@@ -10,8 +9,7 @@ import { LanguageServiceManager } from '../../../src/plugins/typescript/Language
 describe('TypeScript Plugin', () => {
 	function setup(filePath: string) {
 		const env = createEnvironment(filePath, 'typescript');
-		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager);
-		const plugin = new TypeScriptPlugin(languageServiceManager, env.configManager);
+		const plugin = new TypeScriptPlugin(env.docManager, env.configManager, [env.fixturesDir]);
 
 		return {
 			...env,

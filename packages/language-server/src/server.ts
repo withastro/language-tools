@@ -22,7 +22,6 @@ import { AstroDocument } from './core/documents';
 import { getSemanticTokenLegend } from './plugins/typescript/utils';
 import { sortImportKind } from './plugins/typescript/features/CodeActionsProvider';
 import { LSConfig } from './core/config';
-import { LanguageServiceManager } from './plugins/typescript/LanguageServiceManager';
 
 const TagCloseRequest: vscode.RequestType<vscode.TextDocumentPositionParams, string | null, any> =
 	new vscode.RequestType('html/tag');
@@ -72,10 +71,8 @@ export function startLanguageServer(connection: vscode.Connection) {
 
 		// We don't currently support running the TypeScript and Astro plugin in the browser
 		if (params.initializationOptions.environment !== 'browser') {
-			const languageServiceManager = new LanguageServiceManager(documentManager, workspaceUris, configManager);
-
-			pluginHost.registerPlugin(new AstroPlugin(languageServiceManager, configManager));
-			pluginHost.registerPlugin(new TypeScriptPlugin(languageServiceManager, configManager));
+			pluginHost.registerPlugin(new AstroPlugin(documentManager, configManager, workspaceUris));
+			pluginHost.registerPlugin(new TypeScriptPlugin(documentManager, configManager, workspaceUris));
 		}
 
 		return {

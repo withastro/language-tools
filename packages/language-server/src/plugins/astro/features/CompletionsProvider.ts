@@ -14,8 +14,8 @@ import {
 	TextEdit,
 } from 'vscode-languageserver';
 import ts from 'typescript';
-import { LanguageServiceManager } from '../../typescript/LanguageServiceManager';
-import { isInComponentStartTag, isInsideExpression } from '../../../core/documents/utils';
+import { LanguageServiceManager as TypeScriptLanguageServiceManager } from '../../typescript/LanguageServiceManager';
+import { isInComponentStartTag, isInsideExpression, isInsideFrontmatter } from '../../../core/documents/utils';
 import { isPossibleComponent } from '../../../utils';
 import { toVirtualAstroFilePath, toVirtualFilePath } from '../../typescript/utils';
 import { getLanguageService, Node } from 'vscode-html-languageservice';
@@ -23,14 +23,16 @@ import { astroDirectives } from '../../html/features/astro-attributes';
 import { removeDataAttrCompletion } from '../../html/utils';
 
 export class CompletionsProviderImpl implements CompletionsProvider {
-	private readonly languageServiceManager: LanguageServiceManager;
+	private readonly docManager: DocumentManager;
+	private readonly languageServiceManager: TypeScriptLanguageServiceManager;
 
 	public directivesHTMLLang = getLanguageService({
 		customDataProviders: [astroDirectives],
 		useDefaultDataProvider: false,
 	});
 
-	constructor(languageServiceManager: LanguageServiceManager) {
+	constructor(docManager: DocumentManager, languageServiceManager: TypeScriptLanguageServiceManager) {
+		this.docManager = docManager;
 		this.languageServiceManager = languageServiceManager;
 	}
 
@@ -39,10 +41,13 @@ export class CompletionsProviderImpl implements CompletionsProvider {
 		position: Position,
 		completionContext?: CompletionContext
 	): Promise<AppCompletionList | null> {
+		const doc = this.docManager.get(document.uri);
+		if (!doc) return null;
+
 		let items: CompletionItem[] = [];
 
 		if (completionContext?.triggerCharacter === '-') {
-			const frontmatter = this.getComponentScriptCompletion(document, position, completionContext);
+			const frontmatter = this.getComponentScriptCompletion(doc, position, completionContext);
 			if (frontmatter) items.push(frontmatter);
 		}
 
