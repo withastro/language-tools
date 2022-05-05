@@ -164,8 +164,7 @@ describe('TypeScript Plugin#CodeActionsProvider', () => {
 						{
 							edits: [
 								{
-									newText:
-										`---${newLine}import MySuperAstroComponent from "./components/MySuperAstroComponent.astro";${newLine}${newLine}---${newLine}${newLine}`,
+									newText: `---${newLine}import MySuperAstroComponent from "./components/MySuperAstroComponent.astro";${newLine}${newLine}---${newLine}${newLine}`,
 									range: Range.create(0, 0, 0, 0),
 								},
 							],
@@ -298,7 +297,7 @@ describe('TypeScript Plugin#CodeActionsProvider', () => {
 							edits: [
 								{
 									range: Range.create(5, 0, 5, 0),
-									newText: '\nimport { ImportMe } from "./components/imports"\n',
+									newText: `${newLine}import { ImportMe } from "./components/imports"${newLine}`,
 								},
 							],
 						},
