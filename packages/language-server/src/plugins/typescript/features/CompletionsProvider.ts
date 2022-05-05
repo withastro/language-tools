@@ -484,15 +484,6 @@ export function codeActionChangeToTextEdit(
 ) {
 	change.newText = removeAstroComponentSuffix(change.newText);
 
-	// If we don't have a frontmatter already, create one with the import
-	const frontmatterState = document.astroMeta.frontmatter.state;
-	if (frontmatterState === null) {
-		return TextEdit.replace(
-			Range.create(Position.create(0, 0), Position.create(0, 0)),
-			`---${ts.sys.newLine}${change.newText}---${ts.sys.newLine}${ts.sys.newLine}`
-		);
-	}
-
 	const { span } = change;
 	let range: Range;
 	const virtualRange = convertRange(fragment, span);
@@ -500,6 +491,15 @@ export function codeActionChangeToTextEdit(
 	range = mapRangeToOriginal(fragment, virtualRange);
 
 	if (!isInsideScriptTag) {
+		// If we don't have a frontmatter already, create one with the import
+		const frontmatterState = document.astroMeta.frontmatter.state;
+		if (frontmatterState === null) {
+			return TextEdit.replace(
+				Range.create(Position.create(0, 0), Position.create(0, 0)),
+				`---${ts.sys.newLine}${change.newText}---${ts.sys.newLine}${ts.sys.newLine}`
+			);
+		}
+
 		if (!isInsideFrontmatter(document.getText(), document.offsetAt(range.start))) {
 			range = ensureFrontmatterInsert(range, document);
 		}
@@ -512,6 +512,7 @@ export function codeActionChangeToTextEdit(
 		const existingLine = getLineAtPosition(document.positionAt(span.start), document.getText());
 		const isNewImport = !existingLine.trim().startsWith('import');
 
+		// Avoid putting new imports on the same line as the script tag opening
 		if (!(change.newText.startsWith('\n') || change.newText.startsWith('\r\n')) && isNewImport) {
 			change.newText = ts.sys.newLine + change.newText;
 		}

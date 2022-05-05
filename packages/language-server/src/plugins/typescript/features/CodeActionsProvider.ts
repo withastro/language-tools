@@ -247,10 +247,6 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 		skipDestructiveCodeActions = false,
 		cancellationToken: CancellationToken | undefined
 	): Promise<CodeAction[]> {
-		if (document.astroMeta.frontmatter.state !== 'closed') {
-			return [];
-		}
-
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
 
 		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
@@ -262,7 +258,9 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 
 		let changes: ts.FileTextChanges[] = [];
 
-		changes.push(...lang.organizeImports({ fileName: filePath, type: 'file', skipDestructiveCodeActions }, {}, {}));
+		if (document.astroMeta.frontmatter.state === 'closed') {
+			changes.push(...lang.organizeImports({ fileName: filePath, type: 'file', skipDestructiveCodeActions }, {}, {}));
+		}
 
 		document.scriptTags.forEach((scriptTag) => {
 			const { filePath: scriptFilePath, snapshot: scriptTagSnapshot } = getScriptTagSnapshot(
@@ -278,16 +276,19 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 			);
 
 			edits.forEach((edit) => {
+				edit.fileName = tsDoc.filePath;
 				edit.textChanges = edit.textChanges
-					// Since our last line is a (virtual) export, organize imports will try to rewrite it, so let's only take
-					// changes that actually happens inside the script tag
-					.filter((change) => scriptTagSnapshot.isInGenerated(scriptTagSnapshot.positionAt(change.span.start)))
 					.map((change) => {
 						change.span.start = fragment.offsetAt(
 							scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(change.span.start))
 						);
 
 						return change;
+					})
+					// Since our last line is a (virtual) export, organize imports will try to rewrite it, so let's only take
+					// changes that actually happens inside the script tag
+					.filter((change) => {
+						return scriptTagSnapshot.isInGenerated(document.positionAt(change.span.start));
 					});
 
 				return edit;
