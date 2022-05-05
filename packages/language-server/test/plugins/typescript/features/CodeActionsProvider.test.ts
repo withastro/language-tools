@@ -297,7 +297,7 @@ describe('TypeScript Plugin#CodeActionsProvider', () => {
 							edits: [
 								{
 									range: Range.create(5, 0, 5, 0),
-									newText: `${newLine}import { ImportMe } from "./components/imports"${newLine}`,
+									newText: `${newLine}import { ImportMe } from "./components/imports"\n`,
 								},
 							],
 						},
