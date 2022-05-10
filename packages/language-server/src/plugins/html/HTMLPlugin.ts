@@ -6,10 +6,12 @@ import {
 	CompletionItemKind,
 	FoldingRange,
 	Hover,
+	Range,
 	SymbolInformation,
+	FormattingOptions,
 } from 'vscode-languageserver';
 import { doComplete as getEmmetCompletions } from '@vscode/emmet-helper';
-import { getLanguageService } from 'vscode-html-languageservice';
+import { getLanguageService, HTMLFormatConfiguration } from 'vscode-html-languageservice';
 import type { Plugin } from '../interfaces';
 import { ConfigManager } from '../../core/config/ConfigManager';
 import { AstroDocument } from '../../core/documents/AstroDocument';
@@ -110,6 +112,29 @@ export class HTMLPlugin implements Plugin {
 			// Emmet completions change on every keystroke, so they are never complete
 			emmetResults.items.length > 0
 		);
+	}
+
+	async formatDocument(document: AstroDocument, options: FormattingOptions): Promise<TextEdit[]> {
+		const start = document.positionAt(
+			document.astroMeta.frontmatter.state === 'closed' ? document.astroMeta.frontmatter.endOffset! + 3 : 0
+		);
+
+		if (document.astroMeta.frontmatter.state === 'closed') {
+			start.line += 1;
+			start.character = 0;
+		}
+
+		const end = document.positionAt(document.getTextLength());
+
+		const htmlFormatConfig = await this.configManager.getConfig<HTMLFormatConfiguration>('html.format', document.uri);
+
+		// The HTML formatter does some kind of transformation to the script tag that's incomplete
+		// I'm not sure why as it works inside HTML files, but it breaks indentation, we'll instead handle those with TS
+		htmlFormatConfig.contentUnformatted = 'pre,code,textarea,script';
+
+		const edits = this.lang.format(document, Range.create(start, end), { ...htmlFormatConfig, ...options });
+
+		return edits;
 	}
 
 	getFoldingRanges(document: AstroDocument): FoldingRange[] | null {

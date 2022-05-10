@@ -1,7 +1,7 @@
 import { get, merge } from 'lodash';
 import { VSCodeEmmetConfig } from '@vscode/emmet-helper';
 import { LSConfig, LSCSSConfig, LSHTMLConfig, LSTypescriptConfig } from './interfaces';
-import { Connection, DidChangeConfigurationParams } from 'vscode-languageserver';
+import { Connection, FormattingOptions } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
 	FormatCodeSettings,
@@ -97,10 +97,13 @@ export class ConfigManager {
 		return emmetConfig;
 	}
 
-	async getTSFormatConfig(document: TextDocument): Promise<FormatCodeSettings> {
+	async getTSFormatConfig(document: TextDocument, vscodeOptions?: FormattingOptions): Promise<FormatCodeSettings> {
 		const formatConfig = (await this.getConfig<FormatCodeSettings>('typescript.format', document.uri)) ?? {};
 
 		return {
+			tabSize: vscodeOptions?.tabSize,
+			indentSize: vscodeOptions?.tabSize,
+			convertTabsToSpaces: vscodeOptions?.insertSpaces,
 			// We can use \n here since the editor normalizes later on to its line endings.
 			newLineCharacter: '\n',
 			insertSpaceAfterCommaDelimiter: formatConfig.insertSpaceAfterCommaDelimiter ?? true,
