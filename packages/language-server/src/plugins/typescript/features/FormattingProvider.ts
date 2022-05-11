@@ -89,14 +89,17 @@ export class FormattingProviderImpl implements FormattingProvider {
 				if (isWhitespaceOnly(endLine)) {
 					const endLineStartOffset = document.offsetAt(Position.create(scriptTag.endPos.line, 0));
 					const lastLineIndentRange = Range.create(Position.create(scriptTag.endPos.line, 0), scriptTag.endPos);
+					const newText = generateIndent(initialIndentLevel, options);
 
-					edits.push({
-						span: {
-							start: endLineStartOffset,
-							length: lastLineIndentRange.end.character,
-						},
-						newText: generateIndent(initialIndentLevel, options),
-					});
+					if (endLine !== newText) {
+						edits.push({
+							span: {
+								start: endLineStartOffset,
+								length: lastLineIndentRange.end.character,
+							},
+							newText,
+						});
+					}
 				}
 			}
 

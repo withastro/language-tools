@@ -126,7 +126,8 @@ export class HTMLPlugin implements Plugin {
 
 		const end = document.positionAt(document.getTextLength());
 
-		const htmlFormatConfig = await this.configManager.getConfig<HTMLFormatConfiguration>('html.format', document.uri);
+		const htmlFormatConfig =
+			(await this.configManager.getConfig<HTMLFormatConfiguration>('html.format', document.uri)) ?? {};
 
 		// The HTML plugin can't format script tags properly, we'll handle those inside the TypeScript plugin
 		if (htmlFormatConfig.contentUnformatted) {
