@@ -5,9 +5,10 @@ import { LanguageServiceManager } from '../LanguageServiceManager';
 import { toVirtualAstroFilePath } from '../utils';
 import { InlayHintKind, Range } from 'vscode-languageserver-types';
 import ts from 'typescript';
+import { ConfigManager } from '../../../core/config';
 
 export class InlayHintProviderImpl implements InlayHintsProvider {
-	constructor(private languageServiceManager: LanguageServiceManager) {}
+	constructor(private languageServiceManager: LanguageServiceManager, private configManager: ConfigManager) {}
 
 	async getInlayHints(document: AstroDocument, range: Range): Promise<InlayHint[]> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
@@ -18,11 +19,9 @@ export class InlayHintProviderImpl implements InlayHintsProvider {
 		const start = fragment.offsetAt(fragment.getGeneratedPosition(range.start));
 		const end = fragment.offsetAt(fragment.getGeneratedPosition(range.end));
 
-		const inlayHints = lang.provideInlayHints(
-			filePath,
-			{ start, length: end - start },
-			{ includeInlayParameterNameHints: 'all' } // TODO: Replace with actual JavaScript / TypeScript settings
-		);
+		const tsPreferences = await this.configManager.getTSInlayHintsPreferences(document);
+
+		const inlayHints = lang.provideInlayHints(filePath, { start, length: end - start }, tsPreferences);
 
 		return inlayHints.map((hint) => {
 			const result = InlayHint.create(

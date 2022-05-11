@@ -64,7 +64,7 @@ export class TypeScriptPlugin implements Plugin {
 		this.diagnosticsProvider = new DiagnosticsProviderImpl(this.languageServiceManager);
 		this.documentSymbolsProvider = new DocumentSymbolsProviderImpl(this.languageServiceManager);
 		this.semanticTokensProvider = new SemanticTokensProviderImpl(this.languageServiceManager);
-		this.inlayHintsProvider = new InlayHintProviderImpl(this.languageServiceManager);
+		this.inlayHintsProvider = new InlayHintProviderImpl(this.languageServiceManager, this.configManager);
 		this.foldingRangesProvider = new FoldingRangesProviderImpl(this.languageServiceManager);
 	}
 
