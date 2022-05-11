@@ -43,7 +43,7 @@ import { FoldingRangesProviderImpl } from './features/FoldingRangesProvider';
 import { CodeActionsProviderImpl } from './features/CodeActionsProvider';
 import { DefinitionsProviderImpl } from './features/DefinitionsProvider';
 import { InlayHintsProviderImpl } from './features/InlayHintsProvider';
-import { AstroSnapshot } from './snapshots/DocumentSnapshot';
+import { FormattingProviderImpl } from './features/FormattingProvider';
 
 export class TypeScriptPlugin implements Plugin {
 	__name = 'typescript';
@@ -61,6 +61,7 @@ export class TypeScriptPlugin implements Plugin {
 	private readonly inlayHintsProvider: InlayHintsProviderImpl;
 	private readonly semanticTokensProvider: SemanticTokensProviderImpl;
 	private readonly foldingRangesProvider: FoldingRangesProviderImpl;
+	private readonly formattingProvider: FormattingProviderImpl;
 
 	constructor(docManager: DocumentManager, configManager: ConfigManager, workspaceUris: string[]) {
 		this.configManager = configManager;
@@ -76,6 +77,7 @@ export class TypeScriptPlugin implements Plugin {
 		this.semanticTokensProvider = new SemanticTokensProviderImpl(this.languageServiceManager);
 		this.inlayHintsProvider = new InlayHintsProviderImpl(this.languageServiceManager, this.configManager);
 		this.foldingRangesProvider = new FoldingRangesProviderImpl(this.languageServiceManager);
+		this.formattingProvider = new FormattingProviderImpl(this.languageServiceManager, this.configManager);
 	}
 
 	async doHover(document: AstroDocument, position: Position): Promise<Hover | null> {
@@ -117,50 +119,7 @@ export class TypeScriptPlugin implements Plugin {
 	}
 
 	async formatDocument(document: AstroDocument, options: FormattingOptions): Promise<TextEdit[]> {
-		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
-
-		const formatConfig = await this.configManager.getTSFormatConfig(document, options);
-
-		let frontmatterEdits: ts.TextChange[] = [];
-		let scriptTagsEdits: ts.TextChange[] = [];
-
-		if (document.astroMeta.frontmatter.state === 'closed') {
-			const start = document.astroMeta.frontmatter.startOffset!;
-			const end = document.astroMeta.frontmatter.endOffset!;
-			frontmatterEdits = lang.getFormattingEditsForRange(filePath, start, end, formatConfig);
-		}
-
-		document.scriptTags.forEach((scriptTag) => {
-			const { filePath: scriptFilePath, snapshot: scriptTagSnapshot } = getScriptTagSnapshot(
-				tsDoc as AstroSnapshot,
-				document,
-				scriptTag.container
-			);
-
-			let edits = lang.getFormattingEditsForDocument(scriptFilePath, formatConfig);
-
-			edits = edits
-				.map((edit) => {
-					edit.span.start = document.offsetAt(
-						scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(edit.span.start))
-					);
-
-					return edit;
-				})
-				.filter((edit) => {
-					return (
-						scriptTagSnapshot.isInGenerated(document.positionAt(edit.span.start)) && scriptTag.end !== edit.span.start
-					);
-				});
-
-			scriptTagsEdits.push(...edits);
-		});
-
-		return [...frontmatterEdits, ...scriptTagsEdits].map((edit) => ({
-			range: convertRange(document, edit.span),
-			newText: edit.newText,
-		}));
+		return this.formattingProvider.formatDocument(document, options);
 	}
 
 	async getFoldingRanges(document: AstroDocument): Promise<FoldingRange[] | null> {

@@ -128,9 +128,12 @@ export class HTMLPlugin implements Plugin {
 
 		const htmlFormatConfig = await this.configManager.getConfig<HTMLFormatConfiguration>('html.format', document.uri);
 
-		// The HTML formatter does some kind of transformation to the script tag that's incomplete
-		// I'm not sure why as it works inside HTML files, but it breaks indentation, we'll instead handle those with TS
-		htmlFormatConfig.contentUnformatted = 'pre,code,textarea,script';
+		// The HTML plugin can't format script tags properly, we'll handle those inside the TypeScript plugin
+		if (htmlFormatConfig.contentUnformatted) {
+			htmlFormatConfig.contentUnformatted = htmlFormatConfig.contentUnformatted + ',script';
+		} else {
+			htmlFormatConfig.contentUnformatted = 'script';
+		}
 
 		const edits = this.lang.format(document, Range.create(start, end), { ...htmlFormatConfig, ...options });
 
