@@ -7,7 +7,7 @@ import { InlayHintKind, Range } from 'vscode-languageserver-types';
 import ts from 'typescript';
 import { ConfigManager } from '../../../core/config';
 
-export class InlayHintProviderImpl implements InlayHintsProvider {
+export class InlayHintsProviderImpl implements InlayHintsProvider {
 	constructor(private languageServiceManager: LanguageServiceManager, private configManager: ConfigManager) {}
 
 	async getInlayHints(document: AstroDocument, range: Range): Promise<InlayHint[]> {
