@@ -1,15 +1,9 @@
-import { get, merge } from 'lodash';
+import { merge } from 'lodash';
 import { VSCodeEmmetConfig } from '@vscode/emmet-helper';
-import { LSConfig, LSCSSConfig, LSHTMLConfig, LSTypescriptConfig } from './interfaces';
+import { LSConfig, LSCSSConfig, LSFormatConfig, LSHTMLConfig, LSTypescriptConfig } from './interfaces';
 import { Connection, FormattingOptions } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import {
-	FormatCodeSettings,
-	InlayHintsOptions,
-	SemicolonPreference,
-	TsConfigSourceFile,
-	UserPreferences,
-} from 'typescript';
+import { FormatCodeSettings, InlayHintsOptions, SemicolonPreference, UserPreferences } from 'typescript';
 
 export const defaultLSConfig: LSConfig = {
 	typescript: {
@@ -37,6 +31,10 @@ export const defaultLSConfig: LSConfig = {
 		completions: { enabled: true, emmet: true },
 		tagComplete: { enabled: true },
 		documentSymbols: { enabled: true },
+	},
+	format: {
+		indentFrontmatter: true,
+		newLineAfterFrontmatter: true,
 	},
 };
 
@@ -95,6 +93,15 @@ export class ConfigManager {
 		const emmetConfig = (await this.getConfig<VSCodeEmmetConfig>('emmet', document.uri)) ?? {};
 
 		return emmetConfig;
+	}
+
+	async getAstroFormatConfig(document: TextDocument): Promise<LSFormatConfig> {
+		const astroFormatConfig = (await this.getConfig<LSFormatConfig>('astro.format', document.uri)) ?? {};
+
+		return {
+			indentFrontmatter: astroFormatConfig.indentFrontmatter ?? true,
+			newLineAfterFrontmatter: astroFormatConfig.newLineAfterFrontmatter ?? true,
+		};
 	}
 
 	async getTSFormatConfig(document: TextDocument, vscodeOptions?: FormattingOptions): Promise<FormatCodeSettings> {

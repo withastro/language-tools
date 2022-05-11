@@ -20,9 +20,31 @@ export class FormattingProviderImpl implements FormattingProvider {
 		let scriptTagsEdits: ts.TextChange[] = [];
 
 		if (document.astroMeta.frontmatter.state === 'closed') {
-			const start = document.astroMeta.frontmatter.startOffset!;
-			const end = document.astroMeta.frontmatter.endOffset!;
-			frontmatterEdits = lang.getFormattingEditsForRange(filePath, start, end, formatConfig);
+			const start = document.positionAt(document.astroMeta.frontmatter.startOffset! + 3);
+			start.line += 1;
+			start.character = 0;
+
+			const startOffset = document.offsetAt(start);
+			const endOffset = document.astroMeta.frontmatter.endOffset!;
+
+			const astroFormatConfig = await this.configManager.getAstroFormatConfig(document);
+			const settings: FormatCodeSettings = {
+				...formatConfig,
+				baseIndentSize: astroFormatConfig.indentFrontmatter ? formatConfig.tabSize ?? 0 : undefined,
+			};
+
+			frontmatterEdits = lang.getFormattingEditsForRange(filePath, startOffset, endOffset, settings);
+
+			if (astroFormatConfig.newLineAfterFrontmatter) {
+				const templateStart = document.positionAt(endOffset + 3);
+				templateStart.line += 1;
+				templateStart.character = 0;
+
+				frontmatterEdits.push({
+					span: { start: document.offsetAt(templateStart), length: 0 },
+					newText: '\n',
+				});
+			}
 		}
 
 		document.scriptTags.forEach((scriptTag) => {
