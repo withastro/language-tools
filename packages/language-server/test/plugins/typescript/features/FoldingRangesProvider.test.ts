@@ -20,7 +20,7 @@ describe('TypeScript Plugin#FoldingRangesProvider', () => {
 
 		const foldingRanges = await provider.getFoldingRanges(document);
 
-		expect(foldingRanges).to.not.be.empty
+		expect(foldingRanges).to.not.be.empty;
 	});
 
 	it('does not provide folding ranges for ignored tags', async () => {
@@ -30,12 +30,11 @@ describe('TypeScript Plugin#FoldingRangesProvider', () => {
 
 		// TypeScript return a folding range for the script tag sometimes itself, this is inconsistent between Windows and Unix
 		// Either way however, there shouldn't ever be more than 0 or 1 folding range in this file, so this test is still ok
-		expect(foldingRanges.length).to.be.lessThanOrEqual(1)
+		expect(foldingRanges.length).to.be.lessThanOrEqual(1);
 	});
 
 	it('provide folding ranges inside script tags', async () => {
 		const { provider, document } = setup('scriptTag.astro');
-		document.version++;
 
 		const foldingRanges = await provider.getFoldingRanges(document);
 
