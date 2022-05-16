@@ -445,16 +445,16 @@
           "begin": "\\{",
           "beginCaptures": {
             "0": {
-              "name": "punctuation.definition.generic.begin.html"
+              "name": "punctuation.section.embedded.begin.tsx"
             }
           },
           "end": "\\}",
           "endCaptures": {
             "0": {
-              "name": "punctuation.definition.generic.end.html"
+              "name": "punctuation.section.embedded.end.tsx"
             }
           },
-          "name": "expression.embbeded.astro",
+          "name": "expression.embedded.astro",
           "contentName": "source.tsx",
           "patterns": [
             {
@@ -500,10 +500,11 @@
       ]
     },
     "frontmatter": {
+      "comment": "The frontmatter is treated as comments in order to get the \"faded\" look",
       "begin": "\\A(-{3})\\s*$",
       "beginCaptures": {
         "1": {
-          "name": "comment.block.html"
+          "name": "comment"
         }
       },
       "contentName": "source.ts",
@@ -515,7 +516,7 @@
       "end": "(^|\\G)(-{3})|\\.{3}\\s*$",
       "endCaptures": {
         "2": {
-          "name": "comment.block.html"
+          "name": "comment"
         }
       }
     },
