@@ -36,8 +36,9 @@ export class AstroPlugin implements Plugin {
 		// Currently editing frontmatter, don't fold
 		if (frontmatter.state !== 'closed') return foldingRanges;
 
-		const start = document.positionAt(frontmatter.startOffset as number);
-		const end = document.positionAt((frontmatter.endOffset as number) - 3);
+		const start = document.positionAt(frontmatter.startOffset! + 3);
+		const end = document.positionAt(frontmatter.endOffset! - 1);
+
 		return [
 			{
 				startLine: start.line,
