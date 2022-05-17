@@ -132,6 +132,48 @@
       },
       "patterns": [
         {
+          "comment": "Treat script tag with application/ld+json as JSON, why not",
+          "begin": "\\G(?=\\s*[^>]*?type\\s*=\\s*(['\"]|)(?i:application/ld\\+json)\\1)",
+          "end": "(?=</|/>)",
+          "patterns": [
+            {
+              "begin": "(?<=>)(?!</)",
+              "end": "(?=</)",
+              "contentName": "source.json",
+              "patterns": [{ "include": "source.json" }]
+            },
+            { "include": "#html:tag-attributes" }
+          ]
+        },
+        {
+          "comment": "Treat script tag with is:raw as plain text",
+          "begin": "\\G(?=\\s*[^>]*?is:raw)",
+          "end": "(?=</|/>)",
+          "patterns": [
+            {
+              "begin": "(?<=>)(?!</)",
+              "end": "(?=</)",
+              "contentName": "source.plaintext",
+              "patterns": [{ "include": "source.plaintext" }]
+            },
+            { "include": "#html:tag-attributes" }
+          ]
+        },
+        {
+          "comment": "Treat script tag with type=module or type=text/javascript as JS",
+          "begin": "\\G(?=\\s*[^>]*?type\\s*=\\s*(['\"]|)(?i:module|text/javascript)\\1)",
+          "end": "(?=</|/>)",
+          "patterns": [
+            {
+              "begin": "(?<=>)(?!</)",
+              "end": "(?=</)",
+              "contentName": "source.js",
+              "patterns": [{ "include": "source.js" }]
+            },
+            { "include": "#html:tag-attributes" }
+          ]
+        },
+        {
           "begin": "\\G(?=\\s*[^>]*?lang\\s*=\\s*(['\"]|)(?i:jsx?|javascript)\\1)",
           "end": "(?=</|/>)",
           "patterns": [
@@ -171,6 +213,19 @@
           ]
         },
         {
+          "comment": "Treat anything with an unknown type as unknown (plaintext)",
+          "begin": "\\G(?=\\s*[^>]*?type\\s*=\\s*(['\"]|)\\1)",
+          "end": "(?=</|/>)",
+          "patterns": [
+            {
+              "begin": "(?<=>)(?!</)",
+              "end": "(?=</)",
+              "name": "source.unknown"
+            },
+            { "include": "#html:tag-attributes" }
+          ]
+        },
+        {
           "begin": "(?<=>)(?!</)",
           "end": "(?=</)",
           "contentName": "source.js",
@@ -205,6 +260,20 @@
         }
       },
       "patterns": [
+        {
+          "comment": "Treat style tag with is:raw as plain text",
+          "begin": "\\G(?=\\s*[^>]*?is:raw)",
+          "end": "(?=</|/>)",
+          "patterns": [
+            {
+              "begin": "(?<=>)(?!</)",
+              "end": "(?=</)",
+              "contentName": "source.plaintext",
+              "patterns": [{ "include": "source.plaintext" }]
+            },
+            { "include": "#html:tag-attributes" }
+          ]
+        },
         {
           "begin": "\\G(?=\\s*[^>]*?lang\\s*=\\s*(['\"]|)(?i:css)\\1)",
           "end": "(?=</|/>)",

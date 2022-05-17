@@ -1,0 +1,39 @@
+><script type="application/ld+json">
+#^ source.astro punctuation.definition.tag.begin.html
+# ^^^^^^ source.astro entity.name.tag.html
+#       ^ source.astro
+#        ^^^^ source.astro meta.attribute.type.html entity.other.attribute-name.html
+#            ^ source.astro meta.attribute.type.html punctuation.separator.key-value.html
+#             ^ source.astro string.quoted.double.html punctuation.definition.string.begin.html
+#              ^^^^^^^^^^^^^^^^^^^ source.astro string.quoted.double.html
+#                                 ^ source.astro string.quoted.double.html punctuation.definition.string.end.html
+#                                  ^ source.astro punctuation.definition.tag.end.html
+>  {
+#^^^^ source.astro
+>    "@context": "https://schema.org/",
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.astro
+>    "@type": "Recipe",
+#^^^^^^^^^^^^^^^^^^^^^^^ source.astro
+>    "name": "Party Coffee Cake",
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.astro
+>    "author": {
+#^^^^^^^^^^^^^^^^ source.astro
+>      "@type": "Person",
+#^^^^^^^^^^^^^^^^^^^^^^^^^ source.astro
+>      "name": "Mary Stone"
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.astro
+>    },
+#^^^^^^^ source.astro
+>    "datePublished": "2018-03-10",
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.astro
+>    "description": "This coffee cake is awesome and perfect for parties.",
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.astro
+>    "prepTime": "PT20M"
+#^^^^^^^^^^^^^^^^^^^^^^^^ source.astro
+>  }
+#^^^^ source.astro
+></script>
+#^^ source.astro punctuation.definition.tag.begin.html
+#  ^^^^^^ source.astro entity.name.tag.html
+#        ^ source.astro punctuation.definition.tag.end.html
+>
