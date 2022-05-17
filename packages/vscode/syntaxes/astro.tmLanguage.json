@@ -368,6 +368,41 @@
     "html:element": {
       "patterns": [
         {
+          "name": "astro.element.raw",
+          "begin": "(<)([^/?!\\s<>]+)(.+is:raw.*?)(>)",
+          "end": "(</)([^/?!\\s<>]+)(?=\\s|/?>)(>)",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html"
+            },
+            "2": {
+              "name": "entity.name.tag.html"
+            },
+            "3": {
+              "patterns": [
+                {
+                  "include": "#astro:attribute"
+                }
+              ]
+            },
+            "4": {
+              "name": "punctuation.definition.tag.end.html"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html"
+            },
+            "2": {
+              "name": "entity.name.tag.html"
+            },
+            "3": {
+              "name": "punctuation.definition.tag.end.html"
+            }
+          },
+          "contentName": "source.plaintext"
+        },
+        {
           "name": "meta.tag.any.$2.start.html",
           "begin": "(<)([^/?!\\s<>]+)(?=\\s|/?>)",
           "beginCaptures": {
