@@ -153,8 +153,8 @@
             {
               "begin": "(?<=>)(?!</)",
               "end": "(?=</)",
-              "contentName": "source.plaintext",
-              "patterns": [{ "include": "source.plaintext" }]
+              "contentName": "source.unknown",
+              "patterns": [{ "include": "source.unknown" }]
             },
             { "include": "#html:tag-attributes" }
           ]
@@ -213,7 +213,7 @@
           ]
         },
         {
-          "comment": "Treat anything with an unknown type as unknown (plaintext)",
+          "comment": "Treat anything with an unknown type as unknown",
           "begin": "\\G(?=\\s*[^>]*?type\\s*=\\s*(['\"]|)\\1)",
           "end": "(?=</|/>)",
           "patterns": [
@@ -268,8 +268,8 @@
             {
               "begin": "(?<=>)(?!</)",
               "end": "(?=</)",
-              "contentName": "source.plaintext",
-              "patterns": [{ "include": "source.plaintext" }]
+              "contentName": "source.unknown",
+              "patterns": [{ "include": "source.unknown" }]
             },
             { "include": "#html:tag-attributes" }
           ]
@@ -469,7 +469,7 @@
               "name": "punctuation.definition.tag.end.html"
             }
           },
-          "contentName": "source.plaintext"
+          "contentName": "source.unknown"
         },
         {
           "name": "meta.tag.any.$2.start.html",

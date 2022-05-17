@@ -5,7 +5,7 @@
 #     ^^^^^^ source.astro astro.element.raw meta.attribute.is:raw.html entity.other.attribute-name.html
 #           ^ source.astro astro.element.raw punctuation.definition.tag.end.html
 >	Hello
-#^^^^^^^ source.astro astro.element.raw source.plaintext
+#^^^^^^^ source.astro astro.element.raw source.unknown
 ></div>
 #^^ source.astro astro.element.raw punctuation.definition.tag.begin.html
 #  ^^^ source.astro astro.element.raw entity.name.tag.html
@@ -26,7 +26,7 @@
 #                             ^^^^^^ source.astro astro.element.raw meta.attribute.is:raw.html entity.other.attribute-name.html
 #                                   ^ source.astro astro.element.raw punctuation.definition.tag.end.html
 >	Hello
-#^^^^^^^ source.astro astro.element.raw source.plaintext
+#^^^^^^^ source.astro astro.element.raw source.unknown
 ></div>
 #^^ source.astro astro.element.raw punctuation.definition.tag.begin.html
 #  ^^^ source.astro astro.element.raw entity.name.tag.html
@@ -47,7 +47,7 @@
 #                          ^^^^^^^^^ source.astro astro.element.raw meta.attribute.aria-busy.html entity.other.attribute-name.html
 #                                   ^ source.astro astro.element.raw punctuation.definition.tag.end.html
 >	Hello
-#^^^^^^^ source.astro astro.element.raw source.plaintext
+#^^^^^^^ source.astro astro.element.raw source.unknown
 ></div>
 #^^ source.astro astro.element.raw punctuation.definition.tag.begin.html
 #  ^^^ source.astro astro.element.raw entity.name.tag.html

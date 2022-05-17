@@ -5,7 +5,7 @@
 #        ^^^^^^ source.astro meta.attribute.is:raw.html entity.other.attribute-name.html
 #              ^ source.astro punctuation.definition.tag.end.html
 >	"hello"
-#^^^^^^^^^ source.astro
+#^^^^^^^^^ source.astro source.unknown
 ></script>
 #^^ source.astro punctuation.definition.tag.begin.html
 #  ^^^^^^ source.astro entity.name.tag.html
