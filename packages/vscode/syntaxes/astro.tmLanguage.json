@@ -185,20 +185,6 @@
           ]
         },
         {
-          "comment": "Treat script tag with is:raw as plain text",
-          "begin": "\\G(?=\\s*[^>]*?is:raw)",
-          "end": "(?=</|/>)",
-          "patterns": [
-            {
-              "begin": "(?<=>)(?!</)",
-              "end": "(?=</)",
-              "contentName": "source.unknown",
-              "patterns": [{ "include": "source.unknown" }]
-            },
-            { "include": "#html:tag-attributes" }
-          ]
-        },
-        {
           "comment": "Treat script tag with JS-compatible types as JS",
           "begin": "\\G(?=\\s*[^>]*?type\\s*=\\s*(['\"]|)(?i:module|(?:text/javascript|text/partytown|application/node|application/javascript))\\1)",
           "end": "(?=</|/>)",
@@ -299,20 +285,6 @@
         }
       },
       "patterns": [
-        {
-          "comment": "Treat style tag with is:raw as plain text",
-          "begin": "\\G(?=\\s*[^>]*?is:raw)",
-          "end": "(?=</|/>)",
-          "patterns": [
-            {
-              "begin": "(?<=>)(?!</)",
-              "end": "(?=</)",
-              "contentName": "source.unknown",
-              "patterns": [{ "include": "source.unknown" }]
-            },
-            { "include": "#html:tag-attributes" }
-          ]
-        },
         {
           "begin": "\\G(?=\\s*[^>]*?lang\\s*=\\s*(['\"]|)(?i:css)\\1)",
           "end": "(?=</|/>)",
