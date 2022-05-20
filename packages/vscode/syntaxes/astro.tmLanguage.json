@@ -132,7 +132,7 @@
       },
       "patterns": [
         {
-          "comment": "Treat script tag with application/ld+json as JSON, why not",
+          "comment": "Treat script tag with application/ld+json as JSON. This needs to be higher than is:raw since it's a very possible situation to have is:raw on a JSON script tag",
           "begin": "\\G(?=\\s*[^>]*?type\\s*=\\s*(['\"]|)(?i:application/ld\\+json)\\1)",
           "end": "(?=</|/>)",
           "patterns": [
@@ -160,8 +160,8 @@
           ]
         },
         {
-          "comment": "Treat script tag with type=module or type=text/javascript as JS",
-          "begin": "\\G(?=\\s*[^>]*?type\\s*=\\s*(['\"]|)(?i:module|text/javascript)\\1)",
+          "comment": "Treat script tag with JS-compatible types as JS",
+          "begin": "\\G(?=\\s*[^>]*?type\\s*=\\s*(['\"]|)(?i:module|(?:text/javascript|text/partytown|application/node|application/javascript))\\1)",
           "end": "(?=</|/>)",
           "patterns": [
             {
@@ -169,6 +169,19 @@
               "end": "(?=</)",
               "contentName": "source.js",
               "patterns": [{ "include": "source.js" }]
+            },
+            { "include": "#html:tag-attributes" }
+          ]
+        },
+        {
+          "comment": "Treat anything with an unknown type as unknown",
+          "begin": "\\G(?=\\s*[^>]*?type\\s*=\\s*(['\"]|)\\1)",
+          "end": "(?=</|/>)",
+          "patterns": [
+            {
+              "begin": "(?<=>)(?!</)",
+              "end": "(?=</)",
+              "name": "source.unknown"
             },
             { "include": "#html:tag-attributes" }
           ]
@@ -208,19 +221,6 @@
               "end": "(?=</)",
               "contentName": "source.tsx",
               "patterns": [{ "include": "source.tsx" }]
-            },
-            { "include": "#html:tag-attributes" }
-          ]
-        },
-        {
-          "comment": "Treat anything with an unknown type as unknown",
-          "begin": "\\G(?=\\s*[^>]*?type\\s*=\\s*(['\"]|)\\1)",
-          "end": "(?=</|/>)",
-          "patterns": [
-            {
-              "begin": "(?<=>)(?!</)",
-              "end": "(?=</)",
-              "name": "source.unknown"
             },
             { "include": "#html:tag-attributes" }
           ]
