@@ -46,12 +46,12 @@
   "dependencies": {
     "@astrojs/language-server": "0.19.0",
     "@astrojs/ts-plugin": "0.2.1",
-    "vscode-languageclient": "^8.0.1",
-    "vscode-tmgrammar-test": "^0.1.1"
+    "vscode-languageclient": "^8.0.1"
   },
   "devDependencies": {
     "@types/vscode": "^1.67.0",
     "@vscode/test-electron": "^2.1.3",
+    "vscode-tmgrammar-test": "^0.1.1",
     "astro-scripts": "file:../../scripts"
   },
   "main": "./dist/index.js",
