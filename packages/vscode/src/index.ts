@@ -1,4 +1,16 @@
-import { window, commands, workspace, ExtensionContext, TextDocument, Position, TextDocumentChangeEvent } from 'vscode';
+import {
+	window,
+	commands,
+	workspace,
+	ExtensionContext,
+	TextDocument,
+	Position,
+	TextDocumentChangeEvent,
+	ViewColumn,
+	RelativePattern,
+	WorkspaceFolder,
+	Uri,
+} from 'vscode';
 import {
 	LanguageClient,
 	RequestType,
@@ -8,6 +20,7 @@ import {
 } from 'vscode-languageclient/node';
 import { LanguageClientOptions } from 'vscode-languageclient';
 import { activateTagClosing } from './html/autoClose.js';
+import { getCurrentServer, sleep } from './utils.js';
 
 const TagCloseRequest: RequestType<TextDocumentPositionParams, string, any> = new RequestType('html/tag');
 
@@ -91,6 +104,50 @@ export async function activate(context: ExtensionContext) {
 	context.subscriptions.push(
 		commands.registerCommand('astro.restartLanguageServer', async () => {
 			await restartClient(true);
+		}),
+		commands.registerCommand('astro.openDevServerPanel', async () => {
+			// Let's first try to find if we have a dev server currently running already
+			let url = await getDevServerUrl();
+
+			// If not, let's run one
+			if (!url) {
+				const terminal = window.createTerminal({ name: 'astro:dev' });
+				terminal.show();
+				terminal.sendText('node ./node_modules/astro/astro.js dev');
+
+				// Wait for the dev server to start
+				await sleep(2500);
+
+				url = await getDevServerUrl();
+
+				if (!url) {
+					window.showErrorMessage(
+						'Could not find a local server. This might be because the dev server took too long to start'
+					);
+					return;
+				}
+			}
+
+			commands.executeCommand('simpleBrowser.api.open', url, {
+				viewColumn: ViewColumn.Beside,
+			});
+
+			/**
+			 * Return a currently running dev server's URL
+			 */
+			async function getDevServerUrl() {
+				if (window.activeTextEditor) {
+					const workspaceFolder = workspace.getWorkspaceFolder(window.activeTextEditor?.document.uri);
+
+					if (workspaceFolder) {
+						return await getCurrentServer(workspaceFolder);
+					}
+				} else if (workspace.workspaceFolders && workspace.workspaceFolders.length === 1) {
+					return await getCurrentServer(workspace.workspaceFolders[0]);
+				} else {
+					return await getCurrentServer();
+				}
+			}
 		})
 	);
 
