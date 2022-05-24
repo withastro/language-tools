@@ -31,6 +31,8 @@
   "dependencies": {
     "@astrojs/language-server": "0.19.0",
     "@astrojs/ts-plugin": "0.2.1",
+    "@proload/core": "^0.3.2",
+    "@proload/plugin-typescript": "^0.2.1",
     "vscode-languageclient": "^8.0.1",
     "vscode-tmgrammar-test": "^0.1.1"
   },
@@ -64,6 +66,11 @@
       {
         "command": "astro.restartLanguageServer",
         "title": "Astro: Restart Language Server"
+      },
+      {
+        "command": "astro.openDevServerPanel",
+        "title": "Astro: Open dev server",
+        "enablement": "workbenchState == folder || workbenchState == workspace"
       }
     ],
     "configuration": {
