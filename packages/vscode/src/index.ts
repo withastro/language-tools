@@ -1,16 +1,12 @@
 import {
 	commands,
 	ExtensionContext,
-	extensions,
-	IndentAction,
-	languages,
 	Position,
 	ProgressLocation,
 	Range,
 	TextDocument,
 	TextDocumentChangeEvent,
 	Uri,
-	ViewColumn,
 	window,
 	workspace,
 	WorkspaceEdit
@@ -87,14 +83,14 @@ export async function activate(context: ExtensionContext) {
 
 	workspace.onDidChangeTextDocument((params: TextDocumentChangeEvent) => {
 		if (
-			['vue', 'astro', 'javascript', 'typescript', 'javascriptreact', 'typescriptreact'].includes(
+			['vue', 'svelte', 'javascript', 'typescript', 'javascriptreact', 'typescriptreact'].includes(
 				params.document.languageId
 			)
 		) {
 			getLSClient().sendNotification('$/onDidChangeNonAstroFile', {
 				uri: params.document.uri.toString(true),
 				// We only support partial changes for JS/TS files
-				changes: ['vue', 'astro'].includes(params.document.languageId)
+				changes: ['vue', 'svelte'].includes(params.document.languageId)
 					? undefined
 					: params.contentChanges.map((c) => ({
 							range: {

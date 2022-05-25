@@ -27,30 +27,20 @@ describe('UpdateImportsProviderImpl', () => {
     afterEach(() => sinon.restore());
 
     it('updates imports', async () => {
-        const { provider, dir, document } = await setup('updateimports.astro');
+        const { provider, fixturesDir, document } = await setup('updateimports.astro');
         const workspaceEdit = await provider.updateImports({
             // imported files both old and new have to actually exist, so we just use some other test files
-            oldUri: pathToUrl(join(dir, 'components', 'component.astro')),
-            newUri: pathToUrl(join(dir, 'documentation.astro'))
+            oldUri: join(fixturesDir, 'components', 'component.astro'),
+            newUri: join(fixturesDir, 'documentation.astro')
         });
 
-        console.log(workspaceEdit?.documentChanges);
-
-		// expect(workspaceEdit?.documentChanges).to.deep.equal([
-        //     TextDocumentEdit.create(OptionalVersionedTextDocumentIdentifier.create(document.url, null), [
-        //         TextEdit.replace(
-        //             Range.create(Position.create(2, 17), Position.create(2, 49)),
-        //             './documentation.astro'
-        //         )
-        //     ])
-        // ]);
-        // assert.deepStrictEqual(workspaceEdit?.documentChanges, [
-        //     TextDocumentEdit.create(OptionalVersionedTextDocumentIdentifier.create(document.url, null), [
-        //         TextEdit.replace(
-        //             Range.create(Position.create(2, 17), Position.create(2, 49)),
-        //             './documentation.astro'
-        //         )
-        //     ])
-        // ]);
+		expect(workspaceEdit?.documentChanges).to.deep.equal([
+            TextDocumentEdit.create(OptionalVersionedTextDocumentIdentifier.create(document.url, null), [
+                TextEdit.replace(
+                    Range.create(Position.create(2, 17), Position.create(2, 49)),
+                    './documentation.astro'
+                )
+            ])
+        ]);
     });
 });

@@ -1,7 +1,5 @@
 import * as vscode from 'vscode-languageserver';
 import {
-	ApplyWorkspaceEditParams,
-	ApplyWorkspaceEditRequest,
 	CodeActionKind,
 	DidChangeConfigurationNotification,
 	InlayHintRequest,
@@ -12,7 +10,6 @@ import {
 	SemanticTokensRequest,
 	ShowMessageNotification,
 	TextDocumentIdentifier,
-	WorkspaceEdit,
 } from 'vscode-languageserver';
 import { ConfigManager, defaultLSConfig } from './core/config/ConfigManager';
 import { DocumentManager } from './core/documents/DocumentManager';
