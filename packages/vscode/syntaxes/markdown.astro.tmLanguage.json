@@ -5,9 +5,37 @@
   "patterns": [
     {
       "include": "#fenced_code_block_astro"
+    },
+    {
+      "include": "#astro:expressions"
     }
   ],
   "repository": {
+    "astro:expressions": {
+      "patterns": [
+        {
+          "begin": "\\{",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.section.embedded.begin.ts"
+            }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.section.embedded.end.ts"
+            }
+          },
+          "name": "expression.embedded.astro",
+          "contentName": "source.ts",
+          "patterns": [
+            {
+              "include": "source.ts"
+            }
+          ]
+        }
+      ]
+    },
     "fenced_code_block_astro": {
       "name": "markup.fenced_code.block.markdown",
       "begin": "(^|\\G)(\\s*)(\\`{3,}|~{3,})\\s*(?i:astro(\\s+[^`~]*)?$)",
