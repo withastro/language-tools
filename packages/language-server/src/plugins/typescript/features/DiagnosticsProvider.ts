@@ -16,7 +16,7 @@ interface BoundaryParseResults {
 
 // List of codes:
 // https://github.com/Microsoft/TypeScript/blob/main/src/compiler/diagnosticMessages.json
-enum DiagnosticCodes {
+export enum DiagnosticCodes {
 	SPREAD_EXPECTED = 1005, // '{0}' expected.
 	DUPLICATED_JSX_ATTRIBUTES = 17001, // JSX elements cannot have multiple attributes with the same name.
 	MUST_HAVE_PARENT_ELEMENT = 2657, // JSX expressions must have one parent element.
@@ -211,7 +211,7 @@ function isNoJSXMustHaveOneParent(diagnostic: Diagnostic) {
 }
 
 function isNoImportImplicitAnyType(diagnostic: Diagnostic) {
-	return diagnostic.code !== DiagnosticCodes.NO_DECL_IMPLICIT_ANY_TYPE
+	return diagnostic.code !== DiagnosticCodes.NO_DECL_IMPLICIT_ANY_TYPE;
 }
 
 /**
