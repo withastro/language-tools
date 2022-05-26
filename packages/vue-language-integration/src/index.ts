@@ -4,7 +4,7 @@ export const languageId = 'vue';
 export const extension = '.vue';
 
 export function toTSX(code: string, className: string): string {
-	let result = `export default function ${className}__AstroComponent_(): any {}`;
+	let result = `export default function ${className}__AstroComponent_(_props: Record<string, any>): any {}`;
 
 	// NOTE: As you can expect, using regexes for this is not exactly the most reliable way of doing things
 	// However, I couldn't figure out a way to do it using Vue's compiler, I tried looking at how Volar does it, but I
