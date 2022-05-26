@@ -14,6 +14,13 @@ export function toTSX(code: string, className: string): string {
 	try {
 		const parsedResult = parse(code);
 
+		if (parsedResult.errors.length > 0) {
+			return `
+				let ${className}__AstroComponent_: Error
+				export default ${className}__AstroComponent_
+			`;
+		}
+
 		if (parsedResult.descriptor.scriptSetup) {
 			const definePropsType = parsedResult.descriptor.scriptSetup.content.match(/defineProps<([\s\S]+)>/m);
 
