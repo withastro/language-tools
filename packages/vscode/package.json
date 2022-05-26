@@ -229,6 +229,12 @@
           "type": "boolean",
           "default": true,
           "title": "Formatting: Add a line return between the frontmatter and the template"
+        },
+        "astro.devServer.port": {
+          "type": "integer",
+          "default": 3000,
+          "title": "Dev Server: Port to check for a local server in cases where it cannot be inferred from the project",
+          "markdownDescription": "**Caution**: This should only be used in cases where you're setting the dev server port manually using a launch parameter! To change the port used by Astro when starting the dev server, please use the according setting inside your Astro's project config file (`astro.config.mjs`)\n\n[Astro reference](https://docs.astro.build/en/reference/configuration-reference/#serverport)"
         }
       }
     },

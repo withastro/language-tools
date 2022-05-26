@@ -7,9 +7,6 @@ import {
 	Position,
 	TextDocumentChangeEvent,
 	ViewColumn,
-	RelativePattern,
-	WorkspaceFolder,
-	Uri,
 } from 'vscode';
 import {
 	LanguageClient,
@@ -136,16 +133,18 @@ export async function activate(context: ExtensionContext) {
 			 * Return a currently running dev server's URL
 			 */
 			async function getDevServerUrl() {
+				const configuredPort = workspace.getConfiguration('astro.devServer').get<number>('port') ?? 3000;
+
 				if (window.activeTextEditor) {
 					const workspaceFolder = workspace.getWorkspaceFolder(window.activeTextEditor?.document.uri);
 
 					if (workspaceFolder) {
-						return await getCurrentServer(workspaceFolder);
+						return await getCurrentServer(workspaceFolder, configuredPort);
 					}
 				} else if (workspace.workspaceFolders && workspace.workspaceFolders.length === 1) {
-					return await getCurrentServer(workspace.workspaceFolders[0]);
+					return await getCurrentServer(workspace.workspaceFolders[0], configuredPort);
 				} else {
-					return await getCurrentServer();
+					return await getCurrentServer(undefined, configuredPort);
 				}
 			}
 		})
