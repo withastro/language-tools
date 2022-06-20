@@ -28,7 +28,7 @@ describe('Astro Plugin#CompletionsProvider', () => {
 		expect(completions.items).to.deep.equal([
 			{
 				commitCharacters: [],
-				detail: 'Component script',
+				detail: 'Create component script block',
 				insertText: '---\n$0\n---',
 				insertTextFormat: 2,
 				kind: 15,
