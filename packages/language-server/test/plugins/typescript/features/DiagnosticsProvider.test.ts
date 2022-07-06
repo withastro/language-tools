@@ -1,4 +1,4 @@
-import { config, expect } from 'chai';
+import { expect } from 'chai';
 import { DiagnosticSeverity, Range } from 'vscode-languageserver-types';
 import { createEnvironment } from '../../../utils';
 import { LanguageServiceManager } from '../../../../src/plugins/typescript/LanguageServiceManager';
