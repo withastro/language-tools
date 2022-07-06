@@ -1,4 +1,4 @@
-import { merge } from 'lodash';
+import { merge, get } from 'lodash';
 import { VSCodeEmmetConfig } from '@vscode/emmet-helper';
 import { LSConfig, LSCSSConfig, LSFormatConfig, LSHTMLConfig, LSTypescriptConfig } from './interfaces';
 import { Connection, FormattingOptions } from 'vscode-languageserver';
@@ -8,6 +8,7 @@ import { FormatCodeSettings, InlayHintsOptions, SemicolonPreference, UserPrefere
 export const defaultLSConfig: LSConfig = {
 	typescript: {
 		enabled: true,
+		allowArbitraryAttributes: false,
 		diagnostics: { enabled: true },
 		hover: { enabled: true },
 		completions: { enabled: true },
@@ -50,8 +51,11 @@ type DeepPartial<T> = T extends Record<string, unknown>
  * For more info on this, see the [internal docs](../../../../../docs/internal/language-server/config.md)
  */
 export class ConfigManager {
-	private globalConfig: Record<string, any> = { astro: defaultLSConfig };
+	public globalConfig: Record<string, any> = { astro: defaultLSConfig };
 	private documentSettings: Record<string, Record<string, Promise<any>>> = {};
+
+	// If set to true, the next time we need a TypeScript language service, we'll rebuild it so it gets the new config
+	public shouldRefreshTSServices = false;
 
 	private isTrusted = true;
 
@@ -64,6 +68,7 @@ export class ConfigManager {
 	updateConfig() {
 		// Reset all cached document settings
 		this.documentSettings = {};
+		this.shouldRefreshTSServices = true;
 	}
 
 	removeDocument(scopeUri: string) {
@@ -72,7 +77,7 @@ export class ConfigManager {
 
 	async getConfig<T>(section: string, scopeUri: string): Promise<T> {
 		if (!this.connection) {
-			return this.globalConfig[section];
+			return get(this.globalConfig, section);
 		}
 
 		if (!this.documentSettings[scopeUri]) {
@@ -213,6 +218,8 @@ export class ConfigManager {
 		} else {
 			this.globalConfig.astro = merge({}, defaultLSConfig, this.globalConfig.astro, config);
 		}
+
+		this.shouldRefreshTSServices = true;
 	}
 }
 

@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { config, expect } from 'chai';
 import { DiagnosticSeverity, Range } from 'vscode-languageserver-types';
 import { createEnvironment } from '../../../utils';
 import { LanguageServiceManager } from '../../../../src/plugins/typescript/LanguageServiceManager';
@@ -41,6 +41,19 @@ describe('TypeScript Plugin#DiagnosticsProvider', () => {
 				tags: [],
 			},
 		]);
+	});
+
+	it('support arbitrary attributes when enabled', async () => {
+		const { provider, document, configManager } = setup('arbitraryAttrs.astro');
+
+		configManager.updateGlobalConfig(<any>{
+			typescript: {
+				allowArbitraryAttributes: true,
+			},
+		});
+
+		const diagnostics = await provider.getDiagnostics(document);
+		expect(diagnostics).to.be.empty;
 	});
 
 	it('provide deprecated and unused hints', async () => {
