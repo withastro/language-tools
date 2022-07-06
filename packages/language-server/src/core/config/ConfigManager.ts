@@ -51,7 +51,7 @@ type DeepPartial<T> = T extends Record<string, unknown>
  * For more info on this, see the [internal docs](../../../../../docs/internal/language-server/config.md)
  */
 export class ConfigManager {
-	public globalConfig: Record<string, any> = { astro: defaultLSConfig };
+	private globalConfig: Record<string, any> = { astro: defaultLSConfig };
 	private documentSettings: Record<string, Record<string, Promise<any>>> = {};
 
 	// If set to true, the next time we need a TypeScript language service, we'll rebuild it so it gets the new config
