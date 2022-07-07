@@ -210,9 +210,9 @@ export class ConfigManager {
 		const config = (await this.getConfig<any>('astro', document.uri)) ?? {};
 
 		if (config[plugin]) {
-			let res = config[plugin].enabled;
+			let res = config[plugin].enabled ?? true;
 			if (feature && config[plugin][feature]) {
-				res = res && config[plugin][feature].enabled;
+				res = (res && config[plugin][feature].enabled) ?? true;
 			}
 			return res;
 		}
