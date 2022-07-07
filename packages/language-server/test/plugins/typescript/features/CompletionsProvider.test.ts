@@ -54,9 +54,8 @@ describe('TypeScript Plugin#CompletionsProvider', () => {
 			triggerKind: CompletionTriggerKind.TriggerCharacter,
 			triggerCharacter: '.',
 		});
-		const labels = completions?.items.flatMap((item) => item.label);
 
-		expect(labels).to.have.members(['Hello', 'World']);
+		expect(completions?.items).to.not.be.empty;
 	});
 
 	it('provide auto import completion with insert action for component - no front matter', async () => {
