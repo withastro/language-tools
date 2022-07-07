@@ -29,7 +29,7 @@ import {
 } from 'vscode-languageserver';
 import type { AppCompletionItem, Plugin, LSProvider } from './interfaces';
 import { DocumentManager } from '../core/documents/DocumentManager';
-import { isNotNullOrUndefined } from '../utils';
+import { isNotNullOrUndefined, regexLastIndexOf } from '../utils';
 import { getNodeIfIsInHTMLStartTag, isInComponentStartTag } from '../core/documents';
 
 enum ExecuteMode {
@@ -109,6 +109,19 @@ export class PluginHost {
 			(incomplete, completion) => incomplete || completion.result.isIncomplete,
 			false as boolean
 		);
+
+		// If the result is incomplete, we need to filter the results ourselves
+		// to throw out non-matching results. VSCode does filter client-side,
+		// but other IDEs might not.
+		if (isIncomplete && this.pluginHostConfig.filterIncompleteCompletions) {
+			const offset = document.offsetAt(position);
+			// Assumption for performance reasons:
+			// Noone types import names longer than 20 characters and still expects perfect autocompletion.
+			const text = document.getText().substring(Math.max(0, offset - 20), offset);
+			const start = regexLastIndexOf(text, /[\W\s]/g) + 1;
+			const filterValue = text.substring(start).toLowerCase();
+			flattenedCompletions = flattenedCompletions.filter((comp) => comp.label.toLowerCase().includes(filterValue));
+		}
 
 		return CompletionList.create(flattenedCompletions, isIncomplete);
 	}
