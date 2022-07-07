@@ -5,6 +5,10 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { FormatCodeSettings, InlayHintsOptions, SemicolonPreference, UserPreferences } from 'typescript';
 import { get, mergeDeep } from '../../utils';
 
+// The default language server configuration is used only in two cases:
+// 1. When the client does not support `workspace/configuration` requests and as such, needs a global config
+// 2. Inside tests, where we don't have a client connection because.. well.. we don't have a client
+// Additionally, the default config is used to set default settings for some settings (ex: formatting settings)
 export const defaultLSConfig: LSConfig = {
 	typescript: {
 		enabled: true,
@@ -34,7 +38,7 @@ export const defaultLSConfig: LSConfig = {
 		documentSymbols: { enabled: true },
 	},
 	format: {
-		indentFrontmatter: true,
+		indentFrontmatter: false,
 		newLineAfterFrontmatter: true,
 	},
 };
@@ -97,15 +101,25 @@ export class ConfigManager {
 	async getEmmetConfig(document: TextDocument): Promise<VSCodeEmmetConfig> {
 		const emmetConfig = (await this.getConfig<VSCodeEmmetConfig>('emmet', document.uri)) ?? {};
 
-		return emmetConfig;
+		return {
+			...emmetConfig, // The VSCodeEmmetConfig type is strangely incomplete, so we spread the rest of the config
+			preferences: emmetConfig.preferences ?? {},
+			showExpandedAbbreviation: emmetConfig.showExpandedAbbreviation ?? 'always',
+			showAbbreviationSuggestions: emmetConfig.showAbbreviationSuggestions ?? true,
+			syntaxProfiles: emmetConfig.syntaxProfiles ?? {},
+			variables: emmetConfig.variables ?? {},
+			excludeLanguages: emmetConfig.excludeLanguages ?? [],
+			showSuggestionsAsSnippets: emmetConfig.showSuggestionsAsSnippets ?? false,
+		};
 	}
 
 	async getAstroFormatConfig(document: TextDocument): Promise<LSFormatConfig> {
 		const astroFormatConfig = (await this.getConfig<LSFormatConfig>('astro.format', document.uri)) ?? {};
 
 		return {
-			indentFrontmatter: astroFormatConfig.indentFrontmatter ?? true,
-			newLineAfterFrontmatter: astroFormatConfig.newLineAfterFrontmatter ?? true,
+			indentFrontmatter: astroFormatConfig.indentFrontmatter ?? defaultLSConfig.format!.indentFrontmatter,
+			newLineAfterFrontmatter:
+				astroFormatConfig.newLineAfterFrontmatter ?? defaultLSConfig.format!.newLineAfterFrontmatter,
 		};
 	}
 
@@ -202,7 +216,8 @@ export class ConfigManager {
 			}
 			return res;
 		}
-		return false;
+
+		return true;
 	}
 
 	/**
