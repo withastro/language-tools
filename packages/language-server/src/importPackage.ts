@@ -37,7 +37,7 @@ function importEditorIntegration<T>(packageName: string, fromPath: string): T | 
 	return undefined;
 }
 
-export function importSvelteIntegration(fromPath: string): typeof svelte| undefined {
+export function importSvelteIntegration(fromPath: string): typeof svelte | undefined {
 	return importEditorIntegration('@astrojs/svelte', fromPath);
 }
 
