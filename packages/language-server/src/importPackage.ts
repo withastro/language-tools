@@ -1,6 +1,6 @@
 import { dirname, resolve } from 'path';
-import type * as svelte from '@astrojs/svelte';
-import type * as vue from '@astrojs/svelte';
+import type * as svelte from '@astrojs/svelte/dist/editor.cjs';
+import type * as vue from '@astrojs/svelte/dist/editor.cjs';
 
 let isTrusted = true;
 
@@ -37,10 +37,10 @@ function importEditorIntegration<T>(packageName: string, fromPath: string): T | 
 	return undefined;
 }
 
-export function importSvelteIntegration(fromPath: string): typeof svelte.default | undefined {
+export function importSvelteIntegration(fromPath: string): typeof svelte| undefined {
 	return importEditorIntegration('@astrojs/svelte', fromPath);
 }
 
-export function importVueIntegration(fromPath: string): typeof vue.default | undefined {
+export function importVueIntegration(fromPath: string): typeof vue | undefined {
 	return importEditorIntegration('@astrojs/vue', fromPath);
 }
