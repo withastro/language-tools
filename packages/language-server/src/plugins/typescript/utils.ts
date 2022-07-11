@@ -12,7 +12,7 @@ import {
 	SemanticTokensLegend,
 } from 'vscode-languageserver';
 import { AstroDocument, mapRangeToOriginal, TagInformation } from '../../core/documents';
-import { AstroSnapshot, ScriptTagDocumentSnapshot, SnapshotFragment } from './snapshots/DocumentSnapshot';
+import { AstroSnapshot, DocumentSnapshot, ScriptTagDocumentSnapshot } from './snapshots/DocumentSnapshot';
 import { Node } from 'vscode-html-languageservice';
 
 export const enum TokenType {
@@ -274,7 +274,7 @@ export function convertRange(
 	);
 }
 
-export function convertToLocationRange(defDoc: SnapshotFragment, textSpan: ts.TextSpan): Range {
+export function convertToLocationRange(defDoc: DocumentSnapshot, textSpan: ts.TextSpan): Range {
 	const range = mapRangeToOriginal(defDoc, convertRange(defDoc, textSpan));
 	// Some definition like the svelte component class definition don't exist in the original, so we map to 0,1
 	if (range.start.line < 0) {

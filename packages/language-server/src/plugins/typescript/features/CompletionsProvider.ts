@@ -31,12 +31,7 @@ import {
 	ensureFrontmatterInsert,
 	getScriptTagSnapshot,
 } from '../utils';
-import {
-	AstroSnapshot,
-	AstroSnapshotFragment,
-	ScriptTagDocumentSnapshot,
-	SnapshotFragment,
-} from '../snapshots/DocumentSnapshot';
+import { AstroSnapshot, DocumentSnapshot, ScriptTagDocumentSnapshot } from '../snapshots/DocumentSnapshot';
 import { getRegExpMatches, isNotNullOrUndefined } from '../../../utils';
 import { getMarkdownDocumentation } from '../previewer';
 import { isPartOfImportStatement } from './utils';
@@ -201,13 +196,12 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 			: undefined;
 		const wordRangeStartPosition = wordRange?.start;
 
-		const fragment = tsDoc.createFragment();
 		const existingImports = this.getExistingImports(document);
 		const completionItems = completions.entries
 			.filter(this.isValidCompletion)
 			.map((entry: ts.CompletionEntry) =>
 				this.toCompletionItem(
-					fragment,
+					tsDoc,
 					entry,
 					filePath,
 					offset,
@@ -240,7 +234,6 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 			return item;
 		}
 
-		const fragment = tsDoc.createFragment();
 		const detail = lang.getCompletionEntryDetails(
 			data.filePath, // fileName
 			data.offset, // position
@@ -284,7 +277,7 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 				for (const change of action.changes) {
 					if (isInsideScriptTag) {
 						change.textChanges.forEach((textChange) => {
-							textChange.span.start = fragment.offsetAt(
+							textChange.span.start = tsDoc.offsetAt(
 								scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(textChange.span.start))
 							);
 						});
@@ -292,7 +285,7 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 
 					edit.push(
 						...change.textChanges.map((textChange) =>
-							codeActionChangeToTextEdit(document, fragment as AstroSnapshotFragment, isInsideScriptTag, textChange)
+							codeActionChangeToTextEdit(document, tsDoc, isInsideScriptTag, textChange)
 						)
 					);
 				}
@@ -305,7 +298,7 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 	}
 
 	private toCompletionItem(
-		fragment: SnapshotFragment,
+		snapshot: DocumentSnapshot,
 		comp: ts.CompletionEntry,
 		filePath: string,
 		offset: number,
@@ -371,14 +364,14 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 			item.insertText = comp.insertText ? removeAstroComponentSuffix(comp.insertText) : undefined;
 			item.insertTextFormat = comp.isSnippet ? InsertTextFormat.Snippet : InsertTextFormat.PlainText;
 			item.textEdit = comp.replacementSpan
-				? TextEdit.replace(convertRange(fragment, comp.replacementSpan), item.insertText ?? item.label)
+				? TextEdit.replace(convertRange(snapshot, comp.replacementSpan), item.insertText ?? item.label)
 				: undefined;
 		}
 
 		return {
 			...item,
 			data: {
-				uri: fragment.getURL(),
+				uri: snapshot.getURL(),
 				filePath,
 				scriptTagIndex,
 				offset,
@@ -493,7 +486,7 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 
 export function codeActionChangeToTextEdit(
 	document: AstroDocument,
-	fragment: AstroSnapshotFragment,
+	snapshot: DocumentSnapshot,
 	isInsideScriptTag: boolean,
 	change: ts.TextChange
 ) {
@@ -501,9 +494,9 @@ export function codeActionChangeToTextEdit(
 
 	const { span } = change;
 	let range: Range;
-	const virtualRange = convertRange(fragment, span);
+	const virtualRange = convertRange(snapshot, span);
 
-	range = mapRangeToOriginal(fragment, virtualRange);
+	range = mapRangeToOriginal(snapshot, virtualRange);
 
 	if (!isInsideScriptTag) {
 		// If we don't have a frontmatter already, create one with the import

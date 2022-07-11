@@ -3,7 +3,7 @@ import { CancellationToken, Range, SemanticTokens, SemanticTokensBuilder } from 
 import { AstroDocument, mapRangeToOriginal } from '../../../core/documents';
 import { SemanticTokensProvider } from '../../interfaces';
 import { LanguageServiceManager } from '../LanguageServiceManager';
-import { AstroSnapshotFragment } from '../snapshots/DocumentSnapshot';
+import { DocumentSnapshot } from '../snapshots/DocumentSnapshot';
 import { toVirtualAstroFilePath } from '../utils';
 
 export class SemanticTokensProviderImpl implements SemanticTokensProvider {
@@ -15,23 +15,22 @@ export class SemanticTokensProviderImpl implements SemanticTokensProvider {
 		cancellationToken?: CancellationToken
 	): Promise<SemanticTokens | null> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const fragment = tsDoc.createFragment() as AstroSnapshotFragment;
 
 		if (cancellationToken?.isCancellationRequested) {
 			return null;
 		}
 
 		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
-		const start = range ? fragment.offsetAt(fragment.getGeneratedPosition(range.start)) : 0;
+		const start = range ? tsDoc.offsetAt(tsDoc.getGeneratedPosition(range.start)) : 0;
 
 		const { spans } = lang.getEncodedSemanticClassifications(
 			filePath,
 			{
 				start,
 				length: range
-					? fragment.offsetAt(fragment.getGeneratedPosition(range.end)) - start
+					? tsDoc.offsetAt(tsDoc.getGeneratedPosition(range.end)) - start
 					: // We don't want tokens for things added by astro2tsx
-					  fragment.text.lastIndexOf('export default function ') || fragment.text.length,
+					  tsDoc.getFullText().lastIndexOf('export default function ') || tsDoc.getLength(),
 			},
 			ts.SemanticClassificationFormat.TwentyTwenty
 		);
@@ -44,7 +43,7 @@ export class SemanticTokensProviderImpl implements SemanticTokensProvider {
 			const generatedLength = spans[i++];
 			const classification = spans[i++];
 
-			const originalPosition = this.mapToOrigin(document, fragment, offset, generatedLength);
+			const originalPosition = this.mapToOrigin(document, tsDoc, offset, generatedLength);
 			if (!originalPosition) {
 				continue;
 			}
@@ -77,15 +76,15 @@ export class SemanticTokensProviderImpl implements SemanticTokensProvider {
 
 	private mapToOrigin(
 		document: AstroDocument,
-		fragment: AstroSnapshotFragment,
+		snapshot: DocumentSnapshot,
 		generatedOffset: number,
 		generatedLength: number
 	): [line: number, character: number, length: number, start: number] | undefined {
 		const range = {
-			start: fragment.positionAt(generatedOffset),
-			end: fragment.positionAt(generatedOffset + generatedLength),
+			start: snapshot.positionAt(generatedOffset),
+			end: snapshot.positionAt(generatedOffset + generatedLength),
 		};
-		const { start: startPosition, end: endPosition } = mapRangeToOriginal(fragment, range);
+		const { start: startPosition, end: endPosition } = mapRangeToOriginal(snapshot, range);
 
 		if (startPosition.line < 0 || endPosition.line < 0) {
 			return;

@@ -14,7 +14,7 @@ export function createFromDocument(document: AstroDocument) {
 	const { code, map } = astro2tsx(document.getText(), urlToPath(document.getURL()) || '');
 
 	const sourceMap = JSON.parse(map) as EncodedSourceMap;
-	return new AstroSnapshot(document, code, sourceMap, ts.ScriptKind.TSX);
+	return new AstroSnapshot(document, code, sourceMap);
 }
 
 /**
