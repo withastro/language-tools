@@ -102,9 +102,8 @@ export class TypeScriptPlugin implements Plugin {
 
 	async rename(document: AstroDocument, position: Position, newName: string): Promise<WorkspaceEdit | null> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const fragment = tsDoc.createFragment();
 
-		const offset = fragment.offsetAt(fragment.getGeneratedPosition(position));
+		const offset = tsDoc.offsetAt(tsDoc.getGeneratedPosition(position));
 
 		let renames = lang.findRenameLocations(tsDoc.filePath, offset, false, false, true);
 		if (!renames) {
@@ -123,7 +122,7 @@ export class TypeScriptPlugin implements Plugin {
 
 			edit.changes![filePath].push({
 				newText: newName,
-				range: convertToLocationRange(fragment, rename.textSpan),
+				range: convertToLocationRange(tsDoc, rename.textSpan),
 			});
 		});
 
