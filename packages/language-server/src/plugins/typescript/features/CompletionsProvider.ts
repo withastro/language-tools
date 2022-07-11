@@ -203,7 +203,7 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 			: undefined;
 		const wordRangeStartPosition = wordRange?.start;
 
-		const fragment = await tsDoc.createFragment();
+		const fragment = tsDoc.createFragment();
 		const existingImports = this.getExistingImports(document);
 		const completionItems = completions.entries
 			.filter((completion) => this.isValidCompletion(completion, this.ts))
@@ -242,7 +242,7 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 			return item;
 		}
 
-		const fragment = await tsDoc.createFragment();
+		const fragment = tsDoc.createFragment();
 		const detail = lang.getCompletionEntryDetails(
 			data.filePath, // fileName
 			data.offset, // position

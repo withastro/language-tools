@@ -19,7 +19,7 @@ export class DefinitionsProviderImpl implements DefinitionsProvider {
 
 	async getDefinitions(document: AstroDocument, position: Position): Promise<LocationLink[]> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const mainFragment = await tsDoc.createFragment();
+		const mainFragment = tsDoc.createFragment();
 
 		const fragmentPosition = mainFragment.getGeneratedPosition(position);
 		const fragmentOffset = mainFragment.offsetAt(fragmentPosition);

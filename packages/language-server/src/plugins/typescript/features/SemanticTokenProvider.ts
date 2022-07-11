@@ -17,7 +17,7 @@ export class SemanticTokensProviderImpl implements SemanticTokensProvider {
 		cancellationToken?: CancellationToken
 	): Promise<SemanticTokens | null> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const fragment = (await tsDoc.createFragment()) as AstroSnapshotFragment;
+		const fragment = tsDoc.createFragment() as AstroSnapshotFragment;
 
 		if (cancellationToken?.isCancellationRequested) {
 			return null;

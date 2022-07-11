@@ -18,7 +18,7 @@ export class HoverProviderImpl implements HoverProvider {
 
 	async doHover(document: AstroDocument, position: Position): Promise<Hover | null> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const fragment = await tsDoc.createFragment();
+		const fragment = tsDoc.createFragment();
 
 		const offset = fragment.offsetAt(fragment.getGeneratedPosition(position));
 

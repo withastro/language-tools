@@ -15,7 +15,8 @@ import {
 	TextDocumentEdit,
 	TextEdit,
 } from 'vscode-languageserver';
-import { getLineOffsets, offsetAt, positionAt, TagInformation } from './utils';
+import { TagInformation, offsetAt, positionAt, getLineOffsets } from './utils';
+import { generatedPositionFor, originalPositionFor, TraceMap } from '@jridgewell/trace-mapping';
 
 export interface DocumentMapper {
 	/**
@@ -122,7 +123,7 @@ export class FragmentMapper implements DocumentMapper {
 }
 
 export class SourceMapDocumentMapper implements DocumentMapper {
-	constructor(protected consumer: SourceMapConsumer, protected sourceUri: string, private parent?: DocumentMapper) {}
+	constructor(protected traceMap: TraceMap, protected sourceUri: string, private parent?: DocumentMapper) {}
 
 	getOriginalPosition(generatedPosition: Position): Position {
 		if (this.parent) {
@@ -133,7 +134,7 @@ export class SourceMapDocumentMapper implements DocumentMapper {
 			return { line: -1, character: -1 };
 		}
 
-		const mapped = this.consumer.originalPositionFor({
+		const mapped = originalPositionFor(this.traceMap, {
 			line: generatedPosition.line + 1,
 			column: generatedPosition.character,
 		});
@@ -158,7 +159,7 @@ export class SourceMapDocumentMapper implements DocumentMapper {
 			originalPosition = this.parent.getGeneratedPosition(originalPosition);
 		}
 
-		const mapped = this.consumer.generatedPositionFor({
+		const mapped = generatedPositionFor(this.traceMap, {
 			line: originalPosition.line + 1,
 			column: originalPosition.character,
 			source: this.sourceUri,
@@ -191,14 +192,6 @@ export class SourceMapDocumentMapper implements DocumentMapper {
 
 	getURL(): string {
 		return this.sourceUri;
-	}
-
-	/**
-	 * Needs to be called when source mapper is no longer needed in order to prevent memory leaks.
-	 */
-	destroy() {
-		this.parent?.destroy?.();
-		this.consumer.destroy();
 	}
 }
 
