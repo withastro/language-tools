@@ -14,7 +14,7 @@ export class InlayHintsProviderImpl implements InlayHintsProvider {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
 
 		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
-		const fragment = await tsDoc.createFragment();
+		const fragment = tsDoc.createFragment();
 
 		const start = fragment.offsetAt(fragment.getGeneratedPosition(range.start));
 		const end = fragment.offsetAt(fragment.getGeneratedPosition(range.end));

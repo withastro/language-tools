@@ -6,13 +6,15 @@ import { FrameworkExt, getFrameworkFromFilePath, isAstroFilePath, isFrameworkFil
 import { AstroSnapshot, TypeScriptDocumentSnapshot } from './DocumentSnapshot';
 import { toTSX as svelte2tsx } from '@astrojs/svelte-language-integration';
 import { toTSX as vue2tsx } from '@astrojs/vue-language-integration';
-import { toPascalCase } from '../../../utils';
+import { toPascalCase, urlToPath } from '../../../utils';
+import { EncodedSourceMap } from '@jridgewell/trace-mapping';
 
 // Utilities to create Snapshots from different contexts
 export function createFromDocument(document: AstroDocument) {
-	const { code } = astro2tsx(document.getText(), classNameFromFilename(document.getURL()));
+	const { code, map } = astro2tsx(document.getText(), urlToPath(document.getURL()) || '');
 
-	return new AstroSnapshot(document, code, ts.ScriptKind.TSX);
+	const sourceMap = JSON.parse(map) as EncodedSourceMap;
+	return new AstroSnapshot(document, code, sourceMap, ts.ScriptKind.TSX);
 }
 
 /**
@@ -23,7 +25,7 @@ export function createFromDocument(document: AstroDocument) {
 export function createFromFilePath(
 	filePath: string,
 	createDocument: (filePath: string, text: string) => AstroDocument
-) {
+): AstroSnapshot | TypeScriptDocumentSnapshot {
 	if (isAstroFilePath(filePath)) {
 		return createFromAstroFilePath(filePath, createDocument);
 	} else if (isFrameworkFilePath(filePath)) {
@@ -38,7 +40,7 @@ export function createFromFilePath(
  * Return a Framework or a TS snapshot from a file path, depending on the file contents
  * Unlike createFromFilePath, this does not support creating an Astro snapshot
  */
-export function createFromNonAstroFilePath(filePath: string) {
+export function createFromNonAstroFilePath(filePath: string): TypeScriptDocumentSnapshot {
 	if (isFrameworkFilePath(filePath)) {
 		const framework = getFrameworkFromFilePath(filePath);
 		return createFromFrameworkFilePath(filePath, framework);
@@ -52,7 +54,7 @@ export function createFromNonAstroFilePath(filePath: string) {
  * @param filePath path to the js/ts file
  * @param options options that apply in case it's a svelte file
  */
-export function createFromTSFilePath(filePath: string) {
+export function createFromTSFilePath(filePath: string): TypeScriptDocumentSnapshot {
 	const originalText = ts.sys.readFile(filePath) ?? '';
 	return new TypeScriptDocumentSnapshot(0, filePath, originalText);
 }
@@ -65,12 +67,12 @@ export function createFromTSFilePath(filePath: string) {
 export function createFromAstroFilePath(
 	filePath: string,
 	createDocument: (filePath: string, text: string) => AstroDocument
-) {
+): AstroSnapshot {
 	const originalText = ts.sys.readFile(filePath) ?? '';
 	return createFromDocument(createDocument(filePath, originalText));
 }
 
-export function createFromFrameworkFilePath(filePath: string, framework: FrameworkExt) {
+export function createFromFrameworkFilePath(filePath: string, framework: FrameworkExt): TypeScriptDocumentSnapshot {
 	const className = classNameFromFilename(filePath);
 	const originalText = ts.sys.readFile(filePath) ?? '';
 	let code = '';

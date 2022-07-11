@@ -29,7 +29,7 @@ export class SnapshotFragmentMap {
 		let snapshotFragment = this.get(fileName);
 		if (!snapshotFragment) {
 			const snapshot = await this.languageServiceManager.getSnapshot(fileName);
-			const fragment = await snapshot.createFragment();
+			const fragment = snapshot.createFragment();
 			snapshotFragment = { fragment, snapshot };
 			this.set(fileName, snapshotFragment);
 		}

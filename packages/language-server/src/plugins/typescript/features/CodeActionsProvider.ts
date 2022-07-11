@@ -41,7 +41,7 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
 
 		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
-		const fragment = await tsDoc.createFragment();
+		const fragment = tsDoc.createFragment();
 
 		const tsPreferences = await this.configManager.getTSPreferences(document);
 		const formatOptions = await this.configManager.getTSFormatConfig(document);
@@ -249,7 +249,7 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
 
 		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
-		const fragment = await tsDoc.createFragment();
+		const fragment = tsDoc.createFragment();
 
 		if (cancellationToken?.isCancellationRequested) {
 			return [];

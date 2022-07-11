@@ -41,7 +41,7 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
 
 		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
-		const fragment = await tsDoc.createFragment();
+		const fragment = tsDoc.createFragment();
 
 		let scriptDiagnostics: Diagnostic[] = [];
 
