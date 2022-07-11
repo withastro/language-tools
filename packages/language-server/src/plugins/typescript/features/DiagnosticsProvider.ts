@@ -42,6 +42,7 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 		}
 
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
+
 		let scriptDiagnostics: Diagnostic[] = [];
 
 		document.scriptTags.forEach((scriptTag) => {
