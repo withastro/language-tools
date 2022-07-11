@@ -15,7 +15,7 @@ export class DocumentSymbolsProviderImpl implements DocumentSymbolsProvider {
 
 	async getDocumentSymbols(document: AstroDocument): Promise<SymbolInformation[]> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const fragment = await tsDoc.createFragment();
+		const fragment = tsDoc.createFragment();
 
 		const navTree = lang.getNavigationTree(tsDoc.filePath + '?documentSymbols');
 		if (!navTree) {

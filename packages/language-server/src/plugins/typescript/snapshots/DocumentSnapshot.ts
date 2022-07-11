@@ -1,3 +1,4 @@
+import { EncodedSourceMap, TraceMap } from '@jridgewell/trace-mapping';
 import type { Position, TextDocumentContentChangeEvent } from 'vscode-languageserver';
 import {
 	AstroDocument,
@@ -8,6 +9,7 @@ import {
 	offsetAt,
 	positionAt,
 	TagInformation,
+	SourceMapDocumentMapper,
 } from '../../../core/documents';
 import { pathToUrl } from '../../../utils';
 
@@ -18,17 +20,8 @@ export interface DocumentSnapshot extends ts.IScriptSnapshot {
 	positionAt(offset: number): Position;
 	/**
 	 * Instantiates a source mapper.
-	 * `destroyFragment` needs to be called when
-	 * it's no longer needed / the class should be cleaned up
-	 * in order to prevent memory leaks.
 	 */
-	createFragment(): Promise<SnapshotFragment>;
-	/**
-	 * Needs to be called when source mapper
-	 * is no longer needed / the class should be cleaned up
-	 * in order to prevent memory leaks.
-	 */
-	destroyFragment(): void;
+	createFragment(): SnapshotFragment;
 	/**
 	 * Convenience function for getText(0, getLength())
 	 */
@@ -54,19 +47,21 @@ export class AstroSnapshot implements DocumentSnapshot {
 	constructor(
 		public readonly parent: AstroDocument,
 		private readonly text: string,
+		private readonly map: EncodedSourceMap,
 		public readonly scriptKind: ts.ScriptKind
 	) {}
 
-	async createFragment() {
+	createFragment() {
 		if (!this.fragment) {
 			const uri = pathToUrl(this.filePath);
-			this.fragment = new AstroSnapshotFragment(new IdentityMapper(uri), this.parent, this.text, uri);
+			this.fragment = new AstroSnapshotFragment(
+				new ConsumerDocumentMapper(new TraceMap(this.map), uri, 0),
+				this.parent,
+				this.text,
+				uri
+			);
 		}
 		return this.fragment;
-	}
-
-	destroyFragment() {
-		return null;
 	}
 
 	get filePath() {
@@ -151,12 +146,8 @@ export class ScriptTagDocumentSnapshot extends FragmentMapper implements Documen
 		return offsetAt(position, this.text, this.getLineOffsets());
 	}
 
-	async createFragment(): Promise<SnapshotFragment> {
+	createFragment(): SnapshotFragment {
 		return this;
-	}
-
-	destroyFragment(): void {
-		//
 	}
 
 	getText(start: number, end: number) {
@@ -227,12 +218,8 @@ export class TypeScriptDocumentSnapshot extends IdentityMapper implements Docume
 		return offsetAt(position, this.text, this.getLineOffsets());
 	}
 
-	async createFragment() {
+	createFragment() {
 		return this;
-	}
-
-	destroyFragment() {
-		// nothing to clean up
 	}
 
 	update(changes: TextDocumentContentChangeEvent[]): void {
@@ -258,5 +245,28 @@ export class TypeScriptDocumentSnapshot extends IdentityMapper implements Docume
 			this.lineOffsets = getLineOffsets(this.text);
 		}
 		return this.lineOffsets;
+	}
+}
+
+export class ConsumerDocumentMapper extends SourceMapDocumentMapper {
+	constructor(traceMap: TraceMap, sourceUri: string, private nrPrependesLines: number) {
+		super(traceMap, sourceUri);
+	}
+
+	getOriginalPosition(generatedPosition: Position): Position {
+		return super.getOriginalPosition(
+			Position.create(generatedPosition.line - this.nrPrependesLines, generatedPosition.character)
+		);
+	}
+
+	getGeneratedPosition(originalPosition: Position): Position {
+		const result = super.getGeneratedPosition(originalPosition);
+		result.line += this.nrPrependesLines;
+		return result;
+	}
+
+	isInGenerated(): boolean {
+		// always return true and map outliers case by case
+		return true;
 	}
 }

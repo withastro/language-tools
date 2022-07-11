@@ -41,8 +41,6 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 		}
 
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const fragment = await tsDoc.createFragment();
-
 		let scriptDiagnostics: Diagnostic[] = [];
 
 		document.scriptTags.forEach((scriptTag) => {

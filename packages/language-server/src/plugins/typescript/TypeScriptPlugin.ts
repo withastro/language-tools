@@ -102,7 +102,7 @@ export class TypeScriptPlugin implements Plugin {
 
 	async rename(document: AstroDocument, position: Position, newName: string): Promise<WorkspaceEdit | null> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const fragment = await tsDoc.createFragment();
+		const fragment = tsDoc.createFragment();
 
 		const offset = fragment.offsetAt(fragment.getGeneratedPosition(position));
 

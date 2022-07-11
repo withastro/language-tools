@@ -33,7 +33,7 @@ export class SignatureHelpProviderImpl implements SignatureHelpProvider {
 		cancellationToken?: CancellationToken
 	): Promise<SignatureHelp | null> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const fragment = await tsDoc.createFragment();
+		const fragment = tsDoc.createFragment();
 
 		if (cancellationToken?.isCancellationRequested) {
 			return null;
