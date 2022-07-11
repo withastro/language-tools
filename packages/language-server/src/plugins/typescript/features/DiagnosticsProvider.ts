@@ -3,8 +3,9 @@ import { Diagnostic, DiagnosticTag } from 'vscode-languageserver-types';
 import { AstroDocument, mapRangeToOriginal } from '../../../core/documents';
 import type { DiagnosticsProvider } from '../../interfaces';
 import type { LanguageServiceManager } from '../LanguageServiceManager';
-import type { AstroSnapshot, SnapshotFragment } from '../snapshots/DocumentSnapshot';
+import type { AstroSnapshot, DocumentSnapshot } from '../snapshots/DocumentSnapshot';
 import { convertRange, getScriptTagSnapshot } from '../utils';
+
 
 type BoundaryTuple = [number, number];
 
@@ -90,7 +91,7 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 					code: diagnostic.code,
 					tags: getDiagnosticTag(diagnostic),
 				}))
-				.map(mapRange(fragment, document)),
+				.map(mapRange(tsDoc, document)),
 			...scriptDiagnostics,
 		]
 			.filter((diag) => {
@@ -190,9 +191,9 @@ function isNoWithinBoundary(
 	return !diagnosticIsWithinBoundaries(undefined, boundaries, diagnostic, ts);
 }
 
-function mapRange(fragment: SnapshotFragment, _document: AstroDocument): (value: Diagnostic) => Diagnostic {
+function mapRange(snapshot: DocumentSnapshot, _document: AstroDocument): (value: Diagnostic) => Diagnostic {
 	return (diagnostic) => {
-		let range = mapRangeToOriginal(fragment, diagnostic.range);
+		let range = mapRangeToOriginal(snapshot, diagnostic.range);
 
 		return { ...diagnostic, range };
 	};

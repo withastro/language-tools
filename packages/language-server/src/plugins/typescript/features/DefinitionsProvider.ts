@@ -12,17 +12,16 @@ import {
 	isAstroFilePath,
 	isFrameworkFilePath,
 } from '../utils';
-import { SnapshotFragmentMap } from './utils';
+import { SnapshotMap } from './utils';
 
 export class DefinitionsProviderImpl implements DefinitionsProvider {
 	constructor(private languageServiceManager: LanguageServiceManager) {}
 
 	async getDefinitions(document: AstroDocument, position: Position): Promise<LocationLink[]> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const mainFragment = tsDoc.createFragment();
-
-		const fragmentPosition = mainFragment.getGeneratedPosition(position);
-		const fragmentOffset = mainFragment.offsetAt(fragmentPosition);
+		
+		const fragmentPosition = tsDoc.getGeneratedPosition(position);
+		const fragmentOffset = tsDoc.offsetAt(fragmentPosition);
 
 		let defs: ts.DefinitionInfoAndBoundSpan | undefined;
 
@@ -45,7 +44,7 @@ export class DefinitionsProviderImpl implements DefinitionsProvider {
 					def.fileName = isInSameFile ? tsDoc.filePath : def.fileName;
 
 					if (isInSameFile) {
-						def.textSpan.start = mainFragment.offsetAt(
+						def.textSpan.start = tsDoc.offsetAt(
 							scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(def.textSpan.start))
 						);
 					}
@@ -53,7 +52,7 @@ export class DefinitionsProviderImpl implements DefinitionsProvider {
 					return def;
 				});
 
-				defs.textSpan.start = mainFragment.offsetAt(
+				defs.textSpan.start = tsDoc.offsetAt(
 					scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(defs.textSpan.start))
 				);
 			}
@@ -65,12 +64,12 @@ export class DefinitionsProviderImpl implements DefinitionsProvider {
 			return [];
 		}
 
-		const docs = new SnapshotFragmentMap(this.languageServiceManager);
-		docs.set(tsDoc.filePath, { fragment: mainFragment, snapshot: tsDoc });
+		const snapshots = new SnapshotMap(this.languageServiceManager);
+		snapshots.set(tsDoc.filePath, tsDoc);
 
 		const result = await Promise.all(
 			defs.definitions!.map(async (def) => {
-				const { fragment, snapshot } = await docs.retrieve(def.fileName);
+				const snapshot = await snapshots.retrieve(def.fileName);
 
 				const fileName = ensureRealFilePath(def.fileName);
 
@@ -81,9 +80,9 @@ export class DefinitionsProviderImpl implements DefinitionsProvider {
 
 				return LocationLink.create(
 					pathToUrl(fileName),
-					convertToLocationRange(fragment, textSpan),
-					convertToLocationRange(fragment, textSpan),
-					convertToLocationRange(mainFragment, defs!.textSpan)
+					convertToLocationRange(snapshot, textSpan),
+					convertToLocationRange(snapshot, textSpan),
+					convertToLocationRange(tsDoc, defs!.textSpan)
 				);
 			})
 		);

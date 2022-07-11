@@ -18,9 +18,7 @@ export class HoverProviderImpl implements HoverProvider {
 
 	async doHover(document: AstroDocument, position: Position): Promise<Hover | null> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const fragment = tsDoc.createFragment();
-
-		const offset = fragment.offsetAt(fragment.getGeneratedPosition(position));
+		const offset = tsDoc.offsetAt(tsDoc.getGeneratedPosition(position));
 
 		const html = document.html;
 		const documentOffset = document.offsetAt(position);
@@ -38,7 +36,7 @@ export class HoverProviderImpl implements HoverProvider {
 			info = lang.getQuickInfoAtPosition(scriptFilePath, scriptOffset);
 
 			if (info) {
-				info.textSpan.start = fragment.offsetAt(
+				info.textSpan.start = tsDoc.offsetAt(
 					scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(info.textSpan.start))
 				);
 			}
@@ -64,8 +62,8 @@ export class HoverProviderImpl implements HoverProvider {
 			.concat(documentation ? ['---', documentation] : [])
 			.join('\n');
 
-		return mapObjWithRangeToOriginal(fragment, {
-			range: convertRange(fragment, textSpan),
+		return mapObjWithRangeToOriginal(tsDoc, {
+			range: convertRange(tsDoc, textSpan),
 			contents,
 		});
 	}
