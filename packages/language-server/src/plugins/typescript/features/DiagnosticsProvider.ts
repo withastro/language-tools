@@ -4,7 +4,7 @@ import { Diagnostic, DiagnosticTag } from 'vscode-languageserver-types';
 import { AstroDocument, mapRangeToOriginal } from '../../../core/documents';
 import { DiagnosticsProvider } from '../../interfaces';
 import { LanguageServiceManager } from '../LanguageServiceManager';
-import { AstroSnapshot, SnapshotFragment } from '../snapshots/DocumentSnapshot';
+import { AstroSnapshot, DocumentSnapshot } from '../snapshots/DocumentSnapshot';
 import { convertRange, getScriptTagSnapshot, mapSeverity, toVirtualAstroFilePath } from '../utils';
 
 type BoundaryTuple = [number, number];
@@ -41,7 +41,6 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
 
 		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
-		const fragment = await tsDoc.createFragment();
 
 		let scriptDiagnostics: Diagnostic[] = [];
 
@@ -92,7 +91,7 @@ export class DiagnosticsProviderImpl implements DiagnosticsProvider {
 					code: diagnostic.code,
 					tags: getDiagnosticTag(diagnostic),
 				}))
-				.map(mapRange(fragment, document)),
+				.map(mapRange(tsDoc, document)),
 			...scriptDiagnostics,
 		]
 			.filter((diag) => {
@@ -180,9 +179,9 @@ function isNoWithinBoundary(boundaries: BoundaryTuple[], diagnostic: ts.Diagnost
 	return !diagnosticIsWithinBoundaries(undefined, boundaries, diagnostic);
 }
 
-function mapRange(fragment: SnapshotFragment, _document: AstroDocument): (value: Diagnostic) => Diagnostic {
+function mapRange(snapshot: DocumentSnapshot, _document: AstroDocument): (value: Diagnostic) => Diagnostic {
 	return (diagnostic) => {
-		let range = mapRangeToOriginal(fragment, diagnostic.range);
+		let range = mapRangeToOriginal(snapshot, diagnostic.range);
 
 		return { ...diagnostic, range };
 	};
