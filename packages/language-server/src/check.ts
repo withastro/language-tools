@@ -5,7 +5,7 @@ import { PluginHost, TypeScriptPlugin } from './plugins';
 export { DiagnosticSeverity } from 'vscode-languageserver-types';
 export { Diagnostic };
 
-interface GetDiagnosticsResult {
+export interface GetDiagnosticsResult {
 	filePath: string;
 	text: string;
 	diagnostics: Diagnostic[];
