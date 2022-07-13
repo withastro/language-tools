@@ -1,5 +1,11 @@
 # @astrojs/language-server
 
+## 0.20.0
+
+### Minor Changes
+
+- 4b73c21: Load language integrations from the user's project instead of bundling them in the language server
+
 ## 0.19.5
 
 ### Patch Changes
