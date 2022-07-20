@@ -257,7 +257,7 @@ export function getUserAstroVersion(basePath: string): AstroVersion {
 		} catch (e) {
 			// If we still couldn't find it, it probably just doesn't exist
 			exist = false;
-			console.error(`${basePath} seems to be an Astro project, but we couldn't find Astro / Astro is not installed`);
+			console.error(`${basePath} seems to be an Astro project, but we couldn't find Astro or Astro is not installed`);
 		}
 	}
 
