@@ -16,41 +16,8 @@ export const classListAttribute = newHTMLDataProvider('class-list', {
 	],
 });
 
-export const astroAttributes = newHTMLDataProvider('astro-attributes', {
+export const astroElements = newHTMLDataProvider('astro-elements', {
 	version: 1,
-	globalAttributes: [
-		{
-			name: 'set:html',
-			description: 'Inject unescaped HTML into this tag',
-			references: [
-				{
-					name: 'Astro reference',
-					url: 'https://docs.astro.build/en/reference/directives-reference/#sethtml',
-				},
-			],
-		},
-		{
-			name: 'set:text',
-			description: 'Inject escaped text into this tag',
-			references: [
-				{
-					name: 'Astro reference',
-					url: 'https://docs.astro.build/en/reference/directives-reference/#settext',
-				},
-			],
-		},
-		{
-			name: 'is:raw',
-			description: 'Instructs the Astro compiler to treat any children of this element as text',
-			valueSet: 'v',
-			references: [
-				{
-					name: 'Astro reference',
-					url: 'https://docs.astro.build/en/reference/directives-reference/#israw',
-				},
-			],
-		},
-	],
 	tags: [
 		{
 			name: 'script',
@@ -143,6 +110,43 @@ export const astroAttributes = newHTMLDataProvider('astro-attributes', {
 							url: 'https://docs.astro.build/en/reference/directives-reference/#isinline',
 						},
 					],
+				},
+			],
+		},
+	],
+});
+
+export const astroAttributes = newHTMLDataProvider('astro-attributes', {
+	version: 1,
+	globalAttributes: [
+		{
+			name: 'set:html',
+			description: 'Inject unescaped HTML into this tag',
+			references: [
+				{
+					name: 'Astro reference',
+					url: 'https://docs.astro.build/en/reference/directives-reference/#sethtml',
+				},
+			],
+		},
+		{
+			name: 'set:text',
+			description: 'Inject escaped text into this tag',
+			references: [
+				{
+					name: 'Astro reference',
+					url: 'https://docs.astro.build/en/reference/directives-reference/#settext',
+				},
+			],
+		},
+		{
+			name: 'is:raw',
+			description: 'Instructs the Astro compiler to treat any children of this element as text',
+			valueSet: 'v',
+			references: [
+				{
+					name: 'Astro reference',
+					url: 'https://docs.astro.build/en/reference/directives-reference/#israw',
 				},
 			],
 		},
