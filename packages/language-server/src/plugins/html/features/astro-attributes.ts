@@ -20,6 +20,30 @@ export const astroElements = newHTMLDataProvider('astro-elements', {
 	version: 1,
 	tags: [
 		{
+			name: 'slot',
+			description:
+				'The slot element is a placeholder for external HTML content, allowing you to inject (or “slot”) child elements from other files into your component template.',
+			references: [
+				{
+					name: 'Astro reference',
+					url: 'https://docs.astro.build/en/core-concepts/astro-components/#slots',
+				},
+			],
+			attributes: [
+				{
+					name: 'name',
+					description:
+						'The name attribute allows you to pass only HTML elements with the corresponding slot name into a slot’s location.',
+					references: [
+						{
+							name: 'Astro reference',
+							url: 'https://docs.astro.build/en/core-concepts/astro-components/#named-slots',
+						},
+					],
+				},
+			],
+		},
+		{
 			name: 'script',
 			attributes: [
 				{
