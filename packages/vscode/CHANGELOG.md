@@ -1,5 +1,11 @@
 # astro-vscode
 
+## 0.20.4
+
+### Patch Changes
+
+- a3a13d1: Fix extension failing to send a notification when ts|jsconfig.json was updated
+
 ## 0.20.3
 
 ### Patch Changes
