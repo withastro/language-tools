@@ -2,6 +2,7 @@ import * as vscode from 'vscode-languageserver';
 import {
 	CodeActionKind,
 	DidChangeConfigurationNotification,
+	DocumentUri,
 	InlayHintRequest,
 	LinkedEditingRangeRequest,
 	MessageType,
@@ -24,6 +25,8 @@ import { AstroDocument } from './core/documents';
 import { getSemanticTokenLegend } from './plugins/typescript/utils';
 import { sortImportKind } from './plugins/typescript/features/CodeActionsProvider';
 import { LSConfig } from './core/config';
+import astro2tsx from './plugins/typescript/astro2tsx';
+import { classNameFromFilename } from './plugins/typescript/snapshots/utils';
 
 const TagCloseRequest: vscode.RequestType<vscode.TextDocumentPositionParams, string | null, any> =
 	new vscode.RequestType('html/tag');
@@ -35,6 +38,7 @@ export function startLanguageServer(connection: vscode.Connection) {
 	const pluginHost = new PluginHost(documentManager);
 	const configManager = new ConfigManager(connection);
 
+	let typescriptPlugin: TypeScriptPlugin = undefined as any;
 	let hasConfigurationCapability = false;
 
 	connection.onInitialize((params: vscode.InitializeParams) => {
@@ -72,8 +76,9 @@ export function startLanguageServer(connection: vscode.Connection) {
 
 		// We don't currently support running the TypeScript and Astro plugin in the browser
 		if (params.initializationOptions.environment !== 'browser') {
+			typescriptPlugin = new TypeScriptPlugin(documentManager, configManager, workspaceUris);
 			pluginHost.registerPlugin(new AstroPlugin(documentManager, configManager, workspaceUris));
-			pluginHost.registerPlugin(new TypeScriptPlugin(documentManager, configManager, workspaceUris));
+			pluginHost.registerPlugin(typescriptPlugin);
 		}
 
 		return {
@@ -261,6 +266,18 @@ export function startLanguageServer(connection: vscode.Connection) {
 			pluginHost.updateNonAstroFile(path, e.changes);
 		}
 		updateAllDiagnostics();
+	});
+
+	connection.onRequest('$/getTSXOutput', async (uri: DocumentUri) => {
+		const doc = documentManager.get(uri);
+		if (!doc) {
+			return undefined;
+		}
+
+		if (doc) {
+			const tsxOutput = typescriptPlugin.getTSXForDocument(doc);
+			return tsxOutput.code;
+		}
 	});
 
 	documentManager.on(
