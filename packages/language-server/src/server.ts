@@ -25,8 +25,6 @@ import { AstroDocument } from './core/documents';
 import { getSemanticTokenLegend } from './plugins/typescript/utils';
 import { sortImportKind } from './plugins/typescript/features/CodeActionsProvider';
 import { LSConfig } from './core/config';
-import astro2tsx from './plugins/typescript/astro2tsx';
-import { classNameFromFilename } from './plugins/typescript/snapshots/utils';
 
 const TagCloseRequest: vscode.RequestType<vscode.TextDocumentPositionParams, string | null, any> =
 	new vscode.RequestType('html/tag');
