@@ -3,6 +3,7 @@ import { ConfigManager, LSConfig } from './core/config';
 import { DocumentManager } from './core/documents';
 import { PluginHost, TypeScriptPlugin } from './plugins';
 import { LanguageServiceManager } from './plugins/typescript/LanguageServiceManager';
+import { normalizeUri } from './utils';
 export { DiagnosticSeverity } from 'vscode-languageserver-types';
 export { Diagnostic };
 
@@ -52,7 +53,11 @@ export class AstroCheck {
 	}
 
 	private initialize(workspacePath: string) {
-		const languageServiceManager = new LanguageServiceManager(this.docManager, [workspacePath], this.configManager);
+		const languageServiceManager = new LanguageServiceManager(
+			this.docManager,
+			[normalizeUri(workspacePath)],
+			this.configManager
+		);
 		this.pluginHost.registerPlugin(new TypeScriptPlugin(this.configManager, languageServiceManager));
 	}
 
