@@ -87,6 +87,16 @@
       "type": "object",
       "title": "Astro configuration",
       "properties": {
+        "astro.language-server.ls-path": {
+          "scope": "resource",
+          "type": "string",
+          "title": "Language Server: Path"
+        },
+        "astro.language-server.runtime": {
+          "scope": "resource",
+          "type": "string",
+          "title": "Language Server: Runtime"
+        },
         "astro.trace.server": {
           "scope": "window",
           "type": "string",
