@@ -24,14 +24,15 @@ const TagCloseRequest: RequestType<TextDocumentPositionParams, string, any> = ne
 let client: LanguageClient;
 
 export async function activate(context: ExtensionContext) {
-	const runtimeConfig = workspace.getConfiguration("astro.language-server");
+	const runtimeConfig = workspace.getConfiguration('astro.language-server');
 
 	const { workspaceFolders } = workspace;
 	const rootPath = workspaceFolders?.[0].uri.fsPath;
 
-	let lsPath = runtimeConfig.get<string>("ls-path");
+	let lsPath = runtimeConfig.get<string>('ls-path');
 	if (typeof lsPath === 'string' && lsPath.trim() !== '' && typeof rootPath === 'string') {
 		lsPath = path.isAbsolute(lsPath) ? lsPath : path.join(rootPath, lsPath);
+		console.info(`Using language server at ${lsPath}`);
 	} else {
 		lsPath = undefined;
 	}
@@ -54,6 +55,7 @@ export async function activate(context: ExtensionContext) {
 	if (serverRuntime) {
 		serverOptions.run.runtime = serverRuntime;
 		serverOptions.debug.runtime = serverRuntime;
+		console.info(`Using ${serverRuntime} as runtime`);
 	}
 
 	const clientOptions: LanguageClientOptions = {
