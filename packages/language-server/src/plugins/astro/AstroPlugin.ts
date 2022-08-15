@@ -1,7 +1,16 @@
-import { CompletionContext, FoldingRange, FoldingRangeKind, Position, TextEdit, Range } from 'vscode-languageserver';
+import {
+	CompletionContext,
+	FoldingRange,
+	FoldingRangeKind,
+	Position,
+	TextEdit,
+	Range,
+	FormattingOptions,
+} from 'vscode-languageserver';
 import { ConfigManager } from '../../core/config';
 import { AstroDocument } from '../../core/documents';
 import { importPrettier, importPrettierPlugin } from '../../importPackage';
+import { mergeDeep } from '../../utils';
 import { AppCompletionList, Plugin } from '../interfaces';
 import { LanguageServiceManager } from '../typescript/LanguageServiceManager';
 import { CompletionsProviderImpl } from './features/CompletionsProvider';
@@ -30,7 +39,7 @@ export class AstroPlugin implements Plugin {
 		return completions;
 	}
 
-	async formatDocument(document: AstroDocument): Promise<TextEdit[]> {
+	async formatDocument(document: AstroDocument, options: FormattingOptions): Promise<TextEdit[]> {
 		const filePath = document.getFilePath();
 		if (!filePath) {
 			return [];
@@ -38,6 +47,15 @@ export class AstroPlugin implements Plugin {
 
 		const prettier = importPrettier(filePath);
 		const prettierConfig = await prettier.resolveConfig(filePath, { editorconfig: true, useCache: false });
+		const editorFormatConfig =
+			options !== undefined
+				? {
+						tabWidth: prettierConfig?.tabWidth ?? options.tabSize,
+						useTabs: prettierConfig?.useTabs ?? !options.insertSpaces,
+				  }
+				: {};
+		const resultConfig = mergeDeep(prettierConfig ?? {}, editorFormatConfig);
+
 		const fileInfo = await prettier.getFileInfo(filePath, { ignorePath: '.prettierignore' });
 
 		if (fileInfo.ignored) {
@@ -45,7 +63,7 @@ export class AstroPlugin implements Plugin {
 		}
 
 		const result = prettier.format(document.getText(), {
-			...prettierConfig,
+			...resultConfig,
 			plugins: getAstroPrettierPlugin(),
 			parser: 'astro',
 		});

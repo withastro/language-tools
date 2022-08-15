@@ -188,10 +188,10 @@ describe('PluginHost', () => {
 		});
 		const document = docManager.openDocument(textDocument);
 
-		await pluginHost.formatDocument(textDocument);
+		await pluginHost.formatDocument(textDocument, { tabSize: 2, insertSpaces: true });
 
 		sinon.assert.calledOnce(plugin.formatDocument);
-		sinon.assert.calledWithExactly(plugin.formatDocument, document);
+		sinon.assert.calledWithExactly(plugin.formatDocument, document, { tabSize: 2, insertSpaces: true });
 	});
 
 	it('executes getCodeActions on plugins', async () => {

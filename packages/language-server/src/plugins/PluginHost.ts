@@ -150,10 +150,10 @@ export class PluginHost {
 		return this.execute<Hover>('doHover', [document, position], ExecuteMode.FirstNonNull);
 	}
 
-	async formatDocument(textDocument: TextDocumentIdentifier): Promise<TextEdit[]> {
+	async formatDocument(textDocument: TextDocumentIdentifier, options: FormattingOptions): Promise<TextEdit[]> {
 		const document = this.getDocument(textDocument.uri);
 
-		return await this.execute<TextEdit>('formatDocument', [document], ExecuteMode.Collect);
+		return await this.execute<TextEdit>('formatDocument', [document, options], ExecuteMode.Collect);
 	}
 
 	async getCodeActions(

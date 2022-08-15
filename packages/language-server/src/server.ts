@@ -245,7 +245,7 @@ export function startLanguageServer(connection: vscode.Connection) {
 	);
 
 	connection.onDocumentFormatting((params: vscode.DocumentFormattingParams) =>
-		pluginHost.formatDocument(params.textDocument)
+		pluginHost.formatDocument(params.textDocument, params.options)
 	);
 
 	connection.onDocumentColor((params: vscode.DocumentColorParams) => pluginHost.getDocumentColors(params.textDocument));
