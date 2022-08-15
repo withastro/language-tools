@@ -96,6 +96,7 @@ export function startLanguageServer(connection: vscode.Connection) {
 				},
 				foldingRangeProvider: true,
 				definitionProvider: true,
+				typeDefinitionProvider: true,
 				renameProvider: true,
 				documentFormattingProvider: true,
 				codeActionProvider: {
@@ -207,6 +208,8 @@ export function startLanguageServer(connection: vscode.Connection) {
 	connection.onHover((params: vscode.HoverParams) => pluginHost.doHover(params.textDocument, params.position));
 
 	connection.onDefinition((evt) => pluginHost.getDefinitions(evt.textDocument, evt.position));
+
+	connection.onTypeDefinition((evt) => pluginHost.getTypeDefinition(evt.textDocument, evt.position));
 
 	connection.onFoldingRanges((evt) => pluginHost.getFoldingRanges(evt.textDocument));
 
