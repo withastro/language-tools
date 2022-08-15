@@ -63,7 +63,7 @@ export interface CompletionsProvider<T extends TextDocumentIdentifier = any> {
 }
 
 export interface FormattingProvider {
-	formatDocument(document: TextDocument, options: FormattingOptions): Resolvable<TextEdit[]>;
+	formatDocument(document: TextDocument): Resolvable<TextEdit[]>;
 }
 
 export interface TagCompleteProvider {
