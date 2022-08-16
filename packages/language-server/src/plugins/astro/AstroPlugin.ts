@@ -9,7 +9,7 @@ import {
 } from 'vscode-languageserver';
 import { ConfigManager } from '../../core/config';
 import { AstroDocument } from '../../core/documents';
-import { importPrettier, importPrettierPlugin } from '../../importPackage';
+import { importPrettier, getPrettierPluginPath } from '../../importPackage';
 import { mergeDeep } from '../../utils';
 import { AppCompletionList, Plugin } from '../interfaces';
 import { LanguageServiceManager } from '../typescript/LanguageServiceManager';
@@ -74,7 +74,7 @@ export class AstroPlugin implements Plugin {
 
 		function getAstroPrettierPlugin() {
 			const hasPluginLoadedAlready = prettier.getSupportInfo().languages.some((l) => l.name === 'astro');
-			return hasPluginLoadedAlready ? [] : [importPrettierPlugin(filePath!)];
+			return hasPluginLoadedAlready ? [] : [getPrettierPluginPath(filePath!)];
 		}
 	}
 

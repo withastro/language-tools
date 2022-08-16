@@ -57,6 +57,6 @@ export function importPrettier(fromPath: string): typeof prettier {
 	return require(prettierPkg);
 }
 
-export function importPrettierPlugin(fromPath: string): string {
+export function getPrettierPluginPath(fromPath: string): string {
 	return getPackagePath('prettier-plugin-astro', [fromPath, __dirname])!;
 }
