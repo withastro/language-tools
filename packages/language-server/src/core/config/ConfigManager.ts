@@ -2,7 +2,7 @@ import { VSCodeEmmetConfig } from '@vscode/emmet-helper';
 import { LSConfig, LSCSSConfig, LSFormatConfig, LSHTMLConfig, LSTypescriptConfig } from './interfaces';
 import { Connection, FormattingOptions } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { FormatCodeSettings, InlayHintsOptions, SemicolonPreference, UserPreferences } from 'typescript';
+import { FormatCodeSettings, SemicolonPreference, UserPreferences } from 'typescript';
 import { get, mergeDeep } from '../../utils';
 
 // The default language server configuration is used only in two cases:
@@ -276,4 +276,16 @@ function getInlayParameterNameHintsPreference(config: any) {
 		default:
 			return undefined;
 	}
+}
+
+// from https://github.com/microsoft/TypeScript/blob/v4.8.2/tests/cases/fourslash/fourslash.ts#L667-L676
+interface InlayHintsOptions extends UserPreferences {
+	readonly includeInlayParameterNameHints?: "none" | "literals" | "all";
+	readonly includeInlayParameterNameHintsWhenArgumentMatchesName?: boolean;
+	readonly includeInlayFunctionParameterTypeHints?: boolean;
+	readonly includeInlayVariableTypeHints?: boolean;
+	readonly includeInlayVariableTypeHintsWhenTypeMatchesName?: boolean;
+	readonly includeInlayPropertyDeclarationTypeHints?: boolean;
+	readonly includeInlayFunctionLikeReturnTypeHints?: boolean;
+	readonly includeInlayEnumMemberValueHints?: boolean;
 }
