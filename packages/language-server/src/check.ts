@@ -57,7 +57,8 @@ export class AstroCheck {
 			this.docManager,
 			[normalizeUri(workspacePath)],
 			this.configManager,
-			{} as any
+			{} as any,
+			undefined
 		);
 		this.pluginHost.registerPlugin(new TypeScriptPlugin(this.configManager, languageServiceManager, {} as any));
 	}

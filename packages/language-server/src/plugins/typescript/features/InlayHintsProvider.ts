@@ -22,7 +22,7 @@ export class InlayHintsProviderImpl implements InlayHintsProvider {
 		const start = fragment.offsetAt(fragment.getGeneratedPosition(range.start));
 		const end = fragment.offsetAt(fragment.getGeneratedPosition(range.end));
 
-		const tsPreferences = await this.configManager.getTSInlayHintsPreferences(document);
+		const tsPreferences = await this.configManager.getTSPreferences(document);
 
 		const inlayHints = lang.provideInlayHints(filePath, { start, length: end - start }, tsPreferences);
 

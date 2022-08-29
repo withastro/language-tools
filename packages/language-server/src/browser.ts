@@ -12,6 +12,6 @@ startLanguageServer(connection, {
 		return ts; // not support load by user config in web
 	},
 	loadTypescriptLocalized(options) {
-		// TODO
+		return undefined;
 	},
 });
