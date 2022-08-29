@@ -207,7 +207,7 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 		const fragment = await tsDoc.createFragment();
 		const existingImports = this.getExistingImports(document);
 		const completionItems = completions.entries
-			.filter(this.isValidCompletion)
+			.filter((completion) => this.isValidCompletion(completion, this.ts))
 			.map((entry: ts.CompletionEntry) =>
 				this.toCompletionItem(
 					fragment,
@@ -484,10 +484,13 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 		return className.endsWith('__AstroComponent_');
 	}
 
-	private isValidCompletion(completion: ts.CompletionEntry): boolean {
+	private isValidCompletion(
+		completion: ts.CompletionEntry,
+		ts: typeof import('typescript/lib/tsserverlibrary')
+	): boolean {
 		// Remove completion for default exported function
 		const isDefaultExport =
-			completion.name === 'default' && completion.kindModifiers == this.ts.ScriptElementKindModifier.exportedModifier;
+			completion.name === 'default' && completion.kindModifiers == ts.ScriptElementKindModifier.exportedModifier;
 
 		// Remove completion for svelte2tsx internal types
 		const isSvelte2tsxCompletion = completion.name.startsWith('__sveltets_') || svelte2tsxTypes.has(completion.name);

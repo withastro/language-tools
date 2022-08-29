@@ -114,8 +114,6 @@ async function createLanguageService(
 		docContext.ts
 	);
 
-	console.log(docContext.ts.version);
-
 	const astroModuleLoader = createAstroModuleLoader(getScriptSnapshot, compilerOptions, docContext.ts);
 
 	const scriptFileNames: string[] = [];

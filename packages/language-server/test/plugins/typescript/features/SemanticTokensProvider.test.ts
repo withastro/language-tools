@@ -4,6 +4,7 @@ import { SemanticTokensProviderImpl } from '../../../../src/plugins/typescript/f
 import { LanguageServiceManager } from '../../../../src/plugins/typescript/LanguageServiceManager';
 import { TokenModifier, TokenType } from '../../../../src/plugins/typescript/utils';
 import { createEnvironment } from '../../../utils';
+import ts from 'typescript/lib/tsserverlibrary';
 
 interface TokenData {
 	line: number;
@@ -16,8 +17,8 @@ interface TokenData {
 describe('TypeScript Plugin#SemanticTokenProvider', () => {
 	function setup(filePath: string) {
 		const env = createEnvironment(filePath, 'typescript', 'semanticTokens');
-		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager);
-		const provider = new SemanticTokensProviderImpl(languageServiceManager);
+		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager, ts);
+		const provider = new SemanticTokensProviderImpl(languageServiceManager, ts);
 
 		return {
 			...env,
