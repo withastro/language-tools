@@ -67,7 +67,7 @@ export class TypeScriptPlugin implements Plugin {
 		this.languageServiceManager = languageServiceManager;
 		this.ts = ts;
 
-		this.codeActionsProvider = new CodeActionsProviderImpl(this.languageServiceManager, this.configManager);
+		this.codeActionsProvider = new CodeActionsProviderImpl(this.languageServiceManager, this.configManager, ts);
 		this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager, this.configManager, ts);
 		this.hoverProvider = new HoverProviderImpl(this.languageServiceManager, ts);
 		this.definitionsProvider = new DefinitionsProviderImpl(this.languageServiceManager);

@@ -295,7 +295,13 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 
 					edit.push(
 						...change.textChanges.map((textChange) =>
-							codeActionChangeToTextEdit(document, fragment as AstroSnapshotFragment, isInsideScriptTag, textChange)
+							codeActionChangeToTextEdit(
+								document,
+								fragment as AstroSnapshotFragment,
+								isInsideScriptTag,
+								textChange,
+								this.ts
+							)
 						)
 					);
 				}
@@ -507,7 +513,8 @@ export function codeActionChangeToTextEdit(
 	document: AstroDocument,
 	fragment: AstroSnapshotFragment,
 	isInsideScriptTag: boolean,
-	change: ts.TextChange
+	change: ts.TextChange,
+	ts: typeof import('typescript/lib/tsserverlibrary')
 ) {
 	change.newText = removeAstroComponentSuffix(change.newText);
 
@@ -523,7 +530,7 @@ export function codeActionChangeToTextEdit(
 		if (frontmatterState === null) {
 			return TextEdit.replace(
 				Range.create(Position.create(0, 0), Position.create(0, 0)),
-				`---\n${change.newText}---\n\n`
+				`---${ts.sys.newLine}${change.newText}---${ts.sys.newLine}${ts.sys.newLine}`
 			);
 		}
 
@@ -541,7 +548,7 @@ export function codeActionChangeToTextEdit(
 
 		// Avoid putting new imports on the same line as the script tag opening
 		if (!(change.newText.startsWith('\n') || change.newText.startsWith('\r\n')) && isNewImport) {
-			change.newText = '\n' + change.newText;
+			change.newText = ts.sys.newLine + change.newText;
 		}
 	}
 

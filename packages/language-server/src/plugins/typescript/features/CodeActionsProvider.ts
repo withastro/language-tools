@@ -1,4 +1,4 @@
-import ts, { CodeFixAction, FileTextChanges } from 'typescript';
+import type { CodeFixAction, FileTextChanges } from 'typescript';
 import type { CancellationToken } from 'vscode-languageserver';
 import {
 	CodeAction,
@@ -30,7 +30,11 @@ import { findContainingNode } from './utils';
 export const sortImportKind = `${CodeActionKind.Source}.sortImports`;
 
 export class CodeActionsProviderImpl implements CodeActionsProvider {
-	constructor(private languageServiceManager: LanguageServiceManager, private configManager: ConfigManager) {}
+	constructor(
+		private languageServiceManager: LanguageServiceManager,
+		private configManager: ConfigManager,
+		private readonly ts: typeof import('typescript/lib/tsserverlibrary')
+	) {}
 
 	async getCodeActions(
 		document: AstroDocument,
@@ -115,7 +119,8 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 					fix,
 					context.diagnostics,
 					context.only ? CodeActionKind.QuickFix : CodeActionKind.Empty,
-					isInsideScript
+					isInsideScript,
+					this.ts
 				)
 			);
 
@@ -128,7 +133,8 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 			codeFix: CodeFixAction,
 			diagnostics: Diagnostic[],
 			kind: CodeActionKind,
-			isInsideScript: boolean
+			isInsideScript: boolean,
+			ts: typeof import('typescript/lib/tsserverlibrary')
 		): CodeAction {
 			const documentChanges = codeFix.changes.map((change) => {
 				return TextDocumentEdit.create(
@@ -140,7 +146,7 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 						// restricted to the area of the script tag by default
 						if (!isInsideScript) {
 							if (codeFix.fixName === 'import') {
-								return codeActionChangeToTextEdit(document, fragment as AstroSnapshotFragment, false, edit);
+								return codeActionChangeToTextEdit(document, fragment as AstroSnapshotFragment, false, edit, ts);
 							}
 
 							if (codeFix.fixName === 'fixMissingFunctionDeclaration') {
@@ -212,7 +218,7 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 				length: end - start,
 			},
 			(n): n is ts.JsxOpeningLikeElement | ts.JsxClosingElement =>
-				ts.isJsxClosingElement(n) || ts.isJsxOpeningLikeElement(n)
+				this.ts.isJsxClosingElement(n) || this.ts.isJsxOpeningLikeElement(n)
 		);
 
 		if (!node) {
