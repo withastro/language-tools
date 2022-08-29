@@ -42,6 +42,7 @@ export interface LanguageServiceDocumentContext {
 	globalSnapshotManager: GlobalSnapshotManager;
 	configManager: ConfigManager;
 	ts: typeof import('typescript/lib/tsserverlibrary');
+	tsLocalized: Record<string, string> | undefined;
 }
 
 export async function getLanguageService(
@@ -174,6 +175,10 @@ async function createLanguageService(
 		getScriptSnapshot,
 		getScriptVersion: (fileName: string) => getScriptSnapshot(fileName).version.toString(),
 	};
+
+	if (docContext.tsLocalized) {
+		host.getLocalizedDiagnosticMessages = () => docContext.tsLocalized;
+	}
 
 	let languageService = docContext.ts.createLanguageService(host);
 

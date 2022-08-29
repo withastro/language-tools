@@ -32,7 +32,7 @@ const TagCloseRequest: vscode.RequestType<vscode.TextDocumentPositionParams, str
 
 export interface RuntimeEnvironment {
 	loadTypescript: (initOptions: any) => typeof import('typescript/lib/tsserverlibrary');
-	loadTypescriptLocalized: (initOptions: any) => any;
+	loadTypescriptLocalized: (initOptions: any) => Record<string, string> | undefined;
 }
 
 // Start the language server
@@ -81,11 +81,13 @@ export function startLanguageServer(connection: vscode.Connection, env: RuntimeE
 		// We don't currently support running the TypeScript and Astro plugin in the browser
 		if (environment === 'node') {
 			const ts = env.loadTypescript(params.initializationOptions);
+			const tsLocalized = env.loadTypescriptLocalized(params.initializationOptions);
 			const languageServiceManager = new LanguageServiceManager(
 				documentManager,
 				workspaceUris.map(normalizeUri),
 				configManager,
-				ts
+				ts,
+				tsLocalized
 			);
 
 			typescriptPlugin = new TypeScriptPlugin(configManager, languageServiceManager, ts);
