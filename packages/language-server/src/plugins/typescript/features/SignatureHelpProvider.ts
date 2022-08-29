@@ -1,6 +1,6 @@
 import type { LanguageServiceManager } from '../LanguageServiceManager';
 import type { SignatureHelpProvider } from '../../interfaces';
-import ts from 'typescript';
+import type ts from 'typescript';
 import {
 	Position,
 	SignatureHelpContext,
@@ -11,13 +11,16 @@ import {
 	MarkupKind,
 	CancellationToken,
 } from 'vscode-languageserver';
-import { AstroDocument } from '../../../core/documents';
+import type { AstroDocument } from '../../../core/documents';
 import { getMarkdownDocumentation } from '../previewer';
 import { getScriptTagSnapshot, toVirtualAstroFilePath } from '../utils';
-import { AstroSnapshot } from '../snapshots/DocumentSnapshot';
+import type { AstroSnapshot } from '../snapshots/DocumentSnapshot';
 
 export class SignatureHelpProviderImpl implements SignatureHelpProvider {
-	constructor(private readonly languageServiceManager: LanguageServiceManager) {}
+	constructor(
+		private readonly languageServiceManager: LanguageServiceManager,
+		private readonly ts: typeof import('typescript/lib/tsserverlibrary')
+	) {}
 
 	private static readonly triggerCharacters = ['(', ',', '<'];
 	private static readonly retriggerCharacters = [')'];
@@ -119,7 +122,7 @@ export class SignatureHelpProviderImpl implements SignatureHelpProvider {
 			item.prefixDisplayParts,
 			item.separatorDisplayParts,
 			item.suffixDisplayParts,
-		].map(ts.displayPartsToString);
+		].map(this.ts.displayPartsToString);
 
 		let textIndex = prefixLabel.length;
 		let signatureLabel = '';
@@ -127,11 +130,11 @@ export class SignatureHelpProviderImpl implements SignatureHelpProvider {
 		const lastIndex = item.parameters.length - 1;
 
 		item.parameters.forEach((parameter, index) => {
-			const label = ts.displayPartsToString(parameter.displayParts);
+			const label = this.ts.displayPartsToString(parameter.displayParts);
 
 			const startIndex = textIndex;
 			const endIndex = textIndex + label.length;
-			const doc = ts.displayPartsToString(parameter.documentation);
+			const doc = this.ts.displayPartsToString(parameter.documentation);
 
 			signatureLabel += label;
 			parameters.push(ParameterInformation.create([startIndex, endIndex], doc));
@@ -143,7 +146,8 @@ export class SignatureHelpProviderImpl implements SignatureHelpProvider {
 		});
 		const signatureDocumentation = getMarkdownDocumentation(
 			item.documentation,
-			item.tags.filter((tag) => tag.name !== 'param')
+			item.tags.filter((tag) => tag.name !== 'param'),
+			this.ts
 		);
 
 		return {

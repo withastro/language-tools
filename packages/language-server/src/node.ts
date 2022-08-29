@@ -3,4 +3,15 @@ import { startLanguageServer } from './server';
 
 const connection = vscode.createConnection(vscode.ProposedFeatures.all);
 
-startLanguageServer(connection);
+startLanguageServer(connection, {
+	loadTypescript(options) {
+		return require(options.typescript.serverPath);
+	},
+	loadTypescriptLocalized(options) {
+		if (options.typescript.localizedPath) {
+			try {
+				return require(options.typescript.localizedPath);
+			} catch {}
+		}
+	},
+});

@@ -56,9 +56,10 @@ export class AstroCheck {
 		const languageServiceManager = new LanguageServiceManager(
 			this.docManager,
 			[normalizeUri(workspacePath)],
-			this.configManager
+			this.configManager,
+			{} as any
 		);
-		this.pluginHost.registerPlugin(new TypeScriptPlugin(this.configManager, languageServiceManager));
+		this.pluginHost.registerPlugin(new TypeScriptPlugin(this.configManager, languageServiceManager, {} as any));
 	}
 
 	private async getDiagnosticsForFile(uri: string) {

@@ -1,5 +1,5 @@
 import ts, { CodeFixAction, FileTextChanges } from 'typescript';
-import { CancellationToken } from 'vscode-languageserver';
+import type { CancellationToken } from 'vscode-languageserver';
 import {
 	CodeAction,
 	CodeActionContext,
@@ -10,12 +10,12 @@ import {
 	TextDocumentEdit,
 	TextEdit,
 } from 'vscode-languageserver-types';
-import { ConfigManager } from '../../../core/config';
+import type { ConfigManager } from '../../../core/config';
 import { AstroDocument, getLineAtPosition, mapRangeToOriginal } from '../../../core/documents';
 import { modifyLines } from '../../../utils';
-import { CodeActionsProvider } from '../../interfaces';
-import { LanguageServiceManager } from '../LanguageServiceManager';
-import { AstroSnapshot, AstroSnapshotFragment, ScriptTagDocumentSnapshot } from '../snapshots/DocumentSnapshot';
+import type { CodeActionsProvider } from '../../interfaces';
+import type { LanguageServiceManager } from '../LanguageServiceManager';
+import type { AstroSnapshot, AstroSnapshotFragment, ScriptTagDocumentSnapshot } from '../snapshots/DocumentSnapshot';
 import {
 	checkEndOfFileCodeInsert,
 	convertRange,

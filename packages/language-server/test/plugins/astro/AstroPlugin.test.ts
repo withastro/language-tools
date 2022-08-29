@@ -3,13 +3,15 @@ import { createEnvironment } from '../../utils';
 import { AstroPlugin } from '../../../src/plugins';
 import { LanguageServiceManager } from '../../../src/plugins/typescript/LanguageServiceManager';
 import { Range } from 'vscode-languageserver-types';
+import ts from 'typescript/lib/tsserverlibrary';
 
 describe('Astro Plugin', () => {
 	function setup(filePath: string) {
 		const env = createEnvironment(filePath, 'astro');
 		const plugin = new AstroPlugin(
 			env.configManager,
-			new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager)
+			new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager, ts),
+			ts
 		);
 
 		return {
@@ -53,7 +55,7 @@ describe('Astro Plugin', () => {
 	it('provides formatting edits', async () => {
 		const { plugin, document } = setup('formatting/basic.astro');
 
-		const textEdit = await plugin.formatDocument(document);
+		const textEdit = await plugin.formatDocument(document, { tabSize: 4, insertSpaces: true });
 
 		expect(textEdit).to.deep.equal([
 			{

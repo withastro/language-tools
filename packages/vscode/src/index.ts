@@ -8,6 +8,8 @@ import {
 	Position,
 	TextDocumentChangeEvent,
 	ViewColumn,
+	env,
+	extensions,
 } from 'vscode';
 import {
 	LanguageClient,
@@ -18,6 +20,7 @@ import {
 } from 'vscode-languageclient/node';
 import { LanguageClientOptions } from 'vscode-languageclient';
 import { activateTagClosing } from './html/autoClose.js';
+import { getCurrentTsPaths } from './getTs';
 
 const TagCloseRequest: RequestType<TextDocumentPositionParams, string, any> = new RequestType('html/tag');
 
@@ -58,6 +61,8 @@ export async function activate(context: ExtensionContext) {
 		console.info(`Using ${serverRuntime} as runtime`);
 	}
 
+	const typescript = getCurrentTsPaths(context);
+
 	const clientOptions: LanguageClientOptions = {
 		documentSelector: [{ scheme: 'file', language: 'astro' }],
 		synchronize: {
@@ -65,6 +70,7 @@ export async function activate(context: ExtensionContext) {
 		},
 		initializationOptions: {
 			environment: 'node',
+			typescript,
 			dontFilterIncompleteCompletions: true, // VSCode filters client side and is smarter at it than us
 			isTrusted: workspace.isTrusted,
 		},

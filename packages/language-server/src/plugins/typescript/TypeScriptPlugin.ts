@@ -1,4 +1,3 @@
-import ts from 'typescript';
 import {
 	CancellationToken,
 	CodeAction,
@@ -9,7 +8,6 @@ import {
 	Diagnostic,
 	FileChangeType,
 	FoldingRange,
-	FormattingOptions,
 	Hover,
 	InlayHint,
 	Position,
@@ -19,17 +17,16 @@ import {
 	SignatureHelpContext,
 	SymbolInformation,
 	TextDocumentContentChangeEvent,
-	TextEdit,
 	WorkspaceEdit,
 } from 'vscode-languageserver';
-import { ConfigManager, LSTypescriptConfig } from '../../core/config';
-import { AstroDocument, DocumentManager } from '../../core/documents';
-import { AppCompletionItem, AppCompletionList, OnWatchFileChangesParam, Plugin } from '../interfaces';
+import type { ConfigManager, LSTypescriptConfig } from '../../core/config';
+import type { AstroDocument } from '../../core/documents';
+import type { AppCompletionItem, AppCompletionList, OnWatchFileChangesParam, Plugin } from '../interfaces';
 import { CompletionItemData, CompletionsProviderImpl } from './features/CompletionsProvider';
 import { DiagnosticsProviderImpl } from './features/DiagnosticsProvider';
 import { HoverProviderImpl } from './features/HoverProvider';
 import { SignatureHelpProviderImpl } from './features/SignatureHelpProvider';
-import { LanguageServiceManager } from './LanguageServiceManager';
+import type { LanguageServiceManager } from './LanguageServiceManager';
 import { convertToLocationRange, ensureRealFilePath, getScriptKindFromFileName, toVirtualAstroFilePath } from './utils';
 import { DocumentSymbolsProviderImpl } from './features/DocumentSymbolsProvider';
 import { SemanticTokensProviderImpl } from './features/SemanticTokenProvider';
@@ -59,21 +56,28 @@ export class TypeScriptPlugin implements Plugin {
 	private readonly semanticTokensProvider: SemanticTokensProviderImpl;
 	private readonly foldingRangesProvider: FoldingRangesProviderImpl;
 
-	constructor(configManager: ConfigManager, languageServiceManager: LanguageServiceManager) {
+	private readonly ts: typeof import('typescript/lib/tsserverlibrary');
+
+	constructor(
+		configManager: ConfigManager,
+		languageServiceManager: LanguageServiceManager,
+		ts: typeof import('typescript/lib/tsserverlibrary')
+	) {
 		this.configManager = configManager;
 		this.languageServiceManager = languageServiceManager;
+		this.ts = ts;
 
 		this.codeActionsProvider = new CodeActionsProviderImpl(this.languageServiceManager, this.configManager);
-		this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager, this.configManager);
-		this.hoverProvider = new HoverProviderImpl(this.languageServiceManager);
+		this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager, this.configManager, ts);
+		this.hoverProvider = new HoverProviderImpl(this.languageServiceManager, ts);
 		this.definitionsProvider = new DefinitionsProviderImpl(this.languageServiceManager);
 		this.typeDefinitionsProvider = new TypeDefinitionsProviderImpl(this.languageServiceManager);
-		this.signatureHelpProvider = new SignatureHelpProviderImpl(this.languageServiceManager);
-		this.diagnosticsProvider = new DiagnosticsProviderImpl(this.languageServiceManager);
-		this.documentSymbolsProvider = new DocumentSymbolsProviderImpl(this.languageServiceManager);
-		this.semanticTokensProvider = new SemanticTokensProviderImpl(this.languageServiceManager);
-		this.inlayHintsProvider = new InlayHintsProviderImpl(this.languageServiceManager, this.configManager);
-		this.foldingRangesProvider = new FoldingRangesProviderImpl(this.languageServiceManager);
+		this.signatureHelpProvider = new SignatureHelpProviderImpl(this.languageServiceManager, ts);
+		this.diagnosticsProvider = new DiagnosticsProviderImpl(this.languageServiceManager, ts);
+		this.documentSymbolsProvider = new DocumentSymbolsProviderImpl(this.languageServiceManager, ts);
+		this.semanticTokensProvider = new SemanticTokensProviderImpl(this.languageServiceManager, ts);
+		this.inlayHintsProvider = new InlayHintsProviderImpl(this.languageServiceManager, this.configManager, ts);
+		this.foldingRangesProvider = new FoldingRangesProviderImpl(this.languageServiceManager, ts);
 	}
 
 	async doHover(document: AstroDocument, position: Position): Promise<Hover | null> {
@@ -205,9 +209,9 @@ export class TypeScriptPlugin implements Plugin {
 		let doneUpdateProjectFiles = false;
 
 		for (const { fileName, changeType } of onWatchFileChangesParas) {
-			const scriptKind = getScriptKindFromFileName(fileName);
+			const scriptKind = getScriptKindFromFileName(fileName, this.ts);
 
-			if (scriptKind === ts.ScriptKind.Unknown) {
+			if (scriptKind === this.ts.ScriptKind.Unknown) {
 				continue;
 			}
 
