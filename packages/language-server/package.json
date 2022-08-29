@@ -47,6 +47,6 @@
     "svelte": "^3.49.0",
     "ts-node": "^10.7.0",
     "vue": "^3.2.37",
-    "typescript": "~4.6.4"
+    "typescript": "~4.8.2"
   }
 }
