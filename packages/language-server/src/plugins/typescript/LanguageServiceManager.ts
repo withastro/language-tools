@@ -20,7 +20,7 @@ export class LanguageServiceManager {
 		private readonly workspaceUris: string[],
 		private readonly configManager: ConfigManager,
 		typescript: typeof import('typescript/lib/tsserverlibrary'),
-		tsLocalized: Record<string, string> | undefined
+		tsLocalized?: Record<string, string> | undefined
 	) {
 		this.globalSnapshotManager = new GlobalSnapshotManager(typescript);
 		this.docContext = {
