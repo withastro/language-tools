@@ -9,7 +9,7 @@ describe('TypeScript Plugin#InlayHintsProvider', () => {
 	function setup(filePath: string) {
 		const env = createEnvironment(filePath, 'typescript', 'inlayHints');
 		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager, ts);
-		const provider = new InlayHintsProviderImpl(languageServiceManager, env.configManager, ts);
+		const provider = new InlayHintsProviderImpl(languageServiceManager, env.configManager);
 
 		return {
 			...env,

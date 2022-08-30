@@ -64,7 +64,7 @@ export class SignatureHelpProviderImpl implements SignatureHelpProvider {
 			return null;
 		}
 
-		const signatures = info.items.map(this.toSignatureHelpInformation);
+		const signatures = info.items.map((item) => this.toSignatureHelpInformation(item, this.ts));
 
 		return {
 			signatures,
@@ -118,7 +118,10 @@ export class SignatureHelpProviderImpl implements SignatureHelpProvider {
 	/**
 	 * adopted from https://github.com/microsoft/vscode/blob/265a2f6424dfbd3a9788652c7d376a7991d049a3/extensions/typescript-language-features/src/languageFeatures/signatureHelp.ts#L73
 	 */
-	private toSignatureHelpInformation(item: ts.SignatureHelpItem): SignatureInformation {
+	private toSignatureHelpInformation(
+		item: ts.SignatureHelpItem,
+		ts: typeof import('typescript/lib/tsserverlibrary')
+	): SignatureInformation {
 		const [prefixLabel, separatorLabel, suffixLabel] = [
 			item.prefixDisplayParts,
 			item.separatorDisplayParts,
@@ -131,11 +134,11 @@ export class SignatureHelpProviderImpl implements SignatureHelpProvider {
 		const lastIndex = item.parameters.length - 1;
 
 		item.parameters.forEach((parameter, index) => {
-			const label = this.ts.displayPartsToString(parameter.displayParts);
+			const label = ts.displayPartsToString(parameter.displayParts);
 
 			const startIndex = textIndex;
 			const endIndex = textIndex + label.length;
-			const doc = this.ts.displayPartsToString(parameter.documentation);
+			const doc = ts.displayPartsToString(parameter.documentation);
 
 			signatureLabel += label;
 			parameters.push(ParameterInformation.create([startIndex, endIndex], doc));
@@ -148,7 +151,7 @@ export class SignatureHelpProviderImpl implements SignatureHelpProvider {
 		const signatureDocumentation = getMarkdownDocumentation(
 			item.documentation,
 			item.tags.filter((tag) => tag.name !== 'param'),
-			this.ts
+			ts
 		);
 
 		return {
