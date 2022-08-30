@@ -81,18 +81,26 @@ export function startLanguageServer(connection: vscode.Connection, env: RuntimeE
 		// We don't currently support running the TypeScript and Astro plugin in the browser
 		if (environment === 'node') {
 			const ts = env.loadTypescript(params.initializationOptions);
-			const tsLocalized = env.loadTypescriptLocalized(params.initializationOptions);
-			const languageServiceManager = new LanguageServiceManager(
-				documentManager,
-				workspaceUris.map(normalizeUri),
-				configManager,
-				ts,
-				tsLocalized
-			);
 
-			typescriptPlugin = new TypeScriptPlugin(configManager, languageServiceManager, ts);
-			pluginHost.registerPlugin(new AstroPlugin(configManager, languageServiceManager, ts));
-			pluginHost.registerPlugin(typescriptPlugin);
+			if (ts) {
+				const tsLocalized = env.loadTypescriptLocalized(params.initializationOptions);
+				const languageServiceManager = new LanguageServiceManager(
+					documentManager,
+					workspaceUris.map(normalizeUri),
+					configManager,
+					ts,
+					tsLocalized
+				);
+
+				typescriptPlugin = new TypeScriptPlugin(configManager, languageServiceManager, ts);
+				pluginHost.registerPlugin(new AstroPlugin(configManager, languageServiceManager, ts));
+				pluginHost.registerPlugin(typescriptPlugin);
+			} else {
+				connection.sendNotification(ShowMessageNotification.type, {
+					message: `Astro: Couldn't load TypeScript from path ${params?.initializationOptions?.typescript?.serverPath}. Only HTML and CSS features will be enabled`,
+					type: MessageType.Warning,
+				});
+			}
 		}
 
 		return {

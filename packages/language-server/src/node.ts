@@ -5,12 +5,14 @@ const connection = vscode.createConnection(vscode.ProposedFeatures.all);
 
 startLanguageServer(connection, {
 	loadTypescript(options) {
-		return require(options.typescript.serverPath);
+		if (options?.typescript?.serverPath) {
+			return require(options?.typescript?.serverPath);
+		}
 	},
 	loadTypescriptLocalized(options) {
-		if (options.typescript.localizedPath) {
+		if (options?.typescript?.localizedPath) {
 			try {
-				return require(options.typescript.localizedPath);
+				return require(options?.typescript?.localizedPath);
 			} catch {}
 		}
 	},
