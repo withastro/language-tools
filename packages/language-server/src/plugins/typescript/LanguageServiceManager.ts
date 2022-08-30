@@ -19,15 +19,15 @@ export class LanguageServiceManager {
 		private readonly docManager: DocumentManager,
 		private readonly workspaceUris: string[],
 		private readonly configManager: ConfigManager,
-		typescript: typeof import('typescript/lib/tsserverlibrary'),
+		ts: typeof import('typescript/lib/tsserverlibrary'),
 		tsLocalized?: Record<string, string> | undefined
 	) {
-		this.globalSnapshotManager = new GlobalSnapshotManager(typescript);
+		this.globalSnapshotManager = new GlobalSnapshotManager(ts);
 		this.docContext = {
 			createDocument: this.createDocument,
 			globalSnapshotManager: this.globalSnapshotManager,
 			configManager: this.configManager,
-			ts: typescript,
+			ts,
 			tsLocalized: tsLocalized,
 		};
 
