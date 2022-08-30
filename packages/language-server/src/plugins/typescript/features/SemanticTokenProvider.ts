@@ -6,10 +6,11 @@ import type { AstroSnapshotFragment } from '../snapshots/DocumentSnapshot';
 import { toVirtualAstroFilePath } from '../utils';
 
 export class SemanticTokensProviderImpl implements SemanticTokensProvider {
-	constructor(
-		private languageServiceManager: LanguageServiceManager,
-		private readonly ts: typeof import('typescript/lib/tsserverlibrary')
-	) {}
+	private ts: typeof import('typescript/lib/tsserverlibrary');
+
+	constructor(private languageServiceManager: LanguageServiceManager) {
+		this.ts = languageServiceManager.docContext.ts;
+	}
 
 	async getSemanticTokens(
 		document: AstroDocument,

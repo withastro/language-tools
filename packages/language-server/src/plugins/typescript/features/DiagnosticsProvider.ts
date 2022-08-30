@@ -27,10 +27,11 @@ export enum DiagnosticCodes {
 }
 
 export class DiagnosticsProviderImpl implements DiagnosticsProvider {
-	constructor(
-		private readonly languageServiceManager: LanguageServiceManager,
-		private readonly ts: typeof import('typescript/lib/tsserverlibrary')
-	) {}
+	private ts: typeof import('typescript/lib/tsserverlibrary');
+
+	constructor(private languageServiceManager: LanguageServiceManager) {
+		this.ts = languageServiceManager.docContext.ts;
+	}
 
 	async getDiagnostics(document: AstroDocument, _cancellationToken?: CancellationToken): Promise<Diagnostic[]> {
 		// Don't return diagnostics for files inside node_modules. These are considered read-only

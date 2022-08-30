@@ -7,10 +7,11 @@ import type { AstroSnapshot } from '../snapshots/DocumentSnapshot';
 import { getScriptTagSnapshot, toVirtualAstroFilePath } from '../utils';
 
 export class FoldingRangesProviderImpl implements FoldingRangesProvider {
-	constructor(
-		private readonly languageServiceManager: LanguageServiceManager,
-		private readonly ts: typeof import('typescript/lib/tsserverlibrary')
-	) {}
+	private ts: typeof import('typescript/lib/tsserverlibrary');
+
+	constructor(private languageServiceManager: LanguageServiceManager) {
+		this.ts = languageServiceManager.docContext.ts;
+	}
 
 	async getFoldingRanges(document: AstroDocument): Promise<FoldingRange[] | null> {
 		const html = document.html;

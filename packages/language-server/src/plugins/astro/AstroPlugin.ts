@@ -20,18 +20,16 @@ export class AstroPlugin implements Plugin {
 
 	private configManager: ConfigManager;
 	private readonly languageServiceManager: LanguageServiceManager;
+	private readonly ts: typeof import('typescript/lib/tsserverlibrary');
 
 	private readonly completionProvider: CompletionsProviderImpl;
 
-	constructor(
-		configManager: ConfigManager,
-		languageServiceManager: LanguageServiceManager,
-		ts: typeof import('typescript/lib/tsserverlibrary')
-	) {
+	constructor(configManager: ConfigManager, languageServiceManager: LanguageServiceManager) {
 		this.configManager = configManager;
 		this.languageServiceManager = languageServiceManager;
+		this.ts = languageServiceManager.docContext.ts;
 
-		this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager, ts);
+		this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager);
 	}
 
 	async getCompletions(

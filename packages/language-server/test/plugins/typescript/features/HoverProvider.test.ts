@@ -9,7 +9,7 @@ describe('TypeScript Plugin#HoverProvider', () => {
 	function setup(filePath: string) {
 		const env = createEnvironment(filePath, 'typescript', 'hoverInfo');
 		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager, ts);
-		const provider = new HoverProviderImpl(languageServiceManager, ts);
+		const provider = new HoverProviderImpl(languageServiceManager);
 
 		return {
 			...env,

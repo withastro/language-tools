@@ -58,26 +58,22 @@ export class TypeScriptPlugin implements Plugin {
 
 	private readonly ts: typeof import('typescript/lib/tsserverlibrary');
 
-	constructor(
-		configManager: ConfigManager,
-		languageServiceManager: LanguageServiceManager,
-		ts: typeof import('typescript/lib/tsserverlibrary')
-	) {
+	constructor(configManager: ConfigManager, languageServiceManager: LanguageServiceManager) {
 		this.configManager = configManager;
 		this.languageServiceManager = languageServiceManager;
-		this.ts = ts;
+		this.ts = languageServiceManager.docContext.ts;
 
-		this.codeActionsProvider = new CodeActionsProviderImpl(this.languageServiceManager, this.configManager, ts);
-		this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager, this.configManager, ts);
-		this.hoverProvider = new HoverProviderImpl(this.languageServiceManager, ts);
+		this.codeActionsProvider = new CodeActionsProviderImpl(this.languageServiceManager, this.configManager);
+		this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager, this.configManager);
+		this.hoverProvider = new HoverProviderImpl(this.languageServiceManager);
 		this.definitionsProvider = new DefinitionsProviderImpl(this.languageServiceManager);
 		this.typeDefinitionsProvider = new TypeDefinitionsProviderImpl(this.languageServiceManager);
-		this.signatureHelpProvider = new SignatureHelpProviderImpl(this.languageServiceManager, ts);
-		this.diagnosticsProvider = new DiagnosticsProviderImpl(this.languageServiceManager, ts);
-		this.documentSymbolsProvider = new DocumentSymbolsProviderImpl(this.languageServiceManager, ts);
-		this.semanticTokensProvider = new SemanticTokensProviderImpl(this.languageServiceManager, ts);
-		this.inlayHintsProvider = new InlayHintsProviderImpl(this.languageServiceManager, this.configManager, ts);
-		this.foldingRangesProvider = new FoldingRangesProviderImpl(this.languageServiceManager, ts);
+		this.signatureHelpProvider = new SignatureHelpProviderImpl(this.languageServiceManager);
+		this.diagnosticsProvider = new DiagnosticsProviderImpl(this.languageServiceManager);
+		this.documentSymbolsProvider = new DocumentSymbolsProviderImpl(this.languageServiceManager);
+		this.semanticTokensProvider = new SemanticTokensProviderImpl(this.languageServiceManager);
+		this.inlayHintsProvider = new InlayHintsProviderImpl(this.languageServiceManager, this.configManager);
+		this.foldingRangesProvider = new FoldingRangesProviderImpl(this.languageServiceManager);
 	}
 
 	async doHover(document: AstroDocument, position: Position): Promise<Hover | null> {

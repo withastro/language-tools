@@ -17,10 +17,11 @@ import { getScriptTagSnapshot, toVirtualAstroFilePath } from '../utils';
 import type { AstroSnapshot } from '../snapshots/DocumentSnapshot';
 
 export class SignatureHelpProviderImpl implements SignatureHelpProvider {
-	constructor(
-		private readonly languageServiceManager: LanguageServiceManager,
-		private readonly ts: typeof import('typescript/lib/tsserverlibrary')
-	) {}
+	private ts: typeof import('typescript/lib/tsserverlibrary');
+
+	constructor(private languageServiceManager: LanguageServiceManager) {
+		this.ts = languageServiceManager.docContext.ts;
+	}
 
 	private static readonly triggerCharacters = ['(', ',', '<'];
 	private static readonly retriggerCharacters = [')'];

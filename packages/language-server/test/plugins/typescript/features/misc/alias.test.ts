@@ -8,7 +8,7 @@ describe('TypeScript Plugin#Support Aliases', () => {
 	function setup(filePath: string) {
 		const env = createEnvironment(filePath, 'typescript', 'misc');
 		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager, ts);
-		const provider = new DiagnosticsProviderImpl(languageServiceManager, ts);
+		const provider = new DiagnosticsProviderImpl(languageServiceManager);
 
 		return {
 			...env,

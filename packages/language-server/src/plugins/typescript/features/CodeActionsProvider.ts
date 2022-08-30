@@ -30,11 +30,14 @@ import { findContainingNode } from './utils';
 export const sortImportKind = `${CodeActionKind.Source}.sortImports`;
 
 export class CodeActionsProviderImpl implements CodeActionsProvider {
+	private ts: typeof import('typescript/lib/tsserverlibrary')
+
 	constructor(
 		private languageServiceManager: LanguageServiceManager,
 		private configManager: ConfigManager,
-		private readonly ts: typeof import('typescript/lib/tsserverlibrary')
-	) {}
+	) {
+		this.ts = languageServiceManager.docContext.ts
+	}
 
 	async getCodeActions(
 		document: AstroDocument,

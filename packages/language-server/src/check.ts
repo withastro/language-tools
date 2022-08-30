@@ -66,7 +66,7 @@ export class AstroCheck {
 			this.configManager,
 			this.ts
 		);
-		this.pluginHost.registerPlugin(new TypeScriptPlugin(this.configManager, languageServiceManager, this.ts));
+		this.pluginHost.registerPlugin(new TypeScriptPlugin(this.configManager, languageServiceManager));
 	}
 
 	private async getDiagnosticsForFile(uri: string) {

@@ -12,7 +12,7 @@ import type { DocumentSnapshot } from './snapshots/DocumentSnapshot';
 import { GlobalSnapshotManager } from './snapshots/SnapshotManager';
 
 export class LanguageServiceManager {
-	private docContext: LanguageServiceDocumentContext;
+	public docContext: LanguageServiceDocumentContext;
 	private globalSnapshotManager: GlobalSnapshotManager;
 
 	constructor(

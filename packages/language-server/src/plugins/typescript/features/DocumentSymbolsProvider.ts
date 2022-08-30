@@ -8,10 +8,11 @@ import { symbolKindFromString } from '../utils';
 import { SymbolTag } from 'vscode-languageserver-types';
 
 export class DocumentSymbolsProviderImpl implements DocumentSymbolsProvider {
-	constructor(
-		private languageServiceManager: LanguageServiceManager,
-		private readonly ts: typeof import('typescript/lib/tsserverlibrary')
-	) {}
+	private ts: typeof import('typescript/lib/tsserverlibrary');
+
+	constructor(private languageServiceManager: LanguageServiceManager) {
+		this.ts = languageServiceManager.docContext.ts;
+	}
 
 	async getDocumentSymbols(document: AstroDocument): Promise<SymbolInformation[]> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);

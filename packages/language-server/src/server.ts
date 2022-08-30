@@ -92,8 +92,8 @@ export function startLanguageServer(connection: vscode.Connection, env: RuntimeE
 					tsLocalized
 				);
 
-				typescriptPlugin = new TypeScriptPlugin(configManager, languageServiceManager, ts);
-				pluginHost.registerPlugin(new AstroPlugin(configManager, languageServiceManager, ts));
+				typescriptPlugin = new TypeScriptPlugin(configManager, languageServiceManager);
+				pluginHost.registerPlugin(new AstroPlugin(configManager, languageServiceManager));
 				pluginHost.registerPlugin(typescriptPlugin);
 			} else {
 				connection.sendNotification(ShowMessageNotification.type, {

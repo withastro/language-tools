@@ -18,7 +18,7 @@ describe('TypeScript Plugin#SemanticTokenProvider', () => {
 	function setup(filePath: string) {
 		const env = createEnvironment(filePath, 'typescript', 'semanticTokens');
 		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager, ts);
-		const provider = new SemanticTokensProviderImpl(languageServiceManager, ts);
+		const provider = new SemanticTokensProviderImpl(languageServiceManager);
 
 		return {
 			...env,

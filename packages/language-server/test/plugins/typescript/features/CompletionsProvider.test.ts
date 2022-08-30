@@ -12,7 +12,7 @@ describe('TypeScript Plugin#CompletionsProvider', () => {
 	function setup(filePath: string) {
 		const env = createEnvironment(filePath, 'typescript', 'completions');
 		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager, ts);
-		const provider = new CompletionsProviderImpl(languageServiceManager, env.configManager, ts);
+		const provider = new CompletionsProviderImpl(languageServiceManager, env.configManager);
 
 		return {
 			...env,

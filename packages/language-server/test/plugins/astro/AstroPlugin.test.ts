@@ -10,8 +10,7 @@ describe('Astro Plugin', () => {
 		const env = createEnvironment(filePath, 'astro');
 		const plugin = new AstroPlugin(
 			env.configManager,
-			new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager, ts),
-			ts
+			new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager, ts)
 		);
 
 		return {

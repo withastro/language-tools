@@ -28,6 +28,7 @@ type LastCompletion = {
 
 export class CompletionsProviderImpl implements CompletionsProvider {
 	private readonly languageServiceManager: TypeScriptLanguageServiceManager;
+	private readonly ts: typeof import('typescript/lib/tsserverlibrary');
 	private lastCompletion: LastCompletion | null = null;
 
 	public directivesHTMLLang = getLanguageService({
@@ -35,11 +36,9 @@ export class CompletionsProviderImpl implements CompletionsProvider {
 		useDefaultDataProvider: false,
 	});
 
-	constructor(
-		languageServiceManager: TypeScriptLanguageServiceManager,
-		private readonly ts: typeof import('typescript/lib/tsserverlibrary')
-	) {
+	constructor(languageServiceManager: TypeScriptLanguageServiceManager) {
 		this.languageServiceManager = languageServiceManager;
+		this.ts = languageServiceManager.docContext.ts;
 	}
 
 	async getCompletions(

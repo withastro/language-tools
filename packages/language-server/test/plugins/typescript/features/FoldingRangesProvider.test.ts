@@ -8,7 +8,7 @@ describe('TypeScript Plugin#FoldingRangesProvider', () => {
 	function setup(filePath: string) {
 		const env = createEnvironment(filePath, 'typescript', 'foldingRanges');
 		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager, ts);
-		const provider = new FoldingRangesProviderImpl(languageServiceManager, ts);
+		const provider = new FoldingRangesProviderImpl(languageServiceManager);
 
 		return {
 			...env,

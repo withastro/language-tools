@@ -10,10 +10,11 @@ import type ts from 'typescript';
 const partsMap = new Map([['JSX attribute', 'HTML attribute']]);
 
 export class HoverProviderImpl implements HoverProvider {
-	constructor(
-		private readonly languageServiceManager: LanguageServiceManager,
-		private readonly ts: typeof import('typescript/lib/tsserverlibrary')
-	) {}
+	private ts: typeof import('typescript/lib/tsserverlibrary');
+
+	constructor(private languageServiceManager: LanguageServiceManager) {
+		this.ts = languageServiceManager.docContext.ts;
+	}
 
 	async doHover(document: AstroDocument, position: Position): Promise<Hover | null> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);

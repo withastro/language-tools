@@ -74,8 +74,8 @@ describe('PluginHost', () => {
 			const languageServiceManager = new LanguageServiceManager(docManager, [path], configManager, ts);
 
 			pluginHost.registerPlugin(new HTMLPlugin(configManager));
-			pluginHost.registerPlugin(new AstroPlugin(configManager, languageServiceManager, ts));
-			pluginHost.registerPlugin(new TypeScriptPlugin(configManager, languageServiceManager, ts));
+			pluginHost.registerPlugin(new AstroPlugin(configManager, languageServiceManager));
+			pluginHost.registerPlugin(new TypeScriptPlugin(configManager, languageServiceManager));
 
 			const document = openDocument(filePath, path, docManager);
 

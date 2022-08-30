@@ -13,8 +13,7 @@ describe('TypeScript Plugin', () => {
 		const env = createEnvironment(filePath, 'typescript');
 		const plugin = new TypeScriptPlugin(
 			env.configManager,
-			new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager, ts),
-			ts
+			new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager, ts)
 		);
 
 		return {

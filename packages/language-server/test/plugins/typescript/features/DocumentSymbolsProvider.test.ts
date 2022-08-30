@@ -9,7 +9,7 @@ describe('TypeScript Plugin#DocumentSymbolsProvider', () => {
 	function setup(filePath: string) {
 		const env = createEnvironment(filePath, 'typescript', 'documentSymbols');
 		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager, ts);
-		const provider = new DocumentSymbolsProviderImpl(languageServiceManager, ts);
+		const provider = new DocumentSymbolsProviderImpl(languageServiceManager);
 
 		return {
 			...env,

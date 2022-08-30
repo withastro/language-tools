@@ -86,11 +86,11 @@ const svelte2tsxTypes = new Set([
 ]);
 
 export class CompletionsProviderImpl implements CompletionsProvider<CompletionItemData> {
-	constructor(
-		private languageServiceManager: LanguageServiceManager,
-		private configManager: ConfigManager,
-		private readonly ts: typeof import('typescript/lib/tsserverlibrary')
-	) {}
+	private ts: typeof import('typescript/lib/tsserverlibrary');
+
+	constructor(private languageServiceManager: LanguageServiceManager, private configManager: ConfigManager) {
+		this.ts = languageServiceManager.docContext.ts;
+	}
 
 	private readonly validTriggerCharacters = ['.', '"', "'", '`', '/', '@', '<', '#'] as const;
 

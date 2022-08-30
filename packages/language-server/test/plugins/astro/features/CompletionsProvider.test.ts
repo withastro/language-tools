@@ -10,7 +10,7 @@ describe('Astro Plugin#CompletionsProvider', () => {
 	function setup(filePath: string) {
 		const env = createEnvironment(filePath, 'astro', 'completions');
 		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager, ts);
-		const provider = new CompletionsProviderImpl(languageServiceManager, ts);
+		const provider = new CompletionsProviderImpl(languageServiceManager);
 
 		return {
 			...env,
