@@ -146,7 +146,7 @@ export class ConfigManager {
 			insertSpaceAfterTypeAssertion: formatConfig.insertSpaceAfterTypeAssertion ?? false,
 			placeOpenBraceOnNewLineForFunctions: formatConfig.placeOpenBraceOnNewLineForFunctions ?? false,
 			placeOpenBraceOnNewLineForControlBlocks: formatConfig.placeOpenBraceOnNewLineForControlBlocks ?? false,
-			semicolons: formatConfig.semicolons ?? SemicolonPreference.Ignore,
+			semicolons: formatConfig.semicolons ?? 'ignore',
 		};
 	}
 
@@ -268,10 +268,4 @@ function getInlayParameterNameHintsPreference(config: any) {
 		default:
 			return undefined;
 	}
-}
-
-enum SemicolonPreference {
-	Ignore = 'ignore',
-	Insert = 'insert',
-	Remove = 'remove',
 }
