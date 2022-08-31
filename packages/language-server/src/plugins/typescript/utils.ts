@@ -1,4 +1,3 @@
-import ts from 'typescript';
 import { dirname, extname } from 'path';
 import { pathToUrl } from '../../utils';
 import {
@@ -11,8 +10,9 @@ import {
 	SemanticTokenTypes,
 	SemanticTokensLegend,
 } from 'vscode-languageserver';
-import { mapRangeToOriginal } from '../../core/documents';
-import { SnapshotFragment } from './snapshots/DocumentSnapshot';
+import { AstroDocument, mapRangeToOriginal, TagInformation } from '../../core/documents';
+import type { AstroSnapshot, ScriptTagDocumentSnapshot, SnapshotFragment } from './snapshots/DocumentSnapshot';
+import type { Node } from 'vscode-html-languageservice';
 
 export const enum TokenType {
 	class,
@@ -126,7 +126,10 @@ export function symbolKindFromString(kind: string): SymbolKind {
 	}
 }
 
-export function scriptElementKindToCompletionItemKind(kind: ts.ScriptElementKind): CompletionItemKind {
+export function scriptElementKindToCompletionItemKind(
+	kind: ts.ScriptElementKind,
+	ts: typeof import('typescript/lib/tsserverlibrary')
+): CompletionItemKind {
 	switch (kind) {
 		case ts.ScriptElementKind.primitiveType:
 		case ts.ScriptElementKind.keyword:
@@ -170,7 +173,10 @@ export function scriptElementKindToCompletionItemKind(kind: ts.ScriptElementKind
 	return CompletionItemKind.Property;
 }
 
-export function getCommitCharactersForScriptElement(kind: ts.ScriptElementKind): string[] | undefined {
+export function getCommitCharactersForScriptElement(
+	kind: ts.ScriptElementKind,
+	ts: typeof import('typescript/lib/tsserverlibrary')
+): string[] | undefined {
 	const commitCharacters: string[] = [];
 	switch (kind) {
 		case ts.ScriptElementKind.memberGetAccessorElement:
@@ -201,7 +207,10 @@ export function getCommitCharactersForScriptElement(kind: ts.ScriptElementKind):
 	return commitCharacters.length === 0 ? undefined : commitCharacters;
 }
 
-export function getExtensionFromScriptKind(kind: ts.ScriptKind | undefined): ts.Extension {
+export function getExtensionFromScriptKind(
+	kind: ts.ScriptKind | undefined,
+	ts: typeof import('typescript/lib/tsserverlibrary')
+): ts.Extension {
 	switch (kind) {
 		case ts.ScriptKind.JSX:
 			return ts.Extension.Jsx;
@@ -217,7 +226,11 @@ export function getExtensionFromScriptKind(kind: ts.ScriptKind | undefined): ts.
 	}
 }
 
-export function findTsConfigPath(fileName: string, rootUris: string[]) {
+export function findTsConfigPath(
+	fileName: string,
+	rootUris: string[],
+	ts: typeof import('typescript/lib/tsserverlibrary')
+) {
 	const searchDir = dirname(fileName);
 	const path =
 		ts.findConfigFile(searchDir, ts.sys.fileExists, 'tsconfig.json') ||
@@ -232,7 +245,10 @@ export function isSubPath(uri: string, possibleSubPath: string): boolean {
 	return pathToUrl(possibleSubPath).startsWith(uri);
 }
 
-export function getScriptKindFromFileName(fileName: string): ts.ScriptKind {
+export function getScriptKindFromFileName(
+	fileName: string,
+	ts: typeof import('typescript/lib/tsserverlibrary')
+): ts.ScriptKind {
 	const ext = fileName.substring(fileName.lastIndexOf('.'));
 	switch (ext.toLowerCase()) {
 		case ts.Extension.Js:
@@ -247,19 +263,6 @@ export function getScriptKindFromFileName(fileName: string): ts.ScriptKind {
 			return ts.ScriptKind.JSON;
 		default:
 			return ts.ScriptKind.Unknown;
-	}
-}
-
-export function mapSeverity(category: ts.DiagnosticCategory): DiagnosticSeverity {
-	switch (category) {
-		case ts.DiagnosticCategory.Error:
-			return DiagnosticSeverity.Error;
-		case ts.DiagnosticCategory.Warning:
-			return DiagnosticSeverity.Warning;
-		case ts.DiagnosticCategory.Suggestion:
-			return DiagnosticSeverity.Hint;
-		case ts.DiagnosticCategory.Message:
-			return DiagnosticSeverity.Information;
 	}
 }
 
@@ -287,6 +290,37 @@ export function convertToLocationRange(defDoc: SnapshotFragment, textSpan: ts.Te
 	return range;
 }
 
+// Some code actions will insert code at the start of the file instead of inside our frontmatter
+// We'll redirect those to the proper starting place
+export function ensureFrontmatterInsert(resultRange: Range, document: AstroDocument) {
+	if (document.astroMeta.frontmatter.state === 'closed') {
+		const position = document.positionAt(document.astroMeta.frontmatter.startOffset!);
+		position.line += 1;
+		position.character = resultRange.start.character;
+
+		return Range.create(position, position);
+	}
+
+	return resultRange;
+}
+
+// Some code actions ill insert code at the end of the generated TSX file, so we'll manually
+// redirect it to the end of the frontmatter instead
+export function checkEndOfFileCodeInsert(resultRange: Range, document: AstroDocument) {
+	if (resultRange.start.line > document.lineCount) {
+		if (document.astroMeta.frontmatter.state === 'closed') {
+			const position = document.positionAt(document.astroMeta.frontmatter.endOffset!);
+			return Range.create(position, position);
+		}
+	}
+
+	return resultRange;
+}
+
+export function removeAstroComponentSuffix(name: string) {
+	return name.replace(/(\w+)__AstroComponent_/, '$1');
+}
+
 export type FrameworkExt = 'astro' | 'vue' | 'jsx' | 'tsx' | 'svelte';
 type FrameworkVirtualExt = 'ts' | 'tsx';
 
@@ -294,14 +328,6 @@ const VirtualExtension: Record<FrameworkVirtualExt, FrameworkVirtualExt> = {
 	ts: 'ts',
 	tsx: 'tsx',
 };
-
-type VirtualFrameworkSettings = Record<
-	FrameworkExt,
-	{
-		ext: FrameworkExt;
-		virtualExt: FrameworkVirtualExt;
-	}
->;
 
 export function getFrameworkFromFilePath(filePath: string): FrameworkExt {
 	filePath = ensureRealFilePath(filePath);
@@ -371,4 +397,46 @@ export function ensureRealFilePath(filePath: string) {
 	} else {
 		return filePath;
 	}
+}
+
+/**
+ * Return if a script tag is TypeScript or JavaScript
+ */
+export function getScriptTagLanguage(scriptTag: TagInformation): 'js' | 'ts' {
+	// Using any kind of attributes on the script tag will disable hoisting, so we can just check if there's any
+	if (Object.entries(scriptTag.attributes).length === 0) {
+		return 'ts';
+	}
+
+	return 'js';
+}
+
+export function getScriptTagSnapshot(
+	snapshot: AstroSnapshot,
+	document: AstroDocument,
+	tagInfo: Node | { start: number; end: number },
+	position?: Position
+): {
+	snapshot: ScriptTagDocumentSnapshot;
+	filePath: string;
+	index: number;
+	offset: number;
+} {
+	const index = document.scriptTags.findIndex((value) => value.container.start == tagInfo.start);
+
+	const scriptTagLanguage = getScriptTagLanguage(document.scriptTags[index]);
+	const scriptFilePath = snapshot.filePath + `.__script${index}.${scriptTagLanguage}`;
+	const scriptTagSnapshot = snapshot.scriptTagSnapshots[index];
+
+	let offset = 0;
+	if (position) {
+		offset = scriptTagSnapshot.offsetAt(scriptTagSnapshot.getGeneratedPosition(position));
+	}
+
+	return {
+		snapshot: scriptTagSnapshot,
+		filePath: scriptFilePath,
+		index,
+		offset,
+	};
 }

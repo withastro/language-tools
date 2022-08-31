@@ -3,6 +3,7 @@ import { AstroDocument, DocumentManager } from '../src/core/documents';
 import ts from 'typescript';
 import { join } from 'path';
 import { pathToUrl } from '../src/utils';
+import { FormattingOptions } from 'vscode-languageserver-types';
 
 /**
  *
@@ -21,18 +22,23 @@ export function createEnvironment(filePath: string, baseDir: string, pathPrefix?
 	return { document, docManager, configManager, fixturesDir: pathToUrl(fixtureDir) };
 }
 
-function openDocument(filePath: string, baseDir: string, docManager: DocumentManager) {
+export function openDocument(filePath: string, baseDir: string, docManager: DocumentManager) {
 	const path = join(baseDir, filePath);
 
-	if (!ts.sys.fileExists(path)) {
-		return null;
+	if (!ts.sys.fileExists(path) || !path) {
+		throw new Error(`File ${path} doesn't exist`);
 	}
 
 	const document = docManager.openDocument({
 		uri: pathToUrl(path),
-		text: ts.sys.readFile(path) || '',
+		text: harmonizeNewLines(ts.sys.readFile(path) || ''),
 	});
+
 	return document;
+}
+
+function harmonizeNewLines(input: string) {
+	return input.replace(/\r\n/g, '~:~').replace(/\n/g, '~:~').replace(/~:~/g, '\n');
 }
 
 // Outside of the Astro and TypeScript plugins, we don't really need to create a real environnement with proper
@@ -45,3 +51,9 @@ export function createFakeEnvironment(content: string) {
 
 	return { document, configManager };
 }
+
+export const defaultFormattingOptions: FormattingOptions = {
+	tabSize: 2,
+	indentSize: 2,
+	insertSpaces: true,
+};

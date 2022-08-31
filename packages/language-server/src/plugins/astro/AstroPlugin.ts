@@ -1,35 +1,35 @@
-import ts from 'typescript';
 import {
 	CompletionContext,
-	DefinitionLink,
 	FoldingRange,
 	FoldingRangeKind,
-	LocationLink,
 	Position,
+	TextEdit,
 	Range,
+	FormattingOptions,
 } from 'vscode-languageserver';
-import { ConfigManager } from '../../core/config';
-import { AstroDocument, DocumentManager, isInsideFrontmatter } from '../../core/documents';
-import { pathToUrl, urlToPath } from '../../utils';
-import { AppCompletionList, Plugin } from '../interfaces';
-import { LanguageServiceManager } from '../typescript/LanguageServiceManager';
-import { ensureRealFilePath, toVirtualAstroFilePath } from '../typescript/utils';
+import type { ConfigManager } from '../../core/config';
+import type { AstroDocument } from '../../core/documents';
+import { importPrettier, getPrettierPluginPath } from '../../importPackage';
+import { mergeDeep } from '../../utils';
+import type { AppCompletionList, Plugin } from '../interfaces';
+import type { LanguageServiceManager } from '../typescript/LanguageServiceManager';
 import { CompletionsProviderImpl } from './features/CompletionsProvider';
-import { Node } from 'vscode-html-languageservice';
 
 export class AstroPlugin implements Plugin {
 	__name = 'astro';
 
 	private configManager: ConfigManager;
 	private readonly languageServiceManager: LanguageServiceManager;
+	private readonly ts: typeof import('typescript/lib/tsserverlibrary');
 
 	private readonly completionProvider: CompletionsProviderImpl;
 
-	constructor(docManager: DocumentManager, configManager: ConfigManager, workspaceUris: string[]) {
+	constructor(configManager: ConfigManager, languageServiceManager: LanguageServiceManager) {
 		this.configManager = configManager;
-		this.languageServiceManager = new LanguageServiceManager(docManager, workspaceUris, configManager);
+		this.languageServiceManager = languageServiceManager;
+		this.ts = languageServiceManager.docContext.ts;
 
-		this.completionProvider = new CompletionsProviderImpl(docManager, this.languageServiceManager);
+		this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager);
 	}
 
 	async getCompletions(
@@ -41,6 +41,53 @@ export class AstroPlugin implements Plugin {
 		return completions;
 	}
 
+	async formatDocument(document: AstroDocument, options: FormattingOptions): Promise<TextEdit[]> {
+		const filePath = document.getFilePath();
+		if (!filePath) {
+			return [];
+		}
+
+		const prettier = importPrettier(filePath);
+
+		const prettierConfig = (await prettier.resolveConfig(filePath, { editorconfig: true, useCache: false })) ?? {};
+		const prettierVSConfig = await this.configManager.getPrettierVSConfig(document);
+		const editorFormatConfig =
+			options !== undefined // We need to check for options existing here because some editors might not have it
+				? {
+						tabWidth: options.tabSize,
+						useTabs: !options.insertSpaces,
+				  }
+				: {};
+
+		// Return a config with the following cascade:
+		// - Prettier config file should always win if it exists, if it doesn't:
+		// - Prettier config from the VS Code extension is used, if it doesn't exist:
+		// - Use the editor's basic configuration settings
+		const resultConfig =
+			returnObjectIfHasKeys(prettierConfig) || returnObjectIfHasKeys(prettierVSConfig) || editorFormatConfig;
+
+		const fileInfo = await prettier.getFileInfo(filePath, { ignorePath: '.prettierignore' });
+
+		if (fileInfo.ignored) {
+			return [];
+		}
+
+		const result = prettier.format(document.getText(), {
+			...resultConfig,
+			plugins: getAstroPrettierPlugin(),
+			parser: 'astro',
+		});
+
+		return document.getText() === result
+			? []
+			: [TextEdit.replace(Range.create(document.positionAt(0), document.positionAt(document.getTextLength())), result)];
+
+		function getAstroPrettierPlugin() {
+			const hasPluginLoadedAlready = prettier.getSupportInfo().languages.some((l) => l.name === 'astro');
+			return hasPluginLoadedAlready ? [] : [getPrettierPluginPath(filePath!)];
+		}
+	}
+
 	getFoldingRanges(document: AstroDocument): FoldingRange[] {
 		const foldingRanges: FoldingRange[] = [];
 		const { frontmatter } = document.astroMeta;
@@ -48,8 +95,16 @@ export class AstroPlugin implements Plugin {
 		// Currently editing frontmatter, don't fold
 		if (frontmatter.state !== 'closed') return foldingRanges;
 
-		const start = document.positionAt(frontmatter.startOffset as number);
-		const end = document.positionAt((frontmatter.endOffset as number) - 3);
+		// The way folding ranges work is by folding anything between the starting position and the ending one, as such
+		// the start in this case should be after the frontmatter start (after the starting ---) until the last character
+		// of the last line of the frontmatter before its ending (before the closing ---)
+		// ---
+		//		^ -- start
+		// console.log("Astro")
+		// ---								^ -- end
+		const start = document.positionAt(frontmatter.startOffset! + 3);
+		const end = document.positionAt(frontmatter.endOffset! - 1);
+
 		return [
 			{
 				startLine: start.line,
@@ -60,98 +115,10 @@ export class AstroPlugin implements Plugin {
 			},
 		];
 	}
+}
 
-	async getDefinitions(document: AstroDocument, position: Position): Promise<DefinitionLink[]> {
-		if (this.isInsideFrontmatter(document, position)) {
-			return [];
-		}
-
-		const offset = document.offsetAt(position);
-		const html = document.html;
-
-		const node = html.findNodeAt(offset);
-		if (!this.isComponentTag(node)) {
-			return [];
-		}
-
-		const [componentName] = node.tag!.split(':');
-
-		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const defs = this.getDefinitionsForComponentName(document, lang, componentName);
-
-		if (!defs || !defs.length) {
-			return [];
-		}
-
-		const startRange: Range = Range.create(Position.create(0, 0), Position.create(0, 0));
-		const links = defs.map((def) => {
-			const defFilePath = ensureRealFilePath(def.fileName);
-			return LocationLink.create(pathToUrl(defFilePath), startRange, startRange);
-		});
-
-		return links;
-	}
-
-	private isInsideFrontmatter(document: AstroDocument, position: Position) {
-		return isInsideFrontmatter(document.getText(), document.offsetAt(position));
-	}
-
-	private isComponentTag(node: Node): boolean {
-		if (!node.tag) {
-			return false;
-		}
-		const firstChar = node.tag[0];
-		return /[A-Z]/.test(firstChar);
-	}
-
-	private getDefinitionsForComponentName(
-		document: AstroDocument,
-		lang: ts.LanguageService,
-		componentName: string
-	): readonly ts.DefinitionInfo[] | undefined {
-		const filePath = urlToPath(document.uri);
-		const tsFilePath = toVirtualAstroFilePath(filePath!);
-
-		const program = lang.getProgram();
-		const sourceFile = program?.getSourceFile(tsFilePath);
-		if (!sourceFile) {
-			return undefined;
-		}
-
-		const specifier = this.getImportSpecifierForIdentifier(sourceFile, componentName);
-		if (!specifier) {
-			return [];
-		}
-
-		const defs = lang.getDefinitionAtPosition(tsFilePath, specifier.getStart());
-		if (!defs) {
-			return undefined;
-		}
-
-		return defs;
-	}
-
-	private getImportSpecifierForIdentifier(sourceFile: ts.SourceFile, identifier: string): ts.Expression | undefined {
-		let importSpecifier: ts.Expression | undefined = undefined;
-		ts.forEachChild(sourceFile, (tsNode) => {
-			if (ts.isImportDeclaration(tsNode)) {
-				if (tsNode.importClause) {
-					const { name, namedBindings } = tsNode.importClause;
-					if (name && name.getText() === identifier) {
-						importSpecifier = tsNode.moduleSpecifier;
-						return true;
-					} else if (namedBindings && namedBindings.kind === ts.SyntaxKind.NamedImports) {
-						const elements = (namedBindings as ts.NamedImports).elements;
-						for (let elem of elements) {
-							if (elem.name.getText() === identifier) {
-								importSpecifier = tsNode.moduleSpecifier;
-								return true;
-							}
-						}
-					}
-				}
-			}
-		});
-		return importSpecifier;
+function returnObjectIfHasKeys<T>(obj: T | undefined): T | undefined {
+	if (Object.keys(obj || {}).length > 0) {
+		return obj;
 	}
 }

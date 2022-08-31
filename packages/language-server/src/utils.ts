@@ -1,6 +1,6 @@
 import { URI } from 'vscode-uri';
-import { Position, Range } from 'vscode-languageserver';
-import { Node } from 'vscode-html-languageservice';
+import type { Position, Range } from 'vscode-languageserver';
+import { getPackagePath } from './importPackage';
 
 /** Normalizes a document URI */
 export function normalizeUri(uri: string): string {
@@ -38,16 +38,70 @@ export function getLastPartOfPath(path: string): string {
 }
 
 /**
- * Return true if a specific node could be a component.
- * This is not a 100% sure test as it'll return false for any component that does not match the standard format for a component
+ * Return an element in an object using a path as a string (ex: `astro.typescript.format` will return astro['typescript']['format']).
+ * From: https://github.com/you-dont-need/You-Dont-Need-Lodash-Underscore#_get
  */
-export function isPossibleComponent(node: Node): boolean {
-	return !!node.tag?.[0].match(/[A-Z]/) || !!node.tag?.match(/.+[.][A-Z]/);
+export function get<T>(obj: Record<string, any>, path: string) {
+	const travel = (regexp: RegExp) =>
+		String.prototype.split
+			.call(path, regexp)
+			.filter(Boolean)
+			.reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
+	const result = travel(/[,[\]]+?/) || travel(/[,[\].]+?/);
+	return result === undefined ? undefined : (result as T);
 }
 
-/** Flattens an array */
-export function flatten<T>(arr: T[][]): T[] {
-	return arr.reduce((all, item) => [...all, ...item], []);
+/**
+ * Performs a deep merge of objects and returns new object. Does not modify
+ * objects (immutable) and merges arrays via concatenation.
+ * From: https://stackoverflow.com/a/48218209
+ */
+export function mergeDeep(...objects: Record<string, any>[]): Record<string, any> {
+	const isObject = (obj: Record<string, any>) => obj && typeof obj === 'object';
+
+	return objects.reduce((prev, obj) => {
+		Object.keys(obj).forEach((key) => {
+			const pVal = prev[key];
+			const oVal = obj[key];
+
+			if (Array.isArray(pVal) && Array.isArray(oVal)) {
+				prev[key] = pVal.concat(...oVal);
+			} else if (isObject(pVal) && isObject(oVal)) {
+				prev[key] = mergeDeep(pVal, oVal);
+			} else {
+				prev[key] = oVal;
+			}
+		});
+
+		return prev;
+	}, {});
+}
+
+/**
+ * Transform a string into PascalCase
+ */
+export function toPascalCase(string: string) {
+	return `${string}`
+		.replace(new RegExp(/[-_]+/, 'g'), ' ')
+		.replace(new RegExp(/[^\w\s]/, 'g'), '')
+		.replace(new RegExp(/\s+(.)(\w*)/, 'g'), ($1, $2, $3) => `${$2.toUpperCase() + $3.toLowerCase()}`)
+		.replace(new RegExp(/\w/), (s) => s.toUpperCase());
+}
+
+/**
+ * Function to modify each line of a text, preserving the line break style (`\n` or `\r\n`)
+ */
+export function modifyLines(text: string, replacementFn: (line: string, lineIdx: number) => string): string {
+	let idx = 0;
+	return text
+		.split('\r\n')
+		.map((l1) =>
+			l1
+				.split('\n')
+				.map((line) => replacementFn(line, idx++))
+				.join('\n')
+		)
+		.join('\r\n');
 }
 
 /** Clamps a number between min and max */
@@ -68,6 +122,37 @@ export function isBeforeOrEqualToPosition(position: Position, positionToTest: Po
 		positionToTest.line < position.line ||
 		(positionToTest.line === position.line && positionToTest.character <= position.character)
 	);
+}
+
+/**
+ * Like str.lastIndexOf, but for regular expressions. Note that you need to provide the g-flag to your RegExp!
+ */
+export function regexLastIndexOf(text: string, regex: RegExp, endPos?: number) {
+	if (endPos === undefined) {
+		endPos = text.length;
+	} else if (endPos < 0) {
+		endPos = 0;
+	}
+
+	const stringToWorkWith = text.substring(0, endPos + 1);
+	let lastIndexOf = -1;
+	let result: RegExpExecArray | null = null;
+	while ((result = regex.exec(stringToWorkWith)) !== null) {
+		lastIndexOf = result.index;
+	}
+	return lastIndexOf;
+}
+
+/**
+ * Get all matches of a regexp.
+ */
+export function getRegExpMatches(regex: RegExp, str: string) {
+	const matches: RegExpExecArray[] = [];
+	let match: RegExpExecArray | null;
+	while ((match = regex.exec(str))) {
+		matches.push(match);
+	}
+	return matches;
 }
 
 /**
@@ -128,31 +213,66 @@ export function debounceThrottle<T extends (...args: any) => void>(fn: T, millis
 	return maybeCall as any;
 }
 
-export interface AstroVersion {
-	full: string;
-	major: number;
-	minor: number;
-	patch: number;
-	exist: boolean;
+/**
+ * Try to determine if a workspace could be an Astro project based on the content of `package.json`
+ */
+export function isAstroWorkspace(workspacePath: string): boolean {
+	try {
+		const astroPackageJson = require.resolve('./package.json', { paths: [workspacePath] });
+		const deps = Object.assign(
+			require(astroPackageJson).dependencies ?? {},
+			require(astroPackageJson).devDependencies ?? {}
+		);
+
+		if (Object.keys(deps).includes('astro')) {
+			return true;
+		}
+	} catch (e) {
+		return false;
+	}
+
+	return false;
 }
 
-export function getUserAstroVersion(basePath: string): AstroVersion {
-	let version = '0.0.0';
-	let exist = true;
+export interface AstroInstall {
+	path: string;
+	version: {
+		full: string;
+		major: number;
+		minor: number;
+		patch: number;
+	};
+}
+
+export function getAstroInstall(basePaths: string[]): AstroInstall | undefined {
+	let path;
+	let version;
 
 	try {
-		const astroPackageJson = require.resolve('astro/package.json', { paths: [basePath] });
+		path = getPackagePath('astro', basePaths);
 
-		version = require(astroPackageJson).version;
+		if (!path) {
+			throw Error;
+		}
+
+		version = require(path + '/package.json').version;
 	} catch {
 		// If we couldn't find it inside the workspace's node_modules, it might means we're in the monorepo
 		try {
-			const monorepoPackageJson = require.resolve('./packages/astro/package.json', { paths: [basePath] });
-			version = require(monorepoPackageJson).version;
+			path = getPackagePath('./packages/astro', basePaths);
+
+			if (!path) {
+				throw Error;
+			}
+
+			version = require(path + '/package.json').version;
 		} catch (e) {
 			// If we still couldn't find it, it probably just doesn't exist
-			exist = false;
-			console.error(e);
+			console.error(
+				`${basePaths[0]} seems to be an Astro project, but we couldn't find Astro or Astro is not installed`
+			);
+
+			return undefined;
 		}
 	}
 
@@ -164,10 +284,12 @@ export function getUserAstroVersion(basePath: string): AstroVersion {
 	}
 
 	return {
-		full: version,
-		major: Number(major),
-		minor: Number(minor),
-		patch: Number(patch),
-		exist,
+		path,
+		version: {
+			full: version,
+			major: Number(major),
+			minor: Number(minor),
+			patch: Number(patch),
+		},
 	};
 }

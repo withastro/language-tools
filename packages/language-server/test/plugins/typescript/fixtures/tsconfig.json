@@ -1,8 +1,14 @@
 {
     "compilerOptions": {
+      // For testing script tags
+      "checkJs": true,
       "baseUrl": ".",
       /**For testing import json file*/
-      "resolveJsonModule": true
+      "resolveJsonModule": true,
+      "paths": {
+        "$components/*": ["misc/components/*"]
+      },
+      "noEmit": true
     },
     "exclude": [
       /**For testing exclude */

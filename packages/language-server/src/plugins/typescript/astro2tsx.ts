@@ -1,25 +1,41 @@
 import { EOL } from 'os';
 import { parseAstro } from '../../core/documents/parseAstro';
 
-function addProps(content: string): string {
+function addProps(content: string, className: string): string {
 	let defaultExportType = 'Record<string, any>';
+	let shouldAddGlobal = false;
+	let astroGlobal = "type AstroGlobal = import('astro').AstroGlobal";
+	const astroGlobalConstDef = `
+	/**
+	 * Astro global available in all contexts in .astro files
+	 *
+	 * [Astro documentation](https://docs.astro.build/reference/api-reference/#astro-global)
+	 */
+	declare const Astro: Readonly<AstroGlobal>;
+	`;
 
 	if (/(interface|type) Props/.test(content)) {
 		defaultExportType = 'Props';
+		shouldAddGlobal = true;
+		astroGlobal += ' & { props: Props }';
 	}
 
-	return EOL + `export default function (_props: ${defaultExportType}) { return <div></div>; }`;
+	return (
+		EOL +
+		(shouldAddGlobal ? astroGlobal + EOL + astroGlobalConstDef : '') +
+		`export default function ${className}__AstroComponent_(_props: ${defaultExportType}): any {}`
+	);
 }
 
 function escapeTemplateLiteralContent(content: string) {
 	return content.replace(/`/g, '\\`');
 }
 
-interface Astro2TSXResult {
+export interface Astro2TSXResult {
 	code: string;
 }
 
-export default function (content: string): Astro2TSXResult {
+export default function (content: string, className: string): Astro2TSXResult {
 	let result: Astro2TSXResult = {
 		code: '',
 	};
@@ -32,8 +48,9 @@ export default function (content: string): Astro2TSXResult {
 		frontMatterRaw = content
 			.substring(astroDocument.frontmatter.startOffset ?? 0, (astroDocument.frontmatter.endOffset ?? 0) + 3)
 			// Handle case where semicolons is not used in the frontmatter section
+			// We need to add something before the semi-colon or TypeScript won't be able to do completions
 			.replace(/((?!^)(?<!;)\n)(---)/g, (_whole, start, _dashes) => {
-				return start + ';' + '//';
+				return start + '"";';
 			})
 			// Replace frontmatter marks with comments
 			.replace(/---/g, '///');
@@ -47,7 +64,7 @@ export default function (content: string): Astro2TSXResult {
 		.replace(/<\s*!--([^-->]*)(.*?)-->/gs, (whole) => {
 			return `{/*${whole}*/}`;
 		})
-		// Turn styles into internal strings
+		// Turn styles tags into internal strings
 		.replace(/<\s*style([^>]*)>(.*?)<\s*\/\s*style>/gs, (_whole, attrs, children) => {
 			return `<style${attrs}>{\`${escapeTemplateLiteralContent(children)}\`}</style>`;
 		})
@@ -89,7 +106,7 @@ export default function (content: string): Astro2TSXResult {
 		htmlRaw +
 		EOL +
 		// Add TypeScript definitions
-		addProps(frontMatterRaw);
+		addProps(frontMatterRaw, className);
 
 	return result;
 }

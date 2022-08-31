@@ -1,15 +1,20 @@
 import type { LanguageServiceManager } from '../LanguageServiceManager';
-import ts from 'typescript';
-import { Hover, Position } from 'vscode-languageserver';
+import type { Hover, Position } from 'vscode-languageserver';
 import { AstroDocument, mapObjWithRangeToOriginal } from '../../../core/documents';
-import { HoverProvider } from '../../interfaces';
+import type { HoverProvider } from '../../interfaces';
 import { getMarkdownDocumentation } from '../previewer';
-import { convertRange, toVirtualAstroFilePath } from '../utils';
+import { convertRange, getScriptTagSnapshot, toVirtualAstroFilePath } from '../utils';
+import type { AstroSnapshot } from '../snapshots/DocumentSnapshot';
+import type ts from 'typescript';
 
 const partsMap = new Map([['JSX attribute', 'HTML attribute']]);
 
 export class HoverProviderImpl implements HoverProvider {
-	constructor(private readonly languageServiceManager: LanguageServiceManager) {}
+	private ts: typeof import('typescript/lib/tsserverlibrary');
+
+	constructor(private languageServiceManager: LanguageServiceManager) {
+		this.ts = languageServiceManager.docContext.ts;
+	}
 
 	async doHover(document: AstroDocument, position: Position): Promise<Hover | null> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
@@ -17,7 +22,31 @@ export class HoverProviderImpl implements HoverProvider {
 
 		const offset = fragment.offsetAt(fragment.getGeneratedPosition(position));
 		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
-		let info = lang.getQuickInfoAtPosition(filePath, offset);
+
+		const html = document.html;
+		const documentOffset = document.offsetAt(position);
+		const node = html.findNodeAt(documentOffset);
+
+		let info: ts.QuickInfo | undefined;
+
+		if (node.tag === 'script') {
+			const {
+				snapshot: scriptTagSnapshot,
+				filePath: scriptFilePath,
+				offset: scriptOffset,
+			} = getScriptTagSnapshot(tsDoc as AstroSnapshot, document, node, position);
+
+			info = lang.getQuickInfoAtPosition(scriptFilePath, scriptOffset);
+
+			if (info) {
+				info.textSpan.start = fragment.offsetAt(
+					scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(info.textSpan.start))
+				);
+			}
+		} else {
+			info = lang.getQuickInfoAtPosition(filePath, offset);
+		}
+
 		if (!info) {
 			return null;
 		}
@@ -28,8 +57,8 @@ export class HoverProviderImpl implements HoverProvider {
 			text: partsMap.has(value.text) ? partsMap.get(value.text)! : value.text,
 			kind: value.kind,
 		}));
-		const declaration = ts.displayPartsToString(displayParts);
-		const documentation = getMarkdownDocumentation(info.documentation, info.tags);
+		const declaration = this.ts.displayPartsToString(displayParts);
+		const documentation = getMarkdownDocumentation(info.documentation, info.tags, this.ts);
 
 		// https://microsoft.github.io/language-server-protocol/specification#textDocument_hover
 		const contents = ['```typescript', declaration, '```']

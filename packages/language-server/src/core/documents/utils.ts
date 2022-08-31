@@ -1,5 +1,5 @@
 import { Position, Range } from 'vscode-languageserver';
-import { HTMLDocument, Node } from 'vscode-html-languageservice';
+import type { HTMLDocument, Node } from 'vscode-html-languageservice';
 import { clamp, isInRange } from '../../utils';
 import { parseHtml } from './parseHtml';
 
@@ -28,13 +28,21 @@ export function* walk(node: Node): Generator<Node, void, unknown> {
  * @param source text content to extract tag from
  * @param tag the tag to extract
  */
-function extractTags(text: string, tag: 'script' | 'style' | 'template', html?: HTMLDocument): TagInformation[] {
+function extractTags(text: string, tag: 'script' | 'style', html?: HTMLDocument): TagInformation[] {
 	const rootNodes = html?.roots || parseHtml(text).roots;
 	const matchedNodes = rootNodes.filter((node) => node.tag === tag);
 
 	if (tag === 'style' && !matchedNodes.length && rootNodes.length) {
 		for (let child of walk(rootNodes[0])) {
 			if (child.tag === 'style') {
+				matchedNodes.push(child);
+			}
+		}
+	}
+
+	if (tag === 'script' && !matchedNodes.length && rootNodes.length) {
+		for (let child of walk(rootNodes[0])) {
+			if (child.tag === 'script') {
 				matchedNodes.push(child);
 			}
 		}
@@ -77,6 +85,16 @@ export function extractStyleTags(source: string, html?: HTMLDocument): TagInform
 	return styles;
 }
 
+export function extractScriptTags(source: string, html?: HTMLDocument): TagInformation[] {
+	const scripts = extractTags(source, 'script', html);
+
+	if (!scripts.length) {
+		return [];
+	}
+
+	return scripts;
+}
+
 function parseAttributes(rawAttrs: Record<string, string | null> | undefined): Record<string, string> {
 	const attrs: Record<string, string> = {};
 	if (!rawAttrs) {
@@ -100,15 +118,11 @@ function parseAttributes(rawAttrs: Record<string, string | null> | undefined): R
 	}
 }
 
-/**
- * Return if a Node is a Component
- */
-export function isComponentTag(node: Node) {
-	if (!node.tag) {
-		return false;
-	}
-	const firstChar = node.tag[0];
-	return /[A-Z]/.test(firstChar);
+export function getLineAtPosition(position: Position, text: string) {
+	return text.substring(
+		offsetAt({ line: position.line, character: 0 }, text),
+		offsetAt({ line: position.line, character: Number.MAX_VALUE }, text)
+	);
 }
 
 /**
@@ -116,7 +130,23 @@ export function isComponentTag(node: Node) {
  */
 export function isInComponentStartTag(html: HTMLDocument, offset: number): boolean {
 	const node = html.findNodeAt(offset);
-	return isComponentTag(node) && (!node.startTagEnd || offset < node.startTagEnd);
+	return isPossibleComponent(node) && (!node.startTagEnd || offset < node.startTagEnd);
+}
+
+/**
+ * Return if a given offset is inside the name of a tag
+ */
+export function isInTagName(html: HTMLDocument, offset: number): boolean {
+	const node = html.findNodeAt(offset);
+	return offset > node.start && offset < node.start + (node.tag?.length ?? 0);
+}
+
+/**
+ * Return true if a specific node could be a component.
+ * This is not a 100% sure test as it'll return false for any component that does not match the standard format for a component
+ */
+export function isPossibleComponent(node: Node): boolean {
+	return !!node.tag?.[0].match(/[A-Z]/) || !!node.tag?.match(/.+[.][A-Z]?/);
 }
 
 /**

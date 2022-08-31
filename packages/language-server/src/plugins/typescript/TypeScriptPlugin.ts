@@ -1,12 +1,15 @@
-import ts, { ImportDeclaration, SourceFile, SyntaxKind, Node } from 'typescript';
 import {
 	CancellationToken,
+	CodeAction,
+	CodeActionContext,
 	CompletionContext,
 	DefinitionLink,
+	Location,
 	Diagnostic,
 	FileChangeType,
+	FoldingRange,
 	Hover,
-	LocationLink,
+	InlayHint,
 	Position,
 	Range,
 	SemanticTokens,
@@ -16,30 +19,24 @@ import {
 	TextDocumentContentChangeEvent,
 	WorkspaceEdit,
 } from 'vscode-languageserver';
-import { join as pathJoin, dirname as pathDirname } from 'path';
-import { ConfigManager, LSTypescriptConfig } from '../../core/config';
-import { AstroDocument, DocumentManager } from '../../core/documents';
-import { isNotNullOrUndefined, pathToUrl } from '../../utils';
-import { AppCompletionItem, AppCompletionList, OnWatchFileChangesParam, Plugin } from '../interfaces';
-import { CompletionEntryWithIdentifer, CompletionsProviderImpl } from './features/CompletionsProvider';
+import type { ConfigManager, LSTypescriptConfig } from '../../core/config';
+import type { AstroDocument } from '../../core/documents';
+import type { AppCompletionItem, AppCompletionList, OnWatchFileChangesParam, Plugin } from '../interfaces';
+import { CompletionItemData, CompletionsProviderImpl } from './features/CompletionsProvider';
 import { DiagnosticsProviderImpl } from './features/DiagnosticsProvider';
 import { HoverProviderImpl } from './features/HoverProvider';
 import { SignatureHelpProviderImpl } from './features/SignatureHelpProvider';
-import { SnapshotFragmentMap } from './features/utils';
-import { LanguageServiceManager } from './LanguageServiceManager';
-import {
-	convertToLocationRange,
-	ensureRealFilePath,
-	getScriptKindFromFileName,
-	isVirtualFilePath,
-	toVirtualAstroFilePath,
-} from './utils';
+import type { LanguageServiceManager } from './LanguageServiceManager';
+import { convertToLocationRange, ensureRealFilePath, getScriptKindFromFileName, toVirtualAstroFilePath } from './utils';
 import { DocumentSymbolsProviderImpl } from './features/DocumentSymbolsProvider';
 import { SemanticTokensProviderImpl } from './features/SemanticTokenProvider';
-
-type BetterTS = typeof ts & {
-	getTouchingPropertyName(sourceFile: SourceFile, pos: number): Node;
-};
+import { FoldingRangesProviderImpl } from './features/FoldingRangesProvider';
+import { CodeActionsProviderImpl } from './features/CodeActionsProvider';
+import { DefinitionsProviderImpl } from './features/DefinitionsProvider';
+import { InlayHintsProviderImpl } from './features/InlayHintsProvider';
+import astro2tsx, { Astro2TSXResult } from './astro2tsx';
+import { classNameFromFilename } from './snapshots/utils';
+import { TypeDefinitionsProviderImpl } from './features/TypeDefinitionsProvider';
 
 export class TypeScriptPlugin implements Plugin {
 	__name = 'typescript';
@@ -47,27 +44,40 @@ export class TypeScriptPlugin implements Plugin {
 	private configManager: ConfigManager;
 	private readonly languageServiceManager: LanguageServiceManager;
 
+	private readonly codeActionsProvider: CodeActionsProviderImpl;
 	private readonly completionProvider: CompletionsProviderImpl;
 	private readonly hoverProvider: HoverProviderImpl;
+	private readonly definitionsProvider: DefinitionsProviderImpl;
+	private readonly typeDefinitionsProvider: TypeDefinitionsProviderImpl;
 	private readonly signatureHelpProvider: SignatureHelpProviderImpl;
 	private readonly diagnosticsProvider: DiagnosticsProviderImpl;
 	private readonly documentSymbolsProvider: DocumentSymbolsProviderImpl;
+	private readonly inlayHintsProvider: InlayHintsProviderImpl;
 	private readonly semanticTokensProvider: SemanticTokensProviderImpl;
+	private readonly foldingRangesProvider: FoldingRangesProviderImpl;
 
-	constructor(docManager: DocumentManager, configManager: ConfigManager, workspaceUris: string[]) {
+	private readonly ts: typeof import('typescript/lib/tsserverlibrary');
+
+	constructor(configManager: ConfigManager, languageServiceManager: LanguageServiceManager) {
 		this.configManager = configManager;
-		this.languageServiceManager = new LanguageServiceManager(docManager, workspaceUris, configManager);
+		this.languageServiceManager = languageServiceManager;
+		this.ts = languageServiceManager.docContext.ts;
 
-		this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager);
+		this.codeActionsProvider = new CodeActionsProviderImpl(this.languageServiceManager, this.configManager);
+		this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager, this.configManager);
 		this.hoverProvider = new HoverProviderImpl(this.languageServiceManager);
+		this.definitionsProvider = new DefinitionsProviderImpl(this.languageServiceManager);
+		this.typeDefinitionsProvider = new TypeDefinitionsProviderImpl(this.languageServiceManager);
 		this.signatureHelpProvider = new SignatureHelpProviderImpl(this.languageServiceManager);
 		this.diagnosticsProvider = new DiagnosticsProviderImpl(this.languageServiceManager);
 		this.documentSymbolsProvider = new DocumentSymbolsProviderImpl(this.languageServiceManager);
 		this.semanticTokensProvider = new SemanticTokensProviderImpl(this.languageServiceManager);
+		this.inlayHintsProvider = new InlayHintsProviderImpl(this.languageServiceManager, this.configManager);
+		this.foldingRangesProvider = new FoldingRangesProviderImpl(this.languageServiceManager);
 	}
 
 	async doHover(document: AstroDocument, position: Position): Promise<Hover | null> {
-		if (!this.featureEnabled('hover')) {
+		if (!(await this.featureEnabled(document, 'hover'))) {
 			return null;
 		}
 
@@ -104,20 +114,24 @@ export class TypeScriptPlugin implements Plugin {
 		return edit;
 	}
 
+	async getFoldingRanges(document: AstroDocument): Promise<FoldingRange[] | null> {
+		return this.foldingRangesProvider.getFoldingRanges(document);
+	}
+
 	async getSemanticTokens(
-		textDocument: AstroDocument,
+		document: AstroDocument,
 		range?: Range,
 		cancellationToken?: CancellationToken
 	): Promise<SemanticTokens | null> {
-		if (!this.featureEnabled('semanticTokens')) {
+		if (!(await this.featureEnabled(document, 'semanticTokens'))) {
 			return null;
 		}
 
-		return this.semanticTokensProvider.getSemanticTokens(textDocument, range, cancellationToken);
+		return this.semanticTokensProvider.getSemanticTokens(document, range, cancellationToken);
 	}
 
 	async getDocumentSymbols(document: AstroDocument): Promise<SymbolInformation[]> {
-		if (!this.featureEnabled('documentSymbols')) {
+		if (!(await this.featureEnabled(document, 'documentSymbols'))) {
 			return [];
 		}
 
@@ -126,76 +140,61 @@ export class TypeScriptPlugin implements Plugin {
 		return symbols;
 	}
 
+	async getCodeActions(
+		document: AstroDocument,
+		range: Range,
+		context: CodeActionContext,
+		cancellationToken?: CancellationToken
+	): Promise<CodeAction[]> {
+		if (!(await this.featureEnabled(document, 'codeActions'))) {
+			return [];
+		}
+
+		return this.codeActionsProvider.getCodeActions(document, range, context, cancellationToken);
+	}
+
 	async getCompletions(
 		document: AstroDocument,
 		position: Position,
-		completionContext?: CompletionContext
-	): Promise<AppCompletionList<CompletionEntryWithIdentifer> | null> {
-		if (!this.featureEnabled('completions')) {
+		completionContext?: CompletionContext,
+		cancellationToken?: CancellationToken
+	): Promise<AppCompletionList<CompletionItemData> | null> {
+		if (!(await this.featureEnabled(document, 'completions'))) {
 			return null;
 		}
 
-		const completions = await this.completionProvider.getCompletions(document, position, completionContext);
+		const completions = await this.completionProvider.getCompletions(
+			document,
+			position,
+			completionContext,
+			cancellationToken
+		);
 
 		return completions;
 	}
 
 	async resolveCompletion(
 		document: AstroDocument,
-		completionItem: AppCompletionItem<CompletionEntryWithIdentifer>
-	): Promise<AppCompletionItem<CompletionEntryWithIdentifer>> {
-		return this.completionProvider.resolveCompletion(document, completionItem);
+		completionItem: AppCompletionItem<CompletionItemData>,
+		cancellationToken?: CancellationToken
+	): Promise<AppCompletionItem<CompletionItemData>> {
+		return this.completionProvider.resolveCompletion(document, completionItem, cancellationToken);
+	}
+
+	async getInlayHints(document: AstroDocument, range: Range): Promise<InlayHint[]> {
+		return this.inlayHintsProvider.getInlayHints(document, range);
 	}
 
 	async getDefinitions(document: AstroDocument, position: Position): Promise<DefinitionLink[]> {
-		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const mainFragment = await tsDoc.createFragment();
+		return this.definitionsProvider.getDefinitions(document, position);
+	}
 
-		const filePath = tsDoc.filePath;
-		const tsFilePath = toVirtualAstroFilePath(filePath);
-
-		const fragmentPosition = mainFragment.getGeneratedPosition(position);
-		const fragmentOffset = mainFragment.offsetAt(fragmentPosition);
-
-		let defs = lang.getDefinitionAndBoundSpan(tsFilePath, fragmentOffset);
-
-		if (!defs || !defs.definitions) {
-			return [];
-		}
-
-		// Resolve all imports if we can
-		if (this.goToDefinitionFoundOnlyAlias(tsFilePath, defs.definitions!)) {
-			let importDef = this.getGoToDefinitionRefsForImportSpecifier(tsFilePath, fragmentOffset, lang);
-			if (importDef) {
-				defs = importDef;
-			}
-		}
-
-		const docs = new SnapshotFragmentMap(this.languageServiceManager);
-		docs.set(tsDoc.filePath, { fragment: mainFragment, snapshot: tsDoc });
-
-		const result = await Promise.all(
-			defs.definitions!.map(async (def) => {
-				const { fragment, snapshot } = await docs.retrieve(def.fileName);
-
-				const fileName = ensureRealFilePath(def.fileName);
-
-				// Since we converted our files to TSX and we don't have sourcemaps, we don't know where the function is, unfortunate
-				const textSpan = isVirtualFilePath(tsFilePath) ? { start: 0, length: 0 } : def.textSpan;
-
-				return LocationLink.create(
-					pathToUrl(fileName),
-					convertToLocationRange(fragment, textSpan),
-					convertToLocationRange(fragment, textSpan),
-					convertToLocationRange(mainFragment, defs!.textSpan)
-				);
-			})
-		);
-		return result.filter(isNotNullOrUndefined);
+	async getTypeDefinition(document: AstroDocument, position: Position): Promise<Location[] | null> {
+		return this.typeDefinitionsProvider.getTypeDefinitions(document, position);
 	}
 
 	async getDiagnostics(document: AstroDocument, cancellationToken?: CancellationToken): Promise<Diagnostic[]> {
-		if (!this.featureEnabled('diagnostics')) {
+		if (!(await this.featureEnabled(document, 'diagnostics'))) {
 			return [];
 		}
 
@@ -206,9 +205,9 @@ export class TypeScriptPlugin implements Plugin {
 		let doneUpdateProjectFiles = false;
 
 		for (const { fileName, changeType } of onWatchFileChangesParas) {
-			const scriptKind = getScriptKindFromFileName(fileName);
+			const scriptKind = getScriptKindFromFileName(fileName, this.ts);
 
-			if (scriptKind === ts.ScriptKind.Unknown) {
+			if (scriptKind === this.ts.ScriptKind.Unknown) {
 				continue;
 			}
 
@@ -236,55 +235,14 @@ export class TypeScriptPlugin implements Plugin {
 		return this.signatureHelpProvider.getSignatureHelp(document, position, context, cancellationToken);
 	}
 
-	private goToDefinitionFoundOnlyAlias(tsFileName: string, defs: readonly ts.DefinitionInfo[]) {
-		return !!(defs.length === 1 && defs[0].kind === 'alias' && defs[0].fileName === tsFileName);
+	getTSXForDocument(document: AstroDocument): Astro2TSXResult {
+		return astro2tsx(document.getText(), classNameFromFilename(document.getURL()));
 	}
 
-	private getGoToDefinitionRefsForImportSpecifier(
-		tsFilePath: string,
-		offset: number,
-		lang: ts.LanguageService
-	): ts.DefinitionInfoAndBoundSpan | undefined {
-		const program = lang.getProgram();
-		const sourceFile = program?.getSourceFile(tsFilePath);
-		if (sourceFile) {
-			let node = (ts as BetterTS).getTouchingPropertyName(sourceFile, offset);
-			if (node && node.kind === SyntaxKind.Identifier) {
-				if (node.parent.kind === SyntaxKind.ImportClause) {
-					let decl = node.parent.parent as ImportDeclaration;
-					let spec = ts.isStringLiteral(decl.moduleSpecifier) && decl.moduleSpecifier.text;
-					if (spec) {
-						let fileName = pathJoin(pathDirname(tsFilePath), spec);
-						let start = node.pos + 1;
-						let def: ts.DefinitionInfoAndBoundSpan = {
-							definitions: [
-								{
-									kind: 'alias',
-									fileName,
-									name: '',
-									containerKind: '',
-									containerName: '',
-									textSpan: {
-										start: 0,
-										length: 0,
-									},
-								} as ts.DefinitionInfo,
-							],
-							textSpan: {
-								start,
-								length: node.end - start,
-							},
-						};
-						return def;
-					}
-				}
-			}
-		}
-	}
-
-	private featureEnabled(feature: keyof LSTypescriptConfig) {
+	private async featureEnabled(document: AstroDocument, feature: keyof LSTypescriptConfig) {
 		return (
-			this.configManager.enabled('typescript.enabled') && this.configManager.enabled(`typescript.${feature}.enabled`)
+			(await this.configManager.isEnabled(document, 'typescript')) &&
+			(await this.configManager.isEnabled(document, 'typescript', feature))
 		);
 	}
 }

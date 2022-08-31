@@ -11,8 +11,8 @@ import {
 	Range,
 	SymbolInformation,
 } from 'vscode-languageserver';
-import { ConfigManager } from '../../core/config/ConfigManager';
-import { LSCSSConfig } from '../../core/config/interfaces';
+import type { ConfigManager } from '../../core/config/ConfigManager';
+import type { LSConfig, LSCSSConfig } from '../../core/config/interfaces';
 import {
 	AstroDocument,
 	isInsideFrontmatter,
@@ -33,7 +33,6 @@ import { getLanguage, getLanguageService } from './language-service';
 import { AttributeContext, getAttributeContextAtPosition } from '../../core/documents/parseHtml';
 import { StyleAttributeDocument } from './StyleAttributeDocument';
 import { getIdClassCompletion } from './features/getIdClassCompletions';
-import { flatten } from 'lodash';
 
 export class CSSPlugin implements Plugin {
 	__name = 'css';
@@ -46,8 +45,8 @@ export class CSSPlugin implements Plugin {
 		this.configManager = configManager;
 	}
 
-	doHover(document: AstroDocument, position: Position): Hover | null {
-		if (!this.featureEnabled('hover')) {
+	async doHover(document: AstroDocument, position: Position): Promise<Hover | null> {
+		if (!(await this.featureEnabled(document, 'hover'))) {
 			return null;
 		}
 
@@ -98,12 +97,12 @@ export class CSSPlugin implements Plugin {
 		return hoverInfo ? mapHoverToParent(cssDocument, hoverInfo) : hoverInfo;
 	}
 
-	getCompletions(
+	async getCompletions(
 		document: AstroDocument,
 		position: Position,
 		completionContext?: CompletionContext
-	): CompletionList | null {
-		if (!this.featureEnabled('completions')) {
+	): Promise<CompletionList | null> {
+		if (!(await this.featureEnabled(document, 'completions'))) {
 			return null;
 		}
 
@@ -133,7 +132,7 @@ export class CSSPlugin implements Plugin {
 
 			if (this.inStyleAttributeWithoutInterpolation(attributeContext, document.getText())) {
 				const [start, end] = attributeContext.valueRange;
-				return this.getCompletionsInternal(document, position, new StyleAttributeDocument(document, start, end));
+				return await this.getCompletionsInternal(document, position, new StyleAttributeDocument(document, start, end));
 			}
 			// If we're not in a style attribute, instead give completions for ids and classes used in the current document
 			else if ((attributeContext.name == 'id' || attributeContext.name == 'class') && attributeContext.inValue) {
@@ -145,23 +144,55 @@ export class CSSPlugin implements Plugin {
 		}
 
 		const cssDocument = this.getCSSDocumentForStyleTag(styleTag, document);
-		return this.getCompletionsInternal(document, position, cssDocument);
+		return await this.getCompletionsInternal(document, position, cssDocument);
 	}
 
-	private getCompletionsInternal(document: AstroDocument, position: Position, cssDocument: CSSDocumentBase) {
+	private async getCompletionsInternal(document: AstroDocument, position: Position, cssDocument: CSSDocumentBase) {
+		const emmetConfig = await this.configManager.getEmmetConfig(document);
+
 		if (isSASS(cssDocument)) {
 			// The CSS language service does not support SASS (not to be confused with SCSS)
 			// however we can at least still at least provide Emmet completions in SASS blocks
-			return getEmmetCompletions(document, position, 'sass', this.configManager.getEmmetConfig()) || null;
+			return getEmmetCompletions(document, position, 'sass', emmetConfig) || null;
 		}
 
 		const cssLang = extractLanguage(cssDocument);
 		const langService = getLanguageService(cssLang);
 
-		const emmetResults: CompletionList = {
-			isIncomplete: true,
+		let emmetResults: CompletionList = {
+			isIncomplete: false,
 			items: [],
 		};
+
+		const extensionConfig = await this.configManager.getConfig<LSConfig>('astro', document.uri);
+		if (extensionConfig?.css?.completions?.emmet ?? true) {
+			langService.setCompletionParticipants([
+				{
+					onCssProperty: (context) => {
+						if (context?.propertyName) {
+							emmetResults =
+								getEmmetCompletions(
+									cssDocument,
+									cssDocument.getGeneratedPosition(position),
+									getLanguage(cssLang),
+									emmetConfig
+								) || emmetResults;
+						}
+					},
+					onCssPropertyValue: (context) => {
+						if (context?.propertyValue) {
+							emmetResults =
+								getEmmetCompletions(
+									cssDocument,
+									cssDocument.getGeneratedPosition(position),
+									getLanguage(cssLang),
+									emmetConfig
+								) || emmetResults;
+						}
+					},
+				},
+			]);
+		}
 
 		const results = langService.doComplete(
 			cssDocument,
@@ -178,12 +209,12 @@ export class CSSPlugin implements Plugin {
 		);
 	}
 
-	getDocumentColors(document: AstroDocument): ColorInformation[] {
-		if (!this.featureEnabled('documentColors')) {
+	async getDocumentColors(document: AstroDocument): Promise<ColorInformation[]> {
+		if (!(await this.featureEnabled(document, 'documentColors'))) {
 			return [];
 		}
 
-		const allColorInfo = this.getCSSDocumentsForDocument(document).map((cssDoc) => {
+		const allColorInfo = this.getCSSDocumentsForDocument(document).flatMap((cssDoc) => {
 			const cssLang = extractLanguage(cssDoc);
 			const langService = getLanguageService(cssLang);
 
@@ -196,15 +227,15 @@ export class CSSPlugin implements Plugin {
 				.map((colorInfo) => mapObjWithRangeToOriginal(cssDoc, colorInfo));
 		});
 
-		return flatten(allColorInfo);
+		return allColorInfo;
 	}
 
-	getColorPresentations(document: AstroDocument, range: Range, color: Color): ColorPresentation[] {
-		if (!this.featureEnabled('colorPresentations')) {
+	async getColorPresentations(document: AstroDocument, range: Range, color: Color): Promise<ColorPresentation[]> {
+		if (!(await this.featureEnabled(document, 'documentColors'))) {
 			return [];
 		}
 
-		const allColorPres = this.getCSSDocumentsForDocument(document).map((cssDoc) => {
+		const allColorPres = this.getCSSDocumentsForDocument(document).flatMap((cssDoc) => {
 			const cssLang = extractLanguage(cssDoc);
 			const langService = getLanguageService(cssLang);
 
@@ -220,32 +251,32 @@ export class CSSPlugin implements Plugin {
 				.map((colorPres) => mapColorPresentationToOriginal(cssDoc, colorPres));
 		});
 
-		return flatten(allColorPres);
+		return allColorPres;
 	}
 
 	getFoldingRanges(document: AstroDocument): FoldingRange[] | null {
-		const allFoldingRanges = this.getCSSDocumentsForDocument(document).map((cssDoc) => {
+		const allFoldingRanges = this.getCSSDocumentsForDocument(document).flatMap((cssDoc) => {
 			const cssLang = extractLanguage(cssDoc);
 			const langService = getLanguageService(cssLang);
 
 			return langService.getFoldingRanges(cssDoc).map((foldingRange) => mapFoldingRangeToParent(cssDoc, foldingRange));
 		});
 
-		return flatten(allFoldingRanges);
+		return allFoldingRanges;
 	}
 
-	getDocumentSymbols(document: AstroDocument): SymbolInformation[] {
-		if (!this.featureEnabled('documentSymbols')) {
+	async getDocumentSymbols(document: AstroDocument): Promise<SymbolInformation[]> {
+		if (!(await this.featureEnabled(document, 'documentSymbols'))) {
 			return [];
 		}
 
-		const allDocumentSymbols = this.getCSSDocumentsForDocument(document).map((cssDoc) => {
+		const allDocumentSymbols = this.getCSSDocumentsForDocument(document).flatMap((cssDoc) => {
 			return getLanguageService(extractLanguage(cssDoc))
 				.findDocumentSymbols(cssDoc, cssDoc.stylesheet)
 				.map((symbol) => mapSymbolInformationToOriginal(cssDoc, symbol));
 		});
 
-		return flatten(allDocumentSymbols);
+		return allDocumentSymbols;
 	}
 
 	private inStyleAttributeWithoutInterpolation(
@@ -295,8 +326,11 @@ export class CSSPlugin implements Plugin {
 		});
 	}
 
-	private featureEnabled(feature: keyof LSCSSConfig) {
-		return this.configManager.enabled('css.enabled') && this.configManager.enabled(`css.${feature}.enabled`);
+	private async featureEnabled(document: AstroDocument, feature: keyof LSCSSConfig) {
+		return (
+			(await this.configManager.isEnabled(document, 'css')) &&
+			(await this.configManager.isEnabled(document, 'css', feature))
+		);
 	}
 }
 

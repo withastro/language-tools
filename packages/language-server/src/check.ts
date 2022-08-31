@@ -1,10 +1,13 @@
-import type { Diagnostic } from 'vscode-languageserver';
+import type { Diagnostic } from 'vscode-languageserver-types';
+import { ConfigManager, LSConfig } from './core/config';
 import { DocumentManager } from './core/documents';
-import { ConfigManager } from './core/config';
 import { PluginHost, TypeScriptPlugin } from './plugins';
-export { DiagnosticSeverity } from 'vscode-languageserver-protocol';
+import { LanguageServiceManager } from './plugins/typescript/LanguageServiceManager';
+import { normalizeUri } from './utils';
+export { DiagnosticSeverity } from 'vscode-languageserver-types';
+export { Diagnostic };
 
-interface GetDiagnosticsResult {
+export interface GetDiagnosticsResult {
 	filePath: string;
 	text: string;
 	diagnostics: Diagnostic[];
@@ -14,9 +17,20 @@ export class AstroCheck {
 	private docManager = DocumentManager.newInstance();
 	private configManager = new ConfigManager();
 	private pluginHost = new PluginHost(this.docManager);
+	private ts: typeof import('typescript/lib/tsserverlibrary');
 
-	constructor(workspacePath: string) {
+	constructor(workspacePath: string, typescriptPath: string, options?: LSConfig) {
 		this.initialize(workspacePath);
+
+		try {
+			this.ts = require(typescriptPath);
+		} catch (e) {
+			throw new Error(`Couldn't load TypeScript from path ${typescriptPath}`);
+		}
+
+		if (options) {
+			this.configManager.updateGlobalConfig(options);
+		}
 	}
 
 	upsertDocument(doc: { text: string; uri: string }) {
@@ -46,7 +60,13 @@ export class AstroCheck {
 	}
 
 	private initialize(workspacePath: string) {
-		this.pluginHost.registerPlugin(new TypeScriptPlugin(this.docManager, this.configManager, [workspacePath]));
+		const languageServiceManager = new LanguageServiceManager(
+			this.docManager,
+			[normalizeUri(workspacePath)],
+			this.configManager,
+			this.ts
+		);
+		this.pluginHost.registerPlugin(new TypeScriptPlugin(this.configManager, languageServiceManager));
 	}
 
 	private async getDiagnosticsForFile(uri: string) {

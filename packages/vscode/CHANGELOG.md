@@ -1,5 +1,221 @@
 # astro-vscode
 
+## 0.23.1
+
+### Patch Changes
+
+- Updated dependencies [422376e]
+  - @astrojs/language-server@0.23.1
+
+## 0.23.0
+
+### Patch Changes
+
+- 56c14f8: Fix a regression with how VS Code handle unbalanced brackets since 1.70
+- Updated dependencies [b6c95f2]
+- Updated dependencies [1dcef68]
+  - @astrojs/language-server@0.23.0
+
+## 0.22.0
+
+### Patch Changes
+
+- f3777ac: Added settings to configure the path to the language server and the runtime to use to run it
+- Updated dependencies [61620f1]
+- Updated dependencies [9337f00]
+- Updated dependencies [d5aafc0]
+  - @astrojs/language-server@0.22.0
+
+## 0.21.1
+
+### Patch Changes
+
+- Updated dependencies [0e9d7d0]
+- Updated dependencies [3f79dbf]
+  - @astrojs/language-server@0.21.1
+
+## 0.21.0
+
+### Minor Changes
+
+- 574b75d: Remove support for the Markdown component
+
+### Patch Changes
+
+- 81f3aa5: Added a debug command to show the currently opened document's TSX output
+- Updated dependencies [81f3aa5]
+- Updated dependencies [574b75d]
+- Updated dependencies [d23ba22]
+  - @astrojs/language-server@0.21.0
+
+## 0.20.4
+
+### Patch Changes
+
+- a3a13d1: Fix extension failing to send a notification when ts|jsconfig.json was updated
+- a04124c: Fixed syntax highlighting not working properly for components with @, \_ and . in them
+
+## 0.20.3
+
+### Patch Changes
+
+- Updated dependencies [081cf24]
+  - @astrojs/language-server@0.20.3
+
+## 0.20.2
+
+### Patch Changes
+
+- bd47f6e: Fix changes to an Astro config file causing the extension to crash, fixed JSON modules not being updated properly
+
+## 0.20.1
+
+### Patch Changes
+
+- Updated dependencies [e6996f5]
+- Updated dependencies [4589c2b]
+  - @astrojs/language-server@0.20.1
+
+## 0.20.0
+
+### Patch Changes
+
+- Updated dependencies [fa3f0f7]
+- Updated dependencies [ba0fab1]
+  - @astrojs/language-server@0.20.0
+
+## 0.19.6
+
+### Patch Changes
+
+- Updated dependencies [4c1045d]
+  - @astrojs/language-server@0.19.6
+
+## 0.19.5
+
+### Patch Changes
+
+- 421ab52: Added a new setting (`astro.typescript.allowArbitraryAttributes`) to enable support for arbitrary attributes
+- Updated dependencies [421ab52]
+- Updated dependencies [06e3c95]
+- Updated dependencies [301dcfb]
+- Updated dependencies [dd1283b]
+  - @astrojs/language-server@0.19.5
+
+## 0.19.4
+
+### Patch Changes
+
+- Updated dependencies [1033856]
+  - @astrojs/language-server@0.19.4
+
+## 0.19.3
+
+### Patch Changes
+
+- Updated dependencies [49ff4ef]
+- Updated dependencies [14cbf05]
+  - @astrojs/language-server@0.19.3
+
+## 0.19.2
+
+### Patch Changes
+
+- Updated dependencies [7de4967]
+  - @astrojs/language-server@0.19.2
+
+## 0.19.1
+
+### Patch Changes
+
+- 59e8ad6: Update README, disable frontmatter indenting by default
+- fec2817: Improved syntax highlighting, auto-indentation and auto-closing
+- Updated dependencies [729dff5]
+- Updated dependencies [05a48c2]
+- Updated dependencies [fe2d26b]
+  - @astrojs/language-server@0.19.1
+
+## 0.19.0
+
+### Minor Changes
+
+- a97b9a4: Add support for Inlay Hints. Minimum VS Code version supported starting from this update is 1.67.0 (April 2022)
+
+### Patch Changes
+
+- Updated dependencies [a97b9a4]
+  - @astrojs/language-server@0.19.0
+
+## 0.18.1
+
+### Patch Changes
+
+- 666739a: Revert update to latest LSP and inlay hints support
+- Updated dependencies [666739a]
+  - @astrojs/language-server@0.18.1
+
+## 0.18.0
+
+### Minor Changes
+
+- d3c6fd8: Add support for formatting
+- 09e1163: Updated language server to latest version of LSP, added support for Inlay Hints
+
+### Patch Changes
+
+- Updated dependencies [d3c6fd8]
+- Updated dependencies [09e1163]
+- Updated dependencies [fcaba8e]
+- Updated dependencies [4138005]
+- Updated dependencies [76ff46a]
+  - @astrojs/language-server@0.18.0
+
+## 0.17.0
+
+### Patch Changes
+
+- Updated dependencies [3ad0f65]
+- Updated dependencies [2e9da14]
+  - @astrojs/language-server@0.17.0
+
+## 0.16.1
+
+### Patch Changes
+
+- Updated dependencies [ad5a5e5]
+- Updated dependencies [1bd790d]
+  - @astrojs/language-server@0.16.1
+
+## 0.16.0
+
+### Patch Changes
+
+- 1bcae45: Remove support for Node 12 (VS Code versions under 1.56)
+- Updated dependencies [b485acd]
+- Updated dependencies [1cff04c]
+- Updated dependencies [1bcae45]
+- Updated dependencies [9abff62]
+- Updated dependencies [c8d81a1]
+  - @astrojs/language-server@0.16.0
+
+## 0.15.0
+
+### Patch Changes
+
+- Updated dependencies [7978de1]
+- Updated dependencies [3ac74bc]
+- Updated dependencies [6bb45cb]
+  - @astrojs/language-server@0.15.0
+
+## 0.14.0
+
+### Patch Changes
+
+- Updated dependencies [9118c46]
+- Updated dependencies [9ea5b97]
+- Updated dependencies [dbf624a]
+  - @astrojs/language-server@0.14.0
+
 ## 0.13.4
 
 ### Patch Changes

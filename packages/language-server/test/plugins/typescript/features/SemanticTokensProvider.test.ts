@@ -4,6 +4,7 @@ import { SemanticTokensProviderImpl } from '../../../../src/plugins/typescript/f
 import { LanguageServiceManager } from '../../../../src/plugins/typescript/LanguageServiceManager';
 import { TokenModifier, TokenType } from '../../../../src/plugins/typescript/utils';
 import { createEnvironment } from '../../../utils';
+import ts from 'typescript/lib/tsserverlibrary';
 
 interface TokenData {
 	line: number;
@@ -16,7 +17,7 @@ interface TokenData {
 describe('TypeScript Plugin#SemanticTokenProvider', () => {
 	function setup(filePath: string) {
 		const env = createEnvironment(filePath, 'typescript', 'semanticTokens');
-		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager);
+		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager, ts);
 		const provider = new SemanticTokensProviderImpl(languageServiceManager);
 
 		return {
@@ -73,50 +74,8 @@ describe('TypeScript Plugin#SemanticTokenProvider', () => {
 				type: TokenType.method,
 				modifiers: [TokenModifier.defaultLibrary],
 			},
-			{
-				line: 6,
-				character: 11,
-				length: 'Props'.length,
-				type: TokenType.interface,
-				modifiers: [TokenModifier.declaration],
-			},
-			{
-				line: 7,
-				character: 2,
-				length: 'hello'.length,
-				type: TokenType.property,
-				modifiers: [TokenModifier.declaration],
-			},
-			{
-				line: 10,
-				character: 9,
-				length: 'hello'.length,
-				type: TokenType.variable,
-				modifiers: [TokenModifier.declaration, TokenModifier.readonly],
-			},
-			{
-				line: 10,
-				character: 19,
-				length: 'Astro'.length,
-				type: TokenType.type,
-				modifiers: [TokenModifier.readonly],
-			},
-			{
-				line: 10,
-				character: 25,
-				length: 'props'.length,
-				type: TokenType.property,
-				modifiers: [],
-			},
-			{
-				line: 10,
-				character: 34,
-				length: 'Props'.length,
-				type: TokenType.interface,
-				modifiers: [],
-			},
 		]);
 
-		expect(semanticTokens.data).to.deep.equal(expectedTokens.data);
+		expect(semanticTokens?.data).to.deep.equal(expectedTokens.data);
 	});
 });

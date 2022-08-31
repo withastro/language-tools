@@ -1,56 +1,73 @@
 import * as vscode from 'vscode-languageserver';
 import {
+	CodeActionKind,
+	DidChangeConfigurationNotification,
+	DocumentUri,
+	InlayHintRequest,
+	LinkedEditingRangeRequest,
 	MessageType,
 	SemanticTokensRangeRequest,
 	SemanticTokensRequest,
 	ShowMessageNotification,
 	TextDocumentIdentifier,
 } from 'vscode-languageserver';
-import { ConfigManager } from './core/config/ConfigManager';
+import { ConfigManager, defaultLSConfig } from './core/config/ConfigManager';
 import { DocumentManager } from './core/documents/DocumentManager';
 import { DiagnosticsManager } from './core/DiagnosticsManager';
 import { AstroPlugin } from './plugins/astro/AstroPlugin';
 import { CSSPlugin } from './plugins/css/CSSPlugin';
 import { HTMLPlugin } from './plugins/html/HTMLPlugin';
-import { AppCompletionItem } from './plugins/interfaces';
+import type { AppCompletionItem } from './plugins/interfaces';
 import { PluginHost } from './plugins/PluginHost';
 import { TypeScriptPlugin } from './plugins';
-import { debounceThrottle, getUserAstroVersion, urlToPath } from './utils';
-import { AstroDocument } from './core/documents';
+import { debounceThrottle, getAstroInstall, isAstroWorkspace, normalizeUri, urlToPath } from './utils';
+import type { AstroDocument } from './core/documents';
 import { getSemanticTokenLegend } from './plugins/typescript/utils';
+import { sortImportKind } from './plugins/typescript/features/CodeActionsProvider';
+import type { LSConfig } from './core/config';
+import { LanguageServiceManager } from './plugins/typescript/LanguageServiceManager';
 
 const TagCloseRequest: vscode.RequestType<vscode.TextDocumentPositionParams, string | null, any> =
 	new vscode.RequestType('html/tag');
 
+export interface RuntimeEnvironment {
+	loadTypescript: (initOptions: any) => typeof import('typescript/lib/tsserverlibrary');
+	loadTypescriptLocalized: (initOptions: any) => Record<string, string> | undefined;
+}
+
 // Start the language server
-export function startLanguageServer(connection: vscode.Connection) {
+export function startLanguageServer(connection: vscode.Connection, env: RuntimeEnvironment) {
 	// Create our managers
-	const configManager = new ConfigManager();
 	const documentManager = new DocumentManager();
 	const pluginHost = new PluginHost(documentManager);
+	const configManager = new ConfigManager(connection);
+
+	let typescriptPlugin: TypeScriptPlugin = undefined as any;
+	let hasConfigurationCapability = false;
 
 	connection.onInitialize((params: vscode.InitializeParams) => {
+		const environment: 'node' | 'browser' = params.initializationOptions?.environment ?? 'node';
 		const workspaceUris = params.workspaceFolders?.map((folder) => folder.uri.toString()) ?? [params.rootUri ?? ''];
 
 		workspaceUris.forEach((uri) => {
 			uri = urlToPath(uri) as string;
 
-			const astroVersion = getUserAstroVersion(uri);
+			// If the workspace is not an Astro project, we shouldn't warn about not finding Astro
+			// Unless the extension enabled itself in an untitled workspace, in which case the warning is valid
+			if (!isAstroWorkspace(uri) && uri !== '/' && uri !== '') {
+				return;
+			}
 
-			if (astroVersion.exist === false) {
+			const astroInstall = getAstroInstall([uri]);
+			if (!astroInstall) {
 				connection.sendNotification(ShowMessageNotification.type, {
 					message: `Couldn't find Astro in workspace "${uri}". Experience might be degraded. For the best experience, please make sure Astro is installed and then restart the language server`,
 					type: MessageType.Warning,
 				});
 			}
-
-			if (astroVersion.exist && astroVersion.major === 0 && astroVersion.minor < 24 && astroVersion.patch < 5) {
-				connection.sendNotification(ShowMessageNotification.type, {
-					message: `The version of Astro you're using (${astroVersion.full}) is not supported by this version of the Astro language server. Please upgrade Astro to any version higher than 0.23.4 or if using the VS Code extension, downgrade the extension to 0.8.10`,
-					type: MessageType.Error,
-				});
-			}
 		});
+
+		hasConfigurationCapability = !!(params.capabilities.workspace && !!params.capabilities.workspace.configuration);
 
 		pluginHost.initialize({
 			filterIncompleteCompletions: !params.initializationOptions?.dontFilterIncompleteCompletions,
@@ -62,21 +79,52 @@ export function startLanguageServer(connection: vscode.Connection) {
 		pluginHost.registerPlugin(new CSSPlugin(configManager));
 
 		// We don't currently support running the TypeScript and Astro plugin in the browser
-		if (params.initializationOptions.environment !== 'browser') {
-			pluginHost.registerPlugin(new AstroPlugin(documentManager, configManager, workspaceUris));
-			pluginHost.registerPlugin(new TypeScriptPlugin(documentManager, configManager, workspaceUris));
-		}
+		if (environment === 'node') {
+			const ts = env.loadTypescript(params.initializationOptions);
 
-		// Update language-server config with what the user supplied to us at launch
-		configManager.updateConfig(params.initializationOptions.configuration.astro);
-		configManager.updateEmmetConfig(params.initializationOptions.configuration.emmet);
+			if (ts) {
+				const tsLocalized = env.loadTypescriptLocalized(params.initializationOptions);
+				const languageServiceManager = new LanguageServiceManager(
+					documentManager,
+					workspaceUris.map(normalizeUri),
+					configManager,
+					ts,
+					tsLocalized
+				);
+
+				typescriptPlugin = new TypeScriptPlugin(configManager, languageServiceManager);
+				pluginHost.registerPlugin(new AstroPlugin(configManager, languageServiceManager));
+				pluginHost.registerPlugin(typescriptPlugin);
+			} else {
+				connection.sendNotification(ShowMessageNotification.type, {
+					message: `Astro: Couldn't load TypeScript from path ${params?.initializationOptions?.typescript?.serverPath}. Only HTML and CSS features will be enabled`,
+					type: MessageType.Warning,
+				});
+			}
+		}
 
 		return {
 			capabilities: {
-				textDocumentSync: vscode.TextDocumentSyncKind.Incremental,
+				textDocumentSync: {
+					openClose: true,
+					change: vscode.TextDocumentSyncKind.Incremental,
+					save: {
+						includeText: true,
+					},
+				},
 				foldingRangeProvider: true,
 				definitionProvider: true,
+				typeDefinitionProvider: true,
 				renameProvider: true,
+				documentFormattingProvider: true,
+				codeActionProvider: {
+					codeActionKinds: [
+						CodeActionKind.QuickFix,
+						CodeActionKind.SourceOrganizeImports,
+						// VS Code specific
+						sortImportKind,
+					],
+				},
 				completionProvider: {
 					resolveProvider: true,
 					triggerCharacters: [
@@ -111,11 +159,13 @@ export function startLanguageServer(connection: vscode.Connection) {
 				colorProvider: true,
 				hoverProvider: true,
 				documentSymbolProvider: true,
+				linkedEditingRangeProvider: true,
 				semanticTokensProvider: {
 					legend: getSemanticTokenLegend(),
 					range: true,
 					full: true,
 				},
+				inlayHintProvider: true,
 				signatureHelpProvider: {
 					triggerCharacters: ['(', ',', '<'],
 					retriggerCharacters: [')'],
@@ -124,10 +174,20 @@ export function startLanguageServer(connection: vscode.Connection) {
 		};
 	});
 
-	// On update of the user configuration of the language-server
-	connection.onDidChangeConfiguration(({ settings }: vscode.DidChangeConfigurationParams) => {
-		configManager.updateConfig(settings.astro);
-		configManager.updateEmmetConfig(settings.emmet);
+	// The params don't matter here because in "pull mode" it's always null, it's intended that when the config is updated
+	// you should just reset "your internal cache" and get the config again for relevant documents, weird API design
+	connection.onDidChangeConfiguration(async (change) => {
+		if (hasConfigurationCapability) {
+			configManager.updateConfig();
+
+			documentManager.getAllOpenedByClient().forEach(async (document) => {
+				await configManager.getConfig('astro', document[1].uri);
+			});
+		} else {
+			configManager.updateGlobalConfig(<LSConfig>change.settings.astro || defaultLSConfig);
+		}
+
+		updateAllDiagnostics();
 	});
 
 	// Documents
@@ -166,7 +226,14 @@ export function startLanguageServer(connection: vscode.Connection) {
 	connection.onHover((params: vscode.HoverParams) => pluginHost.doHover(params.textDocument, params.position));
 
 	connection.onDefinition((evt) => pluginHost.getDefinitions(evt.textDocument, evt.position));
+
+	connection.onTypeDefinition((evt) => pluginHost.getTypeDefinition(evt.textDocument, evt.position));
+
 	connection.onFoldingRanges((evt) => pluginHost.getFoldingRanges(evt.textDocument));
+
+	connection.onCodeAction((evt, cancellationToken) =>
+		pluginHost.getCodeActions(evt.textDocument, evt.range, evt.context, cancellationToken)
+	);
 
 	connection.onCompletion(async (evt) => {
 		const promise = pluginHost.getCompletions(evt.textDocument, evt.position, evt.context);
@@ -193,9 +260,22 @@ export function startLanguageServer(connection: vscode.Connection) {
 		pluginHost.getSemanticTokens(evt.textDocument, evt.range, cancellationToken)
 	);
 
+	connection.onRequest(
+		LinkedEditingRangeRequest.type,
+		async (evt) => await pluginHost.getLinkedEditingRanges(evt.textDocument, evt.position)
+	);
+
+	connection.onDocumentFormatting((params: vscode.DocumentFormattingParams) =>
+		pluginHost.formatDocument(params.textDocument, params.options)
+	);
+
 	connection.onDocumentColor((params: vscode.DocumentColorParams) => pluginHost.getDocumentColors(params.textDocument));
 	connection.onColorPresentation((params: vscode.ColorPresentationParams) =>
 		pluginHost.getColorPresentations(params.textDocument, params.range, params.color)
+	);
+
+	connection.onRequest(InlayHintRequest.type, (params: vscode.InlayHintParams, cancellationToken) =>
+		pluginHost.getInlayHints(params.textDocument, params.range, cancellationToken)
 	);
 
 	connection.onRequest(TagCloseRequest, (evt: any) => pluginHost.doTagComplete(evt.textDocument, evt.position));
@@ -213,15 +293,36 @@ export function startLanguageServer(connection: vscode.Connection) {
 		updateAllDiagnostics();
 	});
 
+	connection.onRequest('$/getTSXOutput', async (uri: DocumentUri) => {
+		const doc = documentManager.get(uri);
+		if (!doc) {
+			return undefined;
+		}
+
+		if (doc) {
+			const tsxOutput = typescriptPlugin.getTSXForDocument(doc);
+			return tsxOutput.code;
+		}
+	});
+
 	documentManager.on(
 		'documentChange',
 		debounceThrottle(async (document: AstroDocument) => diagnosticsManager.update(document), 1000)
 	);
-	documentManager.on('documentClose', (document: AstroDocument) => diagnosticsManager.removeDiagnostics(document));
+
+	documentManager.on('documentClose', (document: AstroDocument) => {
+		diagnosticsManager.removeDiagnostics(document);
+		configManager.removeDocument(document.uri);
+	});
 
 	// Taking off 🚀
 	connection.onInitialized(() => {
 		connection.console.log('Successfully initialized! 🚀');
+
+		// Register for all configuration changes.
+		if (hasConfigurationCapability) {
+			connection.client.register(DidChangeConfigurationNotification.type);
+		}
 	});
 
 	connection.listen();

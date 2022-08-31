@@ -1,5 +1,205 @@
 # @astrojs/language-server
 
+## 0.23.1
+
+### Patch Changes
+
+- 422376e: Load settings from the Prettier VS Code extension when available
+
+## 0.23.0
+
+### Minor Changes
+
+- 1dcef68: Automatically type `Astro.props` using the Props interface when available
+
+### Patch Changes
+
+- b6c95f2: Fix completions for HTML attributes not working anymore since 0.20.3
+
+## 0.22.0
+
+### Minor Changes
+
+- d5aafc0: Formatting is now powered by Prettier and our Prettier plugin. Going forward, this should result in a more stable and complete way of formatting Astro files
+
+### Patch Changes
+
+- 61620f1: Add support for Go To Type Definition
+- 9337f00: Fix language server not working when no initlizationOptions were passed
+
+## 0.21.1
+
+### Patch Changes
+
+- 0e9d7d0: Improve error handling in cases where we can't load types from the user's project and when the project isn't at the root of the folder
+- 3f79dbf: Fix `tsconfig.json` not loading properly in certain contexts on Windows
+
+## 0.21.0
+
+### Minor Changes
+
+- 574b75d: Remove support for the Markdown component
+- d23ba22: Changed how Astro's types are consumed to avoid making type acquisition explicit inside Astro files
+
+### Patch Changes
+
+- 81f3aa5: Added a debug command to show the currently opened document's TSX output
+
+## 0.20.3
+
+### Patch Changes
+
+- 081cf24: Fix completions not working inside script tags, fix duplicate completions in some cases, added completions for the slot element
+
+## 0.20.1
+
+### Patch Changes
+
+- e6996f5: Fixed many situations where the language server would warn abusively about not being able to find Astro
+- 4589c2b: Fix the language server not warning properly when a package is implicitely any due to missing types
+
+## 0.20.0
+
+### Minor Changes
+
+- ba0fab1: Load language integrations from the user's project instead of bundling them in the language server
+
+### Patch Changes
+
+- fa3f0f7: Updated exports for `astro check`
+
+## 0.19.6
+
+### Patch Changes
+
+- 4c1045d: Empty changeset because publish failed
+
+## 0.19.5
+
+### Patch Changes
+
+- 421ab52: Added a new setting (`astro.typescript.allowArbitraryAttributes`) to enable support for arbitrary attributes
+- 06e3c95: Updated behaviour when no settings are provided. All features are now considered enabled by default
+- 301dcfb: Remove Lodash from the code base, significally reducing the file count of the package
+- dd1283b: Updated Component detection so completions now work for namespaced components (for example, typing `<myMarkdown.` will now give you a completion for the Content component)
+
+## 0.19.4
+
+### Patch Changes
+
+- 1033856: Enable support for TypeScript inside hoisted script tags
+
+## 0.19.3
+
+### Patch Changes
+
+- 49ff4ef: Fixed more bugs where nonexistent server settings would result in a crash
+- 14cbf05: Fix frontmatter completion not working when three dashes were already present
+
+## 0.19.2
+
+### Patch Changes
+
+- 7de4967: Add better error messages for Vue and Svelte components with syntax errors
+- Updated dependencies [7de4967]
+  - @astrojs/svelte-language-integration@0.1.6
+  - @astrojs/vue-language-integration@0.1.1
+
+## 0.19.1
+
+### Patch Changes
+
+- 729dff5: Add support for giving linked editing ranges
+- 05a48c2: Fix some TypeScript diagnostics not showing up in certain cases
+- fe2d26b: Add support for showing Svelte components documentation on hover
+- Updated dependencies [fe2d26b]
+  - @astrojs/svelte-language-integration@0.1.5
+
+## 0.19.0
+
+### Minor Changes
+
+- a97b9a4: Add support for Inlay Hints. Minimum VS Code version supported starting from this update is 1.67.0 (April 2022)
+
+## 0.18.1
+
+### Patch Changes
+
+- 666739a: Revert update to latest LSP and inlay hints support
+
+## 0.18.0
+
+### Minor Changes
+
+- d3c6fd8: Add support for formatting
+- 09e1163: Updated language server to latest version of LSP, added support for Inlay Hints
+- fcaba8e: Add support for completions and type checking for Vue props
+
+### Patch Changes
+
+- 4138005: Fix frontmatter folding not working properly when last few lines of frontmatter are empty
+- 76ff46a: Add `?` in the label of completions of optional parameters (including component props)
+
+## 0.17.0
+
+### Minor Changes
+
+- 3ad0f65: Add support for TypeScript features inside script tags (completions, diagnostics, hover etc)
+
+### Patch Changes
+
+- 2e9da14: Add support for loading props completions from .d.ts files, improve performance of props completions
+
+## 0.16.1
+
+### Patch Changes
+
+- ad5a5e5: Fix misc issues with Go To Definition
+- 1bd790d: Updates config management, make sure to respect TypeScript settings when doing completions and quickfixes
+
+## 0.16.0
+
+### Minor Changes
+
+- 9abff62: Add support for code actions
+
+### Patch Changes
+
+- b485acd: Fixed bug where nonexistent server settings would result in a crash
+- 1cff04c: Fix Emmet settings not being loaded, add support for Emmet in CSS
+- 1bcae45: Remove support for Node 12 (VS Code versions under 1.56)
+- c8d81a1: Update directives tooltips, add missing `is:raw`
+- Updated dependencies [1bcae45]
+  - @astrojs/svelte-language-integration@0.1.4
+
+## 0.15.0
+
+### Minor Changes
+
+- 6bb45cb: Overhaul TypeScript completions
+
+  - Add support for completions inside expressions
+  - Add support for auto imports on completion
+  - Fix misc issues in completions (missing description, deprecated stuff not showing as deprecated)
+
+### Patch Changes
+
+- 7978de1: Add support for folding JavaScript
+- 3ac74bc: Improve props completions on components
+- Updated dependencies [6bb45cb]
+  - @astrojs/svelte-language-integration@0.1.3
+
+## 0.14.0
+
+### Minor Changes
+
+- 9118c46: Add support for loading type definitions from Astro itself
+
+### Patch Changes
+
+- 9ea5b97: Make TypeScript ignore content of Markdown tags
+- dbf624a: Fix error when returning a response from the frontmatter
+
 ## 0.13.4
 
 ### Patch Changes

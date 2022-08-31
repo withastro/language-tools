@@ -1,13 +1,13 @@
-import { AstroDocument } from '../../core/documents';
+import type { AstroDocument } from '../../core/documents';
 import { dirname, resolve } from 'path';
-import ts from 'typescript';
-import { TextDocumentContentChangeEvent } from 'vscode-languageserver';
-import { AstroVersion, getUserAstroVersion, normalizePath, urlToPath } from '../../utils';
+import type { TextDocumentContentChangeEvent } from 'vscode-languageserver';
+import { getAstroInstall, normalizePath, urlToPath } from '../../utils';
 import { createAstroModuleLoader } from './module-loader';
 import { GlobalSnapshotManager, SnapshotManager } from './snapshots/SnapshotManager';
-import { ensureRealFilePath, findTsConfigPath } from './utils';
-import { DocumentSnapshot } from './snapshots/DocumentSnapshot';
+import { ensureRealFilePath, findTsConfigPath, getScriptTagLanguage, isAstroFilePath } from './utils';
+import { AstroSnapshot, DocumentSnapshot, ScriptTagDocumentSnapshot } from './snapshots/DocumentSnapshot';
 import * as DocumentSnapshotUtils from './snapshots/utils';
+import type { ConfigManager, LSTypescriptConfig } from '../../core/config';
 
 export interface LanguageServiceContainer {
 	readonly tsconfigPath: string;
@@ -17,7 +17,10 @@ export interface LanguageServiceContainer {
 	 */
 	readonly snapshotManager: SnapshotManager;
 	getService(): ts.LanguageService;
-	updateSnapshot(documentOrFilePath: AstroDocument | string): DocumentSnapshot;
+	updateSnapshot(
+		documentOrFilePath: AstroDocument | string,
+		ts: typeof import('typescript/lib/tsserverlibrary')
+	): DocumentSnapshot;
 	deleteSnapshot(filePath: string): void;
 	updateProjectFiles(): void;
 	updateNonAstroFile(fileName: string, changes?: TextDocumentContentChangeEvent[]): void;
@@ -37,6 +40,9 @@ const services = new Map<string, Promise<LanguageServiceContainer>>();
 export interface LanguageServiceDocumentContext {
 	createDocument: (fileName: string, content: string) => AstroDocument;
 	globalSnapshotManager: GlobalSnapshotManager;
+	configManager: ConfigManager;
+	ts: typeof import('typescript/lib/tsserverlibrary');
+	tsLocalized: Record<string, string> | undefined;
 }
 
 export async function getLanguageService(
@@ -44,7 +50,7 @@ export async function getLanguageService(
 	workspaceUris: string[],
 	docContext: LanguageServiceDocumentContext
 ): Promise<LanguageServiceContainer> {
-	const tsconfigPath = findTsConfigPath(path, workspaceUris);
+	const tsconfigPath = findTsConfigPath(path, workspaceUris, docContext.ts);
 	return getLanguageServiceForTsconfig(tsconfigPath, docContext, workspaceUris);
 }
 
@@ -64,6 +70,12 @@ export async function getLanguageServiceForTsconfig(
 	workspaceUris: string[]
 ): Promise<LanguageServiceContainer> {
 	let service: LanguageServiceContainer;
+
+	if (docContext.configManager.shouldRefreshTSServices) {
+		services.clear();
+		docContext.configManager.shouldRefreshTSServices = false;
+	}
+
 	if (services.has(tsconfigPath)) {
 		service = await services.get(tsconfigPath)!;
 	} else {
@@ -84,7 +96,11 @@ async function createLanguageService(
 
 	const workspacePaths = workspaceUris.map((uri) => urlToPath(uri) as string);
 	const workspacePath = workspacePaths.find((uri: string) => tsconfigRoot.startsWith(uri)) || workspacePaths[0];
-	const astroVersion = getUserAstroVersion(workspacePath);
+	const astroInstall = getAstroInstall([tsconfigRoot, workspacePath]);
+
+	const config =
+		(await docContext.configManager.getConfig<LSTypescriptConfig>('astro.typescript', workspacePath)) ?? {};
+	const allowArbitraryAttrs = config.allowArbitraryAttributes ?? false;
 
 	// `raw` here represent the tsconfig merged with any extended config
 	const { compilerOptions, fileNames: files, raw: fullConfig } = getParsedTSConfig();
@@ -95,32 +111,53 @@ async function createLanguageService(
 		docContext.globalSnapshotManager,
 		files,
 		fullConfig,
-		tsconfigRoot || process.cwd()
+		tsconfigRoot || process.cwd(),
+		docContext.ts
 	);
 
-	const astroModuleLoader = createAstroModuleLoader(getScriptSnapshot, compilerOptions);
+	const astroModuleLoader = createAstroModuleLoader(getScriptSnapshot, compilerOptions, docContext.ts);
 
 	const scriptFileNames: string[] = [];
 
-	// Before Astro 1.0, JSX definitions were inside of the language-server instead of inside Astro
-	// TODO: Remove this and astro-jsx.d.ts in types when we consider having support for Astro < 1.0 unnecessary
-	if (astroVersion.major === 0 || astroVersion.full === '1.0.0-beta.0') {
-		let languageServerDirectory: string;
-		try {
-			languageServerDirectory = dirname(require.resolve('@astrojs/language-server'));
-		} catch (e) {
-			languageServerDirectory = __dirname;
-		}
-		const astroTSXFile = ts.sys.resolvePath(resolve(languageServerDirectory, '../types/astro-jsx.d.ts'));
-		scriptFileNames.push(astroTSXFile);
+	if (astroInstall) {
+		scriptFileNames.push(
+			...['./env.d.ts', './astro-jsx.d.ts'].map((f) => docContext.ts.sys.resolvePath(resolve(astroInstall.path, f)))
+		);
+	}
 
-		console.warn("Version lower than 1.0 detected, using internal types instead of Astro's");
+	let languageServerDirectory: string;
+	try {
+		languageServerDirectory = dirname(require.resolve('@astrojs/language-server'));
+	} catch (e) {
+		languageServerDirectory = __dirname;
+	}
+
+	// Fallback to internal types when Astro is not installed or the Astro version is too old
+	if (
+		!astroInstall ||
+		((astroInstall.version.major === 0 || astroInstall.version.full === '1.0.0-beta.0') &&
+			!astroInstall.version.full.startsWith('0.0.0-rc-')) // 1.0.0's RC is considered to be 0.0.0, so we have to check for it
+	) {
+		scriptFileNames.push(
+			...['../types/astro-jsx.d.ts', '../types/env.d.ts'].map((f) =>
+				docContext.ts.sys.resolvePath(resolve(languageServerDirectory, f))
+			)
+		);
+
+		console.warn("Couldn't load types from Astro, using internal types instead");
+	}
+
+	if (allowArbitraryAttrs) {
+		const arbitraryAttrsDTS = docContext.ts.sys.resolvePath(
+			resolve(languageServerDirectory, '../types/arbitrary-attrs.d.ts')
+		);
+		scriptFileNames.push(arbitraryAttrsDTS);
 	}
 
 	const host: ts.LanguageServiceHost = {
-		getNewLine: () => ts.sys.newLine,
-		useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
-		getDirectories: ts.sys.getDirectories,
+		getNewLine: () => docContext.ts.sys.newLine,
+		useCaseSensitiveFileNames: () => docContext.ts.sys.useCaseSensitiveFileNames,
+		getDirectories: docContext.ts.sys.getDirectories,
 		resolveModuleNames: astroModuleLoader.resolveModuleNames,
 		readFile: astroModuleLoader.readFile,
 		fileExists: astroModuleLoader.fileExists,
@@ -128,7 +165,7 @@ async function createLanguageService(
 
 		getCompilationSettings: () => compilerOptions,
 		getCurrentDirectory: () => tsconfigRoot,
-		getDefaultLibFileName: ts.getDefaultLibFilePath,
+		getDefaultLibFileName: docContext.ts.getDefaultLibFilePath,
 
 		getProjectVersion: () => projectVersion.toString(),
 		getScriptFileNames: () =>
@@ -139,7 +176,11 @@ async function createLanguageService(
 		getScriptVersion: (fileName: string) => getScriptSnapshot(fileName).version.toString(),
 	};
 
-	let languageService = ts.createLanguageService(host);
+	if (docContext.tsLocalized) {
+		host.getLocalizedDiagnosticMessages = () => docContext.tsLocalized;
+	}
+
+	let languageService = docContext.ts.createLanguageService(host);
 
 	docContext.globalSnapshotManager.onChange(() => {
 		projectVersion++;
@@ -180,13 +221,21 @@ async function createLanguageService(
 			astroModuleLoader.deleteUnresolvedResolutionsFromCache(filePath);
 		}
 
-		const newSnapshot = DocumentSnapshotUtils.createFromDocument(document);
+		const newSnapshot = DocumentSnapshotUtils.createFromDocument(document, docContext.ts);
 
 		snapshotManager.set(filePath, newSnapshot);
+
+		const scriptTagSnapshots = createScriptTagsSnapshots(filePath, document);
+
+		scriptTagSnapshots.forEach((snapshot) => {
+			snapshotManager.set(snapshot.filePath, snapshot);
+			newSnapshot.scriptTagSnapshots?.push(snapshot);
+		});
+
 		if (prevSnapshot && prevSnapshot.scriptKind !== newSnapshot.scriptKind) {
 			// Restart language service as it doesn't handle script kind changes.
 			languageService.dispose();
-			languageService = ts.createLanguageService(host);
+			languageService = docContext.ts.createLanguageService(host);
 		}
 
 		return newSnapshot;
@@ -199,7 +248,7 @@ async function createLanguageService(
 		}
 
 		astroModuleLoader.deleteUnresolvedResolutionsFromCache(filePath);
-		const newSnapshot = DocumentSnapshotUtils.createFromFilePath(filePath, docContext.createDocument);
+		const newSnapshot = DocumentSnapshotUtils.createFromFilePath(filePath, docContext.createDocument, docContext.ts);
 		snapshotManager.set(filePath, newSnapshot);
 		return newSnapshot;
 	}
@@ -213,8 +262,21 @@ async function createLanguageService(
 		}
 
 		astroModuleLoader.deleteUnresolvedResolutionsFromCache(fileName);
-		doc = DocumentSnapshotUtils.createFromFilePath(fileName, docContext.createDocument);
+		doc = DocumentSnapshotUtils.createFromFilePath(fileName, docContext.createDocument, docContext.ts);
+
 		snapshotManager.set(fileName, doc);
+
+		// If we needed to create an Astro snapshot, also create its script tags snapshots
+		if (isAstroFilePath(fileName)) {
+			const document = (doc as AstroSnapshot).parent;
+
+			const scriptTagSnapshots = createScriptTagsSnapshots(fileName, document);
+
+			scriptTagSnapshots.forEach((snapshot) => {
+				snapshotManager.set(snapshot.filePath, snapshot);
+				(doc as AstroSnapshot).scriptTagSnapshots?.push(snapshot);
+			});
+		}
 
 		return doc;
 	}
@@ -240,25 +302,19 @@ async function createLanguageService(
 		snapshotManager.updateNonAstroFile(fileName, changes);
 	}
 
+	function createScriptTagsSnapshots(fileName: string, document: AstroDocument): ScriptTagDocumentSnapshot[] {
+		return document.scriptTags.map((scriptTag, index) => {
+			const scriptTagLanguage = getScriptTagLanguage(scriptTag);
+			const scriptFilePath = fileName + `.__script${index}.${scriptTagLanguage}`;
+			const scriptSnapshot = new ScriptTagDocumentSnapshot(scriptTag, document, scriptFilePath);
+
+			return scriptSnapshot;
+		});
+	}
+
 	function getParsedTSConfig() {
-		let configJson = (tsconfigPath && ts.readConfigFile(tsconfigPath, ts.sys.readFile).config) || {};
-
-		// If our user has types in their config but it doesn't include the types needed for Astro, add them to the config
-		if (configJson.compilerOptions?.types) {
-			if (!configJson.compilerOptions?.types.includes('astro/env')) {
-				configJson.compilerOptions.types.push('astro/env');
-			}
-
-			if (
-				astroVersion.major >= 1 &&
-				astroVersion.full !== '1.0.0-beta.0' &&
-				!configJson.compilerOptions?.types.includes('astro/astro-jsx')
-			) {
-				configJson.compilerOptions.types.push('astro/astro-jsx');
-			}
-		}
-
-		configJson.compilerOptions = Object.assign(getDefaultCompilerOptions(astroVersion), configJson.compilerOptions);
+		let configJson =
+			(tsconfigPath && docContext.ts.readConfigFile(tsconfigPath, docContext.ts.sys.readFile).config) || {};
 
 		// Delete include so that .astro files don't get mistakenly excluded by the user
 		delete configJson.include;
@@ -271,27 +327,30 @@ async function createLanguageService(
 			noEmit: true,
 			declaration: false,
 
+			resolveJsonModule: true,
+			allowSyntheticDefaultImports: true,
 			allowNonTsExtensions: true,
 			allowJs: true,
-			jsx: ts.JsxEmit.Preserve,
+			jsx: docContext.ts.JsxEmit.Preserve,
 			jsxImportSource: undefined,
 			jsxFactory: 'astroHTML',
-			module: ts.ModuleKind.ESNext,
-			target: ts.ScriptTarget.ESNext,
-			moduleResolution: ts.ModuleResolutionKind.NodeJs,
+			module: docContext.ts.ModuleKind.ESNext,
+			target: docContext.ts.ScriptTarget.ESNext,
+			isolatedModules: true,
+			moduleResolution: docContext.ts.ModuleResolutionKind.NodeJs,
 		};
 
-		const project = ts.parseJsonConfigFileContent(
+		const project = docContext.ts.parseJsonConfigFileContent(
 			configJson,
-			ts.sys,
+			docContext.ts.sys,
 			tsconfigRoot,
 			forcedCompilerOptions,
 			tsconfigPath,
 			undefined,
 			[
-				{ extension: '.vue', isMixedContent: true, scriptKind: ts.ScriptKind.Deferred },
-				{ extension: '.svelte', isMixedContent: true, scriptKind: ts.ScriptKind.Deferred },
-				{ extension: '.astro', isMixedContent: true, scriptKind: ts.ScriptKind.Deferred },
+				{ extension: '.vue', isMixedContent: true, scriptKind: docContext.ts.ScriptKind.Deferred },
+				{ extension: '.svelte', isMixedContent: true, scriptKind: docContext.ts.ScriptKind.Deferred },
+				{ extension: '.astro', isMixedContent: true, scriptKind: docContext.ts.ScriptKind.Deferred },
 			]
 		);
 
@@ -306,23 +365,6 @@ async function createLanguageService(
 	}
 }
 
-/**
- * Default configuration used as a base and when the user doesn't have any
- */
-function getDefaultCompilerOptions(astroVersion: AstroVersion): ts.CompilerOptions {
-	const types = ['astro/env'];
-
-	if (astroVersion.major >= 1 && astroVersion.full !== '1.0.0-beta.0') {
-		types.push('astro/astro-jsx');
-	}
-
-	return {
-		maxNodeModuleJsDepth: 2,
-		allowSyntheticDefaultImports: true,
-		types: types,
-	};
-}
-
-function getDefaultExclude() {
+function getDefaultExclude(): string[] {
 	return ['dist', 'node_modules'];
 }

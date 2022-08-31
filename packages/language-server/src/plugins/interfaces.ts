@@ -1,7 +1,8 @@
-import {
+import type {
 	CodeAction,
 	CodeActionContext,
 	Color,
+	Location,
 	ColorInformation,
 	ColorPresentation,
 	CompletionContext,
@@ -13,6 +14,7 @@ import {
 	FoldingRange,
 	FormattingOptions,
 	Hover,
+	InlayHint,
 	LinkedEditingRanges,
 	Position,
 	Range,
@@ -27,7 +29,7 @@ import {
 	TextEdit,
 	WorkspaceEdit,
 } from 'vscode-languageserver';
-import { TextDocument } from 'vscode-languageserver-textdocument';
+import type { TextDocument } from 'vscode-languageserver-textdocument';
 
 export type Resolvable<T> = T | Promise<T>;
 
@@ -47,7 +49,7 @@ export interface HoverProvider {
 	doHover(document: TextDocument, position: Position): Resolvable<Hover | null>;
 }
 
-export interface FoldingRangeProvider {
+export interface FoldingRangesProvider {
 	getFoldingRanges(document: TextDocument): Resolvable<FoldingRange[] | null>;
 }
 
@@ -103,6 +105,10 @@ export interface UpdateImportsProvider {
 	updateImports(fileRename: FileRename): Resolvable<WorkspaceEdit | null>;
 }
 
+export interface InlayHintsProvider {
+	getInlayHints(document: TextDocument, range: Range): Resolvable<InlayHint[]>;
+}
+
 export interface RenameProvider {
 	rename(document: TextDocument, position: Position, newName: string): Resolvable<WorkspaceEdit | null>;
 	prepareRename(document: TextDocument, position: Position): Resolvable<Range | null>;
@@ -132,6 +138,10 @@ export interface LinkedEditingRangesProvider {
 	getLinkedEditingRanges(document: TextDocument, position: Position): Resolvable<LinkedEditingRanges | null>;
 }
 
+export interface TypeDefinitionProvider {
+	getTypeDefinitions(document: TextDocument, position: Position): Resolvable<Location[] | null>;
+}
+
 export interface OnWatchFileChangesParam {
 	fileName: string;
 	changeType: FileChangeType;
@@ -149,8 +159,9 @@ type ProviderBase = DiagnosticsProvider &
 	HoverProvider &
 	CompletionsProvider &
 	DefinitionsProvider &
+	TypeDefinitionProvider &
 	FormattingProvider &
-	FoldingRangeProvider &
+	FoldingRangesProvider &
 	TagCompleteProvider &
 	DocumentColorsProvider &
 	ColorPresentationsProvider &
@@ -164,6 +175,7 @@ type ProviderBase = DiagnosticsProvider &
 	SelectionRangeProvider &
 	OnWatchFileChangesProvider &
 	LinkedEditingRangesProvider &
+	InlayHintsProvider &
 	UpdateNonAstroFile;
 
 export type LSProvider = ProviderBase;
