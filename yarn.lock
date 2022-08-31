@@ -1344,14 +1344,6 @@ ast-types@0.14.2, ast-types@^0.14.2:
   dependencies:
     tslib "^2.0.1"
 
-"astro-scripts@file:scripts":
-  version "0.0.1"
-  dependencies:
-    arg "^5.0.0"
-    esbuild "^0.11.16"
-    globby "^11.0.3"
-    tar "^6.1.0"
-
 astro@^1.0.0-beta.72:
   version "1.0.0-beta.72"
   resolved "https://registry.yarnpkg.com/astro/-/astro-1.0.0-beta.72.tgz#e1ac870fc4fb91032b611ad574629b23a7257fba"
