@@ -1,4 +1,5 @@
 const { watchMode } = require('./utils.js');
+const isDev = process.argv.includes('--watch');
 
 require('esbuild')
 	.build({
@@ -7,14 +8,14 @@ require('esbuild')
 			server: '../language-server/dist/node.js',
 		},
 		bundle: true,
-		sourcemap: false,
+		sourcemap: isDev ? true : false,
 		outdir: './dist/node',
 		external: ['vscode'],
 		format: 'cjs',
 		platform: 'node',
 		tsconfig: './tsconfig.json',
-		minify: true,
-		watch: process.argv.includes('--watch') ? watchMode : false,
+		minify: isDev ? false : true,
+		watch: isDev ? watchMode : false,
 		plugins: [
 			{
 				name: 'umd2esm',

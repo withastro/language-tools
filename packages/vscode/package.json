@@ -46,16 +46,17 @@
     "workspaceContains:astro.config.*"
   ],
   "dependencies": {
-    "@astrojs/language-server": "0.23.3",
-    "@astrojs/ts-plugin": "0.2.1",
-    "vscode-languageclient": "^8.0.1"
+    "@astrojs/ts-plugin": "0.2.1"
   },
   "devDependencies": {
     "@types/vscode": "^1.67.0",
     "@vscode/test-electron": "^2.1.3",
-    "vscode-tmgrammar-test": "^0.1.1",
+    "@astrojs/language-server": "0.23.3",
+    "vscode-languageclient": "^8.0.1",
     "astro-scripts": "0.0.1",
-    "path-browserify": "^1.0.1"
+    "path-browserify": "^1.0.1",
+    "vscode-tmgrammar-test": "^0.1.1",
+    "typescript": "~4.8.2"
   },
   "main": "./dist/node/client.js",
   "browser": "./dist/browser/client.js",

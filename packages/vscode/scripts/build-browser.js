@@ -1,4 +1,5 @@
 const { watchMode } = require('./utils.js');
+const isDev = process.argv.includes('--watch');
 
 require('esbuild')
 	.build({
@@ -6,13 +7,13 @@ require('esbuild')
 			client: './src/browser.ts',
 		},
 		bundle: true,
-		sourcemap: false,
+		sourcemap: isDev ? true : false,
 		outdir: './dist/browser',
 		external: ['vscode'],
 		format: 'cjs',
 		tsconfig: './tsconfig.json',
-		minify: true,
-		watch: process.argv.includes('--watch') ? watchMode : false,
+		minify: isDev ? false : true,
+		watch: isDev ? watchMode : false,
 	})
 	.catch(() => process.exit(1));
 
@@ -21,13 +22,13 @@ require('esbuild').build({
 		server: '../language-server/dist/browser.js',
 	},
 	bundle: true,
-	sourcemap: true,
+	sourcemap: isDev ? true : false,
 	outdir: './dist/browser',
 	platform: 'browser',
 	format: 'iife',
 	tsconfig: './tsconfig.json',
-	minify: false,
-	watch: process.argv.includes('--watch') ? watchMode : false,
+	minify: isDev ? false : true,
+	watch: isDev ? watchMode : false,
 	inject: ['./scripts/process-shim.js'],
 	plugins: [
 		{
