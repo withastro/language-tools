@@ -23,13 +23,12 @@ require('esbuild').build({
 	bundle: true,
 	sourcemap: true,
 	outdir: './dist/browser',
-	external: ['typescript'],
 	platform: 'browser',
 	format: 'iife',
 	tsconfig: './tsconfig.json',
 	minify: false,
 	watch: process.argv.includes('--watch') ? watchMode : false,
-	define: { 'process.cwd.NODE_DEBUG': 'false' },
+	inject: ['./scripts/process-shim.js'],
 	plugins: [
 		{
 			name: 'node-deps',

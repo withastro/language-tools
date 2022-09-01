@@ -1,21 +1,42 @@
-import { ExtensionContext, Uri } from 'vscode';
-import { LanguageClient, LanguageClientOptions } from 'vscode-languageclient/browser';
-import { getInitOptions } from './shared';
+import { ExtensionContext, Position, TextDocument, Uri } from 'vscode';
+import {
+	LanguageClient,
+	LanguageClientOptions,
+	RequestType,
+	TextDocumentPositionParams,
+} from 'vscode-languageclient/browser';
+import { activateTagClosing } from './html/autoClose';
+import { commonActivate, getInitOptions } from './shared';
+import * as tsVersion from './features/typescriptVersionBrowser';
+
+const TagCloseRequest: RequestType<TextDocumentPositionParams, string, any> = new RequestType('html/tag');
 
 export async function activate(context: ExtensionContext) {
 	const serverMain = Uri.joinPath(context.extensionUri, 'dist/browser/server.js');
 	const worker = new Worker(serverMain.toString());
 
-	const clientOptions = getInitOptions('browser');
+	const clientOptions = getInitOptions('browser', {
+		serverPath: undefined,
+	});
 	const client = createLanguageServer(clientOptions, worker);
-	context.subscriptions.push(client.start());
+	client
+		.start()
+		.then(() => {
+			const tagRequestor = (document: TextDocument, position: Position) => {
+				const param = client.code2ProtocolConverter.asTextDocumentPositionParams(document, position);
+				return client.sendRequest(TagCloseRequest, param);
+			};
+			const disposable = activateTagClosing(tagRequestor, { astro: true }, 'html.autoClosingTags');
+			context.subscriptions.push(disposable);
+		})
+		.catch((err) => {
+			console.error('Astro, unable to load language server.', err);
+		});
 
-	function getLSClient() {
-		return client;
-	}
+	commonActivate(context, client, tsVersion);
 
 	return {
-		getLanguageServer: getLSClient,
+		getLanguageServer: () => client,
 	};
 }
 
