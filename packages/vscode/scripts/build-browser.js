@@ -50,6 +50,14 @@ require('esbuild').build({
 					});
 					return { path: pathBrowserify };
 				});
+				build.onResolve({ filter: /^util$/ }, (args) => ({
+					path: args.path,
+					namespace: 'util-ns',
+				}));
+				build.onLoad({ filter: /.*/, namespace: 'util-ns' }, () => ({
+					contents: `export const TextDecoder = {}`,
+					loader: 'js',
+				}));
 			},
 		},
 	],
