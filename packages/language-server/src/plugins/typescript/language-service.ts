@@ -125,12 +125,7 @@ async function createLanguageService(
 		);
 	}
 
-	let languageServerDirectory: string;
-	try {
-		languageServerDirectory = dirname(require.resolve('@astrojs/language-server'));
-	} catch (e) {
-		languageServerDirectory = __dirname;
-	}
+	const languageServerDirectory = __dirname;
 
 	// Fallback to internal types when Astro is not installed or the Astro version is too old
 	if (
