@@ -29,7 +29,6 @@ require('esbuild').build({
 	tsconfig: './tsconfig.json',
 	minify: isDev ? false : true,
 	watch: isDev ? watchMode : false,
-	inject: ['./scripts/process-shim.js'],
 	plugins: [
 		{
 			name: 'node-deps',
