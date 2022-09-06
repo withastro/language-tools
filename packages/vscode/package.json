@@ -28,11 +28,12 @@
   "license": "MIT",
   "publisher": "astro-build",
   "scripts": {
-    "vscode:prepublish": "yarn build",
     "build": "yarn run build:node & yarn run build:browser",
     "dev": "yarn run build:node --watch & yarn run build:browser --watch",
     "build:node": "node ./scripts/build-node.js",
     "build:browser": "node ./scripts/build-browser.js",
+    "build:ci:node": "yarn run build:node & yarn run build:browser --empty",
+    "build:ci:browser": "yarn run build:browser & yarn run build:node --empty",
     "test": "yarn run test:vscode && yarn run test:grammar",
     "test:vscode": "node ./test/runTest.js",
     "test:grammar": "node ./test/grammar/test.mjs",

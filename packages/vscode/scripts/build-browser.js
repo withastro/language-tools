@@ -1,11 +1,16 @@
 const { watchMode } = require('./utils.js');
 const isDev = process.argv.includes('--watch');
+const shouldBeEmpty = process.argv.includes('--empty');
 
 require('esbuild')
 	.build({
-		entryPoints: {
-			client: './src/browser.ts',
-		},
+		entryPoints: shouldBeEmpty
+			? {
+					client: './scripts/empty.js',
+			  }
+			: {
+					client: './src/browser.ts',
+			  },
 		bundle: true,
 		sourcemap: isDev ? true : false,
 		outdir: './dist/browser',
@@ -18,9 +23,13 @@ require('esbuild')
 	.catch(() => process.exit(1));
 
 require('esbuild').build({
-	entryPoints: {
-		server: '../language-server/dist/browser.js',
-	},
+	entryPoints: shouldBeEmpty
+		? {
+				server: './scripts/empty.js',
+		  }
+		: {
+				server: '../language-server/dist/browser.js',
+		  },
 	bundle: true,
 	sourcemap: isDev ? true : false,
 	outdir: './dist/browser',

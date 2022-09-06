@@ -3,10 +3,15 @@ const isDev = process.argv.includes('--watch');
 
 require('esbuild')
 	.build({
-		entryPoints: {
-			client: './src/node.ts',
-			server: '../language-server/dist/node.js',
-		},
+		entryPoints: process.argv.includes('--empty')
+			? {
+					client: './scripts/empty.js',
+					server: './scripts/empty.js',
+			  }
+			: {
+					client: './src/node.ts',
+					server: '../language-server/dist/node.js',
+			  },
 		bundle: true,
 		sourcemap: isDev ? true : false,
 		outdir: './dist/node',
