@@ -1,7 +1,7 @@
 import type ts from 'typescript/lib/tsserverlibrary';
-import { Logger } from './logger.js';
 import { AstroSnapshotManager } from './astro-snapshots.js';
 import { createAstroSys } from './astro-sys.js';
+import { Logger } from './logger.js';
 import { ensureRealAstroFilePath, isVirtualAstroFilePath } from './utils.js';
 
 /**

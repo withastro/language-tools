@@ -1,24 +1,19 @@
-import type { AppCompletionList, CompletionsProvider } from '../../interfaces';
 import type { FunctionDeclaration, FunctionTypeNode } from 'typescript';
-import type { AstroDocument } from '../../../core/documents';
-import {
-	CompletionContext,
-	Position,
-	CompletionList,
-	CompletionItem,
-	CompletionItemKind,
-	CompletionTriggerKind,
-	InsertTextFormat,
-	MarkupContent,
-	MarkupKind,
-	TextEdit,
-} from 'vscode-languageserver';
-import type { LanguageServiceManager as TypeScriptLanguageServiceManager } from '../../typescript/LanguageServiceManager';
-import { isInComponentStartTag, isInsideExpression, isPossibleComponent } from '../../../core/documents/utils';
-import { toVirtualAstroFilePath, toVirtualFilePath } from '../../typescript/utils';
 import { getLanguageService } from 'vscode-html-languageservice';
+import {
+  CompletionContext, CompletionItem,
+  CompletionItemKind, CompletionList, CompletionTriggerKind,
+  InsertTextFormat,
+  MarkupContent,
+  MarkupKind, Position, TextEdit
+} from 'vscode-languageserver';
+import type { AstroDocument } from '../../../core/documents';
+import { isInComponentStartTag, isInsideExpression, isPossibleComponent } from '../../../core/documents/utils';
 import { astroDirectives } from '../../html/features/astro-attributes';
 import { removeDataAttrCompletion } from '../../html/utils';
+import type { AppCompletionList, CompletionsProvider } from '../../interfaces';
+import type { LanguageServiceManager as TypeScriptLanguageServiceManager } from '../../typescript/LanguageServiceManager';
+import { toVirtualAstroFilePath, toVirtualFilePath } from '../../typescript/utils';
 
 type LastCompletion = {
 	tag: string;

@@ -1,7 +1,7 @@
 import type ts from 'typescript/lib/tsserverlibrary';
-import { Logger } from '../logger';
 import { AstroSnapshotManager } from '../astro-snapshots';
-import { isNotNullOrUndefined, isAstroFilePath } from '../utils';
+import { Logger } from '../logger';
+import { isAstroFilePath, isNotNullOrUndefined } from '../utils';
 
 export function decorateGetDefinition(
     ls: ts.LanguageService,

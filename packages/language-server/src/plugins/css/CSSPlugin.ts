@@ -1,38 +1,38 @@
+import { doComplete as getEmmetCompletions } from '@vscode/emmet-helper';
 import {
-	Color,
-	ColorInformation,
-	ColorPresentation,
-	CompletionContext,
-	CompletionList,
-	CompletionTriggerKind,
-	FoldingRange,
-	Hover,
-	Position,
-	Range,
-	SymbolInformation,
+  Color,
+  ColorInformation,
+  ColorPresentation,
+  CompletionContext,
+  CompletionList,
+  CompletionTriggerKind,
+  FoldingRange,
+  Hover,
+  Position,
+  Range,
+  SymbolInformation
 } from 'vscode-languageserver';
 import type { ConfigManager } from '../../core/config/ConfigManager';
 import type { LSConfig, LSCSSConfig } from '../../core/config/interfaces';
 import {
-	AstroDocument,
-	isInsideFrontmatter,
-	isInTag,
-	mapColorPresentationToOriginal,
-	mapCompletionItemToOriginal,
-	mapFoldingRangeToParent,
-	mapHoverToParent,
-	mapObjWithRangeToOriginal,
-	mapRangeToGenerated,
-	mapSymbolInformationToOriginal,
-	TagInformation,
+  AstroDocument,
+  isInsideFrontmatter,
+  isInTag,
+  mapColorPresentationToOriginal,
+  mapCompletionItemToOriginal,
+  mapFoldingRangeToParent,
+  mapHoverToParent,
+  mapObjWithRangeToOriginal,
+  mapRangeToGenerated,
+  mapSymbolInformationToOriginal,
+  TagInformation
 } from '../../core/documents';
-import { doComplete as getEmmetCompletions } from '@vscode/emmet-helper';
+import { AttributeContext, getAttributeContextAtPosition } from '../../core/documents/parseHtml';
 import type { Plugin } from '../interfaces';
 import { CSSDocument, CSSDocumentBase } from './CSSDocument';
-import { getLanguage, getLanguageService } from './language-service';
-import { AttributeContext, getAttributeContextAtPosition } from '../../core/documents/parseHtml';
-import { StyleAttributeDocument } from './StyleAttributeDocument';
 import { getIdClassCompletion } from './features/getIdClassCompletions';
+import { getLanguage, getLanguageService } from './language-service';
+import { StyleAttributeDocument } from './StyleAttributeDocument';
 
 export class CSSPlugin implements Plugin {
 	__name = 'css';

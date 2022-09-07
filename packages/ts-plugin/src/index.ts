@@ -1,9 +1,8 @@
 import type ts from 'typescript/lib/tsserverlibrary';
-import { dirname, resolve } from 'path';
+import { AstroSnapshotManager } from './astro-snapshots.js';
 import { decorateLanguageService } from './language-service/index.js';
 import { Logger } from './logger.js';
 import { patchModuleLoader } from './module-loader.js';
-import { AstroSnapshotManager } from './astro-snapshots.js';
 
 function init(modules: { typescript: typeof ts }) {
   function create(info: ts.server.PluginCreateInfo) {

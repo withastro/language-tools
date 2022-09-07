@@ -1,8 +1,8 @@
-import { astro2tsx } from './astro2tsx.js';
 import type ts from 'typescript/lib/tsserverlibrary';
+import { astro2tsx } from './astro2tsx.js';
 import { Logger } from './logger.js';
 import { SourceMapper } from './source-mapper.js';
-import { isNoTextSpanInGeneratedCode, isAstroFilePath } from './utils.js';
+import { isAstroFilePath, isNoTextSpanInGeneratedCode } from './utils.js';
 
 export class AstroSnapshot {
     private scriptInfo?: ts.server.ScriptInfo;

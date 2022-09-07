@@ -1,14 +1,14 @@
 import type { CodeFixAction, FileTextChanges } from 'typescript';
 import type { CancellationToken } from 'vscode-languageserver';
 import {
-	CodeAction,
-	CodeActionContext,
-	CodeActionKind,
-	Diagnostic,
-	OptionalVersionedTextDocumentIdentifier,
-	Range,
-	TextDocumentEdit,
-	TextEdit,
+  CodeAction,
+  CodeActionContext,
+  CodeActionKind,
+  Diagnostic,
+  OptionalVersionedTextDocumentIdentifier,
+  Range,
+  TextDocumentEdit,
+  TextEdit
 } from 'vscode-languageserver-types';
 import type { ConfigManager } from '../../../core/config';
 import { AstroDocument, getLineAtPosition, mapRangeToOriginal } from '../../../core/documents';
@@ -17,11 +17,11 @@ import type { CodeActionsProvider } from '../../interfaces';
 import type { LanguageServiceManager } from '../LanguageServiceManager';
 import type { AstroSnapshot, AstroSnapshotFragment, ScriptTagDocumentSnapshot } from '../snapshots/DocumentSnapshot';
 import {
-	checkEndOfFileCodeInsert,
-	convertRange,
-	getScriptTagSnapshot,
-	removeAstroComponentSuffix,
-	toVirtualAstroFilePath,
+  checkEndOfFileCodeInsert,
+  convertRange,
+  getScriptTagSnapshot,
+  removeAstroComponentSuffix,
+  toVirtualAstroFilePath
 } from '../utils';
 import { codeActionChangeToTextEdit } from './CompletionsProvider';
 import { findContainingNode } from './utils';

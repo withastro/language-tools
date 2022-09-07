@@ -1,7 +1,7 @@
 import type ts from 'typescript/lib/tsserverlibrary';
-import { Logger } from '../logger';
 import { AstroSnapshotManager } from '../astro-snapshots.js';
-import { isNotNullOrUndefined, isAstroFilePath } from '../utils.js';
+import { Logger } from '../logger';
+import { isAstroFilePath, isNotNullOrUndefined } from '../utils.js';
 
 export function decorateFindReferences(
     ls: ts.LanguageService,

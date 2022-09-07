@@ -1,27 +1,20 @@
-import {
-	CompletionItem,
-	CompletionList,
-	Position,
-	TextEdit,
-	CompletionItemKind,
-	FoldingRange,
-	Hover,
-	SymbolInformation,
-	LinkedEditingRanges,
-} from 'vscode-languageserver';
 import { doComplete as getEmmetCompletions } from '@vscode/emmet-helper';
 import { getLanguageService } from 'vscode-html-languageservice';
-import type { Plugin } from '../interfaces';
+import {
+  CompletionItem, CompletionItemKind, CompletionList, FoldingRange,
+  Hover, LinkedEditingRanges, Position, SymbolInformation, TextEdit
+} from 'vscode-languageserver';
 import type { ConfigManager } from '../../core/config/ConfigManager';
+import type { LSConfig, LSHTMLConfig } from '../../core/config/interfaces';
 import type { AstroDocument } from '../../core/documents/AstroDocument';
 import {
-	isInComponentStartTag,
-	isInsideExpression,
-	isInsideFrontmatter,
-	isInTagName,
-	isPossibleComponent,
+  isInComponentStartTag,
+  isInsideExpression,
+  isInsideFrontmatter,
+  isInTagName,
+  isPossibleComponent
 } from '../../core/documents/utils';
-import type { LSConfig, LSHTMLConfig } from '../../core/config/interfaces';
+import type { Plugin } from '../interfaces';
 import { astroAttributes, astroDirectives, astroElements, classListAttribute } from './features/astro-attributes';
 import { removeDataAttrCompletion } from './utils';
 

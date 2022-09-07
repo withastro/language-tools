@@ -1,18 +1,12 @@
 import { dirname, extname } from 'path';
-import { pathToUrl } from '../../utils';
+import type { Node } from 'vscode-html-languageservice';
 import {
-	CompletionItemKind,
-	DiagnosticSeverity,
-	Position,
-	Range,
-	SymbolKind,
-	SemanticTokenModifiers,
-	SemanticTokenTypes,
-	SemanticTokensLegend,
+  CompletionItemKind, Position,
+  Range, SemanticTokenModifiers, SemanticTokensLegend, SemanticTokenTypes, SymbolKind
 } from 'vscode-languageserver';
 import { AstroDocument, mapRangeToOriginal, TagInformation } from '../../core/documents';
+import { pathToUrl } from '../../utils';
 import type { AstroSnapshot, ScriptTagDocumentSnapshot, SnapshotFragment } from './snapshots/DocumentSnapshot';
-import type { Node } from 'vscode-html-languageservice';
 
 export const enum TokenType {
 	class,

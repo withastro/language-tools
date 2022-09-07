@@ -1,42 +1,39 @@
 import {
-	CancellationToken,
-	CodeAction,
-	CodeActionContext,
-	CompletionContext,
-	DefinitionLink,
-	Location,
-	Diagnostic,
-	FileChangeType,
-	FoldingRange,
-	Hover,
-	InlayHint,
-	Position,
-	Range,
-	SemanticTokens,
-	SignatureHelp,
-	SignatureHelpContext,
-	SymbolInformation,
-	TextDocumentContentChangeEvent,
-	WorkspaceEdit,
+  CancellationToken,
+  CodeAction,
+  CodeActionContext,
+  CompletionContext,
+  DefinitionLink, Diagnostic,
+  FileChangeType,
+  FoldingRange,
+  Hover,
+  InlayHint, Location, Position,
+  Range,
+  SemanticTokens,
+  SignatureHelp,
+  SignatureHelpContext,
+  SymbolInformation,
+  TextDocumentContentChangeEvent,
+  WorkspaceEdit
 } from 'vscode-languageserver';
 import type { ConfigManager, LSTypescriptConfig } from '../../core/config';
 import type { AstroDocument } from '../../core/documents';
 import type { AppCompletionItem, AppCompletionList, OnWatchFileChangesParam, Plugin } from '../interfaces';
-import { CompletionItemData, CompletionsProviderImpl } from './features/CompletionsProvider';
-import { DiagnosticsProviderImpl } from './features/DiagnosticsProvider';
-import { HoverProviderImpl } from './features/HoverProvider';
-import { SignatureHelpProviderImpl } from './features/SignatureHelpProvider';
-import type { LanguageServiceManager } from './LanguageServiceManager';
-import { convertToLocationRange, ensureRealFilePath, getScriptKindFromFileName, toVirtualAstroFilePath } from './utils';
-import { DocumentSymbolsProviderImpl } from './features/DocumentSymbolsProvider';
-import { SemanticTokensProviderImpl } from './features/SemanticTokenProvider';
-import { FoldingRangesProviderImpl } from './features/FoldingRangesProvider';
-import { CodeActionsProviderImpl } from './features/CodeActionsProvider';
-import { DefinitionsProviderImpl } from './features/DefinitionsProvider';
-import { InlayHintsProviderImpl } from './features/InlayHintsProvider';
 import astro2tsx, { Astro2TSXResult } from './astro2tsx';
-import { classNameFromFilename } from './snapshots/utils';
+import { CodeActionsProviderImpl } from './features/CodeActionsProvider';
+import { CompletionItemData, CompletionsProviderImpl } from './features/CompletionsProvider';
+import { DefinitionsProviderImpl } from './features/DefinitionsProvider';
+import { DiagnosticsProviderImpl } from './features/DiagnosticsProvider';
+import { DocumentSymbolsProviderImpl } from './features/DocumentSymbolsProvider';
+import { FoldingRangesProviderImpl } from './features/FoldingRangesProvider';
+import { HoverProviderImpl } from './features/HoverProvider';
+import { InlayHintsProviderImpl } from './features/InlayHintsProvider';
+import { SemanticTokensProviderImpl } from './features/SemanticTokenProvider';
+import { SignatureHelpProviderImpl } from './features/SignatureHelpProvider';
 import { TypeDefinitionsProviderImpl } from './features/TypeDefinitionsProvider';
+import type { LanguageServiceManager } from './LanguageServiceManager';
+import { classNameFromFilename } from './snapshots/utils';
+import { convertToLocationRange, ensureRealFilePath, getScriptKindFromFileName, toVirtualAstroFilePath } from './utils';
 
 export class TypeScriptPlugin implements Plugin {
 	__name = 'typescript';

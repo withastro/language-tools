@@ -1,13 +1,7 @@
 import type { Position, TextDocumentContentChangeEvent } from 'vscode-languageserver';
 import {
-	AstroDocument,
-	DocumentMapper,
-	positionAt,
-	getLineOffsets,
-	offsetAt,
-	IdentityMapper,
-	FragmentMapper,
-	TagInformation,
+  AstroDocument,
+  DocumentMapper, FragmentMapper, getLineOffsets, IdentityMapper, offsetAt, positionAt, TagInformation
 } from '../../../core/documents';
 import { pathToUrl } from '../../../utils';
 import type { FrameworkExt } from '../utils';

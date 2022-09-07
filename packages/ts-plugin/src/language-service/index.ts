@@ -1,6 +1,6 @@
 import type ts from 'typescript/lib/tsserverlibrary';
-import { Logger } from '../logger';
 import { AstroSnapshotManager } from '../astro-snapshots.js';
+import { Logger } from '../logger';
 import { isAstroFilePath } from '../utils.js';
 import { decorateCompletions } from './completions.js';
 import { decorateGetDefinition } from './definition.js';

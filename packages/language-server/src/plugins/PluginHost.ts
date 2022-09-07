@@ -1,36 +1,21 @@
 import {
-	CancellationToken,
-	Color,
-	ColorInformation,
-	ColorPresentation,
-	CompletionContext,
-	CompletionItem,
-	CompletionList,
-	DefinitionLink,
-	Diagnostic,
-	FoldingRange,
-	Hover,
-	Position,
-	Range,
-	Location,
-	SignatureHelp,
-	SignatureHelpContext,
-	TextDocumentContentChangeEvent,
-	TextDocumentIdentifier,
-	WorkspaceEdit,
-	SymbolInformation,
-	SemanticTokens,
-	CodeActionContext,
-	CodeAction,
-	InlayHint,
-	FormattingOptions,
-	TextEdit,
-	LinkedEditingRanges,
+  CancellationToken, CodeAction, CodeActionContext, Color,
+  ColorInformation,
+  ColorPresentation,
+  CompletionContext,
+  CompletionItem,
+  CompletionList,
+  DefinitionLink,
+  Diagnostic,
+  FoldingRange, FormattingOptions, Hover, InlayHint, LinkedEditingRanges, Location, Position,
+  Range, SemanticTokens, SignatureHelp,
+  SignatureHelpContext, SymbolInformation, TextDocumentContentChangeEvent,
+  TextDocumentIdentifier, TextEdit, WorkspaceEdit
 } from 'vscode-languageserver';
-import type { AppCompletionItem, Plugin, LSProvider } from './interfaces';
+import { isInComponentStartTag } from '../core/documents';
 import type { DocumentManager } from '../core/documents/DocumentManager';
 import { isNotNullOrUndefined, regexLastIndexOf } from '../utils';
-import { isInComponentStartTag } from '../core/documents';
+import type { AppCompletionItem, LSProvider, Plugin } from './interfaces';
 
 enum ExecuteMode {
 	None,

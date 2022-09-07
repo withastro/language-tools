@@ -3,10 +3,10 @@ import type { ConfigManager } from '../../core/config';
 import type { AstroDocument, DocumentManager } from '../../core/documents';
 import { debounceSameArg, normalizePath, pathToUrl } from '../../utils';
 import {
-	forAllLanguageServices,
-	getLanguageService,
-	LanguageServiceContainer,
-	LanguageServiceDocumentContext,
+  forAllLanguageServices,
+  getLanguageService,
+  LanguageServiceContainer,
+  LanguageServiceDocumentContext
 } from './language-service';
 import type { DocumentSnapshot } from './snapshots/DocumentSnapshot';
 import { GlobalSnapshotManager } from './snapshots/SnapshotManager';

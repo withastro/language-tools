@@ -1,16 +1,16 @@
-import type { AstroDocument } from '../../../core/documents';
-import astro2tsx from '../astro2tsx';
 import { URI, Utils } from 'vscode-uri';
+import type { AstroDocument } from '../../../core/documents';
+import { importSvelteIntegration, importVueIntegration } from '../../../importPackage';
+import { toPascalCase } from '../../../utils';
+import astro2tsx from '../astro2tsx';
 import {
-	FrameworkExt,
-	getFrameworkFromFilePath,
-	getScriptKindFromFileName,
-	isAstroFilePath,
-	isFrameworkFilePath,
+  FrameworkExt,
+  getFrameworkFromFilePath,
+  getScriptKindFromFileName,
+  isAstroFilePath,
+  isFrameworkFilePath
 } from '../utils';
 import { AstroSnapshot, TypeScriptDocumentSnapshot } from './DocumentSnapshot';
-import { toPascalCase } from '../../../utils';
-import { importSvelteIntegration, importVueIntegration } from '../../../importPackage';
 
 // Utilities to create Snapshots from different contexts
 export function createFromDocument(document: AstroDocument, ts: typeof import('typescript/lib/tsserverlibrary')) {
