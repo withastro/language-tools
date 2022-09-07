@@ -6,7 +6,12 @@ import type { DefinitionsProvider } from '../../interfaces';
 import type { LanguageServiceManager } from '../LanguageServiceManager';
 import type { AstroSnapshot } from '../snapshots/DocumentSnapshot';
 import {
-  convertToLocationRange, ensureRealFilePath, getScriptTagSnapshot, isAstroFilePath, isFrameworkFilePath, toVirtualAstroFilePath
+	convertToLocationRange,
+	ensureRealFilePath,
+	getScriptTagSnapshot,
+	isAstroFilePath,
+	isFrameworkFilePath,
+	toVirtualAstroFilePath,
 } from '../utils';
 import { SnapshotFragmentMap } from './utils';
 

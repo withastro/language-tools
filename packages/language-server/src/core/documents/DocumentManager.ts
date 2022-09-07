@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events';
 import type {
-  TextDocumentContentChangeEvent,
-  TextDocumentItem,
-  VersionedTextDocumentIdentifier
+	TextDocumentContentChangeEvent,
+	TextDocumentItem,
+	VersionedTextDocumentIdentifier,
 } from 'vscode-languageserver';
 import { normalizeUri } from '../../utils';
 import { AstroDocument } from './AstroDocument';

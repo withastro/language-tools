@@ -1,7 +1,11 @@
 import {
-  getLanguageService,
-  HTMLDocument, Node,
-  Position, Scanner, ScannerState, TokenType
+	getLanguageService,
+	HTMLDocument,
+	Node,
+	Position,
+	Scanner,
+	ScannerState,
+	TokenType,
 } from 'vscode-html-languageservice';
 import type { AstroDocument } from './AstroDocument';
 import { AstroMetadata } from './parseAstro';

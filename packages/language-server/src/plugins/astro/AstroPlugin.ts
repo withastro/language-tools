@@ -1,7 +1,11 @@
 import {
-  CompletionContext,
-  FoldingRange,
-  FoldingRangeKind, FormattingOptions, Position, Range, TextEdit
+	CompletionContext,
+	FoldingRange,
+	FoldingRangeKind,
+	FormattingOptions,
+	Position,
+	Range,
+	TextEdit,
 } from 'vscode-languageserver';
 import type { ConfigManager } from '../../core/config';
 import type { AstroDocument } from '../../core/documents';

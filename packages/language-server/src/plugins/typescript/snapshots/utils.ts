@@ -4,11 +4,11 @@ import { importSvelteIntegration, importVueIntegration } from '../../../importPa
 import { toPascalCase } from '../../../utils';
 import astro2tsx from '../astro2tsx';
 import {
-  FrameworkExt,
-  getFrameworkFromFilePath,
-  getScriptKindFromFileName,
-  isAstroFilePath,
-  isFrameworkFilePath
+	FrameworkExt,
+	getFrameworkFromFilePath,
+	getScriptKindFromFileName,
+	isAstroFilePath,
+	isFrameworkFilePath,
 } from '../utils';
 import { AstroSnapshot, TypeScriptDocumentSnapshot } from './DocumentSnapshot';
 

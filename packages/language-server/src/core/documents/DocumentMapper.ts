@@ -1,7 +1,19 @@
 import type { SourceMapConsumer } from 'source-map';
 import {
-  CodeAction, ColorPresentation, CompletionItem, Diagnostic, FoldingRange, Hover, InsertReplaceEdit, LocationLink, Position,
-  Range, SelectionRange, SymbolInformation, TextDocumentEdit, TextEdit
+	CodeAction,
+	ColorPresentation,
+	CompletionItem,
+	Diagnostic,
+	FoldingRange,
+	Hover,
+	InsertReplaceEdit,
+	LocationLink,
+	Position,
+	Range,
+	SelectionRange,
+	SymbolInformation,
+	TextDocumentEdit,
+	TextEdit,
 } from 'vscode-languageserver';
 import { getLineOffsets, offsetAt, positionAt, TagInformation } from './utils';
 

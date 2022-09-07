@@ -1,8 +1,13 @@
 import { dirname, extname } from 'path';
 import type { Node } from 'vscode-html-languageservice';
 import {
-  CompletionItemKind, Position,
-  Range, SemanticTokenModifiers, SemanticTokensLegend, SemanticTokenTypes, SymbolKind
+	CompletionItemKind,
+	Position,
+	Range,
+	SemanticTokenModifiers,
+	SemanticTokensLegend,
+	SemanticTokenTypes,
+	SymbolKind,
 } from 'vscode-languageserver';
 import { AstroDocument, mapRangeToOriginal, TagInformation } from '../../core/documents';
 import { pathToUrl } from '../../utils';

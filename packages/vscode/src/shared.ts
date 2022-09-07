@@ -1,11 +1,12 @@
 import {
-  commands,
-  ConfigurationChangeEvent,
-  ExtensionContext,
-  TextDocument,
-  TextDocumentChangeEvent,
-  ViewColumn,
-  window, workspace
+	commands,
+	ConfigurationChangeEvent,
+	ExtensionContext,
+	TextDocument,
+	TextDocumentChangeEvent,
+	ViewColumn,
+	window,
+	workspace,
 } from 'vscode';
 import { BaseLanguageClient, LanguageClientOptions } from 'vscode-languageclient';
 

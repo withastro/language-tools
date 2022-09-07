@@ -1,9 +1,9 @@
 import { ExtensionContext, Position, TextDocument, Uri } from 'vscode';
 import {
-  LanguageClient,
-  LanguageClientOptions,
-  RequestType,
-  TextDocumentPositionParams
+	LanguageClient,
+	LanguageClientOptions,
+	RequestType,
+	TextDocumentPositionParams,
 } from 'vscode-languageclient/browser';
 import * as tsVersion from './features/typescriptVersionBrowser';
 import { activateTagClosing } from './html/autoClose';

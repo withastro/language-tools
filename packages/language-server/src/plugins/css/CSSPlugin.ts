@@ -1,31 +1,31 @@
 import { doComplete as getEmmetCompletions } from '@vscode/emmet-helper';
 import {
-  Color,
-  ColorInformation,
-  ColorPresentation,
-  CompletionContext,
-  CompletionList,
-  CompletionTriggerKind,
-  FoldingRange,
-  Hover,
-  Position,
-  Range,
-  SymbolInformation
+	Color,
+	ColorInformation,
+	ColorPresentation,
+	CompletionContext,
+	CompletionList,
+	CompletionTriggerKind,
+	FoldingRange,
+	Hover,
+	Position,
+	Range,
+	SymbolInformation,
 } from 'vscode-languageserver';
 import type { ConfigManager } from '../../core/config/ConfigManager';
 import type { LSConfig, LSCSSConfig } from '../../core/config/interfaces';
 import {
-  AstroDocument,
-  isInsideFrontmatter,
-  isInTag,
-  mapColorPresentationToOriginal,
-  mapCompletionItemToOriginal,
-  mapFoldingRangeToParent,
-  mapHoverToParent,
-  mapObjWithRangeToOriginal,
-  mapRangeToGenerated,
-  mapSymbolInformationToOriginal,
-  TagInformation
+	AstroDocument,
+	isInsideFrontmatter,
+	isInTag,
+	mapColorPresentationToOriginal,
+	mapCompletionItemToOriginal,
+	mapFoldingRangeToParent,
+	mapHoverToParent,
+	mapObjWithRangeToOriginal,
+	mapRangeToGenerated,
+	mapSymbolInformationToOriginal,
+	TagInformation,
 } from '../../core/documents';
 import { AttributeContext, getAttributeContextAtPosition } from '../../core/documents/parseHtml';
 import type { Plugin } from '../interfaces';

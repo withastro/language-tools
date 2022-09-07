@@ -1,7 +1,13 @@
 import type ts from 'typescript';
 import {
-  CancellationToken, MarkupKind, ParameterInformation, Position, SignatureHelp, SignatureHelpContext, SignatureHelpTriggerKind,
-  SignatureInformation
+	CancellationToken,
+	MarkupKind,
+	ParameterInformation,
+	Position,
+	SignatureHelp,
+	SignatureHelpContext,
+	SignatureHelpTriggerKind,
+	SignatureInformation,
 } from 'vscode-languageserver';
 import type { AstroDocument } from '../../../core/documents';
 import type { SignatureHelpProvider } from '../../interfaces';

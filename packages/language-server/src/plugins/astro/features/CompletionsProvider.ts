@@ -1,11 +1,16 @@
 import type { FunctionDeclaration, FunctionTypeNode } from 'typescript';
 import { getLanguageService } from 'vscode-html-languageservice';
 import {
-  CompletionContext, CompletionItem,
-  CompletionItemKind, CompletionList, CompletionTriggerKind,
-  InsertTextFormat,
-  MarkupContent,
-  MarkupKind, Position, TextEdit
+	CompletionContext,
+	CompletionItem,
+	CompletionItemKind,
+	CompletionList,
+	CompletionTriggerKind,
+	InsertTextFormat,
+	MarkupContent,
+	MarkupKind,
+	Position,
+	TextEdit,
 } from 'vscode-languageserver';
 import type { AstroDocument } from '../../../core/documents';
 import { isInComponentStartTag, isInsideExpression, isPossibleComponent } from '../../../core/documents/utils';

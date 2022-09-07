@@ -1,15 +1,15 @@
 import * as vscode from 'vscode-languageserver';
 import {
-  CodeActionKind,
-  DidChangeConfigurationNotification,
-  DocumentUri,
-  InlayHintRequest,
-  LinkedEditingRangeRequest,
-  MessageType,
-  SemanticTokensRangeRequest,
-  SemanticTokensRequest,
-  ShowMessageNotification,
-  TextDocumentIdentifier
+	CodeActionKind,
+	DidChangeConfigurationNotification,
+	DocumentUri,
+	InlayHintRequest,
+	LinkedEditingRangeRequest,
+	MessageType,
+	SemanticTokensRangeRequest,
+	SemanticTokensRequest,
+	ShowMessageNotification,
+	TextDocumentIdentifier,
 } from 'vscode-languageserver';
 import type { LSConfig } from './core/config';
 import { ConfigManager, defaultLSConfig } from './core/config/ConfigManager';

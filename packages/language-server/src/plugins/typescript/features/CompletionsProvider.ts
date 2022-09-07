@@ -1,29 +1,44 @@
 import type ts from 'typescript/lib/tsserverlibrary';
 import {
-  CancellationToken, CompletionContext, CompletionItemTag, CompletionList, CompletionTriggerKind, InsertTextFormat, MarkupContent, Position, Range, TextDocumentIdentifier, TextEdit
+	CancellationToken,
+	CompletionContext,
+	CompletionItemTag,
+	CompletionList,
+	CompletionTriggerKind,
+	InsertTextFormat,
+	MarkupContent,
+	Position,
+	Range,
+	TextDocumentIdentifier,
+	TextEdit,
 } from 'vscode-languageserver';
 import { CompletionItem, CompletionItemKind } from 'vscode-languageserver-protocol';
 import type { ConfigManager } from '../../../core/config';
 import { AstroDocument, mapRangeToOriginal } from '../../../core/documents';
 import {
-  getLineAtPosition,
-  isInsideExpression,
-  isInsideFrontmatter,
-  isPossibleComponent
+	getLineAtPosition,
+	isInsideExpression,
+	isInsideFrontmatter,
+	isPossibleComponent,
 } from '../../../core/documents/utils';
 import { getRegExpMatches, isNotNullOrUndefined } from '../../../utils';
 import type { AppCompletionItem, AppCompletionList, CompletionsProvider } from '../../interfaces';
 import type { LanguageServiceManager } from '../LanguageServiceManager';
 import { getMarkdownDocumentation } from '../previewer';
 import type {
-  AstroSnapshot,
-  AstroSnapshotFragment,
-  ScriptTagDocumentSnapshot,
-  SnapshotFragment
+	AstroSnapshot,
+	AstroSnapshotFragment,
+	ScriptTagDocumentSnapshot,
+	SnapshotFragment,
 } from '../snapshots/DocumentSnapshot';
 import {
-  convertRange,
-  ensureFrontmatterInsert, getCommitCharactersForScriptElement, getScriptTagSnapshot, removeAstroComponentSuffix, scriptElementKindToCompletionItemKind, toVirtualAstroFilePath
+	convertRange,
+	ensureFrontmatterInsert,
+	getCommitCharactersForScriptElement,
+	getScriptTagSnapshot,
+	removeAstroComponentSuffix,
+	scriptElementKindToCompletionItemKind,
+	toVirtualAstroFilePath,
 } from '../utils';
 import { isPartOfImportStatement } from './utils';
 
