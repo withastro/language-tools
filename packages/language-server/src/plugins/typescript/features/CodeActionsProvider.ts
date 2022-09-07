@@ -30,13 +30,10 @@ import { findContainingNode } from './utils';
 export const sortImportKind = `${CodeActionKind.Source}.sortImports`;
 
 export class CodeActionsProviderImpl implements CodeActionsProvider {
-	private ts: typeof import('typescript/lib/tsserverlibrary')
+	private ts: typeof import('typescript/lib/tsserverlibrary');
 
-	constructor(
-		private languageServiceManager: LanguageServiceManager,
-		private configManager: ConfigManager,
-	) {
-		this.ts = languageServiceManager.docContext.ts
+	constructor(private languageServiceManager: LanguageServiceManager, private configManager: ConfigManager) {
+		this.ts = languageServiceManager.docContext.ts;
 	}
 
 	async getCodeActions(
@@ -47,7 +44,6 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 	): Promise<CodeAction[]> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
 
-		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
 		const fragment = await tsDoc.createFragment();
 
 		const tsPreferences = await this.configManager.getTSPreferences(document);
@@ -111,10 +107,11 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 				const end = fragment.offsetAt(fragment.getGeneratedPosition(range.end));
 
 				codeFixes = errorCodes.includes(2304)
-					? this.getComponentQuickFix(start, end, lang, filePath, formatOptions, tsPreferences)
+					? this.getComponentQuickFix(start, end, lang, tsDoc.filePath, formatOptions, tsPreferences)
 					: undefined;
 				codeFixes =
-					codeFixes ?? lang.getCodeFixesAtPosition(filePath, start, end, errorCodes, formatOptions, tsPreferences);
+					codeFixes ??
+					lang.getCodeFixesAtPosition(tsDoc.filePath, start, end, errorCodes, formatOptions, tsPreferences);
 			}
 
 			const codeActions = codeFixes.map((fix) =>
@@ -257,7 +254,7 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 	): Promise<CodeAction[]> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
 
-		const filePath = toVirtualAstroFilePath(tsDoc.filePath);
+		const filePath = tsDoc.filePath;
 		const fragment = await tsDoc.createFragment();
 
 		if (cancellationToken?.isCancellationRequested) {
