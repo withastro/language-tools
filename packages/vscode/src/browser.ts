@@ -4,7 +4,6 @@ import {
 	LanguageClientOptions,
 	RequestType,
 	TextDocumentPositionParams,
-	URI,
 } from 'vscode-languageclient/browser';
 import * as tsVersion from './features/typescriptVersionBrowser';
 import { activateTagClosing } from './html/autoClose';
