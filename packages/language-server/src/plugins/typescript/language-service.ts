@@ -340,7 +340,7 @@ async function createLanguageService(
 		return new TypeScriptDocumentSnapshot(
 			doc.version,
 			doc.filePath,
-			(doc as AstroSnapshot).parent.getText(),
+			docContext.ts.sys.readFile(doc.filePath) ?? '',
 			docContext.ts.ScriptKind.Unknown
 		);
 	}
