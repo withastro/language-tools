@@ -33,7 +33,7 @@ export function createAstroSys(
 		},
 		deleteFromCache(path) {
 			fileExistsCache.delete(ensureRealFilePath(path));
-		}
+		},
 	};
 
 	if (ts.sys.realpath) {

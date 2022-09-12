@@ -28,5 +28,5 @@ export function createAstroSys(logger: Logger) {
 		};
 	}
 
-    return astroSys;
+	return astroSys;
 }

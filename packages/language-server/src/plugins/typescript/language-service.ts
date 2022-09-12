@@ -8,7 +8,7 @@ import {
 	AstroSnapshot,
 	DocumentSnapshot,
 	ScriptTagDocumentSnapshot,
-	TypeScriptDocumentSnapshot
+	TypeScriptDocumentSnapshot,
 } from './snapshots/DocumentSnapshot';
 import { GlobalSnapshotManager, SnapshotManager } from './snapshots/SnapshotManager';
 import * as DocumentSnapshotUtils from './snapshots/utils';
@@ -17,7 +17,7 @@ import {
 	findTsConfigPath,
 	getScriptTagLanguage,
 	isAstroFilePath,
-	isDocumentSymbolsPath
+	isDocumentSymbolsPath,
 } from './utils';
 
 export interface LanguageServiceContainer {
