@@ -1,5 +1,41 @@
 # astro-vscode
 
+## 0.24.4
+
+### Patch Changes
+
+- 96957ac: Fix extension not working properly inside the browser
+
+## 0.24.3
+
+### Patch Changes
+
+- 7390abe: We're in deploy hell, but this time it'll work
+
+## 0.24.2
+
+### Patch Changes
+
+- 6b2ca00: Retry deploy again
+
+## 0.24.1
+
+### Patch Changes
+
+- 180ade5: Empty changeset for failed publish
+
+## 0.24.0
+
+### Minor Changes
+
+- b66ae70: Update the VS Code extension to use a bundled version of the language server for better performance and compatibility with running the extension in the web
+- 5a583d3: TypeScript will now be loaded from VS Code / the workspace instead of being bundled inside the language server
+
+### Patch Changes
+
+- Updated dependencies [b66ae70]
+  - @astrojs/ts-plugin@0.3.0
+
 ## 0.23.3
 
 ### Patch Changes

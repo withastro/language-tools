@@ -1,15 +1,8 @@
-import type { DocumentSnapshot } from './snapshots/DocumentSnapshot';
-import {
-	getExtensionFromScriptKind,
-	ensureRealFilePath,
-	isVirtualFilePath,
-	isFrameworkFilePath,
-	isAstroFilePath,
-	toVirtualFilePath,
-} from './utils';
-import { createAstroSys } from './astro-sys';
-import { getLastPartOfPath } from '../../utils';
 import type { ResolvedModule } from 'typescript';
+import { getLastPartOfPath } from '../../utils';
+import { createAstroSys } from './astro-sys';
+import type { DocumentSnapshot } from './snapshots/DocumentSnapshot';
+import { ensureRealFilePath, getExtensionFromScriptKind, isVirtualFilePath } from './utils';
 
 /**
  * Caches resolved modules.

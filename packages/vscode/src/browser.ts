@@ -5,15 +5,15 @@ import {
 	RequestType,
 	TextDocumentPositionParams,
 } from 'vscode-languageclient/browser';
+import * as tsVersion from './features/typescriptVersionBrowser';
 import { activateTagClosing } from './html/autoClose';
 import { commonActivate, getInitOptions } from './shared';
-import * as tsVersion from './features/typescriptVersionBrowser';
 
 const TagCloseRequest: RequestType<TextDocumentPositionParams, string, any> = new RequestType('html/tag');
 
 export async function activate(context: ExtensionContext) {
-	const serverMain = Uri.joinPath(context.extensionUri, 'dist/browser/server.js');
-	const worker = new Worker(serverMain.toString());
+	const serverMain = Uri.joinPath(context.extensionUri, 'dist/browser/server.js').with({ query: 'target=web' });
+	const worker = new Worker(serverMain.toString(true));
 
 	const clientOptions = getInitOptions('browser', {
 		serverPath: undefined,
