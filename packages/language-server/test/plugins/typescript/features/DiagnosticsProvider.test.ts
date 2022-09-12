@@ -123,7 +123,7 @@ describe('TypeScript Plugin#DiagnosticsProvider', () => {
 				code: 2835,
 				message:
 					"Relative import paths need explicit file extensions in EcmaScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './script.js'?",
-				range: Range.create(4, 22, 4, 32),
+				range: Range.create(7, 22, 7, 32),
 				severity: DiagnosticSeverity.Error,
 				source: 'ts',
 				tags: [],

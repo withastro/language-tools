@@ -2,7 +2,14 @@ import type { ResolvedModule } from 'typescript';
 import { getLastPartOfPath } from '../../utils';
 import { createAstroSys } from './astro-sys';
 import type { DocumentSnapshot } from './snapshots/DocumentSnapshot';
-import { ensureRealFilePath, getExtensionFromScriptKind, isVirtualFilePath } from './utils';
+import {
+	ensureRealFilePath,
+	getExtensionFromScriptKind,
+	isAstroFilePath,
+	isFrameworkFilePath,
+	isVirtualFilePath,
+	toVirtualFilePath,
+} from './utils';
 
 /**
  * Caches resolved modules.
@@ -73,6 +80,7 @@ class ImpliedNodeFormatResolver {
 		sourceFile: ts.SourceFile | undefined,
 		compilerOptions: ts.CompilerOptions
 	) {
+		// For Astro & Framework imports, we have to fallback to the old resolution algorithm or it doesn't work
 		if (isAstroFilePath(importPath) || isFrameworkFilePath(importPath)) {
 			return undefined;
 		}
