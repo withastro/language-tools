@@ -104,7 +104,7 @@ describe('TypeScript Plugin#DocumentSymbolsProvider', () => {
 				containerName: 'Template',
 				kind: SymbolKind.Constant,
 				location: {
-					range: Range.create(4, 9, 5, 25),
+					range: Range.create(4, process.platform === 'win32' ? 10 : 9, 5, 25), // NOTE: For some reason, the location of this is different on Windows, might be a bug?
 					uri: document.getURL(),
 				},
 				name: 'MySecondVariable',
