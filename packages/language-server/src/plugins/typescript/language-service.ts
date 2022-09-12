@@ -1,13 +1,24 @@
-import type { AstroDocument } from '../../core/documents';
 import { dirname, resolve } from 'path';
 import type { TextDocumentContentChangeEvent } from 'vscode-languageserver';
+import type { ConfigManager, LSTypescriptConfig } from '../../core/config';
+import type { AstroDocument } from '../../core/documents';
 import { getAstroInstall, normalizePath, urlToPath } from '../../utils';
 import { createAstroModuleLoader } from './module-loader';
+import {
+	AstroSnapshot,
+	DocumentSnapshot,
+	ScriptTagDocumentSnapshot,
+	TypeScriptDocumentSnapshot
+} from './snapshots/DocumentSnapshot';
 import { GlobalSnapshotManager, SnapshotManager } from './snapshots/SnapshotManager';
-import { ensureRealFilePath, findTsConfigPath, getScriptTagLanguage, isAstroFilePath } from './utils';
-import { AstroSnapshot, DocumentSnapshot, ScriptTagDocumentSnapshot } from './snapshots/DocumentSnapshot';
 import * as DocumentSnapshotUtils from './snapshots/utils';
-import type { ConfigManager, LSTypescriptConfig } from '../../core/config';
+import {
+	ensureRealFilePath,
+	findTsConfigPath,
+	getScriptTagLanguage,
+	isAstroFilePath,
+	isDocumentSymbolsPath
+} from './utils';
 
 export interface LanguageServiceContainer {
 	readonly tsconfigPath: string;
@@ -255,27 +266,30 @@ async function createLanguageService(
 	}
 
 	function getScriptSnapshot(fileName: string): DocumentSnapshot {
-		if (fileName.endsWith('?real')) {
-			console.log('Trying to get real file', fileName);
-		}
+		const realFileName = ensureRealFilePath(fileName);
 
-		fileName = ensureRealFilePath(fileName);
-
-		let doc = snapshotManager.get(fileName);
+		let doc = snapshotManager.get(realFileName);
 		if (doc) {
+			if (isDocumentSymbolsPath(fileName)) {
+				return createDocumentSymbolSnapshot(doc);
+			}
 			return doc;
 		}
 
-		astroModuleLoader.deleteUnresolvedResolutionsFromCache(fileName);
-		doc = DocumentSnapshotUtils.createFromFilePath(fileName, docContext.createDocument, docContext.ts);
+		astroModuleLoader.deleteUnresolvedResolutionsFromCache(realFileName);
+		doc = DocumentSnapshotUtils.createFromFilePath(realFileName, docContext.createDocument, docContext.ts);
 
-		snapshotManager.set(fileName, doc);
+		snapshotManager.set(realFileName, doc);
+
+		if (isDocumentSymbolsPath(fileName)) {
+			return createDocumentSymbolSnapshot(doc);
+		}
 
 		// If we needed to create an Astro snapshot, also create its script tags snapshots
-		if (isAstroFilePath(fileName)) {
+		if (isAstroFilePath(realFileName)) {
 			const document = (doc as AstroSnapshot).parent;
 
-			const scriptTagSnapshots = createScriptTagsSnapshots(fileName, document);
+			const scriptTagSnapshots = createScriptTagsSnapshots(realFileName, document);
 
 			scriptTagSnapshots.forEach((snapshot) => {
 				snapshotManager.set(snapshot.filePath, snapshot);
@@ -320,6 +334,15 @@ async function createLanguageService(
 
 			return scriptSnapshot;
 		});
+	}
+
+	function createDocumentSymbolSnapshot(doc: DocumentSnapshot): TypeScriptDocumentSnapshot {
+		return new TypeScriptDocumentSnapshot(
+			doc.version,
+			doc.filePath,
+			(doc as AstroSnapshot).parent.getText(),
+			docContext.ts.ScriptKind.Unknown
+		);
 	}
 
 	function getParsedTSConfig() {
