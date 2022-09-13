@@ -43,7 +43,7 @@ async function snapShotTest() {
 		...extraArgs,
 	];
 
-	const code = await promisifySpawn(process.platform === 'win32' ? 'yarn.cmd' : 'yarn', args, {
+	const code = await promisifySpawn('pnpm', args, {
 		stdio: 'inherit',
 	});
 
