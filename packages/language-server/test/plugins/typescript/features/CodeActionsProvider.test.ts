@@ -118,8 +118,7 @@ describe('TypeScript Plugin#CodeActionsProvider', () => {
 						{
 							edits: [
 								{
-									newText:
-										'import * as aaa from "./aaa";\nimport * as bbb from "./bbb";\nimport * as ccc from "./ccc";\n',
+									newText: `import * as aaa from "./aaa";${newLine}import * as bbb from "./bbb";${newLine}import * as ccc from "./ccc";${newLine}`,
 									range: Range.create(2, 0, 3, 0),
 								},
 								{
@@ -131,8 +130,7 @@ describe('TypeScript Plugin#CodeActionsProvider', () => {
 									range: Range.create(4, 0, 5, 0),
 								},
 								{
-									newText:
-										'import * as child_process from "child_process";\nimport * as fs from "fs";\nimport * as path from "path";\n',
+									newText: `import * as child_process from "child_process";${newLine}import * as fs from "fs";${newLine}import * as path from "path";${newLine}`,
 									range: Range.create(7, 0, 8, 0),
 								},
 								{
