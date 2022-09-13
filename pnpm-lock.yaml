@@ -26,8 +26,8 @@ importers:
 
   packages/language-server:
     specifiers:
-      '@astrojs/svelte': ^0.5.0
-      '@astrojs/vue': ^0.5.0
+      '@astrojs/svelte': ^1.0.0
+      '@astrojs/vue': ^1.0.0
       '@types/chai': ^4.3.0
       '@types/mocha': ^9.1.0
       '@types/node': ^16.11.58
@@ -69,8 +69,8 @@ importers:
       vscode-languageserver-types: 3.17.2
       vscode-uri: 3.0.3
     devDependencies:
-      '@astrojs/svelte': 0.5.1_26q3c2zrpbi2mnw6l2nanh2fhm
-      '@astrojs/vue': 0.5.0_vue@3.2.39
+      '@astrojs/svelte': 1.0.0_26q3c2zrpbi2mnw6l2nanh2fhm
+      '@astrojs/vue': 1.0.2_vue@3.2.39
       '@types/chai': 4.3.3
       '@types/mocha': 9.1.1
       '@types/node': 16.11.58
@@ -239,8 +239,8 @@ packages:
     dependencies:
       prismjs: 1.29.0
 
-  /@astrojs/svelte/0.5.1_26q3c2zrpbi2mnw6l2nanh2fhm:
-    resolution: {integrity: sha512-Rp7RRs9g8oR5Ew+kO8j7mjFZcInGyRsWS7YguTVauJ1SehXvYEPvvxySFdrlG0esUDTip72syyAvUV2zP1GglQ==}
+  /@astrojs/svelte/1.0.0_26q3c2zrpbi2mnw6l2nanh2fhm:
+    resolution: {integrity: sha512-WmvcEe86j/3wL2xWURo1Kxtgh+s0CVys2j7xQboHr0ZeH9TBlkQuacAT8mWccD1/MikhDVqL/1hnF/n+vRKuGw==}
     engines: {node: ^14.18.0 || >=16.12.0}
     peerDependencies:
       svelte: ^3.46.4
@@ -283,8 +283,8 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /@astrojs/vue/0.5.0_vue@3.2.39:
-    resolution: {integrity: sha512-f5qliJERXqwoozKHUG+f1OrStlP7MilYK79YAEPbbbcOx960wZOS8bPDjfxHmmBUdjLWOHnbTr7J7xupi4ZENA==}
+  /@astrojs/vue/1.0.2_vue@3.2.39:
+    resolution: {integrity: sha512-tztJG9DJerWZjGkjkQZVer/W0eHKkFJ3SYVuP9rYTjERgbj/hEjsB0rSKNQgH752HgrF4fyqv72+Ovxp1D0fVg==}
     engines: {node: ^14.18.0 || >=16.12.0}
     peerDependencies:
       vue: ^3.2.30
