@@ -29,7 +29,7 @@ describe('astro check', async () => {
 						tags: [],
 					},
 				],
-				filePath: path,
+				filePath: new URL(pathToUrl(path)).pathname,
 				text: '---\n\tdoesntExist;\n---\n',
 			},
 		]);
