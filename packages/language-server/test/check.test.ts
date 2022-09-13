@@ -4,6 +4,7 @@ import ts from 'typescript/lib/tsserverlibrary';
 import { pathToUrl } from '../src/utils';
 import { expect } from 'chai';
 import { join } from 'path';
+import { harmonizeNewLines } from './utils';
 
 describe('astro check', async () => {
 	it('should check astro projects', async () => {
@@ -12,7 +13,7 @@ describe('astro check', async () => {
 
 		checker.upsertDocument({
 			uri: pathToUrl(path),
-			text: ts.sys.readFile(path) ?? '',
+			text: harmonizeNewLines(ts.sys.readFile(path) || ''),
 		});
 
 		const diagnostics = await checker.getDiagnostics();
