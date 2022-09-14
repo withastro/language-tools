@@ -5,7 +5,6 @@ import { pathToUrl } from '../src/utils';
 import { expect } from 'chai';
 import { join } from 'path';
 import { harmonizeNewLines } from './utils';
-import { pathToFileURL } from 'url';
 
 describe('astro check', async () => {
 	it('should check astro projects', async () => {
@@ -30,7 +29,7 @@ describe('astro check', async () => {
 						tags: [],
 					},
 				],
-				fileUri: pathToFileURL(path).toString(),
+				fileUri: pathToUrl(path).toString(),
 				text: '---\n\tdoesntExist;\n---\n',
 			},
 		]);
