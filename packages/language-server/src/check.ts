@@ -8,7 +8,7 @@ export { DiagnosticSeverity } from 'vscode-languageserver-types';
 export { Diagnostic };
 
 export interface GetDiagnosticsResult {
-	filePath: string;
+	fileUri: string;
 	text: string;
 	diagnostics: Diagnostic[];
 }
@@ -70,7 +70,7 @@ export class AstroCheck {
 	private async getDiagnosticsForFile(uri: string) {
 		const diagnostics = await this.pluginHost.getDiagnostics({ uri });
 		return {
-			filePath: new URL(uri).pathname || '',
+			fileUri: uri || '',
 			text: this.docManager.get(uri)?.getText() || '',
 			diagnostics,
 		};
