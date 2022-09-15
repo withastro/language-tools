@@ -138,6 +138,10 @@ export interface LinkedEditingRangesProvider {
 	getLinkedEditingRanges(document: TextDocument, position: Position): Resolvable<LinkedEditingRanges | null>;
 }
 
+export interface ImplementationProvider {
+	getImplementation(document: TextDocument, position: Position): Resolvable<Location[] | null>;
+}
+
 export interface TypeDefinitionProvider {
 	getTypeDefinitions(document: TextDocument, position: Position): Resolvable<Location[] | null>;
 }
@@ -160,6 +164,7 @@ type ProviderBase = DiagnosticsProvider &
 	CompletionsProvider &
 	DefinitionsProvider &
 	TypeDefinitionProvider &
+	ImplementationProvider &
 	FormattingProvider &
 	FoldingRangesProvider &
 	TagCompleteProvider &

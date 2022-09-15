@@ -234,10 +234,16 @@ export class PluginHost {
 		}
 	}
 
-	getTypeDefinition(textDocument: TextDocumentIdentifier, position: Position): Promise<Location[] | null> {
+	async getTypeDefinition(textDocument: TextDocumentIdentifier, position: Position): Promise<Location[] | null> {
 		const document = this.getDocument(textDocument.uri);
 
-		return this.execute<Location[] | null>('getTypeDefinitions', [document, position], ExecuteMode.FirstNonNull);
+		return await this.execute<Location[] | null>('getTypeDefinitions', [document, position], ExecuteMode.FirstNonNull);
+	}
+
+	async getImplementations(textDocument: TextDocumentIdentifier, position: Position): Promise<Location[] | null> {
+		const document = this.getDocument(textDocument.uri);
+
+		return this.execute<Location[] | null>('getImplementation', [document, position], ExecuteMode.FirstNonNull);
 	}
 
 	async rename(
