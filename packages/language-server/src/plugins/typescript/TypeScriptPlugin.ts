@@ -12,7 +12,6 @@ import {
 	Location,
 	Position,
 	Range,
-	ReferenceContext,
 	SemanticTokens,
 	SignatureHelp,
 	SignatureHelpContext,
