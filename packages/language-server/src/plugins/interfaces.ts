@@ -83,6 +83,10 @@ export interface DocumentSymbolsProvider {
 	getDocumentSymbols(document: TextDocument): Resolvable<SymbolInformation[]>;
 }
 
+export interface FileReferencesProvider {
+	fileReferences(document: TextDocument): Promise<Location[] | null>;
+}
+
 export interface DefinitionsProvider {
 	getDefinitions(document: TextDocument, position: Position): Resolvable<DefinitionLink[]>;
 }
@@ -142,7 +146,7 @@ export interface ImplementationProvider {
 	getImplementation(document: TextDocument, position: Position): Resolvable<Location[] | null>;
 }
 
-export interface TypeDefinitionProvider {
+export interface TypeDefinitionsProvider {
 	getTypeDefinitions(document: TextDocument, position: Position): Resolvable<Location[] | null>;
 }
 
@@ -162,8 +166,9 @@ export interface UpdateNonAstroFile {
 type ProviderBase = DiagnosticsProvider &
 	HoverProvider &
 	CompletionsProvider &
+	FileReferencesProvider &
 	DefinitionsProvider &
-	TypeDefinitionProvider &
+	TypeDefinitionsProvider &
 	ImplementationProvider &
 	FormattingProvider &
 	FoldingRangesProvider &

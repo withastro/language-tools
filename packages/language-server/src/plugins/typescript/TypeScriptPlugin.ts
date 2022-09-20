@@ -12,6 +12,7 @@ import {
 	Location,
 	Position,
 	Range,
+	ReferenceContext,
 	SemanticTokens,
 	SignatureHelp,
 	SignatureHelpContext,
@@ -19,6 +20,7 @@ import {
 	TextDocumentContentChangeEvent,
 	WorkspaceEdit,
 } from 'vscode-languageserver';
+import { TextDocument } from 'vscode-languageserver-textdocument';
 import type { ConfigManager, LSTypescriptConfig } from '../../core/config';
 import type { AstroDocument } from '../../core/documents';
 import type { AppCompletionItem, AppCompletionList, OnWatchFileChangesParam, Plugin } from '../interfaces';
@@ -28,10 +30,12 @@ import { CompletionItemData, CompletionsProviderImpl } from './features/Completi
 import { DefinitionsProviderImpl } from './features/DefinitionsProvider';
 import { DiagnosticsProviderImpl } from './features/DiagnosticsProvider';
 import { DocumentSymbolsProviderImpl } from './features/DocumentSymbolsProvider';
+import { FileReferencesProviderImpl } from './features/FileReferencesProvider';
 import { FoldingRangesProviderImpl } from './features/FoldingRangesProvider';
 import { HoverProviderImpl } from './features/HoverProvider';
 import { ImplementationsProviderImpl } from './features/ImplementationsProvider';
 import { InlayHintsProviderImpl } from './features/InlayHintsProvider';
+import { FindReferencesProviderImpl } from './features/ReferencesProvider';
 import { SemanticTokensProviderImpl } from './features/SemanticTokenProvider';
 import { SignatureHelpProviderImpl } from './features/SignatureHelpProvider';
 import { TypeDefinitionsProviderImpl } from './features/TypeDefinitionsProvider';
@@ -48,9 +52,11 @@ export class TypeScriptPlugin implements Plugin {
 	private readonly codeActionsProvider: CodeActionsProviderImpl;
 	private readonly completionProvider: CompletionsProviderImpl;
 	private readonly hoverProvider: HoverProviderImpl;
+	private readonly fileReferencesProvider: FileReferencesProviderImpl;
 	private readonly definitionsProvider: DefinitionsProviderImpl;
 	private readonly typeDefinitionsProvider: TypeDefinitionsProviderImpl;
 	private readonly implementationsProvider: ImplementationsProviderImpl;
+	private readonly referencesProvider: FindReferencesProviderImpl;
 	private readonly signatureHelpProvider: SignatureHelpProviderImpl;
 	private readonly diagnosticsProvider: DiagnosticsProviderImpl;
 	private readonly documentSymbolsProvider: DocumentSymbolsProviderImpl;
@@ -68,9 +74,11 @@ export class TypeScriptPlugin implements Plugin {
 		this.codeActionsProvider = new CodeActionsProviderImpl(this.languageServiceManager, this.configManager);
 		this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager, this.configManager);
 		this.hoverProvider = new HoverProviderImpl(this.languageServiceManager);
+		this.fileReferencesProvider = new FileReferencesProviderImpl(this.languageServiceManager);
 		this.definitionsProvider = new DefinitionsProviderImpl(this.languageServiceManager);
 		this.typeDefinitionsProvider = new TypeDefinitionsProviderImpl(this.languageServiceManager);
 		this.implementationsProvider = new ImplementationsProviderImpl(this.languageServiceManager);
+		this.referencesProvider = new FindReferencesProviderImpl(this.languageServiceManager);
 		this.signatureHelpProvider = new SignatureHelpProviderImpl(this.languageServiceManager);
 		this.diagnosticsProvider = new DiagnosticsProviderImpl(this.languageServiceManager);
 		this.documentSymbolsProvider = new DocumentSymbolsProviderImpl(this.languageServiceManager);
@@ -188,16 +196,28 @@ export class TypeScriptPlugin implements Plugin {
 		return this.inlayHintsProvider.getInlayHints(document, range);
 	}
 
+	async fileReferences(document: AstroDocument): Promise<Location[] | null> {
+		return this.fileReferencesProvider.fileReferences(document);
+	}
+
 	async getDefinitions(document: AstroDocument, position: Position): Promise<DefinitionLink[]> {
 		return this.definitionsProvider.getDefinitions(document, position);
 	}
 
-	async getTypeDefinition(document: AstroDocument, position: Position): Promise<Location[] | null> {
+	async getTypeDefinitions(document: AstroDocument, position: Position): Promise<Location[] | null> {
 		return this.typeDefinitionsProvider.getTypeDefinitions(document, position);
 	}
 
 	async getImplementation(document: AstroDocument, position: Position): Promise<Location[] | null> {
 		return this.implementationsProvider.getImplementation(document, position);
+	}
+
+	async findReferences(
+		document: AstroDocument,
+		position: Position,
+		context: ReferenceContext
+	): Promise<Location[] | null> {
+		return this.referencesProvider.findReferences(document, position, context);
 	}
 
 	async getDiagnostics(document: AstroDocument, cancellationToken?: CancellationToken): Promise<Diagnostic[]> {

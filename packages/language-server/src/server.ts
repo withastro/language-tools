@@ -116,6 +116,7 @@ export function startLanguageServer(connection: vscode.Connection, env: RuntimeE
 				foldingRangeProvider: true,
 				definitionProvider: true,
 				typeDefinitionProvider: true,
+				referencesProvider: true,
 				implementationProvider: true,
 				renameProvider: true,
 				documentFormattingProvider: true,
@@ -229,7 +230,9 @@ export function startLanguageServer(connection: vscode.Connection, env: RuntimeE
 
 	connection.onDefinition((evt) => pluginHost.getDefinitions(evt.textDocument, evt.position));
 
-	connection.onTypeDefinition((evt) => pluginHost.getTypeDefinition(evt.textDocument, evt.position));
+	connection.onTypeDefinition((evt) => pluginHost.getTypeDefinitions(evt.textDocument, evt.position));
+
+	connection.onReferences((evt) => pluginHost.getReferences(evt.textDocument, evt.position, evt.context));
 
 	connection.onImplementation((evt) => pluginHost.getImplementations(evt.textDocument, evt.position));
 
@@ -289,12 +292,17 @@ export function startLanguageServer(connection: vscode.Connection, env: RuntimeE
 	connection.onRenameRequest((evt) => pluginHost.rename(evt.textDocument, evt.position, evt.newName));
 
 	connection.onDidSaveTextDocument(updateAllDiagnostics);
+
 	connection.onNotification('$/onDidChangeNonAstroFile', async (e: any) => {
 		const path = urlToPath(e.uri);
 		if (path) {
 			pluginHost.updateNonAstroFile(path, e.changes);
 		}
 		updateAllDiagnostics();
+	});
+
+	connection.onRequest('$/getFileReferences', async (uri: DocumentUri) => {
+		return pluginHost.fileReferences({ uri });
 	});
 
 	connection.onRequest('$/getTSXOutput', async (uri: DocumentUri) => {
