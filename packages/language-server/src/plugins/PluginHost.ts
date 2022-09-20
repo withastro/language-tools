@@ -240,13 +240,13 @@ export class PluginHost {
 		}
 	}
 
-	async async getTypeDefinitions(textDocument: TextDocumentIdentifier, position: Position): Promise<Location[] | null> {
+	getTypeDefinitions(textDocument: TextDocumentIdentifier, position: Position): Promise<Location[] | null> {
 		const document = this.getDocument(textDocument.uri);
 
-		return await await this.execute<Location[] | null>('getTypeDefinitions', [document, position], ExecuteMode.FirstNonNull);
+		return this.execute<Location[] | null>('getTypeDefinitions', [document, position], ExecuteMode.FirstNonNull);
 	}
 
-	async getImplementations(textDocument: TextDocumentIdentifier, position: Position): Promise<Location[] | null> {
+	getImplementations(textDocument: TextDocumentIdentifier, position: Position): Promise<Location[] | null> {
 		const document = this.getDocument(textDocument.uri);
 
 		return this.execute<Location[] | null>('getImplementation', [document, position], ExecuteMode.FirstNonNull);
