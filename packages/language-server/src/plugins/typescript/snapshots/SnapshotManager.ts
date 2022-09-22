@@ -85,14 +85,7 @@ export class SnapshotManager {
 	private documents = new Map<string, DocumentSnapshot>();
 	private lastLogged = new Date(new Date().getTime() - 60_001);
 
-	private readonly watchExtensions = [
-		this.ts.Extension.Dts,
-		this.ts.Extension.Js,
-		this.ts.Extension.Jsx,
-		this.ts.Extension.Ts,
-		this.ts.Extension.Tsx,
-		this.ts.Extension.Json,
-	];
+	private readonly watchExtensions = [...Object.values(this.ts.Extension), '.svelte', '.vue'];
 
 	constructor(
 		private globalSnapshotsManager: GlobalSnapshotManager,

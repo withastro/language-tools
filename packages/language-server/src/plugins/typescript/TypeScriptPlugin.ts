@@ -40,7 +40,7 @@ import { SignatureHelpProviderImpl } from './features/SignatureHelpProvider';
 import { TypeDefinitionsProviderImpl } from './features/TypeDefinitionsProvider';
 import type { LanguageServiceManager } from './LanguageServiceManager';
 import { classNameFromFilename } from './snapshots/utils';
-import { convertToLocationRange, ensureRealFilePath, getScriptKindFromFileName } from './utils';
+import { convertToLocationRange, ensureRealFilePath, getScriptKindFromFileName, isFrameworkFilePath } from './utils';
 
 export class TypeScriptPlugin implements Plugin {
 	__name = 'typescript';
@@ -233,7 +233,7 @@ export class TypeScriptPlugin implements Plugin {
 		for (const { fileName, changeType } of onWatchFileChangesParas) {
 			const scriptKind = getScriptKindFromFileName(fileName, this.ts);
 
-			if (scriptKind === this.ts.ScriptKind.Unknown) {
+			if (scriptKind === this.ts.ScriptKind.Unknown && !isFrameworkFilePath(fileName)) {
 				continue;
 			}
 
