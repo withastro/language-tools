@@ -6,7 +6,7 @@ import type { FindReferencesProvider } from '../../interfaces';
 import type { LanguageServiceManager } from '../LanguageServiceManager';
 import { AstroSnapshot } from '../snapshots/DocumentSnapshot';
 import { convertRange, getScriptTagSnapshot } from '../utils';
-import { SnapshotFragmentMap } from './utils';
+import { SnapshotMap } from './utils';
 
 export class FindReferencesProviderImpl implements FindReferencesProvider {
 	constructor(private languageServiceManager: LanguageServiceManager) {}
@@ -17,9 +17,11 @@ export class FindReferencesProviderImpl implements FindReferencesProvider {
 		context: ReferenceContext
 	): Promise<Location[] | null> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const mainFragment = await tsDoc.createFragment();
 
-		const offset = mainFragment.offsetAt(mainFragment.getGeneratedPosition(position));
+		const fragmentPosition = tsDoc.getGeneratedPosition(position);
+		const fragmentOffset = tsDoc.offsetAt(fragmentPosition);
+
+		const offset = document.offsetAt(position);
 		const node = document.html.findNodeAt(offset);
 
 		let references: ts.ReferenceEntry[] | undefined;
@@ -39,7 +41,7 @@ export class FindReferencesProviderImpl implements FindReferencesProvider {
 					ref.fileName = isInSameFile ? tsDoc.filePath : ref.fileName;
 
 					if (isInSameFile) {
-						ref.textSpan.start = mainFragment.offsetAt(
+						ref.textSpan.start = tsDoc.offsetAt(
 							scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(ref.textSpan.start))
 						);
 					}
@@ -48,15 +50,15 @@ export class FindReferencesProviderImpl implements FindReferencesProvider {
 				});
 			}
 		} else {
-			references = lang.getReferencesAtPosition(tsDoc.filePath, offset);
+			references = lang.getReferencesAtPosition(tsDoc.filePath, fragmentOffset);
 		}
 
 		if (!references) {
 			return null;
 		}
 
-		const docs = new SnapshotFragmentMap(this.languageServiceManager);
-		docs.set(tsDoc.filePath, { fragment: mainFragment, snapshot: tsDoc });
+		const snapshots = new SnapshotMap(this.languageServiceManager);
+		snapshots.set(tsDoc.filePath, tsDoc);
 
 		const result = await Promise.all(
 			references.map(async (reference) => {
@@ -64,9 +66,9 @@ export class FindReferencesProviderImpl implements FindReferencesProvider {
 					return null;
 				}
 
-				const { fragment } = await docs.retrieve(reference.fileName);
+				const snapshot = await snapshots.retrieve(reference.fileName);
 
-				const range = mapRangeToOriginal(fragment, convertRange(fragment, reference.textSpan));
+				const range = mapRangeToOriginal(snapshot, convertRange(snapshot, reference.textSpan));
 
 				if (range.start.line >= 0 && range.end.line >= 0) {
 					return Location.create(pathToUrl(reference.fileName), range);

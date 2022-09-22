@@ -23,7 +23,7 @@ import {
 import type { ConfigManager, LSTypescriptConfig } from '../../core/config';
 import type { AstroDocument } from '../../core/documents';
 import type { AppCompletionItem, AppCompletionList, OnWatchFileChangesParam, Plugin } from '../interfaces';
-import astro2tsx, { Astro2TSXResult } from './astro2tsx';
+import astro2tsx, { TSXResult } from './astro2tsx';
 import { CodeActionsProviderImpl } from './features/CodeActionsProvider';
 import { CompletionItemData, CompletionsProviderImpl } from './features/CompletionsProvider';
 import { DefinitionsProviderImpl } from './features/DefinitionsProvider';
@@ -267,7 +267,7 @@ export class TypeScriptPlugin implements Plugin {
 		return this.signatureHelpProvider.getSignatureHelp(document, position, context, cancellationToken);
 	}
 
-	getTSXForDocument(document: AstroDocument): Astro2TSXResult {
+	getTSXForDocument(document: AstroDocument): TSXResult {
 		return astro2tsx(document.getText(), classNameFromFilename(document.getURL()));
 	}
 

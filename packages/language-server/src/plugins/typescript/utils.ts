@@ -10,6 +10,7 @@ import {
 	SymbolKind,
 } from 'vscode-languageserver';
 import { AstroDocument, mapRangeToOriginal, TagInformation } from '../../core/documents';
+import { pathToUrl } from '../../utils';
 import type { AstroSnapshot, DocumentSnapshot, ScriptTagDocumentSnapshot } from './snapshots/DocumentSnapshot';
 
 export const enum TokenType {

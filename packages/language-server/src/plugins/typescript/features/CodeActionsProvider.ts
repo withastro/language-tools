@@ -138,7 +138,7 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 						// restricted to the area of the script tag by default
 						if (!isInsideScript) {
 							if (codeFix.fixName === 'import') {
-								return codeActionChangeToTextEdit(document, tsDoc, false, edit);
+								return codeActionChangeToTextEdit(document, tsDoc, false, edit, ts);
 							}
 
 							if (codeFix.fixName === 'fixMissingFunctionDeclaration') {

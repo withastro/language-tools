@@ -1,17 +1,24 @@
-import { URI, Utils } from 'vscode-uri';
-import { FrameworkExt, getFrameworkFromFilePath, isAstroFilePath, isFrameworkFilePath } from '../utils';
-import { AstroSnapshot, TypeScriptDocumentSnapshot } from './DocumentSnapshot';
-import { toTSX as svelte2tsx } from '@astrojs/svelte-language-integration';
-import { toTSX as vue2tsx } from '@astrojs/vue-language-integration';
-import { toPascalCase, urlToPath } from '../../../utils';
 import { EncodedSourceMap } from '@jridgewell/trace-mapping';
+import { URI, Utils } from 'vscode-uri';
+import type { AstroDocument } from '../../../core/documents';
+import { importSvelteIntegration, importVueIntegration } from '../../../importPackage';
+import { toPascalCase, urlToPath } from '../../../utils';
+import astro2tsx from '../astro2tsx';
+import {
+	FrameworkExt,
+	getFrameworkFromFilePath,
+	getScriptKindFromFileName,
+	isAstroFilePath,
+	isFrameworkFilePath,
+} from '../utils';
+import { AstroSnapshot, TypeScriptDocumentSnapshot } from './DocumentSnapshot';
 
 // Utilities to create Snapshots from different contexts
 export function createFromDocument(document: AstroDocument, ts: typeof import('typescript/lib/tsserverlibrary')) {
 	const { code, map } = astro2tsx(document.getText(), urlToPath(document.getURL()) || '');
 
 	const sourceMap = JSON.parse(map) as EncodedSourceMap;
-	return new AstroSnapshot(document, code, sourceMap);
+	return new AstroSnapshot(document, code, sourceMap, ts.ScriptKind.TSX);
 }
 
 /**

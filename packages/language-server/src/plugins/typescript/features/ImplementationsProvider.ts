@@ -1,4 +1,3 @@
-import type ts from 'typescript';
 import { Location, Position } from 'vscode-languageserver-types';
 import { AstroDocument, mapRangeToOriginal } from '../../../core/documents';
 import { isNotNullOrUndefined, pathToUrl } from '../../../utils';
@@ -6,16 +5,19 @@ import { ImplementationProvider } from '../../interfaces';
 import { LanguageServiceManager } from '../LanguageServiceManager';
 import { AstroSnapshot } from '../snapshots/DocumentSnapshot';
 import { convertRange, getScriptTagSnapshot } from '../utils';
-import { SnapshotFragmentMap } from './utils';
+import { SnapshotMap } from './utils';
 
 export class ImplementationsProviderImpl implements ImplementationProvider {
 	constructor(private languageServiceManager: LanguageServiceManager) {}
 
 	async getImplementation(document: AstroDocument, position: Position): Promise<Location[] | null> {
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
-		const mainFragment = await tsDoc.createFragment();
 
-		const offset = mainFragment.offsetAt(mainFragment.getGeneratedPosition(position));
+		const fragmentPosition = tsDoc.getGeneratedPosition(position);
+		const fragmentOffset = tsDoc.offsetAt(fragmentPosition);
+
+		const html = document.html;
+		const offset = document.offsetAt(position);
 		const node = document.html.findNodeAt(offset);
 
 		let implementations: readonly ts.ImplementationLocation[] | undefined;
@@ -35,7 +37,7 @@ export class ImplementationsProviderImpl implements ImplementationProvider {
 					impl.fileName = isInSameFile ? tsDoc.filePath : impl.fileName;
 
 					if (isInSameFile) {
-						impl.textSpan.start = mainFragment.offsetAt(
+						impl.textSpan.start = tsDoc.offsetAt(
 							scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(impl.textSpan.start))
 						);
 					}
@@ -44,11 +46,11 @@ export class ImplementationsProviderImpl implements ImplementationProvider {
 				});
 			}
 		} else {
-			implementations = lang.getImplementationAtPosition(tsDoc.filePath, offset);
+			implementations = lang.getImplementationAtPosition(tsDoc.filePath, fragmentOffset);
 		}
 
-		const docs = new SnapshotFragmentMap(this.languageServiceManager);
-		docs.set(tsDoc.filePath, { fragment: mainFragment, snapshot: tsDoc });
+		const snapshots = new SnapshotMap(this.languageServiceManager);
+		snapshots.set(tsDoc.filePath, tsDoc);
 
 		if (!implementations) {
 			return null;
@@ -56,9 +58,9 @@ export class ImplementationsProviderImpl implements ImplementationProvider {
 
 		const result = await Promise.all(
 			implementations.map(async (implementation) => {
-				const { fragment } = await docs.retrieve(implementation.fileName);
+				const snapshot = await snapshots.retrieve(implementation.fileName);
 
-				const range = mapRangeToOriginal(fragment, convertRange(fragment, implementation.textSpan));
+				const range = mapRangeToOriginal(snapshot, convertRange(snapshot, implementation.textSpan));
 
 				if (range.start.line >= 0 && range.end.line >= 0) {
 					return Location.create(pathToUrl(implementation.fileName), range);

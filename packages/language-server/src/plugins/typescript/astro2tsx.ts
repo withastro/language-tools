@@ -6,3 +6,5 @@ export default function (content: string, fileName: string): TSXResult {
 
 	return tsx;
 }
+
+export { TSXResult };
