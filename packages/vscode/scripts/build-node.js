@@ -15,7 +15,7 @@ require('esbuild')
 		bundle: true,
 		sourcemap: isDev ? true : false,
 		outdir: './dist/node',
-		external: ['vscode'],
+		external: ['vscode', './TSXWorker'],
 		format: 'cjs',
 		platform: 'node',
 		tsconfig: './tsconfig.json',
