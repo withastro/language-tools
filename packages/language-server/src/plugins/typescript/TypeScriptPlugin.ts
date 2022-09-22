@@ -40,7 +40,13 @@ import { SignatureHelpProviderImpl } from './features/SignatureHelpProvider';
 import { TypeDefinitionsProviderImpl } from './features/TypeDefinitionsProvider';
 import type { LanguageServiceManager } from './LanguageServiceManager';
 import { classNameFromFilename } from './snapshots/utils';
-import { convertToLocationRange, ensureRealFilePath, getScriptKindFromFileName, isFrameworkFilePath } from './utils';
+import {
+	convertToLocationRange,
+	ensureRealFilePath,
+	getScriptKindFromFileName,
+	isAstroFilePath,
+	isFrameworkFilePath,
+} from './utils';
 
 export class TypeScriptPlugin implements Plugin {
 	__name = 'typescript';
@@ -233,7 +239,7 @@ export class TypeScriptPlugin implements Plugin {
 		for (const { fileName, changeType } of onWatchFileChangesParas) {
 			const scriptKind = getScriptKindFromFileName(fileName, this.ts);
 
-			if (scriptKind === this.ts.ScriptKind.Unknown && !isFrameworkFilePath(fileName)) {
+			if (scriptKind === this.ts.ScriptKind.Unknown && !isFrameworkFilePath(fileName) && !isAstroFilePath(fileName)) {
 				continue;
 			}
 
@@ -242,7 +248,8 @@ export class TypeScriptPlugin implements Plugin {
 				await this.languageServiceManager.updateProjectFiles();
 			} else if (changeType === FileChangeType.Deleted) {
 				await this.languageServiceManager.deleteSnapshot(fileName);
-			} else {
+			} else if (!isAstroFilePath(fileName)) {
+				// Content updates for Astro files are handled through the documentManager and the 'documentChange' event
 				await this.languageServiceManager.updateExistingNonAstroFile(fileName);
 			}
 		}

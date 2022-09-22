@@ -213,7 +213,7 @@ export function startLanguageServer(connection: vscode.Connection, env: RuntimeE
 
 	const updateAllDiagnostics = debounceThrottle(() => diagnosticsManager.updateAll(), 1000);
 
-	connection.onDidChangeWatchedFiles(async (evt) => {
+	connection.onDidChangeWatchedFiles(async (evt: vscode.DidChangeWatchedFilesParams) => {
 		const params = evt.changes
 			.map((change) => ({
 				fileName: urlToPath(change.uri),

@@ -85,8 +85,6 @@ export class SnapshotManager {
 	private documents = new Map<string, DocumentSnapshot>();
 	private lastLogged = new Date(new Date().getTime() - 60_001);
 
-	private readonly watchExtensions = [...Object.values(this.ts.Extension), '.svelte', '.vue'];
-
 	constructor(
 		private globalSnapshotsManager: GlobalSnapshotManager,
 		private projectFiles: string[],
@@ -118,7 +116,12 @@ export class SnapshotManager {
 		}
 
 		const projectFiles = this.ts.sys
-			.readDirectory(this.workspaceRoot, this.watchExtensions, exclude, include)
+			.readDirectory(
+				this.workspaceRoot,
+				[...Object.values(this.ts.Extension), '.astro', '.svelte', '.vue'],
+				exclude,
+				include
+			)
 			.map(normalizePath);
 
 		this.projectFiles = Array.from(new Set([...this.projectFiles, ...projectFiles]));
