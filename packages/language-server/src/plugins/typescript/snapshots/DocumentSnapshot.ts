@@ -1,5 +1,5 @@
 import { EncodedSourceMap, TraceMap } from '@jridgewell/trace-mapping';
-import type { Position, TextDocumentContentChangeEvent } from 'vscode-languageserver';
+import { Position, TextDocumentContentChangeEvent } from 'vscode-languageserver';
 import {
 	AstroDocument,
 	DocumentMapper,
@@ -35,13 +35,13 @@ export class AstroSnapshot implements DocumentSnapshot {
 	private url = pathToUrl(this.filePath);
 	public scriptTagSnapshots: ScriptTagDocumentSnapshot[] = [];
 
-	scriptKind = ts.ScriptKind.TSX;
 	version = this.parent.version;
 
 	constructor(
 		public readonly parent: AstroDocument,
 		private readonly text: string,
-		private readonly tsxMap: EncodedSourceMap
+		private readonly tsxMap: EncodedSourceMap,
+		public readonly scriptKind: ts.ScriptKind
 	) {}
 
 	isInGenerated(pos: Position): boolean {
