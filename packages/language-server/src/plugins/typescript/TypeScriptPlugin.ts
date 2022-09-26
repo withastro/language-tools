@@ -272,6 +272,13 @@ export class TypeScriptPlugin implements Plugin {
 		return astro2tsx(document.getText(), classNameFromFilename(document.getURL()));
 	}
 
+	/**
+	 * @internal Public for tests only
+	 */
+	public getSnapshotManager(fileName: string) {
+		return this.languageServiceManager.getSnapshotManager(fileName);
+	}
+
 	private async featureEnabled(document: AstroDocument, feature: keyof LSTypescriptConfig) {
 		return (
 			(await this.configManager.isEnabled(document, 'typescript')) &&
