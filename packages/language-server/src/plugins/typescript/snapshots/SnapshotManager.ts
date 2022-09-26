@@ -146,7 +146,6 @@ export class SnapshotManager {
 		// This isn't duplicated logic to the listener, because this could
 		// be a new snapshot which the listener wouldn't add.
 		this.documents.set(normalizePath(fileName), snapshot);
-		this.logStatistics();
 	}
 
 	get(fileName: string): DocumentSnapshot | undefined {
