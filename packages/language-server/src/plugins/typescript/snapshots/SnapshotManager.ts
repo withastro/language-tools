@@ -146,6 +146,7 @@ export class SnapshotManager {
 		// This isn't duplicated logic to the listener, because this could
 		// be a new snapshot which the listener wouldn't add.
 		this.documents.set(normalizePath(fileName), snapshot);
+		this.logStatistics();
 	}
 
 	get(fileName: string): DocumentSnapshot | undefined {
@@ -181,8 +182,7 @@ export class SnapshotManager {
 			this.lastLogged = date;
 
 			const projectFiles = this.getProjectFileNames();
-			let allFiles = Array.from(new Set([...projectFiles, ...this.getFileNames()]));
-			allFiles = allFiles.map((file) => ensureRealFilePath(file));
+			const allFiles = Array.from(new Set([...projectFiles, ...this.getFileNames()]));
 
 			// eslint-disable-next-line no-console
 			console.log(
