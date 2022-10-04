@@ -11,7 +11,12 @@ import {
 	TextEdit,
 } from 'vscode-languageserver-types';
 import type { ConfigManager } from '../../../core/config';
-import { AstroDocument, getLineAtPosition, mapRangeToOriginal } from '../../../core/documents';
+import {
+	AstroDocument,
+	getLineAtPosition,
+	mapRangeToOriginal,
+	mapScriptSpanStartToSnapshot,
+} from '../../../core/documents';
 import { modifyLines } from '../../../utils';
 import type { CodeActionsProvider } from '../../interfaces';
 import type { LanguageServiceManager } from '../LanguageServiceManager';
@@ -177,9 +182,7 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 		function mapScriptTagFixToOriginal(changes: FileTextChanges[], scriptTagSnapshot: ScriptTagDocumentSnapshot) {
 			return changes.map((change) => {
 				change.textChanges.map((edit) => {
-					edit.span.start = tsDoc.offsetAt(
-						scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(edit.span.start))
-					);
+					edit.span.start = mapScriptSpanStartToSnapshot(edit.span, scriptTagSnapshot, tsDoc);
 
 					return edit;
 				});
@@ -275,10 +278,7 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 				edit.fileName = tsDoc.filePath;
 				edit.textChanges = edit.textChanges
 					.map((change) => {
-						change.span.start = tsDoc.offsetAt(
-							scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(change.span.start))
-						);
-
+						change.span.start = mapScriptSpanStartToSnapshot(change.span, scriptTagSnapshot, tsDoc);
 						return change;
 					})
 					// Since our last line is a (virtual) export, organize imports will try to rewrite it, so let's only take
@@ -298,6 +298,12 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 				OptionalVersionedTextDocumentIdentifier.create(document.url, null),
 				change.textChanges.map((edit) => {
 					const range = mapRangeToOriginal(tsDoc, convertRange(tsDoc, edit.span));
+
+					if (document.offsetAt(range.start) < (document.astroMeta.content.firstNonWhitespaceOffset ?? 0)) {
+						if (document.offsetAt(range.end) > document.astroMeta.frontmatter.endOffset!) {
+							range.end = document.positionAt(document.astroMeta.frontmatter.endOffset!);
+						}
+					}
 
 					return TextEdit.replace(range, this.fixIndentationOfImports(edit.newText, range, document));
 				})

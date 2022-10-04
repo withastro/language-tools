@@ -1,4 +1,3 @@
-import type { SourceMapConsumer } from 'source-map';
 import {
 	CodeAction,
 	ColorPresentation,
@@ -17,6 +16,8 @@ import {
 } from 'vscode-languageserver';
 import { TagInformation, offsetAt, positionAt, getLineOffsets } from './utils';
 import { generatedPositionFor, originalPositionFor, TraceMap } from '@jridgewell/trace-mapping';
+import { DocumentSnapshot, ScriptTagDocumentSnapshot } from '../../plugins/typescript/snapshots/DocumentSnapshot';
+import type ts from 'typescript';
 
 export interface DocumentMapper {
 	/**
@@ -353,6 +354,15 @@ export function mapCodeActionToOriginal(fragment: DocumentMapper, codeAction: Co
 		},
 		codeAction.kind
 	);
+}
+
+export function mapScriptSpanStartToSnapshot(
+	span: ts.TextSpan,
+	scriptTagSnapshot: ScriptTagDocumentSnapshot,
+	tsSnapshot: DocumentSnapshot
+) {
+	const originalPosition = scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(span.start));
+	return tsSnapshot.offsetAt(tsSnapshot.getGeneratedPosition(originalPosition));
 }
 
 export function mapFoldingRangeToParent(fragment: DocumentMapper, foldingRange: FoldingRange): FoldingRange {

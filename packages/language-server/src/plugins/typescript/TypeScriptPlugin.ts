@@ -1,3 +1,4 @@
+import type { TSXResult } from '@astrojs/compiler/shared/types';
 import {
 	CancellationToken,
 	CodeAction,
@@ -39,7 +40,6 @@ import { SemanticTokensProviderImpl } from './features/SemanticTokenProvider';
 import { SignatureHelpProviderImpl } from './features/SignatureHelpProvider';
 import { TypeDefinitionsProviderImpl } from './features/TypeDefinitionsProvider';
 import type { LanguageServiceManager } from './LanguageServiceManager';
-import { classNameFromFilename } from './snapshots/utils';
 import {
 	convertToLocationRange,
 	ensureRealFilePath,
@@ -267,11 +267,8 @@ export class TypeScriptPlugin implements Plugin {
 		return this.signatureHelpProvider.getSignatureHelp(document, position, context, cancellationToken);
 	}
 
-	getTSXForDocument(document: AstroDocument): {
-		code: string;
-		map: string;
-	} {
-		return astro2tsx(document.getText(), classNameFromFilename(document.getURL()));
+	getTSXForDocument(document: AstroDocument): TSXResult {
+		return astro2tsx(document.getText(), document.getURL());
 	}
 
 	/**

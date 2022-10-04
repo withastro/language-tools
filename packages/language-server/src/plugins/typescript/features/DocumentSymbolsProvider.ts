@@ -22,7 +22,7 @@ export class DocumentSymbolsProviderImpl implements DocumentSymbolsProvider {
 		}
 
 		const symbols: SymbolInformation[] = [];
-		this.collectSymbols(navTree, tsDoc, undefined, (symbol) => symbols.push(symbol));
+		this.collectSymbols(navTree, document, undefined, (symbol) => symbols.push(symbol));
 
 		const originalContainerName = symbols[0].name;
 		const result: SymbolInformation[] = [];
@@ -56,8 +56,6 @@ export class DocumentSymbolsProviderImpl implements DocumentSymbolsProvider {
 		);
 
 		for (let symbol of symbols.splice(1)) {
-			symbol = mapSymbolInformationToOriginal(tsDoc, symbol);
-
 			if (document.offsetAt(symbol.location.range.end) >= (document.astroMeta.content.firstNonWhitespaceOffset ?? 0)) {
 				if (symbol.containerName === originalContainerName) {
 					symbol.containerName = 'Template';
@@ -85,7 +83,7 @@ export class DocumentSymbolsProviderImpl implements DocumentSymbolsProvider {
 
 	private collectSymbols(
 		item: ts.NavigationTree,
-		snapshot: DocumentSnapshot,
+		document: AstroDocument,
 		container: string | undefined,
 		cb: (symbol: SymbolInformation) => void
 	) {
@@ -93,8 +91,8 @@ export class DocumentSymbolsProviderImpl implements DocumentSymbolsProvider {
 			const symbol = SymbolInformation.create(
 				item.text,
 				symbolKindFromString(item.kind),
-				Range.create(snapshot.positionAt(span.start), snapshot.positionAt(span.start + span.length)),
-				snapshot.getURL(),
+				Range.create(document.positionAt(span.start), document.positionAt(span.start + span.length)),
+				document.getURL(),
 				container
 			);
 
@@ -110,7 +108,7 @@ export class DocumentSymbolsProviderImpl implements DocumentSymbolsProvider {
 
 		if (item.childItems) {
 			for (const child of item.childItems) {
-				this.collectSymbols(child, snapshot, item.text, cb);
+				this.collectSymbols(child, document, item.text, cb);
 			}
 		}
 	}

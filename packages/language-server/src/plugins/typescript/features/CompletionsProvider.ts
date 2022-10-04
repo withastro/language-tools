@@ -10,7 +10,7 @@ import {
 	Position,
 	Range,
 	TextDocumentIdentifier,
-	TextEdit
+	TextEdit,
 } from 'vscode-languageserver';
 import { CompletionItem, CompletionItemKind } from 'vscode-languageserver-protocol';
 import type { ConfigManager } from '../../../core/config';
@@ -19,7 +19,7 @@ import {
 	getLineAtPosition,
 	isInsideExpression,
 	isInsideFrontmatter,
-	isPossibleComponent
+	isPossibleComponent,
 } from '../../../core/documents/utils';
 import { getRegExpMatches, isNotNullOrUndefined } from '../../../utils';
 import type { AppCompletionItem, AppCompletionList, CompletionsProvider } from '../../interfaces';
@@ -32,7 +32,7 @@ import {
 	getCommitCharactersForScriptElement,
 	getScriptTagSnapshot,
 	removeAstroComponentSuffix,
-	scriptElementKindToCompletionItemKind
+	scriptElementKindToCompletionItemKind,
 } from '../utils';
 import { isPartOfImportStatement } from './utils';
 
@@ -118,16 +118,17 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 		}
 
 		const html = document.html;
-		const offset = document.offsetAt(position);
-		const node = html.findNodeAt(offset);
+		const documentOffset = document.offsetAt(position);
+		const node = html.findNodeAt(documentOffset);
 
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
+		const offset = tsDoc.offsetAt(tsDoc.getGeneratedPosition(position));
 		let filePath = tsDoc.filePath;
 
 		let completions: ts.CompletionInfo | undefined;
 
-		const isCompletionInsideFrontmatter = isInsideFrontmatter(document.getText(), offset);
-		const isCompletionInsideExpression = isInsideExpression(document.getText(), node.start, offset);
+		const isCompletionInsideFrontmatter = isInsideFrontmatter(document.getText(), documentOffset);
+		const isCompletionInsideExpression = isInsideExpression(document.getText(), node.start, documentOffset);
 
 		const tsPreferences = await this.configManager.getTSPreferences(document);
 		const formatOptions = await this.configManager.getTSFormatConfig(document);
@@ -279,9 +280,11 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 				for (const change of action.changes) {
 					if (isInsideScriptTag) {
 						change.textChanges.forEach((textChange) => {
-							textChange.span.start = tsDoc.offsetAt(
-								scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(textChange.span.start))
+							const originalPosition = scriptTagSnapshot.getOriginalPosition(
+								scriptTagSnapshot.positionAt(textChange.span.start)
 							);
+
+							textChange.span.start = tsDoc.offsetAt(tsDoc.getGeneratedPosition(originalPosition));
 						});
 					}
 

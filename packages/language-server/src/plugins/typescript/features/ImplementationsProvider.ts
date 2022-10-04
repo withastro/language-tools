@@ -1,5 +1,5 @@
 import { Location, Position } from 'vscode-languageserver-types';
-import { AstroDocument, mapRangeToOriginal } from '../../../core/documents';
+import { AstroDocument, mapRangeToOriginal, mapScriptSpanStartToSnapshot } from '../../../core/documents';
 import { isNotNullOrUndefined, pathToUrl } from '../../../utils';
 import { ImplementationProvider } from '../../interfaces';
 import { LanguageServiceManager } from '../LanguageServiceManager';
@@ -37,9 +37,7 @@ export class ImplementationsProviderImpl implements ImplementationProvider {
 					impl.fileName = isInSameFile ? tsDoc.filePath : impl.fileName;
 
 					if (isInSameFile) {
-						impl.textSpan.start = tsDoc.offsetAt(
-							scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(impl.textSpan.start))
-						);
+						impl.textSpan.start = mapScriptSpanStartToSnapshot(impl.textSpan, scriptTagSnapshot, tsDoc);
 					}
 
 					return impl;

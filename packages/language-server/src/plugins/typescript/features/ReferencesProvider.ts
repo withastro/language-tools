@@ -1,6 +1,6 @@
 import type ts from 'typescript';
 import { Location, Position, ReferenceContext } from 'vscode-languageserver-types';
-import { AstroDocument, mapRangeToOriginal } from '../../../core/documents';
+import { AstroDocument, mapRangeToOriginal, mapScriptSpanStartToSnapshot } from '../../../core/documents';
 import { isNotNullOrUndefined, pathToUrl } from '../../../utils';
 import type { FindReferencesProvider } from '../../interfaces';
 import type { LanguageServiceManager } from '../LanguageServiceManager';
@@ -41,9 +41,7 @@ export class FindReferencesProviderImpl implements FindReferencesProvider {
 					ref.fileName = isInSameFile ? tsDoc.filePath : ref.fileName;
 
 					if (isInSameFile) {
-						ref.textSpan.start = tsDoc.offsetAt(
-							scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(ref.textSpan.start))
-						);
+						ref.textSpan.start = mapScriptSpanStartToSnapshot(ref.textSpan, scriptTagSnapshot, tsDoc);
 					}
 
 					return ref;

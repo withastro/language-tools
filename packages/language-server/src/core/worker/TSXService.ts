@@ -1,5 +1,5 @@
 import { createSyncFn } from 'synckit';
-// import type { TSXResult } from '@astrojs/compiler/shared/types';
+import type { TSXResult } from '@astrojs/compiler/shared/types';
 
 const convertToTSXSync = createSyncFn(require.resolve('./TSXWorker'));
 
@@ -9,9 +9,6 @@ const convertToTSXSync = createSyncFn(require.resolve('./TSXWorker'));
 export function convertToTSX(
 	source: string,
 	options: { sourcefile: string }
-): {
-	code: string;
-	map: string;
-} {
+): TSXResult {
 	return convertToTSXSync(source, options);
 }

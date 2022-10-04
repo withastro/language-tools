@@ -1,6 +1,6 @@
 import type ts from 'typescript';
 import { Location, Position } from 'vscode-languageserver-protocol';
-import { AstroDocument, mapRangeToOriginal } from '../../../core/documents';
+import { AstroDocument, mapRangeToOriginal, mapScriptSpanStartToSnapshot } from '../../../core/documents';
 import { isNotNullOrUndefined, pathToUrl } from '../../../utils';
 import type { TypeDefinitionsProvider } from '../../interfaces';
 import type { LanguageServiceManager } from '../LanguageServiceManager';
@@ -38,9 +38,7 @@ export class TypeDefinitionsProviderImpl implements TypeDefinitionsProvider {
 					def.fileName = isInSameFile ? tsDoc.filePath : def.fileName;
 
 					if (isInSameFile) {
-						def.textSpan.start = tsDoc.offsetAt(
-							scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(def.textSpan.start))
-						);
+						def.textSpan.start = mapScriptSpanStartToSnapshot(def.textSpan, scriptTagSnapshot, tsDoc);
 					}
 
 					return def;

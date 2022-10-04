@@ -67,7 +67,7 @@ describe('TypeScript Plugin#CompletionsProvider', () => {
 
 		expect(detail).to.equal('./imports/component.astro');
 		expect(additionalTextEdits?.[0].newText).to.equal(
-			`---${newLine}import Component from "./imports/component.astro"${newLine}---${newLine}${newLine}`
+			`---${newLine}import Component from "./imports/component.astro";${newLine}${newLine}---${newLine}${newLine}`
 		);
 	});
 
