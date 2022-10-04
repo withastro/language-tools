@@ -15,9 +15,9 @@ import { AstroSnapshot, TypeScriptDocumentSnapshot } from './DocumentSnapshot';
 
 // Utilities to create Snapshots from different contexts
 export function createFromDocument(document: AstroDocument, ts: typeof import('typescript/lib/tsserverlibrary')) {
-	const { code, map } = astro2tsx(document.getText(), urlToPath(document.getURL()) || '');
+	const { code, map } = astro2tsx(document.getText(), document.getURL());
 
-	const sourceMap = JSON.parse(map) as EncodedSourceMap;
+	const sourceMap = map as unknown as EncodedSourceMap;
 	return new AstroSnapshot(document, code, sourceMap, ts.ScriptKind.TSX);
 }
 

@@ -1,6 +1,6 @@
 import type ts from 'typescript';
 import type { Hover, Position } from 'vscode-languageserver';
-import { AstroDocument, mapObjWithRangeToOriginal } from '../../../core/documents';
+import { AstroDocument, mapObjWithRangeToOriginal, mapScriptSpanStartToSnapshot } from '../../../core/documents';
 import type { HoverProvider } from '../../interfaces';
 import type { LanguageServiceManager } from '../LanguageServiceManager';
 import { getMarkdownDocumentation } from '../previewer';
@@ -36,9 +36,7 @@ export class HoverProviderImpl implements HoverProvider {
 			info = lang.getQuickInfoAtPosition(scriptFilePath, scriptOffset);
 
 			if (info) {
-				info.textSpan.start = tsDoc.offsetAt(
-					scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(info.textSpan.start))
-				);
+				info.textSpan.start = mapScriptSpanStartToSnapshot(info.textSpan, scriptTagSnapshot, tsDoc);
 			}
 		} else {
 			info = lang.getQuickInfoAtPosition(tsDoc.filePath, offset);

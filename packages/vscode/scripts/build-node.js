@@ -11,6 +11,7 @@ require('esbuild')
 			: {
 					client: './src/node.ts',
 					server: '../language-server/dist/node.js',
+					TSXWorker: '../language-server/dist/core/worker/TSXWorker.js',
 			  },
 		bundle: true,
 		sourcemap: isDev ? true : false,

@@ -1,11 +1,12 @@
 import type ts from 'typescript/lib/tsserverlibrary';
 import { LocationLink, Position } from 'vscode-languageserver-types';
-import type { AstroDocument } from '../../../core/documents';
+import { AstroDocument, mapScriptSpanStartToSnapshot } from '../../../core/documents';
 import { isNotNullOrUndefined, pathToUrl } from '../../../utils';
 import type { DefinitionsProvider } from '../../interfaces';
 import type { LanguageServiceManager } from '../LanguageServiceManager';
 import type { AstroSnapshot } from '../snapshots/DocumentSnapshot';
 import {
+	convertRange,
 	convertToLocationRange,
 	ensureRealFilePath,
 	getScriptTagSnapshot,
@@ -44,17 +45,13 @@ export class DefinitionsProviderImpl implements DefinitionsProvider {
 					def.fileName = isInSameFile ? tsDoc.filePath : def.fileName;
 
 					if (isInSameFile) {
-						def.textSpan.start = tsDoc.offsetAt(
-							scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(def.textSpan.start))
-						);
+						def.textSpan.start = mapScriptSpanStartToSnapshot(def.textSpan, scriptTagSnapshot, tsDoc);
 					}
 
 					return def;
 				});
 
-				defs.textSpan.start = tsDoc.offsetAt(
-					scriptTagSnapshot.getOriginalPosition(scriptTagSnapshot.positionAt(defs.textSpan.start))
-				);
+				defs.textSpan.start = mapScriptSpanStartToSnapshot(defs.textSpan, scriptTagSnapshot, tsDoc);
 			}
 		} else {
 			defs = lang.getDefinitionAndBoundSpan(tsDoc.filePath, fragmentOffset);
@@ -75,13 +72,17 @@ export class DefinitionsProviderImpl implements DefinitionsProvider {
 
 				// For Astro, Svelte and Vue, the position is wrongly mapped to the end of the file due to the TSX output
 				// So we'll instead redirect to the beginning of the file
-				const isFramework = isFrameworkFilePath(def.fileName) || isAstroFilePath(def.fileName);
-				const textSpan = isFramework && tsDoc.filePath !== def.fileName ? { start: 0, length: 0 } : def.textSpan;
+				const isFramework =
+					(isFrameworkFilePath(def.fileName) || isAstroFilePath(def.fileName)) && tsDoc.filePath !== def.fileName;
+
+				const targetRange = isFramework
+					? convertRange(document, { start: 0, length: 0 })
+					: convertToLocationRange(snapshot, def.textSpan);
 
 				return LocationLink.create(
 					pathToUrl(fileName),
-					convertToLocationRange(snapshot, textSpan),
-					convertToLocationRange(snapshot, textSpan),
+					targetRange,
+					targetRange,
 					convertToLocationRange(tsDoc, defs!.textSpan)
 				);
 			})
