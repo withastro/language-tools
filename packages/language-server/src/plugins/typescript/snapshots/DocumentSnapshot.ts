@@ -1,3 +1,4 @@
+import type { DiagnosticMessage } from '@astrojs/compiler/shared/types';
 import { EncodedSourceMap, TraceMap } from '@jridgewell/trace-mapping';
 import { Position, TextDocumentContentChangeEvent } from 'vscode-languageserver';
 import {
@@ -41,7 +42,8 @@ export class AstroSnapshot implements DocumentSnapshot {
 		public readonly parent: AstroDocument,
 		private readonly text: string,
 		private readonly tsxMap: EncodedSourceMap,
-		public readonly scriptKind: ts.ScriptKind
+		public readonly scriptKind: ts.ScriptKind,
+		public readonly compilerDiagnostics: DiagnosticMessage[]
 	) {}
 
 	isInGenerated(pos: Position): boolean {
