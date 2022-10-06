@@ -28,7 +28,7 @@ importers:
 
   packages/language-server:
     specifiers:
-      '@astrojs/compiler': ^0.18.2
+      '@astrojs/compiler': ^0.27.0
       '@astrojs/svelte': ^1.0.0
       '@astrojs/vue': ^1.0.0
       '@jridgewell/trace-mapping': ^0.3.14
@@ -61,7 +61,7 @@ importers:
       vscode-uri: ^3.0.3
       vue: ^3.2.37
     dependencies:
-      '@astrojs/compiler': 0.18.2
+      '@astrojs/compiler': 0.27.0
       '@jridgewell/trace-mapping': 0.3.15
       '@vscode/emmet-helper': 2.8.4
       events: 3.3.0
@@ -112,6 +112,7 @@ importers:
 
   packages/vscode:
     specifiers:
+      '@astrojs/compiler': ^0.27.0
       '@astrojs/language-server': 0.27.0
       '@astrojs/ts-plugin': 0.3.0
       '@types/mocha': ^9.1.0
@@ -129,6 +130,7 @@ importers:
       vscode-languageclient: ^8.0.1
       vscode-tmgrammar-test: ^0.1.1
     dependencies:
+      '@astrojs/compiler': 0.27.0
       '@astrojs/ts-plugin': link:../ts-plugin
       prettier: 2.7.1
       prettier-plugin-astro: 0.5.4
@@ -175,16 +177,16 @@ packages:
       '@jridgewell/trace-mapping': 0.3.15
     dev: true
 
-  /@astrojs/compiler/0.18.2:
-    resolution: {integrity: sha512-R2lOpaif3hDju2/sE6OrKvnTMgrcLRJw+jAVih9pLA2ATgy2EnhYMhflRk1vQ6+YwuhyL6Lj/dRJFXgB7r70eg==}
-    dev: false
-
   /@astrojs/compiler/0.23.5:
     resolution: {integrity: sha512-vBMPy9ok4iLapSyCCT1qsZ9dK7LkVFl9mObtLEmWiec9myGHS9h2kQY2xzPeFNJiWXUf9O6tSyQpQTy5As/p3g==}
 
   /@astrojs/compiler/0.24.0:
     resolution: {integrity: sha512-xZ81C/oMfExdF18I1Tyd2BKKzBqO+qYYctSy4iCwH4UWSo/4Y8A8MAzV1hG67uuE7hFRourSl6H5KUbhyChv/A==}
     dev: true
+
+  /@astrojs/compiler/0.27.0:
+    resolution: {integrity: sha512-iFZ7aHEMtZnUYnL/PWAaxMB6YMLfHlj+dRi86ALngDpuKRELEDQrxhpwGShAoOW//SZX0BYc5mZpAa92TuB7yg==}
+    dev: false
 
   /@astrojs/language-server/0.23.3:
     resolution: {integrity: sha512-ROoMKo37NZ76pE/A2xHfjDlgfsNnFmkhL4+Wifs0L855n73SUCbnXz7ZaQktIGAq2Te2TpSjAawiOx0q9L5qeg==}
