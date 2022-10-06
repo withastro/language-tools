@@ -1,5 +1,5 @@
 import type ts from 'typescript/lib/tsserverlibrary';
-import { Logger } from '../logger.js';
+import type { Logger } from '../logger.js';
 import { isAstroFilePath } from '../utils.js';
 
 export function decorateDiagnostics(ls: ts.LanguageService, logger: Logger): void {

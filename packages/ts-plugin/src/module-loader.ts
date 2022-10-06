@@ -1,7 +1,7 @@
 import type ts from 'typescript/lib/tsserverlibrary';
-import { AstroSnapshotManager } from './astro-snapshots.js';
+import type { AstroSnapshotManager } from './astro-snapshots.js';
 import { createAstroSys } from './astro-sys.js';
-import { Logger } from './logger.js';
+import type { Logger } from './logger.js';
 import { ensureRealAstroFilePath, isVirtualAstroFilePath } from './utils.js';
 
 /**
@@ -80,7 +80,8 @@ export function patchModuleLoader(
 		redirectedReference: ts.ResolvedProjectReference | undefined,
 		compilerOptions: ts.CompilerOptions
 	): Array<ts.ResolvedModule | undefined> {
-		logger.log('Resolving modules names for ' + containingFile);
+		// logger.log('Resolving modules names for ' + containingFile);
+
 		// Try resolving all module names with the original method first.
 		// The ones that are undefined will be re-checked if they are a
 		// astro file and if so, are resolved, too. This way we can defer
@@ -129,7 +130,7 @@ export function patchModuleLoader(
 		}
 
 		const resolvedAstroModule: ts.ResolvedModuleFull = {
-			extension: snapshot.isTsFile ? typescript.Extension.Tsx : typescript.Extension.Jsx,
+			extension: typescript.Extension.Tsx,
 			resolvedFileName,
 		};
 		return resolvedAstroModule;
