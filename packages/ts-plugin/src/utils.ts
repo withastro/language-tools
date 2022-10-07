@@ -51,3 +51,25 @@ export function getConfigPathForProject(project: ts.server.Project) {
 		(project.getCompilerOptions() as any).configFilePath
 	);
 }
+
+export function readProjectAstroFilesFromFs(
+	ts: typeof import('typescript/lib/tsserverlibrary'),
+	project: ts.server.Project,
+	parsedCommandLine: ts.ParsedCommandLine
+) {
+	const fileSpec: TsFilesSpec = parsedCommandLine.raw;
+	const { include, exclude } = fileSpec;
+
+	if (include?.length === 0) {
+		return [];
+	}
+
+	return ts.sys
+		.readDirectory(project.getCurrentDirectory() || process.cwd(), ['.astro'], exclude, include)
+		.map(ts.server.toNormalizedPath);
+}
+
+export interface TsFilesSpec {
+	include?: readonly string[];
+	exclude?: readonly string[];
+}

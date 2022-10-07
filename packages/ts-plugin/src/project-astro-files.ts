@@ -1,11 +1,6 @@
 import type ts from 'typescript/lib/tsserverlibrary';
 import type { AstroSnapshotManager } from './astro-snapshots';
-import { getConfigPathForProject, isAstroFilePath } from './utils';
-
-export interface TsFilesSpec {
-	include?: readonly string[];
-	exclude?: readonly string[];
-}
+import { getConfigPathForProject, isAstroFilePath, readProjectAstroFilesFromFs } from './utils';
 
 export class ProjectAstroFilesManager {
 	private files = new Set<string>();
@@ -82,7 +77,7 @@ export class ProjectAstroFilesManager {
 	}
 
 	private updateProjectAstroFiles() {
-		const fileNamesAfter = this.readProjectAstroFilesFromFs();
+		const fileNamesAfter = readProjectAstroFilesFromFs(this.typescript, this.project, this.parsedCommandLine);
 		const removedFiles = new Set(...this.files);
 		const newFiles = fileNamesAfter.filter((fileName) => {
 			const has = this.files.has(fileName);
@@ -109,19 +104,6 @@ export class ProjectAstroFilesManager {
 		if (snapshot) {
 			this.project.addRoot(snapshot);
 		}
-	}
-
-	private readProjectAstroFilesFromFs() {
-		const fileSpec: TsFilesSpec = this.parsedCommandLine.raw;
-		const { include, exclude } = fileSpec;
-
-		if (include?.length === 0) {
-			return [];
-		}
-
-		return this.typescript.sys
-			.readDirectory(this.project.getCurrentDirectory() || process.cwd(), ['.astro'], exclude, include)
-			.map(this.typescript.server.toNormalizedPath);
 	}
 
 	private removeFileFromProject(file: string, exists = true) {
