@@ -15,8 +15,11 @@ suite('Extension Test Suite', () => {
 	});
 
 	test('can find references inside Astro files', async () => {
+		vscode.workspace.asRelativePath('./fixtures/');
 		const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(path.join(__dirname, '../fixtures/script.ts')));
-		const astroDoc = (await vscode.workspace.findFiles('**/*.astro'))[0];
+		const astroDoc = await vscode.workspace.openTextDocument(
+			vscode.Uri.file(path.join(__dirname, '../fixtures/MyAstroComponent.astro'))
+		);
 
 		// TypeScript takes a while to wake up and there's unfortunately no good way to wait for it
 		async function findReferences() {
@@ -38,7 +41,7 @@ suite('Extension Test Suite', () => {
 		expect(references).to.deep.equal([
 			{
 				range: new vscode.Range(1, 10, 1, 18),
-				uri: astroDoc,
+				uri: { ...astroDoc.uri, _fsPath: undefined },
 			},
 			{
 				range: new vscode.Range(0, 16, 0, 24),
