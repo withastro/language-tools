@@ -15,11 +15,7 @@ suite('Extension Test Suite', () => {
 	});
 
 	test('can find references inside Astro files', async () => {
-		vscode.workspace.asRelativePath('./fixtures/');
 		const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(path.join(__dirname, '../fixtures/script.ts')));
-		const astroDoc = await vscode.workspace.openTextDocument(
-			vscode.Uri.file(path.join(__dirname, '../fixtures/MyAstroComponent.astro'))
-		);
 
 		// TypeScript takes a while to wake up and there's unfortunately no good way to wait for it
 		async function findReferences() {
