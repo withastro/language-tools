@@ -45,6 +45,7 @@ import {
 	ensureRealFilePath,
 	getScriptKindFromFileName,
 	isAstroFilePath,
+	isCSSModulePath,
 	isFrameworkFilePath,
 } from './utils';
 
@@ -239,7 +240,12 @@ export class TypeScriptPlugin implements Plugin {
 		for (const { fileName, changeType } of onWatchFileChangesParas) {
 			const scriptKind = getScriptKindFromFileName(fileName, this.ts);
 
-			if (scriptKind === this.ts.ScriptKind.Unknown && !isFrameworkFilePath(fileName) && !isAstroFilePath(fileName)) {
+			if (
+				scriptKind === this.ts.ScriptKind.Unknown &&
+				!isFrameworkFilePath(fileName) &&
+				!isAstroFilePath(fileName) &&
+				!isCSSModulePath(fileName)
+			) {
 				continue;
 			}
 

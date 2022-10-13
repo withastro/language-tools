@@ -23,10 +23,7 @@ export function createAstroSys(
 			return snapshot.getText(0, snapshot.getLength());
 		},
 		readDirectory(path, extensions, exclude, include, depth) {
-			const extensionsWithAstro = (extensions ?? []).concat(
-				...['.astro', '.svelte', '.vue', '.css'],
-				...CSSModuleExtensions
-			);
+			const extensionsWithAstro = (extensions ?? []).concat(...['.astro', '.svelte', '.vue'], ...CSSModuleExtensions);
 			const result = ts.sys.readDirectory(path, extensionsWithAstro, exclude, include, depth);
 			return result;
 		},

@@ -11,12 +11,15 @@ import {
 import { BaseLanguageClient, LanguageClientOptions } from 'vscode-languageclient';
 import * as fileReferences from './features/fileReferences';
 
+export const CSSModuleExtensions = ['.module.css', '.module.scss', '.module.sass', '.module.less', '.module.styl'];
+
 export function getInitOptions(env: 'node' | 'browser', typescript: any): LanguageClientOptions {
+	const cssModulesGlobs = CSSModuleExtensions.map((ext) => `**/*${ext}`).join(',');
 	return {
 		documentSelector: [{ scheme: 'file', language: 'astro' }],
 		synchronize: {
 			fileEvents: workspace.createFileSystemWatcher(
-				'{**/*.astro,**/*.js,**/*.ts,**/*.jsx,**/*.tsx,**/*.json,**/*.vue,**/*.svelte}',
+				`{**/*.astro,**/*.js,**/*.ts,**/*.jsx,**/*.tsx,**/*.json,**/*.vue,**/*.svelte,${cssModulesGlobs}}`,
 				false,
 				false,
 				false
