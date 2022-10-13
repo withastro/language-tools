@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import type { TextDocumentContentChangeEvent } from 'vscode-languageserver';
 import { normalizePath } from '../../../utils';
+import { CSSModuleExtensions } from '../utils';
 import { DocumentSnapshot, TypeScriptDocumentSnapshot } from './DocumentSnapshot';
 import * as DocumentSnapshotUtils from './utils';
 
@@ -117,7 +118,7 @@ export class SnapshotManager {
 		const projectFiles = this.ts.sys
 			.readDirectory(
 				this.workspaceRoot,
-				[...Object.values(this.ts.Extension), '.astro', '.svelte', '.vue'],
+				[...Object.values(this.ts.Extension), '.astro', '.svelte', '.vue', ...CSSModuleExtensions],
 				exclude,
 				include
 			)

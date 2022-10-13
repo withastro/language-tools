@@ -31,12 +31,16 @@
     "vscode-languageserver-protocol": "^3.17.1",
     "vscode-languageserver-textdocument": "^1.0.4",
     "vscode-languageserver-types": "^3.17.1",
-    "vscode-uri": "^3.0.3"
+    "vscode-uri": "^3.0.3",
+    "icss-utils": "^5.1.0",
+    "postcss": "^8.4.18",
+    "postcss-icss-selectors": "^2.0.3"
   },
   "devDependencies": {
     "@astrojs/svelte": "^1.0.0",
     "@astrojs/vue": "^1.0.0",
     "@types/chai": "^4.3.0",
+    "@types/icss-utils": "^5.1.0",
     "@types/mocha": "^9.1.0",
     "@types/node": "^16.11.58",
     "@types/prettier": "^2.7.0",

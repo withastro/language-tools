@@ -1,6 +1,7 @@
+import { extractICSS } from 'icss-utils';
 import { URI, Utils } from 'vscode-uri';
 import type { AstroDocument } from '../../../core/documents';
-import { importSvelteIntegration, importVueIntegration } from '../../../importPackage';
+import { importSvelteIntegration, importVueIntegration, processor } from '../../../importPackage';
 import { toPascalCase } from '../../../utils';
 import astro2tsx from '../astro2tsx';
 import {
@@ -8,6 +9,7 @@ import {
 	getFrameworkFromFilePath,
 	getScriptKindFromFileName,
 	isAstroFilePath,
+	isCSSModulePath,
 	isFrameworkFilePath,
 } from '../utils';
 import { AstroSnapshot, TypeScriptDocumentSnapshot } from './DocumentSnapshot';
@@ -34,6 +36,8 @@ export function createFromFilePath(
 	} else if (isFrameworkFilePath(filePath)) {
 		const framework = getFrameworkFromFilePath(filePath);
 		return createFromFrameworkFilePath(filePath, framework, ts);
+	} else if (isCSSModulePath(filePath)) {
+		return createFromCSSFilePath(filePath, ts);
 	} else {
 		return createFromTSFilePath(filePath, ts);
 	}
@@ -47,6 +51,8 @@ export function createFromNonAstroFilePath(filePath: string, ts: typeof import('
 	if (isFrameworkFilePath(filePath)) {
 		const framework = getFrameworkFromFilePath(filePath);
 		return createFromFrameworkFilePath(filePath, framework, ts);
+	} else if (isCSSModulePath(filePath)) {
+		return createFromCSSFilePath(filePath, ts);
 	} else {
 		return createFromTSFilePath(filePath, ts);
 	}
@@ -98,6 +104,29 @@ export function createFromFrameworkFilePath(
 	}
 
 	return new TypeScriptDocumentSnapshot(0, filePath, code, ts.ScriptKind.TSX);
+}
+
+export function createFromCSSFilePath(filePath: string, ts: typeof import('typescript/lib/tsserverlibrary')) {
+	const originalText = ts.sys.readFile(filePath) ?? '';
+
+	// TODO: Transform SCSS/LESS/etc to CSS before giving to PostCSS
+
+	const processedCSS = processor.process(originalText, { from: filePath });
+
+	// TODO: Figure out an easier way to extract the class names? The plugin we use is deprecated and having PostCSS as a
+	// dependency is not ideal. Volar uses a regex for this, maybe we can do something similar?
+	const classes = processedCSS.root ? extractICSS(processedCSS.root).icssExports : {};
+
+	const processedClasses = Object.keys(classes).map((className) => {
+		return `'${className}': string;`;
+	});
+
+	return new TypeScriptDocumentSnapshot(
+		0,
+		filePath,
+		`declare let classes: {${processedClasses.join('\n  ')}};export default classes;`,
+		ts.ScriptKind.TS
+	);
 }
 
 export function classNameFromFilename(filename: string): string {

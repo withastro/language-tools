@@ -66,6 +66,14 @@ require('esbuild').build({
 					contents: `export const TextDecoder = {}`,
 					loader: 'js',
 				}));
+				build.onResolve({ filter: /^generic-names$/ }, (args) => ({
+					path: args.path,
+					namespace: 'generic-names-ns',
+				}));
+				build.onLoad({ filter: /.*/, namespace: 'generic-names-ns' }, () => ({
+					contents: `export default function genericNames(name) { return name; }`,
+					loader: 'js',
+				}));
 			},
 		},
 	],

@@ -1,3 +1,4 @@
+import { default as nodePath } from 'path';
 import type { ResolvedModule } from 'typescript';
 import { getLastPartOfPath } from '../../utils';
 import { createAstroSys } from './astro-sys';
@@ -6,6 +7,7 @@ import {
 	ensureRealFilePath,
 	getExtensionFromScriptKind,
 	isAstroFilePath,
+	isCSSModulePath,
 	isFrameworkFilePath,
 	isVirtualFilePath,
 	toVirtualFilePath,
@@ -81,7 +83,7 @@ class ImpliedNodeFormatResolver {
 		compilerOptions: ts.CompilerOptions
 	) {
 		// For Astro & Framework imports, we have to fallback to the old resolution algorithm or it doesn't work
-		if (isAstroFilePath(importPath) || isFrameworkFilePath(importPath)) {
+		if (isAstroFilePath(importPath) || isFrameworkFilePath(importPath) || isCSSModulePath(importPath)) {
 			return undefined;
 		}
 
@@ -89,7 +91,9 @@ class ImpliedNodeFormatResolver {
 		if (sourceFile) {
 			if (
 				!sourceFile.impliedNodeFormat &&
-				(isAstroFilePath(sourceFile.fileName) || isFrameworkFilePath(sourceFile.fileName))
+				(isAstroFilePath(sourceFile.fileName) ||
+					isFrameworkFilePath(sourceFile.fileName) ||
+					isCSSModulePath(sourceFile.fileName))
 			) {
 				// impliedNodeFormat is not set for non-TS files, because the TS function which calculates this works with a
 				// fixed set of extensions that does not include frameworks files

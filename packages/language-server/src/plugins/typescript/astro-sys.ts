@@ -1,5 +1,5 @@
 import type { DocumentSnapshot } from './snapshots/DocumentSnapshot';
-import { ensureRealFilePath, isVirtualFilePath } from './utils';
+import { CSSModuleExtensions, ensureRealFilePath, isVirtualFilePath } from './utils';
 
 /**
  * This should only be accessed by TS Astro module resolution.
@@ -23,7 +23,10 @@ export function createAstroSys(
 			return snapshot.getText(0, snapshot.getLength());
 		},
 		readDirectory(path, extensions, exclude, include, depth) {
-			const extensionsWithAstro = (extensions ?? []).concat(...['.astro', '.svelte', '.vue']);
+			const extensionsWithAstro = (extensions ?? []).concat(
+				...['.astro', '.svelte', '.vue', '.css'],
+				...CSSModuleExtensions
+			);
 			const result = ts.sys.readDirectory(path, extensionsWithAstro, exclude, include, depth);
 			return result;
 		},

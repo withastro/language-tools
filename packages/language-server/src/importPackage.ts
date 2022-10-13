@@ -2,7 +2,10 @@ import type * as svelte from '@astrojs/svelte/dist/editor.cjs';
 import type * as vue from '@astrojs/svelte/dist/editor.cjs';
 import { dirname, resolve } from 'path';
 import type * as prettier from 'prettier';
+import Processor from 'postcss/lib/processor';
+import postcssIcssSelectors from 'postcss-icss-selectors';
 
+export const processor = new Processor([postcssIcssSelectors({ mode: 'local', generateScopedName: () => '' })]);
 let isTrusted = true;
 
 export function setIsTrusted(_isTrusted: boolean) {

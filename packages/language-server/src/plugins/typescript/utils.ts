@@ -358,7 +358,22 @@ export function isVirtualSvelteFilePath(filePath: string) {
 }
 
 export function isVirtualFilePath(filePath: string) {
-	return isVirtualAstroFilePath(filePath) || isVirtualVueFilePath(filePath) || isVirtualSvelteFilePath(filePath);
+	return (
+		isVirtualAstroFilePath(filePath) ||
+		isVirtualVueFilePath(filePath) ||
+		isVirtualSvelteFilePath(filePath) ||
+		isVirtualCSSModule(filePath)
+	);
+}
+
+export const CSSModuleExtensions = ['.module.css', '.module.scss', '.module.sass', '.module.less', '.module.styl'];
+
+export function isCSSModulePath(filePath: string) {
+	return CSSModuleExtensions.some((ext) => filePath.includes(ext));
+}
+
+export function isVirtualCSSModule(filePath: string) {
+	return isCSSModulePath(filePath) && filePath.endsWith('.ts');
 }
 
 export function toVirtualAstroFilePath(filePath: string) {

@@ -13,6 +13,7 @@ import {
 import { GlobalSnapshotManager, SnapshotManager } from './snapshots/SnapshotManager';
 import * as DocumentSnapshotUtils from './snapshots/utils';
 import {
+	CSSModuleExtensions,
 	ensureRealFilePath,
 	findTsConfigPath,
 	getScriptTagLanguage,
@@ -383,6 +384,11 @@ async function createLanguageService(
 				{ extension: 'vue', isMixedContent: true, scriptKind: docContext.ts.ScriptKind.Deferred },
 				{ extension: 'svelte', isMixedContent: true, scriptKind: docContext.ts.ScriptKind.Deferred },
 				{ extension: 'astro', isMixedContent: true, scriptKind: docContext.ts.ScriptKind.Deferred },
+				...CSSModuleExtensions.map((ext) => ({
+					extension: ext,
+					isMixedContent: true,
+					scriptKind: docContext.ts.ScriptKind.Deferred,
+				})),
 			]
 		);
 
