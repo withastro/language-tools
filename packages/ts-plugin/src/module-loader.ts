@@ -73,6 +73,13 @@ export function patchModuleLoader(
 		return origRemoveFile(info, fileExists, detachFromProject);
 	};
 
+	// Patch readDirectory so we get completions for .astro files
+	const origReadDirectory = project.readDirectory.bind(project);
+	project.readDirectory = (path, extensions, exclude, include, depth) => {
+		const extensionsWithAstro = (extensions ?? []).concat('.astro', '.md', '.mdx');
+		return origReadDirectory(path, extensionsWithAstro, exclude, include, depth);
+	};
+
 	function resolveModuleNames(
 		moduleNames: string[],
 		containingFile: string,
