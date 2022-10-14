@@ -55,7 +55,8 @@ describe('TypeScript Plugin#CompletionsProvider', () => {
 			triggerCharacter: '.',
 		});
 
-		expect(completions?.items).to.not.be.empty;
+		const labels = completions?.items.map((completion) => completion.label);
+		expect(labels).to.deep.equal(['Hello', 'World']);
 	});
 
 	it('provide auto import completion with insert action for component - no front matter', async () => {
@@ -107,7 +108,7 @@ describe('TypeScript Plugin#CompletionsProvider', () => {
 	it('provide completion inside import statement', async () => {
 		const { provider, document } = setup('importStatement.astro');
 
-		const completions = await provider.getCompletions(document, Position.create(1, 11), {
+		const completions = await provider.getCompletions(document, Position.create(1, 10), {
 			triggerKind: CompletionTriggerKind.Invoked,
 		});
 
