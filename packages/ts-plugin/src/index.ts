@@ -21,15 +21,15 @@ function init(modules: { typescript: typeof import('typescript/lib/tsserverlibra
 		logger.log('Starting Astro plugin');
 
 		const snapshotManager = new AstroSnapshotManager(modules.typescript, info.project.projectService, logger);
-		const projectAstroFilesManager = parsedCommandLine
-			? new ProjectAstroFilesManager(
-					modules.typescript,
-					info.project,
-					info.serverHost,
-					snapshotManager,
-					parsedCommandLine
-			  )
-			: undefined;
+		if (parsedCommandLine) {
+			new ProjectAstroFilesManager(
+				modules.typescript,
+				info.project,
+				info.serverHost,
+				snapshotManager,
+				parsedCommandLine
+			);
+		}
 
 		patchModuleLoader(logger, snapshotManager, modules.typescript, info.languageServiceHost, info.project);
 		return decorateLanguageService(info.languageService, snapshotManager, logger);

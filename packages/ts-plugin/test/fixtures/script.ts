@@ -3,3 +3,7 @@ export function sayHello() {
 }
 
 MyAstroCompon
+
+export class Hello {
+
+}
