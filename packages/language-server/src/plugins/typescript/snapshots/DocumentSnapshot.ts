@@ -10,7 +10,6 @@ import {
 	TagInformation,
 } from '../../../core/documents';
 import { pathToUrl } from '../../../utils';
-import type { FrameworkExt } from '../utils';
 
 export interface DocumentSnapshot extends ts.IScriptSnapshot {
 	version: number;
@@ -197,7 +196,7 @@ export class TypeScriptDocumentSnapshot extends IdentityMapper implements Docume
 		public readonly filePath: string,
 		private text: string,
 		scriptKind: ts.ScriptKind,
-		public readonly framework?: FrameworkExt
+		public readonly supportPartialUpdate: boolean
 	) {
 		super(pathToUrl(filePath));
 
