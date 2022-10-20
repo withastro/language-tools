@@ -10,6 +10,7 @@ import {
 	ensureRealFilePath,
 	getScriptTagSnapshot,
 	isAstroFilePath,
+	isCSSModulePath,
 	isFrameworkFilePath,
 } from '../utils';
 import { SnapshotFragmentMap } from './utils';
@@ -77,7 +78,14 @@ export class DefinitionsProviderImpl implements DefinitionsProvider {
 				// For Astro, Svelte and Vue, the position is wrongly mapped to the end of the file due to the TSX output
 				// So we'll instead redirect to the beginning of the file
 				const isFramework = isFrameworkFilePath(def.fileName) || isAstroFilePath(def.fileName);
-				const textSpan = isFramework && tsDoc.filePath !== def.fileName ? { start: 0, length: 0 } : def.textSpan;
+				const isCSSModule = isCSSModulePath(fileName);
+				let textSpan = def.textSpan;
+
+				if (isFramework && tsDoc.filePath !== def.fileName) {
+					textSpan = { start: 0, length: 0 };
+				} else if (isCSSModule) {
+					snapshot
+				}
 
 				return LocationLink.create(
 					pathToUrl(fileName),

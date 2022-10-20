@@ -24,7 +24,8 @@ export function createAstroSys(
 		},
 		readDirectory(path, extensions, exclude, include, depth) {
 			const extensionsWithAstro = (extensions ?? []).concat(
-				...['.astro', '.svelte', '.vue', '.md', '.mdx', '.html', CSSModuleExtensions]
+				...['.astro', '.svelte', '.vue', '.md', '.mdx', '.html'],
+				...CSSModuleExtensions
 			);
 			const result = ts.sys.readDirectory(path, extensionsWithAstro, exclude, include, depth);
 			return result;

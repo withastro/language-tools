@@ -134,7 +134,8 @@ export function createFromCSSFilePath(filePath: string, ts: typeof import('types
 		0,
 		filePath,
 		`declare let classes: {${processedClasses.join('\n  ')}};export default classes;`,
-		ts.ScriptKind.TS
+		ts.ScriptKind.TS,
+		false
 	);
 }
 
