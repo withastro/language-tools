@@ -50,7 +50,7 @@
     "@astrojs/ts-plugin": "0.3.0",
     "prettier": "^2.7.1",
     "prettier-plugin-astro": "^0.5.4",
-    "@astrojs/compiler": "^0.27.0"
+    "@astrojs/compiler": "^0.29.3"
   },
   "devDependencies": {
     "@astrojs/language-server": "0.27.0",
