@@ -28,7 +28,7 @@ importers:
 
   packages/language-server:
     specifiers:
-      '@astrojs/compiler': ^0.29.6
+      '@astrojs/compiler': ^0.29.7
       '@astrojs/svelte': ^1.0.0
       '@astrojs/vue': ^1.0.0
       '@jridgewell/trace-mapping': ^0.3.14
@@ -61,7 +61,7 @@ importers:
       vscode-uri: ^3.0.3
       vue: ^3.2.37
     dependencies:
-      '@astrojs/compiler': 0.29.6
+      '@astrojs/compiler': 0.29.7
       '@jridgewell/trace-mapping': 0.3.15
       '@vscode/emmet-helper': 2.8.4
       events: 3.3.0
@@ -112,7 +112,7 @@ importers:
 
   packages/vscode:
     specifiers:
-      '@astrojs/compiler': ^0.29.6
+      '@astrojs/compiler': ^0.29.7
       '@astrojs/language-server': 0.28.1
       '@astrojs/ts-plugin': 0.3.0
       '@types/mocha': ^9.1.0
@@ -130,7 +130,7 @@ importers:
       vscode-languageclient: ^8.0.1
       vscode-tmgrammar-test: ^0.1.1
     dependencies:
-      '@astrojs/compiler': 0.29.6
+      '@astrojs/compiler': 0.29.7
       '@astrojs/ts-plugin': link:../ts-plugin
       prettier: 2.7.1
       prettier-plugin-astro: 0.7.0
@@ -185,12 +185,8 @@ packages:
     resolution: {integrity: sha512-xZ81C/oMfExdF18I1Tyd2BKKzBqO+qYYctSy4iCwH4UWSo/4Y8A8MAzV1hG67uuE7hFRourSl6H5KUbhyChv/A==}
     dev: true
 
-  /@astrojs/compiler/0.29.5:
-    resolution: {integrity: sha512-XpSJyBO6ha5mGqsD71ie83SOcv3p7zKq6qzngyeLKhccCXtf9Zn/4tGbi/Iq4YmkRBNCjLEkF0wZMYWY+eJYAA==}
-    dev: false
-
-  /@astrojs/compiler/0.29.6:
-    resolution: {integrity: sha512-Jpwb+GhfV5u3yVZCaCggBX4OjL4jo0PJs5q/TdbgZP7Qpn5rbxpeu/TPxd61emY0gGcnhQR6Sso35C3jzjTS8Q==}
+  /@astrojs/compiler/0.29.7:
+    resolution: {integrity: sha512-4G2vZNK3TwjsLyLqfQidObUYnUEB4U6iN70IM+GwBOBZhpOoCy1EEUAROmUx8IyU1mBNZlZXHPOAQt5FoWF8Yg==}
     dev: false
 
   /@astrojs/language-server/0.23.3:
@@ -5020,7 +5016,7 @@ packages:
     resolution: {integrity: sha512-ehCUx7MqHWvkHwUmxxAWLsL35pFaCTM5YXQ8xjG/1W6dY2yBhvEks+2aCfjeI5zmMrZNCXkiMQtpznSlLSLrxw==}
     engines: {node: ^14.15.0 || >=16.0.0, npm: '>=6.14.0'}
     dependencies:
-      '@astrojs/compiler': 0.29.5
+      '@astrojs/compiler': 0.29.7
       prettier: 2.7.1
       sass-formatter: 0.7.5
       synckit: 0.8.4
