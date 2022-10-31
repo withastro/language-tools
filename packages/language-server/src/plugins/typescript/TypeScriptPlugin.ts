@@ -254,8 +254,8 @@ export class TypeScriptPlugin implements Plugin {
 		}
 	}
 
-	async updateNonAstroFile(fileName: string, changes: TextDocumentContentChangeEvent[]): Promise<void> {
-		await this.languageServiceManager.updateExistingNonAstroFile(fileName, changes);
+	async updateNonAstroFile(fileName: string, changes: TextDocumentContentChangeEvent[], text?: string): Promise<void> {
+		await this.languageServiceManager.updateExistingNonAstroFile(fileName, changes, text);
 	}
 
 	async getSignatureHelp(

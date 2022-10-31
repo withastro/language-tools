@@ -41,8 +41,9 @@ require('esbuild')
 			require('esbuild-plugin-copy').copy({
 				resolveFrom: 'cwd',
 				assets: {
-					from: ['../language-server/types/*.d.ts'],
-					to: ['./dist/types/*'],
+					from: ['../language-server/types/**/*.d.ts'],
+					to: ['./dist/types'],
+					keepStructure: true,
 				},
 			}),
 		],
