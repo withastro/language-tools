@@ -402,7 +402,7 @@ describe('TypeScript Plugin#CodeActionsProvider', () => {
 								edits: [
 									{
 										newText: '',
-										range: Range.create(11, 0, 12, 0),
+										range: Range.create(11, 0, 11, 44),
 									},
 								],
 								textDocument: {

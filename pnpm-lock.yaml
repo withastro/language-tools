@@ -28,7 +28,7 @@ importers:
 
   packages/language-server:
     specifiers:
-      '@astrojs/compiler': ^0.29.3
+      '@astrojs/compiler': ^0.29.5
       '@astrojs/svelte': ^1.0.0
       '@astrojs/vue': ^1.0.0
       '@jridgewell/trace-mapping': ^0.3.14
@@ -61,7 +61,7 @@ importers:
       vscode-uri: ^3.0.3
       vue: ^3.2.37
     dependencies:
-      '@astrojs/compiler': 0.29.3
+      '@astrojs/compiler': 0.29.5
       '@jridgewell/trace-mapping': 0.3.15
       '@vscode/emmet-helper': 2.8.4
       events: 3.3.0
@@ -112,7 +112,7 @@ importers:
 
   packages/vscode:
     specifiers:
-      '@astrojs/compiler': ^0.29.3
+      '@astrojs/compiler': ^0.29.5
       '@astrojs/language-server': 0.28.1
       '@astrojs/ts-plugin': 0.3.0
       '@types/mocha': ^9.1.0
@@ -130,7 +130,7 @@ importers:
       vscode-languageclient: ^8.0.1
       vscode-tmgrammar-test: ^0.1.1
     dependencies:
-      '@astrojs/compiler': 0.29.3
+      '@astrojs/compiler': 0.29.5
       '@astrojs/ts-plugin': link:../ts-plugin
       prettier: 2.7.1
       prettier-plugin-astro: 0.6.0
@@ -189,8 +189,8 @@ packages:
     resolution: {integrity: sha512-VG4X87cUkcmT40HqEwShQzUgl0VSnVTszobbmnhAOkHzdoWMxhwAm61A2o5fEsv6eEK8M0lW/fGwkSofYM5GcQ==}
     dev: false
 
-  /@astrojs/compiler/0.29.3:
-    resolution: {integrity: sha512-hpdX96EVuoEqK7M9tM+SldbCPTrGJ2Dd49NQ8IilxsSGrs0IGsN18zdJra3U3Egau8bO1ncSUOwl3QZWUq/bMg==}
+  /@astrojs/compiler/0.29.5:
+    resolution: {integrity: sha512-XpSJyBO6ha5mGqsD71ie83SOcv3p7zKq6qzngyeLKhccCXtf9Zn/4tGbi/Iq4YmkRBNCjLEkF0wZMYWY+eJYAA==}
     dev: false
 
   /@astrojs/language-server/0.23.3:
