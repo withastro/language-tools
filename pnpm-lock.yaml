@@ -185,6 +185,10 @@ packages:
     resolution: {integrity: sha512-xZ81C/oMfExdF18I1Tyd2BKKzBqO+qYYctSy4iCwH4UWSo/4Y8A8MAzV1hG67uuE7hFRourSl6H5KUbhyChv/A==}
     dev: true
 
+  /@astrojs/compiler/0.27.2:
+    resolution: {integrity: sha512-VG4X87cUkcmT40HqEwShQzUgl0VSnVTszobbmnhAOkHzdoWMxhwAm61A2o5fEsv6eEK8M0lW/fGwkSofYM5GcQ==}
+    dev: false
+
   /@astrojs/compiler/0.29.3:
     resolution: {integrity: sha512-hpdX96EVuoEqK7M9tM+SldbCPTrGJ2Dd49NQ8IilxsSGrs0IGsN18zdJra3U3Egau8bO1ncSUOwl3QZWUq/bMg==}
     dev: false
@@ -5815,7 +5819,6 @@ packages:
     dependencies:
       '@pkgr/utils': 2.3.1
       tslib: 2.4.0
-    dev: true
 
   /synckit/0.8.4:
     resolution: {integrity: sha512-Dn2ZkzMdSX827QbowGbU/4yjWuvNaCoScLLoMo/yKbu+P4GBR6cRGKZH27k6a9bRzdqcyd1DE96pQtQ6uNkmyw==}
