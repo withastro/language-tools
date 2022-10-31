@@ -279,6 +279,14 @@ export class CodeActionsProviderImpl implements CodeActionsProvider {
 				edit.textChanges = edit.textChanges
 					.map((change) => {
 						change.span.start = mapScriptSpanStartToSnapshot(change.span, scriptTagSnapshot, tsDoc);
+
+						// If the result ending position is unmapped, it usually means the ending position has a newline
+						// inside the virtual part of the script tag, so let's just make it a character shorter
+						const range = mapRangeToOriginal(tsDoc, convertRange(tsDoc, change.span));
+						if (range.end.character === 0 && range.end.line === 0) {
+							change.span.length -= 1;
+						}
+
 						return change;
 					})
 					// Since our last line is a (virtual) export, organize imports will try to rewrite it, so let's only take
