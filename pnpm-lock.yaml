@@ -28,7 +28,7 @@ importers:
 
   packages/language-server:
     specifiers:
-      '@astrojs/compiler': ^0.29.7
+      '@astrojs/compiler': ^0.29.8
       '@astrojs/svelte': ^1.0.0
       '@astrojs/vue': ^1.0.0
       '@jridgewell/trace-mapping': ^0.3.14
@@ -61,7 +61,7 @@ importers:
       vscode-uri: ^3.0.3
       vue: ^3.2.37
     dependencies:
-      '@astrojs/compiler': 0.29.7
+      '@astrojs/compiler': 0.29.8
       '@jridgewell/trace-mapping': 0.3.15
       '@vscode/emmet-helper': 2.8.4
       events: 3.3.0
@@ -187,6 +187,10 @@ packages:
 
   /@astrojs/compiler/0.29.7:
     resolution: {integrity: sha512-4G2vZNK3TwjsLyLqfQidObUYnUEB4U6iN70IM+GwBOBZhpOoCy1EEUAROmUx8IyU1mBNZlZXHPOAQt5FoWF8Yg==}
+    dev: false
+
+  /@astrojs/compiler/0.29.8:
+    resolution: {integrity: sha512-D4qKnSQcOF32LgskeGnzq35N30yrITgrSaQrt/EIPU6ItcgcUr/K1BG07JCZdc+4mbfWF6RFQc7yPP9pS8Sg8w==}
     dev: false
 
   /@astrojs/language-server/0.23.3:
@@ -5016,7 +5020,7 @@ packages:
     resolution: {integrity: sha512-ehCUx7MqHWvkHwUmxxAWLsL35pFaCTM5YXQ8xjG/1W6dY2yBhvEks+2aCfjeI5zmMrZNCXkiMQtpznSlLSLrxw==}
     engines: {node: ^14.15.0 || >=16.0.0, npm: '>=6.14.0'}
     dependencies:
-      '@astrojs/compiler': 0.29.7
+      '@astrojs/compiler': 0.29.8
       prettier: 2.7.1
       sass-formatter: 0.7.5
       synckit: 0.8.4
