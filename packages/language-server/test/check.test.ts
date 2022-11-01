@@ -7,7 +7,7 @@ import { pathToUrl } from '../src/utils';
 import { harmonizeNewLines } from './utils';
 
 describe('astro check', async () => {
-	it.only('should check astro projects', async () => {
+	it('should check astro projects', async () => {
 		const path = join(__dirname, '/fixtures/astro-check/hasError.astro');
 		const checker = new AstroCheck(path, require.resolve('typescript/lib/tsserverlibrary.js'));
 
