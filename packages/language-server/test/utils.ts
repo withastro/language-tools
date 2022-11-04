@@ -38,7 +38,8 @@ export function openDocument(filePath: string, baseDir: string, docManager: Docu
 }
 
 export function harmonizeNewLines(input: string) {
-	return input.replace(/\r\n/g, '~:~').replace(/\n/g, '~:~').replace(/~:~/g, '\n');
+	// input.replace(/\r\n/g, '~:~').replace(/\n/g, '~:~').replace(/~:~/g, '\n');
+	return input;
 }
 
 // Outside of the Astro and TypeScript plugins, we don't really need to create a real environnement with proper
