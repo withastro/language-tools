@@ -47,7 +47,7 @@
     "workspaceContains:astro.config.*"
   ],
   "dependencies": {
-    "@astrojs/compiler": "0.0.0-win-20221104182719",
+    "@astrojs/compiler": "^0.29.9",
     "@astrojs/ts-plugin": "0.3.0",
     "prettier": "^2.7.1",
     "prettier-plugin-astro": "^0.7.0"
