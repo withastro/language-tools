@@ -1,6 +1,6 @@
 {
   "name": "@astrojs/language-server",
-  "version": "0.28.1",
+  "version": "0.28.3",
   "author": "withastro",
   "license": "MIT",
   "type": "commonjs",
@@ -20,7 +20,7 @@
     "test:match": "pnpm run test -g"
   },
   "dependencies": {
-    "@astrojs/compiler": "^0.29.9",
+    "@astrojs/compiler": "^0.29.13",
     "@jridgewell/trace-mapping": "^0.3.14",
     "@vscode/emmet-helper": "^2.8.4",
     "events": "^3.3.0",

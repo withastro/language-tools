@@ -23,7 +23,7 @@
     "color": "#FFBE2D",
     "theme": "dark"
   },
-  "version": "0.28.2",
+  "version": "0.28.3",
   "author": "withastro",
   "license": "MIT",
   "publisher": "astro-build",
@@ -47,7 +47,7 @@
     "workspaceContains:astro.config.*"
   ],
   "dependencies": {
-    "@astrojs/compiler": "^0.29.9",
+    "@astrojs/compiler": "^0.29.13",
     "@astrojs/ts-plugin": "0.3.0",
     "prettier": "^2.7.1",
     "prettier-plugin-astro": "^0.7.0"
