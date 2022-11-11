@@ -20,6 +20,7 @@
     "test:match": "pnpm run test -g"
   },
   "dependencies": {
+    "@astrojs/compiler": "^0.29.13",
     "@vscode/emmet-helper": "^2.8.4",
     "events": "^3.3.0",
     "prettier": "^2.7.1",
