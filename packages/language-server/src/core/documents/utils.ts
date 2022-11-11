@@ -236,7 +236,10 @@ export function getLineOffsets(text: string) {
 			isLineStart = false;
 		}
 		const ch = text.charAt(i);
-		isLineStart = ch === '\n' || (ch === '\r' && i + 1 < text.length && text.charAt(i + 1) === '\n');
+		isLineStart = ch === '\r' || ch === '\n';
+		if (ch === '\r' && i + 1 < text.length && text.charAt(i + 1) === '\n') {
+			i++;
+		}
 	}
 
 	if (isLineStart && text.length > 0) {
