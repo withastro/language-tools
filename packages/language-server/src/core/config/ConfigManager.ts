@@ -1,4 +1,6 @@
 import type { VSCodeEmmetConfig } from '@vscode/emmet-helper';
+import os from 'os';
+import path from 'path';
 import type { FormatCodeSettings, UserPreferences } from 'typescript';
 import type { Connection, FormattingOptions } from 'vscode-languageserver';
 import type { TextDocument } from 'vscode-languageserver-textdocument';
@@ -121,8 +123,7 @@ export class ConfigManager {
 			tabSize: vscodeOptions?.tabSize,
 			indentSize: vscodeOptions?.tabSize,
 			convertTabsToSpaces: vscodeOptions?.insertSpaces,
-			// We can use \n here since the editor normalizes later on to its line endings.
-			newLineCharacter: '\n',
+			newLineCharacter: os.EOL,
 			insertSpaceAfterCommaDelimiter: formatConfig.insertSpaceAfterCommaDelimiter ?? true,
 			insertSpaceAfterConstructor: formatConfig.insertSpaceAfterConstructor ?? false,
 			insertSpaceAfterSemicolonInForStatements: formatConfig.insertSpaceAfterSemicolonInForStatements ?? true,
