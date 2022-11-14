@@ -111,7 +111,7 @@ importers:
   packages/vscode:
     specifiers:
       '@astrojs/compiler': ^0.29.15
-      '@astrojs/language-server': 0.28.1
+      '@astrojs/language-server': 0.28.3
       '@astrojs/ts-plugin': 0.3.0
       '@types/mocha': ^9.1.0
       '@types/vscode': ^1.67.0
@@ -133,7 +133,7 @@ importers:
       prettier: 2.7.1
       prettier-plugin-astro: 0.7.0
     devDependencies:
-      '@astrojs/language-server': 0.28.1
+      '@astrojs/language-server': link:../language-server
       '@types/mocha': 9.1.1
       '@types/vscode': 1.71.0
       '@vscode/test-electron': 2.1.5
@@ -175,30 +175,8 @@ packages:
       '@jridgewell/trace-mapping': 0.3.15
     dev: true
 
-  /@astrojs/compiler/0.27.2:
-    resolution: {integrity: sha512-VG4X87cUkcmT40HqEwShQzUgl0VSnVTszobbmnhAOkHzdoWMxhwAm61A2o5fEsv6eEK8M0lW/fGwkSofYM5GcQ==}
-    dev: true
-
   /@astrojs/compiler/0.29.15:
     resolution: {integrity: sha512-vicPD8oOPNkcFZvz71Uz/nJcadovurUQ3L0yMZNPb6Nn6T1nHhlSHt5nAKaurB2pYU9DrxOFWZS2/RdV+JsWmQ==}
-
-  /@astrojs/language-server/0.28.1:
-    resolution: {integrity: sha512-PhWuvsmmWziD5KFB1J84IeRoWDUgl1Gb8l7Vz6feJdQ3vjTsykT0hMpiht8wp0CtXbY+c8ee3DuV5ZFUvtI/5g==}
-    hasBin: true
-    dependencies:
-      '@vscode/emmet-helper': 2.8.4
-      events: 3.3.0
-      prettier: 2.7.1
-      prettier-plugin-astro: 0.6.0
-      source-map: 0.7.4
-      vscode-css-languageservice: 6.1.0
-      vscode-html-languageservice: 5.0.1
-      vscode-languageserver: 8.0.2
-      vscode-languageserver-protocol: 3.17.2
-      vscode-languageserver-textdocument: 1.0.7
-      vscode-languageserver-types: 3.17.2
-      vscode-uri: 3.0.3
-    dev: true
 
   /@astrojs/language-server/0.28.3:
     resolution: {integrity: sha512-fPovAX/X46eE2w03jNRMpQ7W9m2mAvNt4Ay65lD9wl1Z5vIQYxlg7Enp9qP225muTr4jSVB5QiLumFJmZMAaVA==}
@@ -5309,16 +5287,6 @@ packages:
     engines: {node: '>=6.0.0'}
     dependencies:
       fast-diff: 1.2.0
-    dev: true
-
-  /prettier-plugin-astro/0.6.0:
-    resolution: {integrity: sha512-xU67TzyGi1u/pwVbEh55AwoOfcOpsh9BtD2MpUAEVrViAcdrBDcmA9VN0edLgla7f2NYu8ntGakxTSrSNFv1mQ==}
-    engines: {node: ^14.15.0 || >=16.0.0, npm: '>=6.14.0'}
-    dependencies:
-      '@astrojs/compiler': 0.27.2
-      prettier: 2.7.1
-      sass-formatter: 0.7.5
-      synckit: 0.8.4
     dev: true
 
   /prettier-plugin-astro/0.7.0:
