@@ -1,6 +1,5 @@
-// import type { TSXResult } from '@astrojs/compiler/shared/types';
+import type { TSXResult } from '@astrojs/compiler/shared/types';
 import { createSyncFn } from 'synckit';
-import type { TSXResult } from '../astro2tsx';
 
 const convertToTSXSync = createSyncFn(require.resolve('./TSXWorker'));
 
