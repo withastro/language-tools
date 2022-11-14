@@ -191,6 +191,10 @@ packages:
       '@jridgewell/trace-mapping': 0.3.15
     dev: true
 
+  /@astrojs/compiler/0.26.1:
+    resolution: {integrity: sha512-GoRi4qB05u+bVcSlR9nu9HJfSUGFBcoUUb+WFimKSm9e/KPTy0STOMb/Q0mLIcloavF4KvEqAnd9ukX62ewoaA==}
+    dev: false
+
   /@astrojs/compiler/0.29.15:
     resolution: {integrity: sha512-vicPD8oOPNkcFZvz71Uz/nJcadovurUQ3L0yMZNPb6Nn6T1nHhlSHt5nAKaurB2pYU9DrxOFWZS2/RdV+JsWmQ==}
 
