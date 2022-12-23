@@ -7,6 +7,8 @@ import {
 	CompletionList,
 	CompletionTriggerKind,
 	InsertTextFormat,
+	InsertTextMode,
+	Range,
 	MarkupContent,
 	MarkupKind,
 	Position,
@@ -25,6 +27,11 @@ type LastCompletion = {
 	documentVersion: number;
 	completions: CompletionItem[] | null;
 };
+
+// Matches import statements and dynamic imports. Captures import specifiers only.
+// Adapted from: https://github.com/vitejs/vite/blob/97f8b4df3c9eb817ab2669e5c10b700802eec900/packages/vite/src/node/optimizer/scan.ts#L47-L48
+const importsRE =
+	/(?<!\/\/.*)(?<=^|;|\*\/)\s*(?:import(?!\s+type)(?:[\w*{}\n\r\t, ]+from)?\s*("[^"]+"|'[^']+')\s*(?=$|;|\/\/|\/\*)|import\s*\(\s*("[^"]+"|'[^']+')\s*\))/gm;
 
 export class CompletionsProviderImpl implements CompletionsProvider {
 	private readonly languageServiceManager: LanguageServiceManager;
@@ -57,6 +64,11 @@ export class CompletionsProviderImpl implements CompletionsProvider {
 		if (completionContext?.triggerCharacter === '-' && node.parent === undefined && !insideExpression) {
 			const frontmatter = this.getComponentScriptCompletion(document, position);
 			if (frontmatter) items.push(frontmatter);
+		}
+
+		const { completions: flowCompletions } = await this.getFlowCompletions(document, position, completionContext);
+		if (flowCompletions.length > 0) {
+			items.push(...flowCompletions);
 		}
 
 		if (isInComponentStartTag(html, offset) && !insideExpression) {
@@ -122,6 +134,129 @@ export class CompletionsProviderImpl implements CompletionsProvider {
 			};
 		}
 		return null;
+	}
+
+	private getInjectImportTextEdit(document: AstroDocument, localNames: string[], importPackage: string): TextEdit | undefined {
+		if (document.astroMeta.frontmatter.state === null) {
+			return TextEdit.insert(Position.create(0, 0), `---\nimport { ${localNames.join(', ')} } from "${importPackage}";\n---\n`)
+		}
+		if (document.astroMeta.frontmatter.state === 'closed') {
+			const start = document.positionAt(document.astroMeta.frontmatter.startOffset! + 3);
+			const end = document.positionAt(document.astroMeta.frontmatter.endOffset!);
+			const code = document.getText(Range.create(start.line, start.character, end.line, end.character));
+
+			let textEdit: TextEdit | undefined;
+
+			let m;
+			importsRE.lastIndex = 0;
+			while ((m = importsRE.exec(code)) != null) {
+				const spec = (m[1] || m[2]).slice(1, -1);
+
+				if (spec !== 'astro/components') {
+					continue;
+				}
+				const existingImports = m[0].split('{')[1].split('}')[0].split(',').map(v => v.trim());
+				localNames = localNames.filter(localName => !existingImports.includes(localName))
+
+				if (localNames.length === 0) {
+					return
+				}
+				const lastBrace = m[0].lastIndexOf('}');
+				if (lastBrace === 0) {
+					continue;
+				}
+				const whitespace = m[0].slice(0, lastBrace).length - m[0].slice(0, lastBrace).trimEnd().length;
+
+
+				const offset = document.content.indexOf(m[0]) + lastBrace - whitespace;
+				const pos = document.positionAt(offset)
+				textEdit = TextEdit.insert(pos, `, ${localNames.join(', ')}`);
+			}
+
+			if (textEdit) {
+				return textEdit;
+			}
+
+			const insideFrontmatterPosition = document.positionAt(document.astroMeta.frontmatter.startOffset! + 3);
+			return TextEdit.insert(insideFrontmatterPosition, `\nimport { ${ localNames.join(', ')} } from "${importPackage}";\n`);
+		}
+	}
+
+	private async getFlowCompletions(
+		document: AstroDocument,
+		position: Position,
+		completionContext?: CompletionContext
+	): Promise<{ completions: CompletionItem[]; componentFilePath: string | null }> {
+		const base: CompletionItem = {
+			label: '',
+			kind: CompletionItemKind.Snippet,
+			insertTextFormat: InsertTextFormat.Snippet,
+			insertTextMode: InsertTextMode.adjustIndentation,
+		}
+		const flowCompletions: Record<string, CompletionItem> = {
+			For: {
+				...base,
+				label: 'For',
+				detail: 'For (Astro)',
+				insertText: `<For each={\${1:items}}>\n\t{(\${1/(ie)?s$/\${1:+y}/gi}) => $3}\n</For>$0`,
+			},
+			Range: {
+				...base,
+				label: 'Range',
+				detail: 'Range (Astro)',
+				insertText: `<Range from={\${1:0}} to={\${2:10}}>\n\t{(i) => $3}\n</Range>$0`,
+			},
+			Switch: {
+				...base,
+				label: 'Switch',
+				detail: 'Switch (Astro)',
+				insertText: `<Switch on={\${1:key}}>\n\t<Case is={\${2:value}}>\n\t\t$3\n\t</Case>\n\t<Default>\n\t\t$4\n\t</Default>\n</Switch>`,
+			},
+			Case: {
+				...base,
+				label: 'Case',
+				detail: 'Case (Astro)',
+				insertText: `<Case is={\${1:value}}>\n\t$2\n</Case>$0`
+			},
+			Maybe: {
+				...base,
+				label: 'Maybe',
+				detail: 'Maybe (Astro)',
+				insertText: `<Maybe as="\${1|div,span,h1,h2,h3,h4,h5,h6|}">\n\t$2\n</Maybe>$0`
+			}
+		}
+		const text = document
+			.getText(Range.create(position.line, position.character, position.line, document.lines[position.line - 1].length))
+			.trim();
+
+		const completions: CompletionItem[] = [];
+
+		for (const [key, completion] of Object.entries(flowCompletions)) {
+			let i = 0;
+			let match = false;
+			for (const char of text) {
+				if (i === 0 && char === '<') {
+					completion.insertText = completion.insertText?.slice(1);
+				} else {
+					match = match || char === key[i];
+					if (!match) {
+						break;
+					}
+					i++;
+				}
+			}
+
+			if (match) {
+				const imports = completion.label === 'Switch' ? ['Switch', 'Case', 'Default'] : [completion.label];
+				const textEdit = this.getInjectImportTextEdit(document, imports, 'astro/components');
+				if (textEdit) {
+					completion.additionalTextEdits = [textEdit];
+				}
+				completions.push(completion);
+			}
+		}
+
+		return { completions, componentFilePath: null };
 	}
 
 	private async getPropCompletionsAndFilePath(
