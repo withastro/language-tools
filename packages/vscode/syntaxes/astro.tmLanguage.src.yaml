@@ -206,8 +206,8 @@ repository:
     begin: <!--
     end: -->
     captures:
-      0: { name: punctuation.definition.comment.html }
-    name: comment.block.html
+      0: { name: punctuation.definition.comment.astro }
+    name: comment.block.astro
     patterns:
       # Validations
       - { match: '\G-?>|<!--(?!>)|<!-(?=-->)|--!>', name: invalid.illegal.characters-not-allowed-here.astro }
@@ -326,7 +326,7 @@ repository:
       # Template literals
       - begin: (`)
         end: \1
-        name: string.template.html
+        name: string.template.astro
         patterns:
           - include: 'source.tsx#template-substitution-element'
 

@@ -37,7 +37,7 @@
     "build:grammar": "npx js-yaml syntaxes/astro.tmLanguage.src.yaml > syntaxes/astro.tmLanguage.json",
     "test": "pnpm test:vscode && pnpm test:grammar",
     "test:vscode": "node ./test/runTest.js",
-    "test:grammar": "node ./test/grammar/test.mjs",
+    "test:grammar": "pnpm build:grammar && node ./test/grammar/test.mjs",
     "update-grammar-snapshots": "node ./test/grammar/test.mjs --updateSnapshot"
   },
   "engines": {
