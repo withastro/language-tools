@@ -390,49 +390,6 @@ export class CompletionsProviderImpl implements CompletionsProvider<CompletionIt
 		};
 	}
 
-	/**
-	 * If the textEdit is out of the word range of the triggered position
-	 * vscode would refuse to show the completions
-	 * split those edits into additionalTextEdit to fix it
-	 */
-	private fixTextEditRange(wordRangePosition: Position | undefined, completionItem: CompletionItem) {
-		const { textEdit } = completionItem;
-		if (!textEdit || !TextEdit.is(textEdit) || !wordRangePosition) {
-			return completionItem;
-		}
-
-		const {
-			newText,
-			range: { start },
-		} = textEdit;
-
-		const wordRangeStartCharacter = wordRangePosition.character;
-		if (wordRangePosition.line !== wordRangePosition.line || start.character > wordRangePosition.character) {
-			return completionItem;
-		}
-
-		textEdit.newText = newText.substring(wordRangeStartCharacter - start.character);
-		textEdit.range.start = {
-			line: start.line,
-			character: wordRangeStartCharacter,
-		};
-
-		completionItem.additionalTextEdits = [
-			TextEdit.replace(
-				{
-					start,
-					end: {
-						line: start.line,
-						character: wordRangeStartCharacter,
-					},
-				},
-				newText.substring(0, wordRangeStartCharacter - start.character)
-			),
-		];
-
-		return completionItem;
-	}
-
 	private canReuseLastCompletion(
 		lastCompletion: LastCompletion | undefined,
 		triggerKind: number | undefined,
