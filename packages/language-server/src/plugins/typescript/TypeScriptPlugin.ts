@@ -97,6 +97,10 @@ export class TypeScriptPlugin implements Plugin {
 		return this.hoverProvider.doHover(document, position);
 	}
 
+	async prepareRename(document: AstroDocument, position: Position): Promise<Range | null> {
+		return this.renameProvider.prepareRename(document, position);
+	}
+
 	async rename(document: AstroDocument, position: Position, newName: string): Promise<WorkspaceEdit | null> {
 		return this.renameProvider.rename(document, position, newName);
 	}
