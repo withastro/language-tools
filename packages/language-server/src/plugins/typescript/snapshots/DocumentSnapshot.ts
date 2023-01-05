@@ -1,6 +1,6 @@
-import { DiagnosticMessage, DiagnosticSeverity } from '@astrojs/compiler/shared/types';
+import { DiagnosticMessage } from '@astrojs/compiler/types';
 import { EncodedSourceMap, TraceMap } from '@jridgewell/trace-mapping';
-import { Position, TextDocumentContentChangeEvent } from 'vscode-languageserver';
+import { DiagnosticSeverity, Position, TextDocumentContentChangeEvent } from 'vscode-languageserver';
 import {
 	AstroDocument,
 	DocumentMapper,
