@@ -9,7 +9,7 @@ describe('TypeScript Plugin#RenameProvider', () => {
 	function setup(filePath: string) {
 		const env = createEnvironment(filePath, 'typescript', 'renaming');
 		const languageServiceManager = new LanguageServiceManager(env.docManager, [env.fixturesDir], env.configManager, ts);
-		const provider = new RenameProviderImpl(languageServiceManager);
+		const provider = new RenameProviderImpl(languageServiceManager, env.configManager);
 
 		return {
 			...env,

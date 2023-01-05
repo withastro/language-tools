@@ -131,7 +131,7 @@ describe('CSS Plugin', () => {
 				contents: {
 					kind: 'markdown',
 					value:
-						"Sets the color of an element's text\n\nSyntax: &lt;color&gt;\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/CSS/color)",
+						"Sets the color of an element's text\n\n(Edge 12, Firefox 1, Safari 1, Chrome 1, IE 3, Opera 3)\n\nSyntax: &lt;color&gt;\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/CSS/color)",
 				},
 				range: Range.create(0, 11, 0, 21),
 			});
@@ -144,7 +144,7 @@ describe('CSS Plugin', () => {
 				contents: {
 					kind: 'markdown',
 					value:
-						"Sets the color of an element's text\n\nSyntax: &lt;color&gt;\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/CSS/color)",
+						"Sets the color of an element's text\n\n(Edge 12, Firefox 1, Safari 1, Chrome 1, IE 3, Opera 3)\n\nSyntax: &lt;color&gt;\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/CSS/color)",
 				},
 				range: Range.create(0, 12, 0, 22),
 			});
