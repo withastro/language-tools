@@ -86,7 +86,7 @@ export class TypeScriptPlugin implements Plugin {
 		this.semanticTokensProvider = new SemanticTokensProviderImpl(this.languageServiceManager);
 		this.inlayHintsProvider = new InlayHintsProviderImpl(this.languageServiceManager, this.configManager);
 		this.foldingRangesProvider = new FoldingRangesProviderImpl(this.languageServiceManager);
-		this.renameProvider = new RenameProviderImpl(this.languageServiceManager);
+		this.renameProvider = new RenameProviderImpl(this.languageServiceManager, this.configManager);
 	}
 
 	async doHover(document: AstroDocument, position: Position): Promise<Hover | null> {

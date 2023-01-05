@@ -1,4 +1,5 @@
 import { Position, Range, WorkspaceEdit } from 'vscode-languageserver-types';
+import { ConfigManager } from '../../../core/config';
 import { AstroDocument, mapRangeToOriginal } from '../../../core/documents';
 import { pathToUrl } from '../../../utils';
 import type { RenameProvider } from '../../interfaces';
@@ -10,7 +11,7 @@ import { SnapshotMap } from './utils';
 export class RenameProviderImpl implements RenameProvider {
 	private ts: typeof import('typescript/lib/tsserverlibrary');
 
-	constructor(private languageServiceManager: LanguageServiceManager) {
+	constructor(private languageServiceManager: LanguageServiceManager, private configManager: ConfigManager) {
 		this.ts = languageServiceManager.docContext.ts;
 	}
 
@@ -23,7 +24,9 @@ export class RenameProviderImpl implements RenameProvider {
 			return null;
 		}
 
-		const renameInfo = lang.getRenameInfo(tsDoc.filePath, offset, {});
+		// TODO: Allow renaming of import paths
+		// This requires a bit of work, because we need to create files for the new import paths
+		const renameInfo = lang.getRenameInfo(tsDoc.filePath, offset, { allowRenameOfImportPath: false });
 
 		if (!renameInfo.canRename) {
 			return null;
@@ -37,7 +40,8 @@ export class RenameProviderImpl implements RenameProvider {
 
 		const offset = tsDoc.offsetAt(tsDoc.getGeneratedPosition(position));
 
-		let renames = lang.findRenameLocations(tsDoc.filePath, offset, false, false, true);
+		const { providePrefixAndSuffixTextForRename } = await this.configManager.getTSPreferences(document);
+		let renames = lang.findRenameLocations(tsDoc.filePath, offset, false, false, providePrefixAndSuffixTextForRename);
 		if (!renames) {
 			return null;
 		}
