@@ -237,6 +237,29 @@ describe('CSS Plugin', () => {
 		});
 	});
 
+	describe('provides renaming edits', () => {
+		it('can prepare rename', () => {
+			const { plugin, document } = setup('<style>h1 {color: red;}</style>');
+
+			const prepareRename = plugin.prepareRename(document, Position.create(0, 8));
+
+			expect(prepareRename).to.deep.equal(Range.create(0, 7, 0, 9));
+		});
+
+		it('can provide rename edits', () => {
+			const { plugin, document } = setup('<style>h1 {color: red;}</style>');
+
+			const renameEdits = plugin.rename(document, Position.create(0, 8), 'h2');
+
+			expect(renameEdits?.changes?.[document.uri]).to.deep.equal([
+				{
+					newText: 'h2',
+					range: Range.create(0, 7, 0, 9),
+				},
+			]);
+		});
+	});
+
 	describe('provides document symbols', () => {
 		it('for normal CSS', async () => {
 			const { plugin, document } = setup('<style>h1 {color: red;}</style>');

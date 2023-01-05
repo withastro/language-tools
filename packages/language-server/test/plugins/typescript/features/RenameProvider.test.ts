@@ -47,4 +47,40 @@ describe('TypeScript Plugin#RenameProvider', () => {
 			},
 		]);
 	});
+
+	it('can rename across files', async () => {
+		const { provider, document, configManager } = setup('crossFile.astro');
+
+		const newText = 'hasBeenRenamed';
+		const otherFile = document.getURL().replace('crossFile.astro', 'script.ts');
+
+		configManager.updateGlobalConfig(
+			{
+				typescript: {
+					preferences: {
+						useAliasesForRenames: false,
+					},
+				},
+			},
+			true
+		);
+
+		const rename = await provider.rename(document, Position.create(3, 1), newText);
+
+		expect(rename?.changes?.[otherFile]).to.deep.equal([
+			{
+				newText: 'hasBeenRenamed',
+				range: {
+					end: {
+						character: 29,
+						line: 0,
+					},
+					start: {
+						character: 16,
+						line: 0,
+					},
+				},
+			},
+		]);
+	});
 });
