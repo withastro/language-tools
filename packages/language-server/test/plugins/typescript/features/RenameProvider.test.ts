@@ -17,7 +17,15 @@ describe('TypeScript Plugin#RenameProvider', () => {
 		};
 	}
 
-	it('can rename things in the frontmatter', async () => {
+	it('can prepare renaming symbols in the frontmatter', async () => {
+		const { provider, document } = setup('simple.astro');
+
+		const rename = await provider.prepareRename(document, Position.create(1, 8));
+
+		expect(rename).to.deep.equal(Range.create(1, 7, 1, 22));
+	});
+
+	it('can rename symbols in the frontmatter', async () => {
 		const { provider, document } = setup('simple.astro');
 
 		const newText = 'myBadVariable';
