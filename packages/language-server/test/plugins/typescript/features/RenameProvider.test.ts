@@ -29,7 +29,7 @@ describe('TypeScript Plugin#RenameProvider', () => {
 		const { provider, document } = setup('simple.astro');
 
 		const newText = 'myBadVariable';
-		const filePath = document.getFilePath()!;
+		const filePath = document.getURL();
 		const rename = await provider.rename(document, Position.create(1, 8), newText);
 
 		expect(rename?.changes?.[filePath]).to.deep.equal([

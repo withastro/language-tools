@@ -1,9 +1,11 @@
 import { Position, Range, WorkspaceEdit } from 'vscode-languageserver-types';
 import { AstroDocument, mapRangeToOriginal } from '../../../core/documents';
+import { pathToUrl } from '../../../utils';
 import type { RenameProvider } from '../../interfaces';
 import type { LanguageServiceManager } from '../LanguageServiceManager';
 import { AstroSnapshot } from '../snapshots/DocumentSnapshot';
-import { convertRange, convertToLocationRange, ensureRealFilePath } from '../utils';
+import { convertRange } from '../utils';
+import { SnapshotMap } from './utils';
 
 export class RenameProviderImpl implements RenameProvider {
 	private ts: typeof import('typescript/lib/tsserverlibrary');
@@ -40,22 +42,35 @@ export class RenameProviderImpl implements RenameProvider {
 			return null;
 		}
 
-		let edit = {
-			changes: {},
-		} as WorkspaceEdit;
+		const docs = new SnapshotMap(this.languageServiceManager);
+		docs.set(tsDoc.filePath, tsDoc);
 
-		renames.forEach((rename) => {
-			const filePath = ensureRealFilePath(rename.fileName);
-			if (!(filePath in edit.changes!)) {
-				edit.changes![filePath] = [];
-			}
+		const mappedRenames = await Promise.all(
+			renames.map(async (rename) => {
+				const snapshot = await docs.retrieve(rename.fileName);
 
-			edit.changes![filePath].push({
-				newText: newName,
-				range: convertToLocationRange(tsDoc, rename.textSpan),
-			});
-		});
+				return {
+					...rename,
+					range: mapRangeToOriginal(snapshot, convertRange(snapshot, rename.textSpan)),
+					newName,
+				};
+			})
+		);
 
-		return edit;
+		return mappedRenames.reduce(
+			(acc, loc) => {
+				const uri = pathToUrl(loc.fileName);
+				if (!acc.changes[uri]) {
+					acc.changes[uri] = [];
+				}
+
+				acc.changes[uri].push({
+					newText: (loc.prefixText || '') + (loc.newName || newName) + (loc.suffixText || ''),
+					range: loc.range,
+				});
+				return acc;
+			},
+			<Required<Pick<WorkspaceEdit, 'changes'>>>{ changes: {} }
+		);
 	}
 }
