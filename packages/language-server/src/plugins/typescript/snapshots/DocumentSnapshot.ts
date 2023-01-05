@@ -1,4 +1,4 @@
-import type { DiagnosticMessage } from '@astrojs/compiler/shared/types';
+import { DiagnosticMessage, DiagnosticSeverity } from '@astrojs/compiler/shared/types';
 import { EncodedSourceMap, TraceMap } from '@jridgewell/trace-mapping';
 import { Position, TextDocumentContentChangeEvent } from 'vscode-languageserver';
 import {
@@ -44,6 +44,10 @@ export class AstroSnapshot implements DocumentSnapshot {
 		public readonly scriptKind: ts.ScriptKind,
 		public readonly compilerDiagnostics: DiagnosticMessage[]
 	) {}
+
+	get isInErrorState(): boolean {
+		return this.compilerDiagnostics.filter((diag) => diag.severity === DiagnosticSeverity.Error).length > 0;
+	}
 
 	isInGenerated(pos: Position): boolean {
 		throw new Error('Method not implemented.');
