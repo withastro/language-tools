@@ -1,10 +1,10 @@
-import { Position, Range, WorkspaceEdit } from 'vscode-languageserver-types';
-import { ConfigManager } from '../../../core/config';
+import type { Position, Range, WorkspaceEdit } from 'vscode-languageserver-types';
+import type { ConfigManager } from '../../../core/config';
 import { AstroDocument, mapRangeToOriginal } from '../../../core/documents';
 import { pathToUrl } from '../../../utils';
 import type { RenameProvider } from '../../interfaces';
 import type { LanguageServiceManager } from '../LanguageServiceManager';
-import { AstroSnapshot } from '../snapshots/DocumentSnapshot';
+import type { AstroSnapshot } from '../snapshots/DocumentSnapshot';
 import { convertRange } from '../utils';
 import { SnapshotMap } from './utils';
 
