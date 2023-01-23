@@ -92,18 +92,22 @@
     "commands": [
       {
         "command": "astro.restartLanguageServer",
+        "when": "resourceExtName == .astro",
         "title": "Astro: Restart Language Server"
       },
       {
         "command": "astro.showTSXOutput",
+        "when": "resourceExtName == .astro",
         "title": "Astro: Debug: Show TSX Output"
       },
       {
         "command": "astro.selectTypescriptVersion",
+        "when": "resourceExtName == .astro",
         "title": "Astro: Select Typescript Version..."
       },
       {
         "command": "astro.findFileReferences",
+        "when": "resourceExtName == .astro",
         "title": "Astro: Find File References"
       }
     ],
