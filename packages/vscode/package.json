@@ -49,10 +49,11 @@
   ],
   "dependencies": {
     "@astrojs/compiler": "^0.31.3",
-    "synckit": "0.8.4",
     "@astrojs/ts-plugin": "0.4.3",
+    "@vscode/webview-ui-toolkit": "^1.2.1",
     "prettier": "^2.7.1",
-    "prettier-plugin-astro": "^0.7.0"
+    "prettier-plugin-astro": "^0.7.0",
+    "synckit": "0.8.4"
   },
   "devDependencies": {
     "@astrojs/language-server": "0.29.5",
@@ -107,6 +108,25 @@
         "title": "Astro: Find File References"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "astro",
+          "title": "Astro",
+          "icon": "assets/astro.svg"
+        }
+      ]
+    },
+    "views": {
+      "astro": [
+        {
+          "id": "astro.houston",
+          "name": "Houston",
+          "type": "webview",
+          "contextualTitle": "Houston"
+        }
+      ]
+    },
     "menus": {
       "commandPalette": [
         {

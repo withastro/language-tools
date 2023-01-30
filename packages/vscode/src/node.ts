@@ -1,8 +1,9 @@
 import * as path from 'path';
-import { ExtensionContext, Position, TextDocument, Uri, workspace } from 'vscode';
+import { ExtensionContext, Position, TextDocument, Uri, workspace, window } from 'vscode';
 import { LanguageClientOptions, RequestType, TextDocumentPositionParams } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 import * as tsVersion from './features/typescriptVersion';
+import { WebviewProvider } from './webview/provider';
 import { activateTagClosing } from './html/autoClose';
 import { commonActivate, getInitOptions } from './shared';
 
@@ -64,6 +65,15 @@ export async function activate(context: ExtensionContext) {
 		});
 
 	commonActivate(context, client, tsVersion);
+	
+	const webviewProvider = new WebviewProvider(context.extensionUri);
+	context.subscriptions.push(
+		window.registerWebviewViewProvider(
+			WebviewProvider.viewType,
+			webviewProvider
+		)
+	);
+
 
 	return {
 		getLanguageServer: () => client,
