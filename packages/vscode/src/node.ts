@@ -74,7 +74,6 @@ function createLanguageServer(serverOptions: ServerOptions, clientOptions: Langu
 	return new LanguageClient('astro', 'Astro', serverOptions, clientOptions);
 }
 
-
 async function getConfiguredServerPath(workspaceState: Memento) {
 	const scope = 'astro.language-server';
 	const detailedLSPath = workspace.getConfiguration(scope).inspect<string>('ls-path');
