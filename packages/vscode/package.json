@@ -343,8 +343,8 @@
         ],
         "configuration": "./languages/astro-language-configuration.json",
         "icon": {
-          "light": "./assets/lang-icon.svg",
-          "dark": "./assets/lang-icon.svg"
+          "light": "./assets/lang-icon-light.svg",
+          "dark": "./assets/lang-icon-dark.svg"
         }
       }
     ],
