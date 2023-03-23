@@ -44,7 +44,6 @@
     "vscode": "^1.67.0"
   },
   "activationEvents": [
-    "onLanguage:astro",
     "workspaceContains:astro.config.*"
   ],
   "dependencies": {
@@ -83,6 +82,12 @@
     "directory": "packages/vscode"
   },
   "contributes": {
+    "snippets": [
+      {
+        "scope": "astro",
+        "path": "./languages/astro.code-snippets"
+      }
+    ],
     "typescriptServerPlugins": [
       {
         "name": "@astrojs/ts-plugin",
