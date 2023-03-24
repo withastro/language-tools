@@ -44,6 +44,7 @@
     "vscode": "^1.67.0"
   },
   "activationEvents": [
+    "onLanguage:astro",
     "workspaceContains:astro.config.*"
   ],
   "dependencies": {
