@@ -17,7 +17,7 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@astrojs/compiler": "link:../../../compiler/packages/compiler",
+    "@astrojs/compiler": "0.0.0-sync-20230409173822",
     "@jridgewell/sourcemap-codec": "^1.4.15",
     "@volar-plugins/css": "2.0.0-alpha.21",
     "@volar-plugins/emmet": "2.0.0-alpha.21",
