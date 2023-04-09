@@ -369,6 +369,7 @@
     "@volar/vscode": "1.4.0-alpha.7",
     "@vscode/vsce": "latest",
     "esbuild": "^0.17.15",
+    "esbuild-plugin-copy": "^2.1.1",
     "kleur": "^4.1.5",
     "typescript": "~5.0.0",
     "vscode-languageclient": "^8.1.0"

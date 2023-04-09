@@ -1,4 +1,5 @@
 import esbuild from 'esbuild';
+import { copy } from 'esbuild-plugin-copy';
 import { createRequire } from 'node:module';
 import { rebuildPlugin } from './shared.mjs';
 
@@ -26,15 +27,25 @@ export default async function build(...args) {
 		define: { 'process.env.NODE_ENV': '"production"' },
 		minify: process.argv.includes('--minify'),
 		plugins: [
+			copy({
+				assets: {
+					from: ['../language-server/node_modules/@astrojs/compiler/astro.wasm'],
+					to: ['../astro.wasm'],
+					watch: isDev,
+				},
+			}),
 			{
 				name: 'umd2esm',
 				setup(pluginBuild) {
-					pluginBuild.onResolve({ filter: /^(vscode-.*|estree-walker|jsonc-parser)/ }, (buildArgs) => {
-						const pathUmdMay = require.resolve(buildArgs.path, { paths: [buildArgs.resolveDir] });
-						// Call twice the replace is to solve the problem of the path in Windows
-						const pathEsm = pathUmdMay.replace('/umd/', '/esm/').replace('\\umd\\', '\\esm\\');
-						return { path: pathEsm };
-					});
+					pluginBuild.onResolve(
+						{ filter: /^(vscode-.*|estree-walker|jsonc-parser)/ },
+						(buildArgs) => {
+							const pathUmdMay = require.resolve(buildArgs.path, { paths: [buildArgs.resolveDir] });
+							// Call twice the replace is to solve the problem of the path in Windows
+							const pathEsm = pathUmdMay.replace('/umd/', '/esm/').replace('\\umd\\', '\\esm\\');
+							return { path: pathEsm };
+						}
+					);
 				},
 			},
 		],
