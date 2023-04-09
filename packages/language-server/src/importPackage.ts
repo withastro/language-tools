@@ -1,6 +1,9 @@
+// @ts-expect-error
 import type * as svelte from '@astrojs/svelte/dist/editor.cjs';
+// @ts-expect-error
 import type * as vue from '@astrojs/svelte/dist/editor.cjs';
 import { dirname, resolve } from 'path';
+// @ts-expect-error
 import type * as prettier from 'prettier';
 
 let isTrusted = true;

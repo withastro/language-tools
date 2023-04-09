@@ -7,36 +7,20 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": ["--extensionDevelopmentPath=${workspaceRoot}/packages/vscode"],
-      "outFiles": ["${workspaceRoot}/packages/vscode/dist/node/client.js"]
-    },
-    {
-      "type": "node",
-      "request": "attach",
-      "name": "Attach to Server",
-      "port": 6040,
-      "restart": true,
-      "outFiles": ["${workspaceRoot}/packages/vscode/dist/node/server.js"],
-      "skipFiles": ["<node_internals>/**"]
-    },
-    {
-      "name": "Run extension tests",
-      "type": "extensionHost",
-      "request": "launch",
-      "runtimeExecutable": "${execPath}",
       "args": [
         "--disable-extensions",
-        "--extensionDevelopmentPath=${workspaceRoot}/packages/vscode",
-        "--extensionTestsPath=${workspaceRoot}/packages/vscode/test/suite/index.js"
-      ]
+        "--extensionDevelopmentPath=${workspaceRoot}/packages/vscode"
+      ],
+      "outFiles": ["${workspaceRoot}/*/*/dist/**/*.js"]
     },
     {
-      "name": "Launch Web Extension",
-      "type": "extensionHost",
-      "debugWebWorkerHost": true,
-      "request": "launch",
-      "args": ["--extensionDevelopmentPath=${workspaceFolder}/packages/vscode", "--extensionDevelopmentKind=web"],
-      "outFiles": ["${workspaceFolder}/packages/vscode/dist/browser/*.js"]
+      "name": "Attach to Server",
+      "type": "node",
+      "request": "attach",
+      "port": 6009,
+      "restart": true,
+      "outFiles": ["${workspaceRoot}/*/*/dist/**/*.js"],
+      "skipFiles": ["<node_internals>/**"]
     }
   ],
   "compounds": [
