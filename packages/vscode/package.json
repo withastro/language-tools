@@ -49,10 +49,10 @@
   ],
   "dependencies": {
     "@astrojs/compiler": "^1.1.1",
-    "synckit": "0.8.4",
     "@astrojs/ts-plugin": "0.4.4",
     "prettier": "^2.7.1",
-    "prettier-plugin-astro": "^0.7.0"
+    "prettier-plugin-astro": "^0.8.0",
+    "synckit": "0.8.4"
   },
   "devDependencies": {
     "@astrojs/language-server": "0.29.6",

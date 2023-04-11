@@ -45,7 +45,7 @@ importers:
       events: ^3.3.0
       mocha: ^9.2.2
       prettier: ^2.7.1
-      prettier-plugin-astro: ^0.7.0
+      prettier-plugin-astro: ^0.8.0
       sinon: ^13.0.1
       svelte: ^3.49.0
       synckit: ^0.8.4
@@ -65,7 +65,7 @@ importers:
       '@vscode/emmet-helper': 2.8.4
       events: 3.3.0
       prettier: 2.7.1
-      prettier-plugin-astro: 0.7.0
+      prettier-plugin-astro: 0.8.0
       synckit: 0.8.4
       vscode-css-languageservice: 6.2.1
       vscode-html-languageservice: 5.0.1
@@ -140,7 +140,7 @@ importers:
       mocha: ^9.2.2
       path-browserify: ^1.0.1
       prettier: ^2.7.1
-      prettier-plugin-astro: ^0.7.0
+      prettier-plugin-astro: ^0.8.0
       synckit: 0.8.4
       typescript: ~4.8.2
       vscode-languageclient: ^8.0.1
@@ -149,7 +149,7 @@ importers:
       '@astrojs/compiler': 1.1.1
       '@astrojs/ts-plugin': link:../ts-plugin
       prettier: 2.7.1
-      prettier-plugin-astro: 0.7.0
+      prettier-plugin-astro: 0.8.0
       synckit: 0.8.4
     devDependencies:
       '@astrojs/language-server': link:../language-server
@@ -197,9 +197,18 @@ packages:
 
   /@astrojs/compiler/0.29.16:
     resolution: {integrity: sha512-1CCf+dktc8IQCdmsNNSIor3rcJE5OIirFnFtQWp1VUxqCacefqRRlsl9lH7JcKKpRvz1taL43yHYJP8dxNfVww==}
+    dev: true
+
+  /@astrojs/compiler/0.31.4:
+    resolution: {integrity: sha512-6bBFeDTtPOn4jZaiD3p0f05MEGQL9pw2Zbfj546oFETNmjJFWO3nzHz6/m+P53calknCvyVzZ5YhoBLIvzn5iw==}
+    dev: true
 
   /@astrojs/compiler/1.1.1:
     resolution: {integrity: sha512-JRDEARnuUUOlKUE4XVu8+NoeNWpOHtYQW39uWjqTbpefMjL95og54vTKLHqeUajXWeY115zZtO7jIVdOmQ1IPQ==}
+    dev: false
+
+  /@astrojs/compiler/1.3.1:
+    resolution: {integrity: sha512-xV/3r+Hrfpr4ECfJjRjeaMkJvU73KiOADowHjhkqidfNPVAWPzbqw1KePXuMK1TjzMvoAVE7E163oqfH3lDwSw==}
     dev: false
 
   /@astrojs/language-server/0.28.3:
@@ -209,7 +218,7 @@ packages:
       '@vscode/emmet-helper': 2.8.4
       events: 3.3.0
       prettier: 2.7.1
-      prettier-plugin-astro: 0.7.0
+      prettier-plugin-astro: 0.7.2
       source-map: 0.7.4
       vscode-css-languageservice: 6.2.1
       vscode-html-languageservice: 5.0.1
@@ -5312,19 +5321,36 @@ packages:
       fast-diff: 1.2.0
     dev: true
 
-  /prettier-plugin-astro/0.7.0:
-    resolution: {integrity: sha512-ehCUx7MqHWvkHwUmxxAWLsL35pFaCTM5YXQ8xjG/1W6dY2yBhvEks+2aCfjeI5zmMrZNCXkiMQtpznSlLSLrxw==}
-    engines: {node: ^14.15.0 || >=16.0.0, npm: '>=6.14.0'}
+  /prettier-plugin-astro/0.7.2:
+    resolution: {integrity: sha512-mmifnkG160BtC727gqoimoxnZT/dwr8ASxpoGGl6EHevhfblSOeu+pwH1LAm5Qu1MynizktztFujHHaijLCkww==}
+    engines: {node: ^14.15.0 || >=16.0.0, pnpm: '>=7.14.0'}
     dependencies:
-      '@astrojs/compiler': 0.29.16
+      '@astrojs/compiler': 0.31.4
       prettier: 2.7.1
       sass-formatter: 0.7.5
       synckit: 0.8.4
+    dev: true
+
+  /prettier-plugin-astro/0.8.0:
+    resolution: {integrity: sha512-kt9wk33J7HvFGwFaHb8piwy4zbUmabC8Nu+qCw493jhe96YkpjscqGBPy4nJ9TPy9pd7+kEx1zM81rp+MIdrXg==}
+    engines: {node: ^14.15.0 || >=16.0.0, pnpm: '>=7.14.0'}
+    dependencies:
+      '@astrojs/compiler': 1.3.1
+      prettier: 2.8.7
+      sass-formatter: 0.7.6
+      synckit: 0.8.4
+    dev: false
 
   /prettier/2.7.1:
     resolution: {integrity: sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==}
     engines: {node: '>=10.13.0'}
     hasBin: true
+
+  /prettier/2.8.7:
+    resolution: {integrity: sha512-yPngTo3aXUUmyuTjeTUT75txrf+aMh9FiD7q9ZE/i6r0bPb22g4FsE6Y338PQX1bmfy08i9QQCB7/rcUAVntfw==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
+    dev: false
 
   /prismjs/1.29.0:
     resolution: {integrity: sha512-Kx/1w86q/epKcmte75LNrEoT+lX8pBpavuAbvJWRXar7Hz8jrtF+e3vY751p0R8H9HdArwaCTNDDzHg/ScJK1Q==}
@@ -5692,6 +5718,13 @@ packages:
     resolution: {integrity: sha512-NKFP8ddjhUYi6A/iD1cEtzkEs91U61kzqe3lY9SVNuvX7LGc88xnEN0mmsWL7Ol//YTi2GL/ol7b9XZ2+hgXuA==}
     dependencies:
       suf-log: 2.5.3
+    dev: true
+
+  /sass-formatter/0.7.6:
+    resolution: {integrity: sha512-hXdxU6PCkiV3XAiSnX+XLqz2ohHoEnVUlrd8LEVMAI80uB1+OTScIkH9n6qQwImZpTye1r1WG1rbGUteHNhoHg==}
+    dependencies:
+      suf-log: 2.5.3
+    dev: false
 
   /section-matter/1.0.0:
     resolution: {integrity: sha512-vfD3pmTzGpufjScBh50YHKzEu2lxBWhVEHsNGoEXmCmn2hKGfeNLYMzCJpe8cD7gqX7TJluOVpBkAequ6dgMmA==}
