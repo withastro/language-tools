@@ -30,7 +30,9 @@ export function getLanguageModule(astroInstall: AstroInstall): LanguageModule<As
 				getScriptFileNames() {
 					const fileNames = host.getScriptFileNames();
 					return [
-						...['./env.d.ts', './astro-jsx.d.ts'].map((filePath) => path.join(astroInstall.path, filePath)),
+						...['./env.d.ts', './astro-jsx.d.ts'].map((filePath) =>
+							path.join(astroInstall.path, filePath)
+						),
 						...fileNames,
 					];
 				},
@@ -88,6 +90,8 @@ export class AstroFile implements VirtualFile {
 		this.embeddedFiles = [];
 		this.embeddedFiles.push(htmlVirtualFile);
 		this.embeddedFiles.push(...extractStylesheets(this.fileName, this.snapshot, htmlDocument));
-		this.embeddedFiles.push(getVirtualFileTSX(this.snapshot.getText(0, this.snapshot.getLength()), this.fileName));
+		this.embeddedFiles.push(
+			getVirtualFileTSX(this.snapshot.getText(0, this.snapshot.getLength()), this.fileName)
+		);
 	}
 }

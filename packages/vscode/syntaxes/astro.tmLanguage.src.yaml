@@ -210,7 +210,10 @@ repository:
     name: comment.block.astro
     patterns:
       # Validations
-      - { match: '\G-?>|<!--(?!>)|<!-(?=-->)|--!>', name: invalid.illegal.characters-not-allowed-here.astro }
+      - {
+          match: '\G-?>|<!--(?!>)|<!-(?=-->)|--!>',
+          name: invalid.illegal.characters-not-allowed-here.astro,
+        }
 
   # ------
   #  MISC

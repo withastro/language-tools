@@ -23,14 +23,21 @@ export async function activate(context: vscode.ExtensionContext) {
 	};
 	const initializationOptions: LanguageServerInitializationOptions = {
 		// no need tsdk because language server do not have typescript features
-		typescript: { tsdk: require('path').join(vscode.env.appRoot, 'extensions/node_modules/typescript/lib') },
+		typescript: {
+			tsdk: require('path').join(vscode.env.appRoot, 'extensions/node_modules/typescript/lib'),
+		},
 		diagnosticModel: DiagnosticModel.Pull,
 	};
 	const clientOptions: lsp.LanguageClientOptions = {
 		documentSelector: [{ language: 'astro' }],
 		initializationOptions,
 	};
-	client = new lsp.LanguageClient('astro-language-server', 'Astro Language Server', serverOptions, clientOptions);
+	client = new lsp.LanguageClient(
+		'astro-language-server',
+		'Astro Language Server',
+		serverOptions,
+		clientOptions
+	);
 	await client.start();
 
 	// support for auto close tag

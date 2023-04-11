@@ -94,8 +94,13 @@ export function patchModuleLoader(
 		// astro file and if so, are resolved, too. This way we can defer
 		// all module resolving logic except for astro files to TypeScript.
 		const resolved =
-			origResolveModuleNames?.(moduleNames, containingFile, reusedNames, redirectedReference, compilerOptions) ||
-			Array.from<undefined>(Array(moduleNames.length));
+			origResolveModuleNames?.(
+				moduleNames,
+				containingFile,
+				reusedNames,
+				redirectedReference,
+				compilerOptions
+			) || Array.from<undefined>(Array(moduleNames.length));
 
 		return resolved.map((moduleName, idx) => {
 			const fileName = moduleNames[idx];

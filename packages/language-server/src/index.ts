@@ -2,7 +2,11 @@ import createCssPlugin from '@volar-plugins/css';
 import createEmmetPlugin from '@volar-plugins/emmet';
 import createHtmlPlugin from '@volar-plugins/html';
 import createTypeScriptPlugin from '@volar-plugins/typescript';
-import { LanguageServerPlugin, createConnection, startLanguageServer } from '@volar/language-server/node';
+import {
+	LanguageServerPlugin,
+	createConnection,
+	startLanguageServer,
+} from '@volar/language-server/node';
 import { getLanguageModule } from './core';
 import { startWASMService } from './core/parseAstro';
 import { getAstroInstall } from './core/utils';

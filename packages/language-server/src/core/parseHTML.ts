@@ -1,4 +1,9 @@
-import { FileCapabilities, FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
+import {
+	FileCapabilities,
+	FileKind,
+	FileRangeCapabilities,
+	VirtualFile,
+} from '@volar/language-core';
 import type ts from 'typescript/lib/tsserverlibrary';
 import * as html from 'vscode-html-languageservice';
 import { isInsideExpression } from './utils';
@@ -73,7 +78,9 @@ function preprocess(text: string, frontmatterEnd?: number) {
 
 	function shouldBlankStartOrEndTagLike(offset: number) {
 		// not null rather than falsy, otherwise it won't work on first tag(0)
-		return currentStartTagStart !== null && isInsideExpression(content, currentStartTagStart, offset);
+		return (
+			currentStartTagStart !== null && isInsideExpression(content, currentStartTagStart, offset)
+		);
 	}
 
 	function blankStartOrEndTagLike(offset: number, state?: html.ScannerState) {

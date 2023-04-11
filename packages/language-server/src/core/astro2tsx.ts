@@ -1,6 +1,11 @@
 import { convertToTSX } from '@astrojs/compiler/sync';
 import { decode } from '@jridgewell/sourcemap-codec';
-import { FileCapabilities, FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
+import {
+	FileCapabilities,
+	FileKind,
+	FileRangeCapabilities,
+	VirtualFile,
+} from '@volar/language-core';
 import { TextDocument } from 'vscode-html-languageservice';
 
 function astro2tsx(input: string, fileName: string) {
