@@ -296,9 +296,8 @@ export function getAstroInstall(basePaths: string[]): AstroInstall | undefined {
 }
 
 export function getWorkspacePnpPath(workspacePath: string): string | null {
-	const possiblePath = resolve(workspacePath, '.pnp.cjs');
-
 	try {
+		const possiblePath = resolve(workspacePath, '.pnp.cjs');
 		require.resolve(possiblePath);
 		return possiblePath;
 	} catch {
