@@ -5,6 +5,11 @@
   "license": "MIT",
   "type": "commonjs",
   "main": "out/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/withastro/language-tools",
+    "directory": "packages/language-server"
+  },
   "files": [
     "out/**/*.js",
     "out/**/*.d.ts"

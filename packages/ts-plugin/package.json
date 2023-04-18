@@ -4,6 +4,11 @@
   "description": "A TypeScript Plugin providing Astro intellisense",
   "main": "dist/index.js",
   "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/withastro/language-tools",
+    "directory": "packages/ts-plugin"
+  },
   "keywords": [
     "astro",
     "typescript",
