@@ -60,7 +60,7 @@ export class AstroFile implements VirtualFile {
 	mappings!: VirtualFile['mappings'];
 	embeddedFiles!: VirtualFile['embeddedFiles'];
 	astroAst!: ParseResult;
-	frontmatterStatus!: FrontmatterStatus;
+	frontmatter!: FrontmatterStatus;
 	compilerDiagnostics!: DiagnosticMessage[];
 
 	constructor(public sourceFileName: string, public snapshot: ts.IScriptSnapshot) {
@@ -83,7 +83,7 @@ export class AstroFile implements VirtualFile {
 		];
 
 		this.astroAst = getAstroAST(this.snapshot.getText(0, this.snapshot.getLength()));
-		this.frontmatterStatus = getFrontmatterStatus(this.astroAst);
+		this.frontmatter = getFrontmatterStatus(this.astroAst);
 		const tsx = astro2tsx(this.snapshot.getText(0, this.snapshot.getLength()), this.fileName);
 
 		this.compilerDiagnostics = tsx.diagnostics;
@@ -91,7 +91,7 @@ export class AstroFile implements VirtualFile {
 		const { htmlDocument, virtualFile: htmlVirtualFile } = parseHTML(
 			this.fileName,
 			this.snapshot,
-			this.frontmatterStatus.status === 'closed' ? this.frontmatterStatus.position.end.offset : 0
+			this.frontmatter.status === 'closed' ? this.frontmatter.position.end.offset : 0
 		);
 
 		this.embeddedFiles = [];

@@ -1,20 +1,43 @@
 import { DiagnosticMessage } from '@astrojs/compiler/types.js';
 import {
 	CodeLens,
+	CompletionItem,
+	CompletionItemKind,
 	Diagnostic,
+	InsertTextFormat,
 	LanguageServicePlugin,
 	LanguageServicePluginInstance,
 	Position,
 	Range,
+	TextEdit,
 } from '@volar/language-server';
 import fg from 'fast-glob';
 import { dirname } from 'path';
+import type { TextDocument } from 'vscode-html-languageservice';
 import { AstroFile } from '../core/index.js';
 import { isTsDocument } from '../utils.js';
 
 export default (): LanguageServicePlugin =>
 	(context): LanguageServicePluginInstance => {
 		return {
+			triggerCharacters: ['-'],
+			provideCompletionItems(document, position, completionContext, token) {
+				if (token.isCancellationRequested) return null;
+				let items: CompletionItem[] = [];
+
+				const [file] = context!.documents.getVirtualFileByUri(document.uri);
+				if (!(file instanceof AstroFile)) return;
+
+				if (completionContext.triggerCharacter === '-') {
+					const frontmatterCompletion = getFrontmatterCompletion(file, document, position);
+					if (frontmatterCompletion) items.push(frontmatterCompletion);
+				}
+
+				return {
+					isIncomplete: false,
+					items: items,
+				};
+			},
 			provideSemanticDiagnostics(document, token) {
 				if (token.isCancellationRequested) return [];
 
@@ -83,4 +106,52 @@ function getGlobResultAsCodeLens(globText: string, dir: string, position: Positi
 		range: Range.create(position, position),
 		command: { title: `Matches ${globResult.length} files`, command: '' },
 	};
+}
+
+function getFrontmatterCompletion(file: AstroFile, document: TextDocument, position: Position) {
+	const base: CompletionItem = {
+		kind: CompletionItemKind.Snippet,
+		label: '---',
+		sortText: '\0',
+		preselect: true,
+		detail: 'Create component script block',
+		insertTextFormat: InsertTextFormat.Snippet,
+		commitCharacters: [],
+	};
+
+	const documentLines = document.getText().split(/\r?\n/);
+	const { line, character } = document.positionAt(document.offsetAt(position));
+	const prefix = documentLines[line].slice(0, character);
+
+	if (file.frontmatter.status === 'doesnt-exist') {
+		return {
+			...base,
+			insertText: '---\n$0\n---',
+			textEdit: prefix.match(/^\s*\-+/)
+				? TextEdit.replace({ start: { ...position, character: 0 }, end: position }, '---\n$0\n---')
+				: undefined,
+		};
+	}
+
+	if (file.frontmatter.status === 'open') {
+		let insertText = '---';
+
+		// If the current line is a full component script starter/ender, the user expects a full frontmatter
+		// completion and not just a completion for "---"  on the same line (which result in, well, nothing)
+		if (prefix === '---') {
+			insertText = '---\n$0\n---';
+		}
+
+		return {
+			...base,
+			insertText,
+			detail:
+				insertText === '---' ? 'Close component script block' : 'Create component script block',
+			textEdit: prefix.match(/^\s*\-+/)
+				? TextEdit.replace({ start: { ...position, character: 0 }, end: position }, insertText)
+				: undefined,
+		};
+	}
+
+	return null;
 }
