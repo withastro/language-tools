@@ -28,7 +28,7 @@ importers:
 
   packages/language-server:
     specifiers:
-      '@astrojs/compiler': 0.0.0-sync-20230418112509
+      '@astrojs/compiler': 0.0.0-map-export-20230418133923
       '@jridgewell/sourcemap-codec': ^1.4.15
       '@volar-plugins/css': 2.0.0-alpha.23
       '@volar-plugins/emmet': 2.0.0-alpha.23
@@ -43,7 +43,7 @@ importers:
       typescript: ~5.0.4
       vscode-html-languageservice: ^5.0.4
     dependencies:
-      '@astrojs/compiler': 0.0.0-sync-20230418112509
+      '@astrojs/compiler': 0.0.0-map-export-20230418133923
       '@jridgewell/sourcemap-codec': 1.4.15
       '@volar-plugins/css': 2.0.0-alpha.23_jx5eulwuvnn6koipfpinwpqutm
       '@volar-plugins/emmet': 2.0.0-alpha.23_jx5eulwuvnn6koipfpinwpqutm
@@ -116,8 +116,8 @@ importers:
 
 packages:
 
-  /@astrojs/compiler/0.0.0-sync-20230418112509:
-    resolution: {integrity: sha512-3PpXs2PI5tv15uAv56FMTjAJTkisVtw88MB7FpoQHOQ+aJlUsXD+I9Ayz4GTfqbRCVKPJjaI9DlbM/XIB3fc5w==}
+  /@astrojs/compiler/0.0.0-map-export-20230418133923:
+    resolution: {integrity: sha512-lWIeGFA6fz7FQ7z9tOqFcP3HnYyJB0KwPNtzvzCRbgQhrRl2SENg9rA3hHW0uLP4OqU7DIszsX69HGzDB29y3Q==}
     dev: false
 
   /@astrojs/compiler/1.3.1:

@@ -17,7 +17,7 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@astrojs/compiler": "0.0.0-sync-20230418112509",
+    "@astrojs/compiler": "0.0.0-map-export-20230418133923",
     "@jridgewell/sourcemap-codec": "^1.4.15",
     "@volar-plugins/css": "2.0.0-alpha.23",
     "@volar-plugins/emmet": "2.0.0-alpha.23",
