@@ -59,10 +59,8 @@ export function startLanguageServer(connection: vscode.Connection, env: RuntimeE
 
 		workspaceUris.forEach((uri) => {
 			uri = urlToPath(uri) as string;
-			let possiblePnpPath = null;
-
 			if (!isPnpInit) {
-				possiblePnpPath = getWorkspacePnpPath(uri);
+				const possiblePnpPath = getWorkspacePnpPath(uri);
 
 				if (possiblePnpPath) {
 					require(possiblePnpPath).setup();
