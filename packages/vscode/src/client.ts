@@ -1,5 +1,9 @@
 import { DiagnosticModel, LanguageServerInitializationOptions } from '@volar/language-server';
-import { activateAutoInsertion, activateShowVirtualFiles } from '@volar/vscode';
+import {
+	activateAutoInsertion,
+	activateShowVirtualFiles,
+	activateWriteVirtualFiles,
+} from '@volar/vscode';
 import * as vscode from 'vscode';
 import * as lsp from 'vscode-languageclient/node';
 
@@ -43,6 +47,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// support for auto close tag
 	activateAutoInsertion([client], (document) => document.languageId === 'astro');
 	activateShowVirtualFiles('astro.showTSXOutput', client);
+	activateWriteVirtualFiles('astro.findFileReferences', client);
 }
 
 export function deactivate(): Thenable<any> | undefined {

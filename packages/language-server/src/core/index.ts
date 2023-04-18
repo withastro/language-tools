@@ -1,4 +1,4 @@
-import type { ParseResult } from '@astrojs/compiler/types';
+import type { DiagnosticMessage, ParseResult } from '@astrojs/compiler/types';
 import {
 	FileCapabilities,
 	FileKind,
@@ -8,7 +8,7 @@ import {
 } from '@volar/language-core';
 import * as path from 'path';
 import type ts from 'typescript/lib/tsserverlibrary';
-import { getVirtualFileTSX } from './astro2tsx';
+import { astro2tsx } from './astro2tsx';
 import { FrontmatterStatus, getAstroAST, getFrontmatterStatus } from './parseAstro';
 import { extractStylesheets } from './parseCSS';
 import { parseHTML } from './parseHTML';
@@ -61,6 +61,7 @@ export class AstroFile implements VirtualFile {
 	embeddedFiles!: VirtualFile['embeddedFiles'];
 	astroAst!: ParseResult;
 	frontmatterStatus!: FrontmatterStatus;
+	compilerDiagnostics!: DiagnosticMessage[];
 
 	constructor(public sourceFileName: string, public snapshot: ts.IScriptSnapshot) {
 		this.fileName = sourceFileName;
@@ -83,6 +84,9 @@ export class AstroFile implements VirtualFile {
 
 		this.astroAst = getAstroAST(this.snapshot.getText(0, this.snapshot.getLength()));
 		this.frontmatterStatus = getFrontmatterStatus(this.astroAst);
+		const tsx = astro2tsx(this.snapshot.getText(0, this.snapshot.getLength()), this.fileName);
+
+		this.compilerDiagnostics = tsx.diagnostics;
 
 		const { htmlDocument, virtualFile: htmlVirtualFile } = parseHTML(
 			this.fileName,
@@ -93,8 +97,6 @@ export class AstroFile implements VirtualFile {
 		this.embeddedFiles = [];
 		this.embeddedFiles.push(htmlVirtualFile);
 		this.embeddedFiles.push(...extractStylesheets(this.fileName, this.snapshot, htmlDocument));
-		this.embeddedFiles.push(
-			getVirtualFileTSX(this.snapshot.getText(0, this.snapshot.getLength()), this.fileName)
-		);
+		this.embeddedFiles.push(tsx.virtualFile);
 	}
 }
