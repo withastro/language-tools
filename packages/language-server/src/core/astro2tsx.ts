@@ -74,6 +74,13 @@ function getVirtualFileTSX(input: string, tsx: TSXResult, fileName: string): Vir
 		}
 	}
 
+	// Ensure that `0:0` is mapped to `0:0` to make sure we properly handle "unmapped" lines
+	mappings.push({
+		sourceRange: [0, 0],
+		generatedRange: [0, 0],
+		data: {},
+	});
+
 	return {
 		fileName: fileName + '.tsx',
 		kind: FileKind.TypeScriptHostFile,
