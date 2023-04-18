@@ -1,11 +1,6 @@
 import type { Point } from '@astrojs/compiler/shared/ast';
-import { parse, startRunningService } from '@astrojs/compiler/sync';
+import { parse } from '@astrojs/compiler/sync';
 import type { ParseResult } from '@astrojs/compiler/types';
-import * as path from 'path';
-
-export async function startWASMService() {
-	return await startRunningService(path.join(__dirname, '../astro.wasm'));
-}
 
 export function getAstroAST(input: string, position = true) {
 	return parse(input, { position: position });

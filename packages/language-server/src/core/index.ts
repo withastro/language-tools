@@ -14,7 +14,10 @@ import { extractStylesheets } from './parseCSS';
 import { parseHTML } from './parseHTML';
 import { AstroInstall } from './utils';
 
-export function getLanguageModule(astroInstall: AstroInstall): LanguageModule<AstroFile> {
+export function getLanguageModule(
+	astroInstall: AstroInstall,
+	ts: typeof import('typescript/lib/tsserverlibrary.js')
+): LanguageModule<AstroFile> {
 	return {
 		createFile(fileName, snapshot) {
 			if (fileName.endsWith('.astro')) {
@@ -38,7 +41,7 @@ export function getLanguageModule(astroInstall: AstroInstall): LanguageModule<As
 				},
 				getCompilationSettings() {
 					return {
-						jsx: 1,
+						jsx: ts.JsxEmit.Preserve ?? 1,
 						jsxImportSource: undefined,
 						jsxFactory: 'astroHTML',
 						...host.getCompilationSettings(),

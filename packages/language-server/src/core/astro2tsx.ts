@@ -1,11 +1,6 @@
 import { convertToTSX } from '@astrojs/compiler/sync';
 import { decode } from '@jridgewell/sourcemap-codec';
-import {
-	FileCapabilities,
-	FileKind,
-	FileRangeCapabilities,
-	VirtualFile,
-} from '@volar/language-core';
+import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
 import { TextDocument } from 'vscode-html-languageservice';
 
 function astro2tsx(input: string, fileName: string) {
@@ -77,7 +72,14 @@ export function getVirtualFileTSX(input: string, fileName: string): VirtualFile 
 	return {
 		fileName: fileName + '.tsx',
 		kind: FileKind.TypeScriptHostFile,
-		capabilities: FileCapabilities.full,
+		capabilities: {
+			codeAction: true,
+			documentFormatting: false,
+			diagnostic: true,
+			documentSymbol: true,
+			inlayHint: true,
+			foldingRange: true,
+		},
 		snapshot: {
 			getText: (start, end) => tsx.code.substring(start, end),
 			getLength: () => tsx.code.length,

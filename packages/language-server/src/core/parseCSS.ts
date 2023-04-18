@@ -1,9 +1,4 @@
-import {
-	FileCapabilities,
-	FileKind,
-	FileRangeCapabilities,
-	VirtualFile,
-} from '@volar/language-core';
+import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
 import type ts from 'typescript/lib/tsserverlibrary';
 import type { HTMLDocument } from 'vscode-html-languageservice';
 
@@ -31,7 +26,12 @@ export function extractStylesheets(
 						data: FileRangeCapabilities.full,
 					},
 				],
-				capabilities: FileCapabilities.full,
+				capabilities: {
+					diagnostic: false,
+					documentSymbol: true,
+					foldingRange: true,
+					documentFormatting: false,
+				},
 				embeddedFiles: [],
 			});
 		}

@@ -1,9 +1,4 @@
-import {
-	FileCapabilities,
-	FileKind,
-	FileRangeCapabilities,
-	VirtualFile,
-} from '@volar/language-core';
+import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
 import type ts from 'typescript/lib/tsserverlibrary';
 import * as html from 'vscode-html-languageservice';
 import { isInsideExpression } from './utils';
@@ -105,7 +100,11 @@ function getHTMLVirtualFile(fileName: string, preprocessedHTML: string): Virtual
 				data: FileRangeCapabilities.full,
 			},
 		],
-		capabilities: FileCapabilities.full,
+		capabilities: {
+			documentSymbol: true,
+			foldingRange: true,
+			documentFormatting: false,
+		},
 		embeddedFiles: [],
 	};
 }

@@ -17,15 +17,18 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@astrojs/compiler": "0.0.0-sync-20230409173822",
+    "@astrojs/compiler": "0.0.0-sync-20230418112509",
     "@jridgewell/sourcemap-codec": "^1.4.15",
-    "@volar-plugins/css": "2.0.0-alpha.21",
-    "@volar-plugins/emmet": "2.0.0-alpha.21",
-    "@volar-plugins/html": "2.0.0-alpha.21",
-    "@volar-plugins/typescript": "2.0.0-alpha.21",
-    "@volar/language-core": "1.4.0-alpha.7",
-    "@volar/language-server": "1.4.0-alpha.7",
-    "@volar/source-map": "1.4.0-alpha.7",
+    "@volar-plugins/css": "2.0.0-alpha.23",
+    "@volar-plugins/emmet": "2.0.0-alpha.23",
+    "@volar-plugins/html": "2.0.0-alpha.23",
+    "@volar-plugins/prettier": "2.0.0-alpha.23",
+    "@volar-plugins/typescript": "2.0.0-alpha.23",
+    "@volar/language-core": "^1.4.0-alpha.8",
+    "@volar/language-server": "1.4.0-alpha.8",
+    "@volar/language-service": "1.4.0-alpha.8",
+    "@volar/source-map": "1.4.0-alpha.8",
+    "fast-glob": "^3.2.12",
     "vscode-html-languageservice": "^5.0.4"
   },
   "devDependencies": {
