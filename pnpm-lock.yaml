@@ -58,6 +58,9 @@ importers:
       '@volar-plugins/typescript':
         specifier: 2.0.0-alpha.23
         version: 2.0.0-alpha.23(@volar/language-service@1.4.0-alpha.8)
+      '@volar-plugins/typescript-twoslash-queries':
+        specifier: 2.0.0-alpha.23
+        version: 2.0.0-alpha.23(@volar/language-service@1.4.0-alpha.8)
       '@volar/language-core':
         specifier: ^1.4.0-alpha.8
         version: 1.4.0-alpha.8
@@ -974,6 +977,17 @@ packages:
     dependencies:
       '@volar/language-service': 1.4.0-alpha.8
       prettier: 2.8.7
+    dev: false
+
+  /@volar-plugins/typescript-twoslash-queries@2.0.0-alpha.23(@volar/language-service@1.4.0-alpha.8):
+    resolution: {integrity: sha512-zjDGpBTjhw9Hke4QNBZejWO/fRZCO7Ir2yo3HFB8WhlF4+Myi05lbdvWwgo6BhvG9YReUtVVDLYEUfz2EtA3+g==}
+    peerDependencies:
+      '@volar/language-service': '*'
+    peerDependenciesMeta:
+      '@volar/language-service':
+        optional: true
+    dependencies:
+      '@volar/language-service': 1.4.0-alpha.8
     dev: false
 
   /@volar-plugins/typescript@2.0.0-alpha.23(@volar/language-service@1.4.0-alpha.8):

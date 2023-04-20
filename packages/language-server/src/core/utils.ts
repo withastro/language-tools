@@ -1,14 +1,6 @@
 import * as path from 'path';
 import { getPackagePath } from '../importPackage';
 
-/**
- * Return if a given position is inside a JSX expression
- */
-export function isInsideExpression(html: string, tagStart: number, position: number) {
-	const charactersInNode = html.substring(tagStart, position);
-	return charactersInNode.lastIndexOf('{') > charactersInNode.lastIndexOf('}');
-}
-
 export interface AstroInstall {
 	path: string;
 	version: {

@@ -1,4 +1,4 @@
-import { DiagnosticMessage } from '@astrojs/compiler/types.js';
+import type { DiagnosticMessage } from '@astrojs/compiler/types';
 import {
 	CodeLens,
 	CompletionItem,

@@ -8,11 +8,12 @@ import {
 } from '@volar/language-core';
 import * as path from 'path';
 import type ts from 'typescript/lib/tsserverlibrary';
+import type { HTMLDocument } from 'vscode-html-languageservice';
 import { astro2tsx } from './astro2tsx';
 import { FrontmatterStatus, getAstroAST, getFrontmatterStatus } from './parseAstro';
 import { extractStylesheets } from './parseCSS';
 import { parseHTML } from './parseHTML';
-import { AstroInstall } from './utils';
+import type { AstroInstall } from './utils';
 
 export function getLanguageModule(
 	astroInstall: AstroInstall,
@@ -21,7 +22,7 @@ export function getLanguageModule(
 	return {
 		createFile(fileName, snapshot) {
 			if (fileName.endsWith('.astro')) {
-				return new AstroFile(fileName, snapshot);
+				return new AstroFile(fileName, snapshot, ts);
 			}
 		},
 		updateFile(astroFile, snapshot) {
@@ -62,8 +63,13 @@ export class AstroFile implements VirtualFile {
 	astroAst!: ParseResult;
 	frontmatter!: FrontmatterStatus;
 	compilerDiagnostics!: DiagnosticMessage[];
+	htmlDocument!: HTMLDocument;
 
-	constructor(public sourceFileName: string, public snapshot: ts.IScriptSnapshot) {
+	constructor(
+		public sourceFileName: string,
+		public snapshot: ts.IScriptSnapshot,
+		private readonly ts: typeof import('typescript/lib/tsserverlibrary.js')
+	) {
 		this.fileName = sourceFileName;
 		this.onSnapshotUpdated();
 	}
@@ -84,7 +90,11 @@ export class AstroFile implements VirtualFile {
 
 		this.astroAst = getAstroAST(this.snapshot.getText(0, this.snapshot.getLength()));
 		this.frontmatter = getFrontmatterStatus(this.astroAst);
-		const tsx = astro2tsx(this.snapshot.getText(0, this.snapshot.getLength()), this.fileName);
+		const tsx = astro2tsx(
+			this.snapshot.getText(0, this.snapshot.getLength()),
+			this.fileName,
+			this.ts
+		);
 
 		this.compilerDiagnostics = tsx.diagnostics;
 
@@ -93,6 +103,8 @@ export class AstroFile implements VirtualFile {
 			this.snapshot,
 			this.frontmatter.status === 'closed' ? this.frontmatter.position.end.offset : 0
 		);
+
+		this.htmlDocument = htmlDocument;
 
 		this.embeddedFiles = [];
 		this.embeddedFiles.push(htmlVirtualFile);
