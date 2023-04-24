@@ -11,14 +11,33 @@ import {
 	startLanguageServer,
 } from '@volar/language-server/node';
 import { AstroFile, getLanguageModule } from './core';
+import { getSvelteLanguageModule } from './core/svelte.js';
 import { getAstroInstall } from './core/utils';
+import { getVueLanguageModule } from './core/vue.js';
 import { getPrettierPluginPath, importPrettier } from './importPackage.js';
 import createAstroPlugin from './plugins/astro.js';
 import { isInComponentStartTag } from './utils.js';
 
 const plugin: LanguageServerPlugin = (): ReturnType<LanguageServerPlugin> => ({
-	extraFileExtensions: [{ extension: 'astro', isMixedContent: true, scriptKind: 7 }],
-	watchFileExtensions: ['js', 'cjs', 'mjs', 'ts', 'cts', 'mts', 'jsx', 'tsx', 'json', 'astro'],
+	extraFileExtensions: [
+		{ extension: 'astro', isMixedContent: true, scriptKind: 7 },
+		{ extension: 'vue', isMixedContent: true, scriptKind: 7 },
+		{ extension: 'svelte', isMixedContent: true, scriptKind: 7 },
+	],
+	watchFileExtensions: [
+		'js',
+		'cjs',
+		'mjs',
+		'ts',
+		'cts',
+		'mts',
+		'jsx',
+		'tsx',
+		'json',
+		'astro',
+		'vue',
+		'svelte',
+	],
 	resolveConfig(config, modules, ctx) {
 		config.languages ??= {};
 		if (ctx) {
@@ -26,6 +45,8 @@ const plugin: LanguageServerPlugin = (): ReturnType<LanguageServerPlugin> => ({
 				getAstroInstall([ctx.project.rootUri.fsPath])!,
 				modules.typescript!
 			);
+			config.languages.vue = getVueLanguageModule();
+			config.languages.svelte = getSvelteLanguageModule();
 		}
 
 		config.plugins ??= {};

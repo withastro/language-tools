@@ -365,13 +365,13 @@
     "@astrojs/language-server": "workspace:*",
     "@types/node": "^16.12.0",
     "@types/vscode": "1.67.0",
-    "@volar/language-server": "1.4.0-alpha.7",
-    "@volar/vscode": "1.4.0-alpha.7",
+    "@volar/language-server": "1.4.1",
+    "@volar/vscode": "1.4.1",
     "@vscode/vsce": "latest",
-    "esbuild": "^0.17.15",
+    "esbuild": "^0.17.18",
     "esbuild-plugin-copy": "^2.1.1",
     "kleur": "^4.1.5",
-    "typescript": "~5.0.0",
+    "typescript": "~5.0.4",
     "vscode-languageclient": "^8.1.0"
   }
 }

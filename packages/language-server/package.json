@@ -22,22 +22,26 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@astrojs/compiler": "0.0.0-map-export-20230418133923",
+    "@astrojs/compiler": "1.3.1",
     "@jridgewell/sourcemap-codec": "^1.4.15",
-    "@volar-plugins/css": "2.0.0-alpha.23",
-    "@volar-plugins/emmet": "2.0.0-alpha.23",
-    "@volar-plugins/html": "2.0.0-alpha.23",
-    "@volar-plugins/prettier": "2.0.0-alpha.23",
-    "@volar-plugins/typescript": "2.0.0-alpha.23",
-    "@volar-plugins/typescript-twoslash-queries": "2.0.0-alpha.23",
-    "@volar/language-core": "^1.4.0-alpha.8",
-    "@volar/language-server": "1.4.0-alpha.8",
-    "@volar/language-service": "1.4.0-alpha.8",
-    "@volar/source-map": "1.4.0-alpha.8",
+    "@volar-plugins/css": "2.0.0",
+    "@volar-plugins/emmet": "2.0.0",
+    "@volar-plugins/html": "2.0.0",
+    "@volar-plugins/prettier": "2.0.0",
+    "@volar-plugins/typescript": "2.0.0",
+    "@volar-plugins/typescript-twoslash-queries": "2.0.0",
+    "@volar/language-core": "^1.4.1",
+    "@volar/language-server": "1.4.1",
+    "@volar/language-service": "1.4.1",
+    "@volar/source-map": "1.4.1",
     "fast-glob": "^3.2.12",
-    "vscode-html-languageservice": "^5.0.4"
+    "vscode-html-languageservice": "^5.0.4",
+    "vscode-uri": "^3.0.7"
   },
   "devDependencies": {
+    "@astrojs/svelte": "^2.1.0",
+    "@astrojs/vue": "^2.1.1",
+    "astro": "^2.3.0",
     "typescript": "~5.0.4"
   }
 }

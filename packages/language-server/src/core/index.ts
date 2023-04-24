@@ -57,7 +57,7 @@ export class AstroFile implements VirtualFile {
 	kind = FileKind.TextFile;
 	capabilities = FileCapabilities.full;
 
-	fileName!: string;
+	fileName: string;
 	mappings!: VirtualFile['mappings'];
 	embeddedFiles!: VirtualFile['embeddedFiles'];
 	astroAst!: ParseResult;
