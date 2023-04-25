@@ -16,7 +16,7 @@ import { parseHTML } from './parseHTML';
 import type { AstroInstall } from './utils';
 
 export function getLanguageModule(
-	astroInstall: AstroInstall,
+	astroInstall: AstroInstall | undefined,
 	ts: typeof import('typescript/lib/tsserverlibrary.js')
 ): LanguageModule<AstroFile> {
 	return {
@@ -34,9 +34,11 @@ export function getLanguageModule(
 				getScriptFileNames() {
 					const fileNames = host.getScriptFileNames();
 					return [
-						...['./env.d.ts', './astro-jsx.d.ts'].map((filePath) =>
-							ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
-						),
+						...(astroInstall
+							? ['./env.d.ts', './astro-jsx.d.ts'].map((filePath) =>
+									ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
+							  )
+							: []),
 						...fileNames,
 					];
 				},

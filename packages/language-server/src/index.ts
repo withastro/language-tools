@@ -16,7 +16,7 @@ import { getPrettierPluginPath, importPrettier } from './importPackage.js';
 import createAstroPlugin from './plugins/astro.js';
 import createHtmlPlugin from './plugins/html.js';
 
-const plugin: LanguageServerPlugin = (): ReturnType<LanguageServerPlugin> => ({
+const plugin: LanguageServerPlugin = (initOptions, modules): ReturnType<LanguageServerPlugin> => ({
 	extraFileExtensions: [
 		{ extension: 'astro', isMixedContent: true, scriptKind: 7 },
 		{ extension: 'vue', isMixedContent: true, scriptKind: 7 },
@@ -40,8 +40,8 @@ const plugin: LanguageServerPlugin = (): ReturnType<LanguageServerPlugin> => ({
 		config.languages ??= {};
 		if (ctx) {
 			config.languages.astro = getLanguageModule(
-				getAstroInstall([ctx.project.rootUri.fsPath])!,
-				ctx.project.workspace.workspaces.ts!
+				getAstroInstall([ctx.project.rootUri.fsPath]),
+				modules.typescript!
 			);
 			config.languages.vue = getVueLanguageModule();
 			config.languages.svelte = getSvelteLanguageModule();
