@@ -4,7 +4,7 @@ import {
 	FileRangeCapabilities,
 	type VirtualFile,
 } from '@volar/language-core';
-import * as path from 'path';
+import * as path from 'node:path';
 import { URI, Utils } from 'vscode-uri';
 import { getPackagePath, importSvelteIntegration, importVueIntegration } from '../importPackage';
 
@@ -100,7 +100,7 @@ export function framework2tsx(
 			mappings: [
 				{
 					sourceRange: [0, content.length],
-					generatedRange: [0, content.length],
+					generatedRange: [0, 0],
 					data: FileRangeCapabilities.full,
 				},
 			],

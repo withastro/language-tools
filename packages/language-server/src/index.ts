@@ -38,12 +38,12 @@ const plugin: LanguageServerPlugin = (): ReturnType<LanguageServerPlugin> => ({
 		'vue',
 		'svelte',
 	],
-	resolveConfig(config, modules, ctx) {
+	resolveConfig(config, ctx) {
 		config.languages ??= {};
 		if (ctx) {
 			config.languages.astro = getLanguageModule(
 				getAstroInstall([ctx.project.rootUri.fsPath])!,
-				modules.typescript!
+				ctx.project.workspace.workspaces.ts!
 			);
 			config.languages.vue = getVueLanguageModule();
 			config.languages.svelte = getSvelteLanguageModule();

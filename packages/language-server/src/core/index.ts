@@ -6,7 +6,7 @@ import {
 	type LanguageModule,
 	type VirtualFile,
 } from '@volar/language-core';
-import * as path from 'path';
+import * as path from 'node:path';
 import type ts from 'typescript/lib/tsserverlibrary';
 import type { HTMLDocument } from 'vscode-html-languageservice';
 import { astro2tsx } from './astro2tsx';
@@ -35,7 +35,7 @@ export function getLanguageModule(
 					const fileNames = host.getScriptFileNames();
 					return [
 						...['./env.d.ts', './astro-jsx.d.ts'].map((filePath) =>
-							path.join(astroInstall.path, filePath)
+							ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
 						),
 						...fileNames,
 					];

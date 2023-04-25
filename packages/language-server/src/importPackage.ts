@@ -1,6 +1,6 @@
 import type * as svelte from '@astrojs/svelte/dist/editor.cjs';
 import type * as vue from '@astrojs/vue/dist/editor.cjs';
-import { dirname, resolve } from 'path';
+import { dirname, resolve } from 'node:path';
 // @ts-expect-error
 import type * as prettier from 'prettier';
 

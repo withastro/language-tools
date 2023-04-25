@@ -12,7 +12,7 @@ import {
 	TextEdit,
 } from '@volar/language-server';
 import fg from 'fast-glob';
-import { dirname } from 'path';
+import { dirname } from 'node:path';
 import type { TextDocument } from 'vscode-html-languageservice';
 import { AstroFile } from '../core/index.js';
 import { isTsDocument } from '../utils.js';
