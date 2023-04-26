@@ -54,12 +54,13 @@ export function startLanguageServer(connection: vscode.Connection, env: RuntimeE
 
 	connection.onInitialize((params: vscode.InitializeParams) => {
 		let isPnpInit = false;
+		const canRequirePnp = params.initializationOptions?.canRequirePnp ?? false;
 		const environment: 'node' | 'browser' = params.initializationOptions?.environment ?? 'node';
 		const workspaceUris = params.workspaceFolders?.map((folder) => folder.uri.toString()) ?? [params.rootUri ?? ''];
 
 		workspaceUris.forEach((uri) => {
 			uri = urlToPath(uri) as string;
-			if (!isPnpInit) {
+			if (canRequirePnp && !isPnpInit) {
 				const possiblePnpPath = getWorkspacePnpPath(uri);
 
 				if (possiblePnpPath) {
