@@ -2,21 +2,21 @@ import {
 	FileCapabilities,
 	FileKind,
 	FileRangeCapabilities,
-	LanguageModule,
+	Language,
 	VirtualFile,
 } from '@volar/language-core';
 import type { Mapping } from '@volar/source-map';
 import type ts from 'typescript/lib/tsserverlibrary';
 import { framework2tsx } from './utils.js';
 
-export function getVueLanguageModule(): LanguageModule<VueFile> {
+export function getVueLanguageModule(): Language<VueFile> {
 	return {
-		createFile(fileName, snapshot) {
+		createVirtualFile(fileName, snapshot) {
 			if (fileName.endsWith('.vue')) {
 				return new VueFile(fileName, snapshot);
 			}
 		},
-		updateFile(vueFile, snapshot) {
+		updateVirtualFile(vueFile, snapshot) {
 			vueFile.update(snapshot);
 		},
 	};

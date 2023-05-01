@@ -3,7 +3,7 @@ import {
 	FileCapabilities,
 	FileKind,
 	FileRangeCapabilities,
-	type LanguageModule,
+	type Language,
 	type VirtualFile,
 } from '@volar/language-core';
 import * as path from 'node:path';
@@ -18,17 +18,17 @@ import type { AstroInstall } from './utils';
 export function getLanguageModule(
 	astroInstall: AstroInstall | undefined,
 	ts: typeof import('typescript/lib/tsserverlibrary.js')
-): LanguageModule<AstroFile> {
+): Language<AstroFile> {
 	return {
-		createFile(fileName, snapshot) {
+		createVirtualFile(fileName, snapshot) {
 			if (fileName.endsWith('.astro')) {
 				return new AstroFile(fileName, snapshot, ts);
 			}
 		},
-		updateFile(astroFile, snapshot) {
+		updateVirtualFile(astroFile, snapshot) {
 			astroFile.update(snapshot);
 		},
-		proxyLanguageServiceHost(host) {
+		resolveHost(host) {
 			return {
 				...host,
 				getScriptFileNames() {

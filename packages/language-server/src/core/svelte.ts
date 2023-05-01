@@ -2,21 +2,21 @@ import {
 	FileCapabilities,
 	FileKind,
 	FileRangeCapabilities,
-	LanguageModule,
+	Language,
 	VirtualFile,
 } from '@volar/language-core';
 import type { Mapping } from '@volar/source-map';
 import type ts from 'typescript/lib/tsserverlibrary';
 import { framework2tsx } from './utils.js';
 
-export function getSvelteLanguageModule(): LanguageModule<SvelteFile> {
+export function getSvelteLanguageModule(): Language<SvelteFile> {
 	return {
-		createFile(fileName, snapshot) {
+		createVirtualFile(fileName, snapshot) {
 			if (fileName.endsWith('.svelte')) {
 				return new SvelteFile(fileName, snapshot);
 			}
 		},
-		updateFile(svelteFile, snapshot) {
+		updateVirtualFile(svelteFile, snapshot) {
 			svelteFile.update(snapshot);
 		},
 	};

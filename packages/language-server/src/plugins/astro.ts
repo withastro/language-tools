@@ -5,10 +5,9 @@ import {
 	CompletionItemKind,
 	Diagnostic,
 	InsertTextFormat,
-	LanguageServicePlugin,
-	LanguageServicePluginInstance,
 	Position,
 	Range,
+	Service,
 	TextEdit,
 } from '@volar/language-server';
 import fg from 'fast-glob';
@@ -17,8 +16,8 @@ import type { TextDocument } from 'vscode-html-languageservice';
 import { AstroFile } from '../core/index.js';
 import { isTsDocument } from '../utils.js';
 
-export default (): LanguageServicePlugin =>
-	(context): LanguageServicePluginInstance => {
+export default (): Service =>
+	(context, modules): ReturnType<Service> => {
 		return {
 			triggerCharacters: ['-'],
 			provideCompletionItems(document, position, completionContext, token) {
@@ -63,14 +62,15 @@ export default (): LanguageServicePlugin =>
 			},
 			provideCodeLenses(document, token) {
 				if (token.isCancellationRequested) return;
-				if (!context?.typescript || !isTsDocument(document.languageId)) return;
+				if (!modules?.typescript || !context?.typescript || !isTsDocument(document.languageId))
+					return;
 
-				const ts = context.typescript.module;
+				const ts = modules?.typescript;
 				const tsProgram = context.typescript.languageService.getProgram();
 				if (!tsProgram) return;
 
 				const globcodeLens: CodeLens[] = [];
-				const sourceFile = tsProgram.getSourceFile(context.uriToFileName(document.uri))!;
+				const sourceFile = tsProgram.getSourceFile(context.env.uriToFileName(document.uri))!;
 
 				function walk() {
 					return ts.forEachChild(sourceFile, function cb(node): void {
@@ -80,7 +80,7 @@ export default (): LanguageServicePlugin =>
 							globcodeLens.push(
 								getGlobResultAsCodeLens(
 									globText,
-									dirname(context!.uriToFileName(document.uri)),
+									dirname(context!.env.uriToFileName(document.uri)),
 									document.positionAt(node.arguments.pos)
 								)
 							);

@@ -1,13 +1,13 @@
-import createCssPlugin from '@volar-plugins/css';
-import createEmmetPlugin from '@volar-plugins/emmet';
-import createPrettierPlugin from '@volar-plugins/prettier';
-import createTypeScriptPlugin from '@volar-plugins/typescript';
-import createTypeScriptTwoSlash from '@volar-plugins/typescript-twoslash-queries';
 import {
 	LanguageServerPlugin,
 	createConnection,
 	startLanguageServer,
 } from '@volar/language-server/node';
+import createCssService from 'volar-service-css';
+import createEmmetService from 'volar-service-emmet';
+import createPrettierService from 'volar-service-prettier';
+import createTypeScriptService from 'volar-service-typescript';
+import createTypeScriptTwoSlashService from 'volar-service-typescript-twoslash-queries';
 import { getLanguageModule } from './core';
 import { getSvelteLanguageModule } from './core/svelte.js';
 import { getAstroInstall } from './core/utils';
@@ -47,20 +47,20 @@ const plugin: LanguageServerPlugin = (initOptions, modules): ReturnType<Language
 			config.languages.svelte = getSvelteLanguageModule();
 		}
 
-		config.plugins ??= {};
-		config.plugins.html ??= createHtmlPlugin();
-		config.plugins.css ??= createCssPlugin();
-		config.plugins.emmet ??= createEmmetPlugin();
-		config.plugins.typescript ??= createTypeScriptPlugin();
-		config.plugins.typescripttwoslash ??= createTypeScriptTwoSlash();
-		config.plugins.astro ??= createAstroPlugin();
-		config.plugins.prettier ??= createPrettierPlugin({
+		config.services ??= {};
+		config.services.html ??= createHtmlPlugin();
+		config.services.css ??= createCssService();
+		config.services.emmet ??= createEmmetService();
+		config.services.typescript ??= createTypeScriptService();
+		config.services.typescripttwoslash ??= createTypeScriptTwoSlashService();
+		config.services.astro ??= createAstroPlugin();
+		config.services.prettier ??= createPrettierService({
 			languages: ['astro'],
 			additionalOptions: (resolvedConfig) => {
 				function getAstroPrettierPlugin() {
 					if (!ctx?.project.rootUri) return [];
 
-					const rootDir = ctx?.options.uriToFileName(ctx?.project.rootUri.toString());
+					const rootDir = ctx.env.uriToFileName(ctx?.project.rootUri.toString());
 					const prettier = importPrettier(rootDir);
 					const hasPluginLoadedAlready = prettier
 						.getSupportInfo()
