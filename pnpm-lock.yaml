@@ -58,6 +58,9 @@ importers:
       fast-glob:
         specifier: ^3.2.12
         version: 3.2.12
+      muggle-string:
+        specifier: ^0.2.2
+        version: 0.2.2
       volar-service-css:
         specifier: ^0.0.0
         version: 0.0.0(@volar/language-service@1.5.0)

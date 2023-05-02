@@ -10,7 +10,7 @@ import * as path from 'node:path';
 import type ts from 'typescript/lib/tsserverlibrary';
 import type { HTMLDocument } from 'vscode-html-languageservice';
 import { astro2tsx } from './astro2tsx';
-import { FrontmatterStatus, getAstroAST, getFrontmatterStatus } from './parseAstro';
+import { FrontmatterStatus, getAstroMetadata } from './parseAstro';
 import { extractStylesheets } from './parseCSS';
 import { parseHTML } from './parseHTML';
 import type { AstroInstall } from './utils';
@@ -62,8 +62,7 @@ export class AstroFile implements VirtualFile {
 	fileName: string;
 	mappings!: VirtualFile['mappings'];
 	embeddedFiles!: VirtualFile['embeddedFiles'];
-	astroAst!: ParseResult;
-	frontmatter!: FrontmatterStatus;
+	astroMeta!: ParseResult & { frontmatter: FrontmatterStatus };
 	compilerDiagnostics!: DiagnosticMessage[];
 	htmlDocument!: HTMLDocument;
 
@@ -90,8 +89,7 @@ export class AstroFile implements VirtualFile {
 			},
 		];
 
-		this.astroAst = getAstroAST(this.snapshot.getText(0, this.snapshot.getLength()));
-		this.frontmatter = getFrontmatterStatus(this.astroAst);
+		this.astroMeta = getAstroMetadata(this.snapshot.getText(0, this.snapshot.getLength()));
 		const tsx = astro2tsx(
 			this.snapshot.getText(0, this.snapshot.getLength()),
 			this.fileName,
@@ -103,14 +101,18 @@ export class AstroFile implements VirtualFile {
 		const { htmlDocument, virtualFile: htmlVirtualFile } = parseHTML(
 			this.fileName,
 			this.snapshot,
-			this.frontmatter.status === 'closed' ? this.frontmatter.position.end.offset : 0
+			this.astroMeta.frontmatter.status === 'closed'
+				? this.astroMeta.frontmatter.position.end.offset
+				: 0
 		);
 
 		this.htmlDocument = htmlDocument;
 
 		this.embeddedFiles = [];
 		this.embeddedFiles.push(htmlVirtualFile);
-		this.embeddedFiles.push(...extractStylesheets(this.fileName, this.snapshot, htmlDocument));
+		this.embeddedFiles.push(
+			...extractStylesheets(this.fileName, this.snapshot, htmlDocument, this.astroMeta.ast)
+		);
 		this.embeddedFiles.push(tsx.virtualFile);
 	}
 }

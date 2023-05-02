@@ -123,7 +123,7 @@ function getFrontmatterCompletion(file: AstroFile, document: TextDocument, posit
 	const { line, character } = document.positionAt(document.offsetAt(position));
 	const prefix = documentLines[line].slice(0, character);
 
-	if (file.frontmatter.status === 'doesnt-exist') {
+	if (file.astroMeta.frontmatter.status === 'doesnt-exist') {
 		return {
 			...base,
 			insertText: '---\n$0\n---',
@@ -133,7 +133,7 @@ function getFrontmatterCompletion(file: AstroFile, document: TextDocument, posit
 		};
 	}
 
-	if (file.frontmatter.status === 'open') {
+	if (file.astroMeta.frontmatter.status === 'open') {
 		let insertText = '---';
 
 		// If the current line is a full component script starter/ender, the user expects a full frontmatter

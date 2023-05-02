@@ -2,8 +2,15 @@ import type { Point } from '@astrojs/compiler/shared/ast';
 import { parse } from '@astrojs/compiler/sync';
 import type { ParseResult } from '@astrojs/compiler/types';
 
-export function getAstroAST(input: string, position = true) {
-	return parse(input, { position: position });
+type AstroMetadata = ParseResult & { frontmatter: FrontmatterStatus };
+
+export function getAstroMetadata(input: string, position = true): AstroMetadata {
+	const parseResult = parse(input, { position: position });
+
+	return {
+		...parseResult,
+		frontmatter: getFrontmatterStatus(parseResult.ast),
+	};
 }
 
 interface FrontmatterOpen {
@@ -29,16 +36,16 @@ interface FrontmatterNull {
 
 export type FrontmatterStatus = FrontmatterOpen | FrontmatterClosed | FrontmatterNull;
 
-export function getFrontmatterStatus(ast: ParseResult): FrontmatterStatus {
-	if (!ast.ast.children || (ast.ast.children && ast.ast.children.length === 0)) {
+export function getFrontmatterStatus(ast: ParseResult['ast']): FrontmatterStatus {
+	if (!ast.children || (ast.children && ast.children.length === 0)) {
 		return {
 			status: 'doesnt-exist',
 			position: undefined,
 		};
 	}
 
-	if (ast.ast.children[0].type === 'frontmatter') {
-		const frontmatter = ast.ast.children[0];
+	if (ast.children[0].type === 'frontmatter') {
+		const frontmatter = ast.children[0];
 		if (frontmatter.position) {
 			if (frontmatter.position.end) {
 				return {
