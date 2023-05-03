@@ -86,6 +86,8 @@ export function findInlineStyles(ast: ParseResult['ast']): StyleAttribute[] {
 
 	// `@astrojs/compiler`'s `walk` method is async, so we can't use it here. Arf
 	function walkDown(parent: ParentNode) {
+		if (!parent.children) return;
+
 		parent.children.forEach((child) => {
 			if (is.element(child)) {
 				const styleAttribute = child.attributes.find(
