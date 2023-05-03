@@ -7,7 +7,7 @@ export function astro2tsx(content: string, fileName: string): TSXResult {
 		return tsx;
 	} catch (e) {
 		console.error(
-			`There was an error transforming ${fileName} to TSX. An empty file will be returned instead. Please create an issu: https://github.com/withastro/language-tools/issues\nError: ${e}.`
+			`There was an error transforming ${fileName} to TSX. An empty file will be returned instead. Please create an issue: https://github.com/withastro/language-tools/issues\nError: ${e}.`
 		);
 		return {
 			code: '',

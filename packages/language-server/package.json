@@ -25,7 +25,7 @@
     "test:match": "pnpm run test -g"
   },
   "dependencies": {
-    "@astrojs/compiler": "link:../../../compiler/packages/compiler",
+    "@astrojs/compiler": "^1.4.0",
     "@jridgewell/trace-mapping": "^0.3.14",
     "@vscode/emmet-helper": "^2.8.4",
     "events": "^3.3.0",
@@ -55,7 +55,7 @@
     "sinon": "^13.0.1",
     "svelte": "^3.49.0",
     "ts-node": "^10.7.0",
-    "typescript": "~4.8.2",
+    "typescript": "~5.0.2",
     "vue": "^3.2.37"
   }
 }

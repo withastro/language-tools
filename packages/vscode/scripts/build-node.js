@@ -1,4 +1,5 @@
 const { watchMode } = require('./utils.js');
+const { copy } = require('esbuild-plugin-copy');
 const isDev = process.argv.includes('--watch');
 
 require('esbuild')
@@ -37,12 +38,21 @@ require('esbuild')
 					});
 				},
 			},
-			require('esbuild-plugin-copy').copy({
+			copy({
 				resolveFrom: 'cwd',
 				assets: {
 					from: ['../language-server/types/**/*.d.ts'],
 					to: ['./dist/types'],
 					keepStructure: true,
+					watch: isDev,
+				},
+			}),
+			copy({
+				resolveFrom: 'cwd',
+				assets: {
+					from: ['../language-server/node_modules/@astrojs/compiler/astro.wasm'],
+					to: ['./dist/astro.wasm'],
+					watch: isDev,
 				},
 			}),
 		],

@@ -1,3 +1,4 @@
+import type ts from 'typescript';
 import type { ResolvedModule } from 'typescript';
 import { getLastPartOfPath } from '../../utils';
 import { createAstroSys } from './astro-sys';
