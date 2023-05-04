@@ -6,7 +6,6 @@ import {
 import createCssService from 'volar-service-css';
 import createEmmetService from 'volar-service-emmet';
 import createPrettierService from 'volar-service-prettier';
-import createTypeScriptService from 'volar-service-typescript';
 import createTypeScriptTwoSlashService from 'volar-service-typescript-twoslash-queries';
 import { getLanguageModule } from './core';
 import { getSvelteLanguageModule } from './core/svelte.js';
@@ -15,6 +14,7 @@ import { getVueLanguageModule } from './core/vue.js';
 import { getPrettierPluginPath, importPrettier } from './importPackage.js';
 import createAstroPlugin from './plugins/astro.js';
 import createHtmlPlugin from './plugins/html.js';
+import createTypeScriptService from './plugins/typescript/index.js';
 
 const plugin: LanguageServerPlugin = (initOptions, modules): ReturnType<LanguageServerPlugin> => ({
 	extraFileExtensions: [

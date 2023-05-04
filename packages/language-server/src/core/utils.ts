@@ -83,7 +83,7 @@ export function framework2tsx(
 	}
 
 	const className = classNameFromFilename(filePath);
-	const tsx = integrationEditorEntrypoint.toTSX(sourceCode, className);
+	const tsx = patchTSX(integrationEditorEntrypoint.toTSX(sourceCode, className));
 
 	return getVirtualFile(tsx);
 
@@ -143,4 +143,9 @@ export function classNameFromFilename(filename: string): string {
 	const finalName = firstValidCharIdx === -1 ? `A${inPascalCase}` : inPascalCase;
 
 	return finalName;
+}
+
+// TODO: Patch the upstream packages with these changes
+export function patchTSX(code: string) {
+	return code.replace('__AstroComponent_', '');
 }

@@ -3,6 +3,7 @@ import type { TSXResult } from '@astrojs/compiler/types.js';
 import { decode } from '@jridgewell/sourcemap-codec';
 import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
 import { TextDocument } from 'vscode-html-languageservice';
+import { patchTSX } from './utils.js';
 
 export function astro2tsx(
 	input: string,
@@ -23,6 +24,7 @@ function getVirtualFileTSX(
 	fileName: string,
 	ts: typeof import('typescript/lib/tsserverlibrary.js')
 ): VirtualFile {
+	tsx.code = patchTSX(tsx.code);
 	const v3Mappings = decode(tsx.map.mappings);
 	const sourcedDoc = TextDocument.create(fileName, 'astro', 0, input);
 	const genDoc = TextDocument.create(fileName + '.tsx', 'typescriptreact', 0, tsx.code);

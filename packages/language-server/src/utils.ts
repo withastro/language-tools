@@ -1,4 +1,6 @@
-import type { HTMLDocument, Node } from 'vscode-html-languageservice';
+import type { Point } from '@astrojs/compiler/types.js';
+import { HTMLDocument, Node, Position, Range, TextEdit } from 'vscode-html-languageservice';
+import type { FrontmatterStatus } from './core/parseAstro.js';
 
 export function isTsDocument(languageId: string) {
 	return (
@@ -31,4 +33,53 @@ export function isInComponentStartTag(html: HTMLDocument, offset: number): boole
 export function isInsideExpression(html: string, tagStart: number, position: number) {
 	const charactersInNode = html.substring(tagStart, position);
 	return charactersInNode.lastIndexOf('{') > charactersInNode.lastIndexOf('}');
+}
+
+/**
+ * Return if a given offset is inside the frontmatter
+ */
+export function isInsideFrontmatter(offset: number, frontmatter: FrontmatterStatus) {
+	switch (frontmatter.status) {
+		case 'closed':
+			return offset > frontmatter.position.start.offset && offset < frontmatter.position.end.offset;
+		case 'open':
+			return offset > frontmatter.position.start.offset;
+		case 'doesnt-exist':
+			return false;
+	}
+}
+
+/**
+ * Transform a Point from the Astro compiler to an LSP Position
+ */
+export function PointToPosition(point: Point) {
+	return Position.create(point.line, point.column);
+}
+
+/**
+ * Force a range to be at the start of the frontmatter
+ */
+export function ensureRangeIsInFrontmatter(range: Range, frontmatter: FrontmatterStatus): Range {
+	if (frontmatter.status === 'open' || frontmatter.status === 'closed') {
+		const position = PointToPosition(frontmatter.position.start);
+		position.line += 1;
+
+		return Range.create(position, position);
+	}
+
+	return range;
+}
+
+export function getNewFrontmatterEdit(edit: TextEdit, newLine: string) {
+	edit.newText = `---${newLine}${edit.newText}---${newLine}${newLine}`;
+	edit.range = Range.create(0, 0, 0, 0);
+
+	return edit;
+}
+
+export function getOpenFrontmatterEdit(edit: TextEdit, newLine: string) {
+	edit.newText = edit.newText.startsWith(newLine)
+		? `${edit.newText}---`
+		: `${newLine}${edit.newText}---`;
+	return edit;
 }
