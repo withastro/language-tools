@@ -109,9 +109,9 @@ async function createLanguageService(
 	const workspacePaths = workspaceUris.map((uri) => urlToPath(uri) as string);
 	const workspacePath = workspacePaths.find((p: string) => tsconfigRoot.startsWith(p)) || workspacePaths[0];
 	const astroInstall = getAstroInstall([tsconfigRoot, workspacePath]);
+	const workspaceUri = workspacePath ? pathToUrl(workspacePath) : '';
 
-	const config =
-		(await docContext.configManager.getConfig<LSTypescriptConfig>('astro.typescript', pathToUrl(workspacePath))) ?? {};
+	const config = (await docContext.configManager.getConfig<LSTypescriptConfig>('astro.typescript', workspaceUri)) ?? {};
 	const allowArbitraryAttrs = config.allowArbitraryAttributes ?? false;
 
 	// `raw` here represent the tsconfig merged with any extended config
