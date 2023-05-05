@@ -22,6 +22,7 @@ export function enhancedProvideCodeActions(
 				change.edits = change.edits.map((edit) => {
 					// Move code actions adding new imports to the frontmatter, as by default they'll be outside of it
 					// TODO: This is a bit brittle, but we're unfortunately too late into the process to be able to tell the `fixName`
+					// Maybe contribute upstream to pass the `fixName` through `data`?
 					if (edit.newText.trim().startsWith('import ')) {
 						if (file.astroMeta.frontmatter.status === 'doesnt-exist') {
 							return getNewFrontmatterEdit(edit, newLine);

@@ -3,6 +3,7 @@ import createTypeScriptService from 'volar-service-typescript';
 import { AstroFile } from '../../core/index.js';
 import { enhancedProvideCodeActions } from './codeActions.js';
 import { enhancedProvideCompletionItems, enhancedResolveCompletionItem } from './completions.js';
+import { enhancedProvideSemanticDiagnostics } from './diagnostics.js';
 
 export default (): Service =>
 	(context, modules): ReturnType<Service> => {
@@ -46,14 +47,30 @@ export default (): Service =>
 
 				const newLine = context.host.getNewLine ? context.host.getNewLine() : '\n';
 
-				// console.dir(codeActions, { depth: 100 });
-
 				return enhancedProvideCodeActions(
 					codeActions,
 					file,
 					context.documents.getDocumentByFileName(file.snapshot, file.sourceFileName),
 					newLine
 				);
+			},
+			async provideSemanticDiagnostics(document, token) {
+				const [_, source] = context.documents.getVirtualFileByUri(document.uri);
+				const file = source?.root;
+				if (!(file instanceof AstroFile)) return null;
+
+				// If we have compiler errors, our TSX isn't valid so don't bother showing TS errors
+				if (file.hasCompilationErrors) return null;
+
+				const diagnostics = await typeScriptPlugin.provideSemanticDiagnostics!(document, token);
+				if (!diagnostics) return null;
+
+				const astroDocument = context.documents.getDocumentByFileName(
+					file.snapshot,
+					file.sourceFileName
+				);
+
+				return enhancedProvideSemanticDiagnostics(diagnostics, astroDocument.lineCount);
 			},
 		};
 	};
