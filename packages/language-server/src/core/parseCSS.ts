@@ -1,10 +1,10 @@
-import type { ParentNode, ParseResult, Position } from '@astrojs/compiler/types.js';
-import { is } from '@astrojs/compiler/utils';
+import type { ParentNode, ParseResult, Position } from '@astrojs/compiler/types';
 import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
 import * as SourceMap from '@volar/source-map';
 import * as muggle from 'muggle-string';
 import type ts from 'typescript/lib/tsserverlibrary';
 import type { HTMLDocument } from 'vscode-html-languageservice';
+import { is } from './compilerUtils.js';
 
 export function extractStylesheets(
 	fileName: string,

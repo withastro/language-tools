@@ -1,5 +1,5 @@
 import { convertToTSX } from '@astrojs/compiler/sync';
-import type { TSXResult } from '@astrojs/compiler/types.js';
+import type { TSXResult } from '@astrojs/compiler/types';
 import { decode } from '@jridgewell/sourcemap-codec';
 import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
 import { TextDocument } from 'vscode-html-languageservice';

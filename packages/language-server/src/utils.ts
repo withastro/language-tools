@@ -1,4 +1,4 @@
-import type { Point } from '@astrojs/compiler/types.js';
+import type { Point } from '@astrojs/compiler/types';
 import { HTMLDocument, Node, Position, Range, TextEdit } from 'vscode-html-languageservice';
 import type { FrontmatterStatus } from './core/parseAstro.js';
 

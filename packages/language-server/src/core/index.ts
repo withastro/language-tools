@@ -1,4 +1,4 @@
-import { DiagnosticMessage, DiagnosticSeverity, ParseResult } from '@astrojs/compiler/types';
+import type { DiagnosticMessage, ParseResult } from '@astrojs/compiler/types';
 import {
 	FileCapabilities,
 	FileKind,
@@ -76,10 +76,7 @@ export class AstroFile implements VirtualFile {
 	}
 
 	get hasCompilationErrors(): boolean {
-		return (
-			this.compilerDiagnostics.filter((diag) => diag.severity === DiagnosticSeverity.Error).length >
-			0
-		);
+		return this.compilerDiagnostics.filter((diag) => diag.severity === 1).length > 0;
 	}
 
 	public update(newSnapshot: ts.IScriptSnapshot) {
