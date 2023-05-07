@@ -16,16 +16,17 @@ export interface LanguageServer {
 		/**
 		 * Open a real file path (relative to `./fixture`) and return the associated TextDocument
 		 */
-		openRealDocument: (filePath: string, languageId: string) => Promise<TextDocument>;
+		openRealDocument: (filePath: string, languageId?: string) => Promise<TextDocument>;
 		/**
 		 * Create a fake document from content and return the associated TextDocument
 		 */
-		openFakeDocument: (content: string, languageId: string) => Promise<TextDocument>;
+		openFakeDocument: (content: string, languageId?: string) => Promise<TextDocument>;
 		requestCompletion: (
 			document: TextDocument,
 			position: protocol.Position
 		) => Promise<protocol.CompletionList>;
 		requestDiagnostics: (document: TextDocument) => Promise<protocol.FullDocumentDiagnosticReport>;
+		requestHover: (document: TextDocument, position: protocol.Position) => Promise<protocol.Hover>;
 	};
 }
 
@@ -87,7 +88,7 @@ async function initLanguageServer() {
 			return initRequest;
 		},
 		helpers: {
-			async openRealDocument(filePath, languageId) {
+			async openRealDocument(filePath, languageId = 'astro') {
 				const fileName = path.resolve(dir, filePath);
 				const uri = URI.file(fileName).toString();
 				const item = protocol.TextDocumentItem.create(
@@ -101,7 +102,7 @@ async function initLanguageServer() {
 				});
 				return TextDocument.create(uri, languageId, 0, item.text);
 			},
-			async openFakeDocument(content, languageId) {
+			async openFakeDocument(content, languageId = 'astro') {
 				const hash = createHash('sha256').update(content).digest('base64url');
 				const uri = URI.file(`does-not-exists-${hash}-.astro`).toString();
 				const item = protocol.TextDocumentItem.create(uri, languageId, 0, content);
@@ -111,7 +112,7 @@ async function initLanguageServer() {
 				return TextDocument.create(uri, languageId, 0, item.text);
 			},
 			async requestCompletion(document, position) {
-				const completions = await connection.sendRequest<protocol.CompletionList>(
+				return await connection.sendRequest<protocol.CompletionList>(
 					protocol.CompletionRequest.method,
 					{
 						textDocument: {
@@ -120,11 +121,9 @@ async function initLanguageServer() {
 						position: position,
 					}
 				);
-
-				return completions;
 			},
 			async requestDiagnostics(document) {
-				const diagnostics = await connection.sendRequest<protocol.FullDocumentDiagnosticReport>(
+				return await connection.sendRequest<protocol.FullDocumentDiagnosticReport>(
 					protocol.DocumentDiagnosticRequest.method,
 					{
 						textDocument: {
@@ -132,8 +131,14 @@ async function initLanguageServer() {
 						},
 					}
 				);
-
-				return diagnostics;
+			},
+			async requestHover(document, position) {
+				return await connection.sendRequest<protocol.Hover>(protocol.HoverRequest.method, {
+					textDocument: {
+						uri: document.uri,
+					},
+					position: position,
+				});
 			},
 		},
 	};

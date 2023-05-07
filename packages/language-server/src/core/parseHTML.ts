@@ -25,7 +25,7 @@ const createScanner = htmlLs.createScanner as (
 ) => html.Scanner;
 
 /**
- * scan the text and remove any `>` or `<` that cause the tag to end short,
+ * scan the text and remove any `>` or `<` that cause the tag to end short
  */
 function preprocess(text: string, frontmatterEnd?: number) {
 	let content = text.split('').fill(' ', 0, frontmatterEnd).join('');
@@ -97,7 +97,7 @@ function getHTMLVirtualFile(fileName: string, preprocessedHTML: string): Virtual
 			{
 				sourceRange: [0, preprocessedHTML.length],
 				generatedRange: [0, preprocessedHTML.length],
-				data: FileRangeCapabilities.full,
+				data: { ...FileRangeCapabilities.full, completion: { additional: true } },
 			},
 		],
 		capabilities: {

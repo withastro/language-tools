@@ -1,8 +1,8 @@
 /**
- * Re-export of `@astrojs/compiler/utils` because the original is ESM-only.
  * TODO: Upstream this
  */
 
+//  Re-export of `@astrojs/compiler/utils` because the original is ESM-only.
 import type {
 	CommentNode,
 	ComponentNode,
@@ -15,6 +15,8 @@ import type {
 	LiteralNode,
 	Node,
 	ParentNode,
+	Point,
+	Position,
 	RootNode,
 	TagLikeNode,
 	TextNode,
@@ -53,3 +55,18 @@ export const is = {
 	comment: guard<CommentNode>('comment'),
 	frontmatter: guard<FrontmatterNode>('frontmatter'),
 };
+
+export function createCompilerPosition(start: Point, end: Point): Position {
+	return {
+		start,
+		end,
+	};
+}
+
+export function createCompilerPoint(line: number, column: number, offset: number): Point {
+	return {
+		line,
+		column,
+		offset,
+	};
+}
