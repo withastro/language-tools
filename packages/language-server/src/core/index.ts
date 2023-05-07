@@ -44,10 +44,10 @@ export function getLanguageModule(
 				},
 				getCompilationSettings() {
 					return {
+						...host.getCompilationSettings(),
 						jsx: ts.JsxEmit.Preserve ?? 1,
 						jsxImportSource: undefined,
 						jsxFactory: 'astroHTML',
-						...host.getCompilationSettings(),
 					};
 				},
 			};
@@ -110,13 +110,17 @@ export class AstroFile implements VirtualFile {
 				: 0
 		);
 
+		htmlVirtualFile.embeddedFiles = extractStylesheets(
+			this.fileName,
+			this.snapshot,
+			htmlDocument,
+			this.astroMeta.ast
+		);
+
 		this.htmlDocument = htmlDocument;
 
 		this.embeddedFiles = [];
 		this.embeddedFiles.push(htmlVirtualFile);
-		this.embeddedFiles.push(
-			...extractStylesheets(this.fileName, this.snapshot, htmlDocument, this.astroMeta.ast)
-		);
 		this.embeddedFiles.push(tsx.virtualFile);
 	}
 }
