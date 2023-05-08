@@ -20,6 +20,7 @@ import { removeDataAttrCompletion } from '../../html/utils';
 import type { AppCompletionList, CompletionsProvider } from '../../interfaces';
 import type { LanguageServiceManager } from '../../typescript/LanguageServiceManager';
 import { toVirtualFilePath } from '../../typescript/utils';
+import { ConfigManager } from '../../../core/config';
 
 type LastCompletion = {
 	tag: string;
@@ -27,8 +28,15 @@ type LastCompletion = {
 	completions: CompletionItem[] | null;
 };
 
+// COPIED FROM packages/language-server/src/plugins/typescript/features/CompletionsProvider.ts
+/**
+ * The language service throws an error if the character is not a valid trigger character.
+ * Also, the completions are worse.
+ * Therefore, only use the characters the typescript compiler treats as valid.
+ */
+type validTriggerCharacter = '.' | '"' | "'" | '`' | '/' | '@' | '<' | '#';
+
 export class CompletionsProviderImpl implements CompletionsProvider {
-	private readonly languageServiceManager: LanguageServiceManager;
 	private readonly ts: typeof import('typescript/lib/tsserverlibrary');
 	private lastCompletion: LastCompletion | null = null;
 
@@ -37,8 +45,17 @@ export class CompletionsProviderImpl implements CompletionsProvider {
 		useDefaultDataProvider: false,
 	});
 
-	constructor(languageServiceManager: LanguageServiceManager) {
-		this.languageServiceManager = languageServiceManager;
+	// COPIED FROM packages/language-server/src/plugins/typescript/features/CompletionsProvider.ts
+	private readonly validTriggerCharacters = ['.', '"', "'", '`', '/', '@', '<', '#'] as const;
+
+	private isValidTriggerCharacter(character: string | undefined): character is validTriggerCharacter {
+		return this.validTriggerCharacters.includes(character as validTriggerCharacter);
+	}
+
+	constructor(
+		private readonly languageServiceManager: LanguageServiceManager,
+		private readonly configManager: ConfigManager
+	) {
 		this.ts = languageServiceManager.docContext.ts;
 	}
 
@@ -159,6 +176,42 @@ export class CompletionsProviderImpl implements CompletionsProvider {
 
 		const componentName = node.tag!;
 		const { lang, tsDoc } = await this.languageServiceManager.getLSAndTSDoc(document);
+
+		const finalOffset = tsDoc.offsetAt(tsDoc.getGeneratedPosition(position));
+
+		// console.log(
+		// 	tsDoc.getFullText().slice(0, finalOffset) + '|' + tsDoc.getFullText().slice(finalOffset, finalOffset + 10)
+		// );
+
+		const triggerCharacter = completionContext?.triggerCharacter;
+		const triggerKind = completionContext?.triggerKind;
+
+		const validTriggerCharacter = this.isValidTriggerCharacter(triggerCharacter) ? triggerCharacter : undefined;
+
+		const tsPreferences = await this.configManager.getTSPreferences(document);
+		const formatOptions = await this.configManager.getTSFormatConfig(document);
+
+		// console.log(lang.getCompletionsAtPosition(tsDoc.filePath, offset - 6, tsPreferences, formatOptions));
+		// console.log(lang.getCompletionsAtPosition(tsDoc.filePath, offset - 5, tsPreferences, formatOptions));
+		// console.log(lang.getCompletionsAtPosition(tsDoc.filePath, offset - 4, tsPreferences, formatOptions));
+		// console.log(lang.getCompletionsAtPosition(tsDoc.filePath, offset - 3, tsPreferences, formatOptions));
+		// console.log(lang.getCompletionsAtPosition(tsDoc.filePath, offset - 2, tsPreferences, formatOptions));
+		// console.log(lang.getCompletionsAtPosition(tsDoc.filePath, offset - 1, tsPreferences, formatOptions));
+		// console.log({ validTriggerCharacter });
+		const completionStuff = lang.getCompletionsAtPosition(
+			tsDoc.filePath,
+			finalOffset,
+			{ ...tsPreferences, triggerCharacter: validTriggerCharacter },
+			formatOptions
+		);
+		console.log(completionStuff?.entries.map((e) => e.name));
+		console.log(completionStuff?.entries.map((e) => e.name).findIndex((n) => n.includes('client:')));
+		console.log(triggerKind)
+		// console.log(lang.getCompletionsAtPosition(tsDoc.filePath, offset + 1, tsPreferences, formatOptions));
+		// console.log(lang.getCompletionsAtPosition(tsDoc.filePath, offset + 2, tsPreferences, formatOptions));
+		// console.log(lang.getCompletionsAtPosition(tsDoc.filePath, offset + 3, tsPreferences, formatOptions));
+		// console.log(lang.getCompletionsAtPosition(tsDoc.filePath, offset + 4, tsPreferences, formatOptions));
+		// console.log(lang.getCompletionsAtPosition(tsDoc.filePath, offset + 5, tsPreferences, formatOptions));
 
 		// Get the source file
 		const tsFilePath = tsDoc.filePath;

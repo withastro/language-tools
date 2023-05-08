@@ -29,7 +29,7 @@ export class AstroPlugin implements Plugin {
 		this.configManager = configManager;
 		this.languageServiceManager = languageServiceManager;
 
-		this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager);
+		this.completionProvider = new CompletionsProviderImpl(this.languageServiceManager, this.configManager);
 		this.diagnosticsProvider = new DiagnosticsProviderImpl(this.languageServiceManager);
 	}
 
