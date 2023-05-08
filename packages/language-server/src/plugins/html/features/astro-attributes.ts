@@ -184,63 +184,63 @@ export const astroAttributes = newHTMLDataProvider('astro-attributes', {
 export const astroDirectives = newHTMLDataProvider('astro-directives', {
 	version: 1,
 	globalAttributes: [
-		{
-			name: 'client:load',
-			description: 'Start importing the component JS at page load. Hydrate the component when import completes.',
-			valueSet: 'v',
-			references: [
-				{
-					name: 'Astro reference',
-					url: 'https://docs.astro.build/en/reference/directives-reference/#clientload',
-				},
-			],
-		},
-		{
-			name: 'client:idle',
-			description:
-				'Start importing the component JS as soon as main thread is free (uses requestIdleCallback()). Hydrate the component when import completes.',
-			valueSet: 'v',
-			references: [
-				{
-					name: 'Astro reference',
-					url: 'https://docs.astro.build/en/reference/directives-reference/#clientidle',
-				},
-			],
-		},
-		{
-			name: 'client:visible',
-			description:
-				'Start importing the component JS as soon as the element enters the viewport (uses IntersectionObserver). Hydrate the component when import completes. Useful for content lower down on the page.',
-			valueSet: 'v',
-			references: [
-				{
-					name: 'Astro reference',
-					url: 'https://docs.astro.build/en/reference/directives-reference/#clientvisible',
-				},
-			],
-		},
-		{
-			name: 'client:media',
-			description:
-				'Start importing the component JS as soon as the browser matches the given media query (uses matchMedia). Hydrate the component when import completes. Useful for sidebar toggles, or other elements that should only display on mobile or desktop devices.',
-			references: [
-				{
-					name: 'Astro reference',
-					url: 'https://docs.astro.build/en/reference/directives-reference/#clientmedia',
-				},
-			],
-		},
-		{
-			name: 'client:only',
-			description:
-				'Start importing the component JS at page load and hydrate when the import completes, similar to client:load. The component will be skipped at build time, useful for components that are entirely dependent on client-side APIs. This is best avoided unless absolutely needed, in most cases it is best to render placeholder content on the server and delay any browser API calls until the component hydrates in the browser.',
-			valueSet: 'v',
-			references: [
-				{
-					name: 'Astro reference',
-					url: 'https://docs.astro.build/en/reference/directives-reference/#clientonly',
-				},
-			],
-		},
+		// {
+		// 	name: 'client:load',
+		// 	description: 'Start importing the component JS at page load. Hydrate the component when import completes.',
+		// 	valueSet: 'v',
+		// 	references: [
+		// 		{
+		// 			name: 'Astro reference',
+		// 			url: 'https://docs.astro.build/en/reference/directives-reference/#clientload',
+		// 		},
+		// 	],
+		// },
+		// {
+		// 	name: 'client:idle',
+		// 	description:
+		// 		'Start importing the component JS as soon as main thread is free (uses requestIdleCallback()). Hydrate the component when import completes.',
+		// 	valueSet: 'v',
+		// 	references: [
+		// 		{
+		// 			name: 'Astro reference',
+		// 			url: 'https://docs.astro.build/en/reference/directives-reference/#clientidle',
+		// 		},
+		// 	],
+		// },
+		// {
+		// 	name: 'client:visible',
+		// 	description:
+		// 		'Start importing the component JS as soon as the element enters the viewport (uses IntersectionObserver). Hydrate the component when import completes. Useful for content lower down on the page.',
+		// 	valueSet: 'v',
+		// 	references: [
+		// 		{
+		// 			name: 'Astro reference',
+		// 			url: 'https://docs.astro.build/en/reference/directives-reference/#clientvisible',
+		// 		},
+		// 	],
+		// },
+		// {
+		// 	name: 'client:media',
+		// 	description:
+		// 		'Start importing the component JS as soon as the browser matches the given media query (uses matchMedia). Hydrate the component when import completes. Useful for sidebar toggles, or other elements that should only display on mobile or desktop devices.',
+		// 	references: [
+		// 		{
+		// 			name: 'Astro reference',
+		// 			url: 'https://docs.astro.build/en/reference/directives-reference/#clientmedia',
+		// 		},
+		// 	],
+		// },
+		// {
+		// 	name: 'client:only',
+		// 	description:
+		// 		'Start importing the component JS at page load and hydrate when the import completes, similar to client:load. The component will be skipped at build time, useful for components that are entirely dependent on client-side APIs. This is best avoided unless absolutely needed, in most cases it is best to render placeholder content on the server and delay any browser API calls until the component hydrates in the browser.',
+		// 	valueSet: 'v',
+		// 	references: [
+		// 		{
+		// 			name: 'Astro reference',
+		// 			url: 'https://docs.astro.build/en/reference/directives-reference/#clientonly',
+		// 		},
+		// 	],
+		// },
 	],
 });

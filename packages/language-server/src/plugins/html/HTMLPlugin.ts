@@ -34,11 +34,11 @@ export class HTMLPlugin implements Plugin {
 		customDataProviders: [astroAttributes, astroElements, classListAttribute],
 	});
 	private attributeOnlyLang = getLanguageService({
-		customDataProviders: [astroAttributes],
+		// customDataProviders: [astroAttributes],
 		useDefaultDataProvider: false,
 	});
 	private componentLang = getLanguageService({
-		customDataProviders: [astroAttributes, astroDirectives],
+		// customDataProviders: [astroAttributes, astroDirectives],
 		useDefaultDataProvider: false,
 	});
 	private styleScriptTemplate = new Set(['style']);
