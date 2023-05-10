@@ -1,4 +1,5 @@
 import type { Point } from '@astrojs/compiler/types';
+import path from 'node:path';
 import { HTMLDocument, Node, Position, Range, TextEdit } from 'vscode-html-languageservice';
 import type { FrontmatterStatus } from './core/parseAstro.js';
 
@@ -86,7 +87,7 @@ export function getOpenFrontmatterEdit(edit: TextEdit, newLine: string) {
 
 export function getWorkspacePnpPath(workspacePath: string): string | null {
 	try {
-		const possiblePath = resolve(workspacePath, '.pnp.cjs');
+		const possiblePath = path.resolve(workspacePath, '.pnp.cjs');
 		require.resolve(possiblePath);
 		return possiblePath;
 	} catch {
