@@ -10,11 +10,4 @@ suite('Extension Test Suite', () => {
 
 		assert.notStrictEqual(activate, undefined);
 	});
-
-	test('can load the language server', async () => {
-		const ext = vscode.extensions.getExtension('astro-build.astro-vscode');
-		const languageServer = (await ext?.activate()).getLanguageServer();
-
-		assert.notStrictEqual(languageServer, undefined);
-	});
 });

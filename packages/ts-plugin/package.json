@@ -1,6 +1,6 @@
 {
   "name": "@astrojs/ts-plugin",
-  "version": "0.4.4",
+  "version": "2.0.0",
   "description": "A TypeScript Plugin providing Astro intellisense",
   "main": "dist/index.js",
   "type": "commonjs",
@@ -15,13 +15,16 @@
     "javascript",
     "plugin"
   ],
-  "scripts": {},
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "node ./test/runTest.js"
+  },
   "author": "withastro",
   "license": "MIT",
   "dependencies": {
-    "@astrojs/compiler": "^1.1.1",
-    "@jridgewell/trace-mapping": "^0.3.15",
-    "synckit": "^0.8.4"
+    "@astrojs/compiler": "^1.4.1",
+    "@jridgewell/trace-mapping": "^0.3.15"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",
