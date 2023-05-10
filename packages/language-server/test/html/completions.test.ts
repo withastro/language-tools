@@ -19,7 +19,7 @@ describe('HTML - Completions', () => {
 
 		expect(completions.items).to.not.be.empty;
 		expect(completions.items[0].label).to.equal('blockquote');
-		expect(completions.items[0].data.pluginId).to.equal('html');
+		expect(completions.items[0].data.serviceId).to.equal('html');
 	});
 
 	it('Can provide completions for HTML attributes', async () => {
@@ -31,6 +31,6 @@ describe('HTML - Completions', () => {
 
 		expect(completions.items).to.not.be.empty;
 		expect(completions.items[0].label).to.equal('cite');
-		expect(completions.items[0].data.pluginId).to.equal('html');
+		expect(completions.items[0].data.serviceId).to.equal('html');
 	});
 });

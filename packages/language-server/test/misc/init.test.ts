@@ -41,6 +41,10 @@ describe('Initialize', async () => {
 			typeDefinitionProvider: true,
 			callHierarchyProvider: true,
 			hoverProvider: true,
+			diagnosticProvider: {
+				interFileDependencies: true,
+				workspaceDiagnostics: false,
+			},
 			renameProvider: { prepareProvider: true },
 			signatureHelpProvider: { triggerCharacters: [], retriggerCharacters: [] },
 			completionProvider: {

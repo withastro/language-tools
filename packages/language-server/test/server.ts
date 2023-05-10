@@ -68,6 +68,7 @@ async function initLanguageServer() {
 		rootPath: './fixture',
 		capabilities: {},
 		initializationOptions: {
+			diagnosticModel: 2, // DiagnosticModel.Pull
 			typescript: {
 				tsdk: path.join(
 					path.dirname(fileURLToPath(import.meta.url)),
