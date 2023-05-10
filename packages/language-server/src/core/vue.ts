@@ -29,6 +29,7 @@ class VueFile implements VirtualFile {
 	fileName: string;
 	mappings!: Mapping<FileRangeCapabilities>[];
 	embeddedFiles!: VirtualFile[];
+	codegenStacks = [];
 
 	constructor(public sourceFileName: string, public snapshot: ts.IScriptSnapshot) {
 		this.fileName = sourceFileName;

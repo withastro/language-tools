@@ -97,6 +97,7 @@ export function framework2tsx(
 				getLength: () => content.length,
 				getChangeRange: () => undefined,
 			},
+			codegenStacks: [],
 			mappings: [
 				{
 					sourceRange: [0, content.length],

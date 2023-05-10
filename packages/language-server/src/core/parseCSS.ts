@@ -24,6 +24,7 @@ export function extractStylesheets(
 					getLength: () => styleText.length,
 					getChangeRange: () => undefined,
 				},
+				codegenStacks: [],
 				mappings: [
 					{
 						sourceRange: [root.startTagEnd, root.endTagStart],
@@ -61,6 +62,7 @@ export function extractStylesheets(
 
 		embeddedCSSFiles.push({
 			fileName: fileName + '.inline.css',
+			codegenStacks: [],
 			snapshot: {
 				getText: (start, end) => text.substring(start, end),
 				getLength: () => text.length,

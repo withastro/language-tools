@@ -18,7 +18,7 @@ export default async function build(...args) {
 		},
 		bundle: true,
 		metafile: process.argv.includes('--metafile'),
-		sourcemap: true,
+		sourcemap: isDev,
 		outdir: './dist/node',
 		external: ['vscode'],
 		format: 'cjs',

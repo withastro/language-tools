@@ -1,9 +1,6 @@
-import { DiagnosticModel, LanguageServerInitializationOptions } from '@volar/language-server';
-import {
-	activateAutoInsertion,
-	activateShowVirtualFiles,
-	activateWriteVirtualFiles,
-} from '@volar/vscode';
+import * as serverLib from '@astrojs/language-server';
+import { DiagnosticModel, InitializationOptions } from '@volar/language-server';
+import { activateAutoInsertion, createExports } from '@volar/vscode';
 import * as vscode from 'vscode';
 import * as lsp from 'vscode-languageclient/node';
 
@@ -25,7 +22,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			options: debugOptions,
 		},
 	};
-	const initializationOptions: LanguageServerInitializationOptions = {
+	const initializationOptions: InitializationOptions = {
 		typescript: {
 			tsdk: require('path').join(vscode.env.appRoot, 'extensions/node_modules/typescript/lib'),
 		},
@@ -45,8 +42,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// support for auto close tag
 	activateAutoInsertion([client], (document) => document.languageId === 'astro');
-	activateShowVirtualFiles('astro.showTSXOutput', client);
-	activateWriteVirtualFiles('astro.findFileReferences', client);
+
+	return createExports({
+		languageClients: [client],
+		serverLib: serverLib,
+	});
 }
 
 export function deactivate(): Thenable<any> | undefined {

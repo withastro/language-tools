@@ -93,6 +93,7 @@ function getHTMLVirtualFile(fileName: string, preprocessedHTML: string): Virtual
 			getLength: () => preprocessedHTML.length,
 			getChangeRange: () => undefined,
 		},
+		codegenStacks: [],
 		mappings: [
 			{
 				sourceRange: [0, preprocessedHTML.length],

@@ -65,6 +65,7 @@ export class AstroFile implements VirtualFile {
 	astroMeta!: ParseResult & { frontmatter: FrontmatterStatus };
 	compilerDiagnostics!: DiagnosticMessage[];
 	htmlDocument!: HTMLDocument;
+	codegenStacks = [];
 
 	constructor(
 		public sourceFileName: string,

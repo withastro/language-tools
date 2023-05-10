@@ -7,10 +7,7 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": [
-        "--disable-extensions",
-        "--extensionDevelopmentPath=${workspaceRoot}/packages/vscode"
-      ],
+      "args": ["--extensionDevelopmentPath=${workspaceRoot}/packages/vscode"],
       "outFiles": ["${workspaceRoot}/*/*/dist/**/*.js"]
     },
     {

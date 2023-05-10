@@ -110,6 +110,7 @@ function getVirtualFileTSX(
 			inlayHint: true,
 			foldingRange: true,
 		},
+		codegenStacks: [],
 		snapshot: {
 			getText: (start, end) => tsx.code.substring(start, end),
 			getLength: () => tsx.code.length,
