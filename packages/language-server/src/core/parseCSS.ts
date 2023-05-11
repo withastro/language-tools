@@ -1,10 +1,10 @@
-import type { ParentNode, ParseResult, Position } from '@astrojs/compiler/types';
+import type { ParentNode, ParseResult } from '@astrojs/compiler/types';
 import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
 import * as SourceMap from '@volar/source-map';
 import * as muggle from 'muggle-string';
 import type ts from 'typescript/lib/tsserverlibrary';
 import type { HTMLDocument } from 'vscode-html-languageservice';
-import { is } from './compilerUtils.js';
+import { AttributeNodeWithPosition, is } from './compilerUtils.js';
 
 export function extractStylesheets(
 	fileName: string,
@@ -49,7 +49,7 @@ export function extractStylesheets(
 		for (const inlineStyle of inlineStyles) {
 			codes.push('x { ');
 			codes.push([
-				inlineStyle.content,
+				inlineStyle.value,
 				undefined,
 				inlineStyle.position.start.offset + 'style="'.length,
 				FileRangeCapabilities.full,
@@ -78,13 +78,8 @@ export function extractStylesheets(
 	return embeddedCSSFiles;
 }
 
-interface StyleAttribute {
-	position: Position;
-	content: string;
-}
-
-export function findInlineStyles(ast: ParseResult['ast']): StyleAttribute[] {
-	const styleAttrs: StyleAttribute[] = [];
+export function findInlineStyles(ast: ParseResult['ast']): AttributeNodeWithPosition[] {
+	const styleAttrs: AttributeNodeWithPosition[] = [];
 
 	// `@astrojs/compiler`'s `walk` method is async, so we can't use it here. Arf
 	function walkDown(parent: ParentNode) {
@@ -97,10 +92,7 @@ export function findInlineStyles(ast: ParseResult['ast']): StyleAttribute[] {
 				);
 
 				if (styleAttribute && styleAttribute.position) {
-					styleAttrs.push({
-						position: styleAttribute.position,
-						content: styleAttribute.value,
-					});
+					styleAttrs.push(styleAttribute as AttributeNodeWithPosition);
 				}
 			}
 
