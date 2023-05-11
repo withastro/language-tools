@@ -6,7 +6,10 @@ import { LanguageServer, getLanguageServer } from '../server.js';
 describe('Initialize', async () => {
 	let languageServer: LanguageServer;
 
-	before(async () => (languageServer = await getLanguageServer()));
+	before(async function () {
+		this.timeout(10000);
+		languageServer = await getLanguageServer();
+	});
 
 	it('Can start server', async () => {
 		expect(languageServer.initResult).not.be.null;
