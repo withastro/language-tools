@@ -367,27 +367,27 @@
     "test:grammar": "pnpm build:grammar && node ./test/grammar/test.mjs",
     "update-grammar-snapshots": "node ./test/grammar/test.mjs --updateSnapshot"
   },
-  "dependencies": {
-    "@astrojs/language-server": "workspace:*",
-    "@astrojs/ts-plugin": "workspace:*"
-  },
   "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
     "@types/node": "^16.18.26",
     "@types/vscode": "1.67.0",
     "@volar/language-server": "1.6.2",
     "@volar/vscode": "1.6.2",
+    "@vscode/test-electron": "^2.3.0",
     "@vscode/vsce": "latest",
-    "mocha": "^10.2.0",
-    "@types/mocha": "^10.0.1",
-    "glob": "^8.0.3",
-    "@types/glob": "^8.1.0",
     "esbuild": "^0.17.18",
     "esbuild-plugin-copy": "^2.1.1",
-    "kleur": "^4.1.5",
+    "glob": "^8.0.3",
     "js-yaml": "^4.1.0",
-    "vscode-tmgrammar-test": "^0.1.1",
+    "kleur": "^4.1.5",
+    "mocha": "^10.2.0",
     "typescript": "~5.0.4",
-    "@vscode/test-electron": "^2.3.0",
-    "vscode-languageclient": "^8.1.0"
+    "vscode-languageclient": "^8.1.0",
+    "vscode-tmgrammar-test": "^0.1.1"
+  },
+  "dependencies": {
+    "@astrojs/language-server": "^2.0.1-next.0",
+    "@astrojs/ts-plugin": "^2.0.0"
   }
 }
