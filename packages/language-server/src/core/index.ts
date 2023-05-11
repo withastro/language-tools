@@ -44,8 +44,9 @@ export function getLanguageModule(
 					];
 				},
 				getCompilationSettings() {
+					const baseCompilationSettings = host.getCompilationSettings();
 					return {
-						...host.getCompilationSettings(),
+						...baseCompilationSettings,
 						module: ts.ModuleKind.ESNext ?? 99,
 						target: ts.ScriptTarget.ESNext ?? 99,
 						jsx: ts.JsxEmit.Preserve ?? 1,
@@ -54,6 +55,11 @@ export function getLanguageModule(
 						resolveJsonModule: true,
 						allowJs: true,
 						isolatedModules: true,
+						moduleResolution:
+							baseCompilationSettings.moduleResolution === ts.ModuleResolutionKind.Classic ||
+							!baseCompilationSettings.moduleResolution
+								? ts.ModuleResolutionKind.Node10
+								: baseCompilationSettings.moduleResolution,
 					};
 				},
 			};

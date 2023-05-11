@@ -143,4 +143,10 @@ async function initLanguageServer() {
 			},
 		},
 	};
+
+	// Ensure that our first test does not suffer from a TypeScript overhead
+	await languageServer.helpers.requestCompletion(
+		TextDocument.create('file://doesnt-exists', 'astro', 0, ''),
+		protocol.Position.create(0, 0)
+	);
 }
