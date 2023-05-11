@@ -1,6 +1,6 @@
-import * as serverLib from '@astrojs/language-server';
+import { protocol } from '@astrojs/language-server';
 import { DiagnosticModel, InitializationOptions } from '@volar/language-server';
-import { activateAutoInsertion, createExports } from '@volar/vscode';
+import { activateAutoInsertion, supportLabsVersion, type ExportsInfoForLabs } from '@volar/vscode';
 import * as vscode from 'vscode';
 import * as lsp from 'vscode-languageclient/node';
 
@@ -43,10 +43,13 @@ export async function activate(context: vscode.ExtensionContext) {
 	// support for auto close tag
 	activateAutoInsertion([client], (document) => document.languageId === 'astro');
 
-	return createExports({
-		languageClients: [client],
-		serverLib: serverLib,
-	});
+	return {
+		volarLabs: {
+			version: supportLabsVersion,
+			languageClients: [client],
+			languageServerProtocol: protocol,
+		},
+	} satisfies ExportsInfoForLabs;
 }
 
 export function deactivate(): Thenable<any> | undefined {

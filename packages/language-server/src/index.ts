@@ -1,1 +1,1 @@
-export * from '@volar/language-server';
+export * as protocol from '@volar/language-server/protocol';
