@@ -40,7 +40,6 @@ function createProxyHandler(): ProxyHandler<ts.LanguageService> {
 
 	return {
 		get(target, p) {
-			// always return patch symbol whether the plugin is enabled or not
 			if (p === astroPluginPatchSymbol) {
 				return true;
 			}
