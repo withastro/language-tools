@@ -10,11 +10,6 @@
   },
   "type": "commonjs",
   "main": "dist/index.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/withastro/language-tools",
-    "directory": "packages/language-server"
-  },
   "files": [
     "bin",
     "dist/**/*.js",
@@ -33,10 +28,10 @@
   "dependencies": {
     "@astrojs/compiler": "^1.4.1",
     "@jridgewell/sourcemap-codec": "^1.4.15",
-    "@volar/language-core": "^1.6.1",
-    "@volar/language-server": "^1.6.1",
-    "@volar/language-service": "^1.6.1",
-    "@volar/source-map": "^1.6.1",
+    "@volar/language-core": "^1.6.2",
+    "@volar/language-server": "^1.6.2",
+    "@volar/language-service": "^1.6.2",
+    "@volar/source-map": "^1.6.2",
     "muggle-string": "^0.3.1",
     "volar-service-css": "^0.0.2",
     "volar-service-emmet": "^0.0.2",
