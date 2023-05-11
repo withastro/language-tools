@@ -4,6 +4,7 @@
 
 //  Re-export of `@astrojs/compiler/utils` because the original is ESM-only.
 import type {
+	AttributeNode,
 	CommentNode,
 	ComponentNode,
 	CustomElementNode,
@@ -70,3 +71,6 @@ export function createCompilerPoint(line: number, column: number, offset: number
 		offset,
 	};
 }
+
+type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
+export type AttributeNodeWithPosition = WithRequired<AttributeNode, 'position'>;

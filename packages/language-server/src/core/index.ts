@@ -13,6 +13,7 @@ import { astro2tsx } from './astro2tsx';
 import { FrontmatterStatus, getAstroMetadata } from './parseAstro';
 import { extractStylesheets } from './parseCSS';
 import { parseHTML } from './parseHTML';
+import { extractScriptTags } from './parseJS.js';
 import type { AstroInstall } from './utils';
 
 export function getLanguageModule(
@@ -45,9 +46,14 @@ export function getLanguageModule(
 				getCompilationSettings() {
 					return {
 						...host.getCompilationSettings(),
+						module: ts.ModuleKind.ESNext ?? 99,
+						target: ts.ScriptTarget.ESNext ?? 99,
 						jsx: ts.JsxEmit.Preserve ?? 1,
 						jsxImportSource: undefined,
 						jsxFactory: 'astroHTML',
+						resolveJsonModule: true,
+						allowJs: true,
+						isolatedModules: true,
 					};
 				},
 			};
@@ -95,13 +101,6 @@ export class AstroFile implements VirtualFile {
 		];
 
 		this.astroMeta = getAstroMetadata(this.snapshot.getText(0, this.snapshot.getLength()));
-		const tsx = astro2tsx(
-			this.snapshot.getText(0, this.snapshot.getLength()),
-			this.fileName,
-			this.ts
-		);
-
-		this.compilerDiagnostics = tsx.diagnostics;
 
 		const { htmlDocument, virtualFile: htmlVirtualFile } = parseHTML(
 			this.fileName,
@@ -110,18 +109,24 @@ export class AstroFile implements VirtualFile {
 				? this.astroMeta.frontmatter.position.end.offset
 				: 0
 		);
-
-		htmlVirtualFile.embeddedFiles = extractStylesheets(
-			this.fileName,
-			this.snapshot,
-			htmlDocument,
-			this.astroMeta.ast
-		);
-
 		this.htmlDocument = htmlDocument;
+
+		htmlVirtualFile.embeddedFiles.push(
+			...extractStylesheets(this.fileName, this.snapshot, htmlDocument, this.astroMeta.ast),
+			...extractScriptTags(this.fileName, this.snapshot, htmlDocument, this.astroMeta.ast)
+		);
 
 		this.embeddedFiles = [];
 		this.embeddedFiles.push(htmlVirtualFile);
+
+		const tsx = astro2tsx(
+			this.snapshot.getText(0, this.snapshot.getLength()),
+			this.fileName,
+			this.ts,
+			htmlDocument
+		);
+
+		this.compilerDiagnostics = tsx.diagnostics;
 		this.embeddedFiles.push(tsx.virtualFile);
 	}
 }

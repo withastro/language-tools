@@ -2,18 +2,19 @@ import { convertToTSX } from '@astrojs/compiler/sync';
 import type { TSXResult } from '@astrojs/compiler/types';
 import { decode } from '@jridgewell/sourcemap-codec';
 import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
-import { TextDocument } from 'vscode-html-languageservice';
+import { HTMLDocument, TextDocument } from 'vscode-html-languageservice';
 import { patchTSX } from './utils.js';
 
 export function astro2tsx(
 	input: string,
 	fileName: string,
-	ts: typeof import('typescript/lib/tsserverlibrary.js')
+	ts: typeof import('typescript/lib/tsserverlibrary.js'),
+	htmlDocument: HTMLDocument
 ) {
 	const tsx = convertToTSX(input, { filename: fileName });
 
 	return {
-		virtualFile: getVirtualFileTSX(input, tsx, fileName, ts),
+		virtualFile: getVirtualFileTSX(input, tsx, fileName, ts, htmlDocument),
 		diagnostics: tsx.diagnostics,
 	};
 }
@@ -22,7 +23,8 @@ function getVirtualFileTSX(
 	input: string,
 	tsx: TSXResult,
 	fileName: string,
-	ts: typeof import('typescript/lib/tsserverlibrary.js')
+	ts: typeof import('typescript/lib/tsserverlibrary.js'),
+	htmlDocument: HTMLDocument
 ): VirtualFile {
 	tsx.code = patchTSX(tsx.code);
 	const v3Mappings = decode(tsx.map.mappings);
@@ -66,10 +68,28 @@ function getVirtualFileTSX(
 						lastMapping.generatedRange[1] = current.genOffset + length;
 						lastMapping.sourceRange[1] = current.sourceOffset + length;
 					} else {
+						// Disable features inside script tags. This is a bit annoying to do, I wonder if maybe leaving script tags
+						// unmapped would be better.
+						const node = htmlDocument.findNodeAt(current.sourceOffset);
+						const rangeCapabilities: FileRangeCapabilities =
+							node.tag !== 'script'
+								? FileRangeCapabilities.full
+								: {
+										completion: false,
+										definition: false,
+										diagnostic: false,
+										displayWithLink: false,
+										hover: false,
+										references: false,
+										referencesCodeLens: false,
+										rename: false,
+										semanticTokens: false,
+								  };
+
 						mappings.push({
 							sourceRange: [current.sourceOffset, current.sourceOffset + length],
 							generatedRange: [current.genOffset, current.genOffset + length],
-							data: FileRangeCapabilities.full,
+							data: rangeCapabilities,
 						});
 					}
 				}
