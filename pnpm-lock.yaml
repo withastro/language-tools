@@ -163,10 +163,10 @@ importers:
   packages/vscode:
     dependencies:
       '@astrojs/language-server':
-        specifier: ^2.0.0
+        specifier: ^1.0.5
         version: link:../language-server
       '@astrojs/ts-plugin':
-        specifier: ^2.0.0
+        specifier: ^1.0.5
         version: link:../ts-plugin
     devDependencies:
       '@types/glob':

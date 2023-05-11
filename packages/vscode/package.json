@@ -23,7 +23,7 @@
     "color": "#17191E",
     "theme": "dark"
   },
-  "version": "1.0.5",
+  "version": "2.0.0-next.0",
   "author": "withastro",
   "license": "MIT",
   "publisher": "astro-build",
@@ -387,7 +387,7 @@
     "vscode-tmgrammar-test": "^0.1.1"
   },
   "dependencies": {
-    "@astrojs/language-server": "^2.0.1-next.0",
-    "@astrojs/ts-plugin": "^2.0.0"
+    "@astrojs/language-server": "^2.0.0-next.0",
+    "@astrojs/ts-plugin": "^1.0.5"
   }
 }
