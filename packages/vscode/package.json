@@ -35,7 +35,6 @@
     "workspaceContains:astro.config.*"
   ],
   "main": "./dist/node/client.js",
-  "browser": "./dist/browser/client.js",
   "files": [
     "dist/",
     "languages/",
