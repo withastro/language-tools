@@ -1,5 +1,11 @@
 # astro-vscode
 
+## 2.0.0-next.3
+
+### Patch Changes
+
+- 46f321f: Fix packaging error, part 2
+
 ## 2.0.0-next.2
 
 ### Patch Changes
