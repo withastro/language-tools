@@ -1,2 +1,1 @@
-export { AstroCheck, Diagnostic, DiagnosticSeverity, GetDiagnosticsResult } from './check';
-export { offsetAt } from './core/documents';
+export * as protocol from '@volar/language-server/protocol';

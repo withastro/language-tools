@@ -1,0 +1,12 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "@astrojs/language-server": "1.0.5",
+    "@astrojs/ts-plugin": "1.0.5",
+    "astro-vscode": "1.0.5"
+  },
+  "changesets": [
+    "late-squids-sparkle"
+  ]
+}
