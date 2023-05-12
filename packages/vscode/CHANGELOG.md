@@ -1,5 +1,11 @@
 # astro-vscode
 
+## 2.0.0-next.2
+
+### Patch Changes
+
+- fce2944: Fix publishing error
+
 ## 2.0.0-next.1
 
 ### Patch Changes
