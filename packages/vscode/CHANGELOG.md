@@ -1,5 +1,11 @@
 # astro-vscode
 
+## 2.0.0-next.4
+
+### Patch Changes
+
+- f707876: Fix commands not working
+
 ## 2.0.0-next.3
 
 ### Patch Changes
