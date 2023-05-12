@@ -1,5 +1,11 @@
 # astro-vscode
 
+## 2.0.0-next.1
+
+### Patch Changes
+
+- 0cb6b9e: Publish pre-release to marketplace
+
 ## 2.0.0-next.0
 
 ### Major Changes
