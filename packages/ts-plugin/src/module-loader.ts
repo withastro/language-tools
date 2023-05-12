@@ -20,7 +20,11 @@ class ModuleResolutionCache {
 	/**
 	 * Caches resolved module, if it is not undefined.
 	 */
-	set(moduleName: string, containingFile: string, resolvedModule: ts.ResolvedModuleFull | undefined) {
+	set(
+		moduleName: string,
+		containingFile: string,
+		resolvedModule: ts.ResolvedModuleFull | undefined
+	) {
 		if (!resolvedModule) {
 			return;
 		}
@@ -183,7 +187,10 @@ export function patchModuleLoader(
 
 		return resolved.map((tsResolvedModule, idx) => {
 			const moduleName = moduleLiterals[idx].text;
-			if (tsResolvedModule.resolvedModule || !ensureRealAstroFilePath(moduleName).endsWith('.astro')) {
+			if (
+				tsResolvedModule.resolvedModule ||
+				!ensureRealAstroFilePath(moduleName).endsWith('.astro')
+			) {
 				return tsResolvedModule;
 			}
 
@@ -191,7 +198,11 @@ export function patchModuleLoader(
 		});
 	}
 
-	function resolveAstroModuleNameFromCache(moduleName: string, containingFile: string, options: ts.CompilerOptions) {
+	function resolveAstroModuleNameFromCache(
+		moduleName: string,
+		containingFile: string,
+		options: ts.CompilerOptions
+	) {
 		const cachedModule = moduleCache.get(moduleName, containingFile);
 		if (cachedModule) {
 			return {
