@@ -1,5 +1,13 @@
 # astro-vscode
 
+## 2.0.0-next.5
+
+### Patch Changes
+
+- 3fcbc1a: Fix TypeScript plugin crashing at start in certain circumstances
+- Updated dependencies [3fcbc1a]
+  - @astrojs/ts-plugin@1.0.6-next.0
+
 ## 2.0.0-next.4
 
 ### Patch Changes
