@@ -41,14 +41,8 @@ function init(modules: { typescript: typeof import('typescript/lib/tsserverlibra
 			);
 		}
 
-		patchModuleLoader(
-			logger,
-			snapshotManager,
-			modules.typescript,
-			info.languageServiceHost,
-			info.project
-		);
-		return decorateLanguageService(info.languageService, snapshotManager, logger);
+		patchModuleLoader(logger, snapshotManager, modules.typescript, info.languageServiceHost, info.project);
+		return decorateLanguageService(info.languageService, snapshotManager, ts, logger);
 	}
 
 	function getExternalFiles(project: ts.server.ConfiguredProject) {
