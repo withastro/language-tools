@@ -1,5 +1,11 @@
 # @astrojs/language-server
 
+## 2.0.0-next.6
+
+### Patch Changes
+
+- 4038ca5: Attempt to solve crash in packaged version
+
 ## 2.0.0-next.0
 
 ### Major Changes
