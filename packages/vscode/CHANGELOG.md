@@ -37,6 +37,20 @@ In the background, this update means that we now have to maintain a lot less cod
 - Updated dependencies
   - @astrojs/language-server@2.0.0-next.0
 
+## 1.0.7
+
+### Patch Changes
+
+- e54ec6c: Update to prettier-plugin-astro@0.9.0
+
+## 1.0.6
+
+### Patch Changes
+
+- 3fcbc1a: Fix TypeScript plugin crashing at start in certain circumstances
+- Updated dependencies [3fcbc1a]
+  - @astrojs/ts-plugin@1.0.6
+
 ## 1.0.5
 
 ### Patch Changes
