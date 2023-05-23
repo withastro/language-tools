@@ -1,5 +1,11 @@
 # astro-vscode
 
+## 2.0.0-next.5
+
+### Patch Changes
+
+- 77d74d9: Update Astro Prettier Plugin to 0.9.0
+
 ## 2.0.0-next.4
 
 ### Patch Changes

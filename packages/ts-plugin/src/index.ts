@@ -41,7 +41,13 @@ function init(modules: { typescript: typeof import('typescript/lib/tsserverlibra
 			);
 		}
 
-		patchModuleLoader(logger, snapshotManager, modules.typescript, info.languageServiceHost, info.project);
+		patchModuleLoader(
+			logger,
+			snapshotManager,
+			modules.typescript,
+			info.languageServiceHost,
+			info.project
+		);
 		return decorateLanguageService(info.languageService, snapshotManager, ts, logger);
 	}
 
