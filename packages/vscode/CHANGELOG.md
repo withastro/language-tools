@@ -1,5 +1,11 @@
 # astro-vscode
 
+## 2.0.0-next.7
+
+### Patch Changes
+
+- df6cd5a: Fix crash at start
+
 ## 2.0.0-next.6
 
 ### Patch Changes
