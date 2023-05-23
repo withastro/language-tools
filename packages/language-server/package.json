@@ -32,7 +32,10 @@
     "@volar/language-server": "^1.6.2",
     "@volar/language-service": "^1.6.2",
     "@volar/source-map": "^1.6.2",
+    "fast-glob": "^3.2.12",
     "muggle-string": "^0.3.1",
+    "prettier": "^2.8.8",
+    "prettier-plugin-astro": "^0.9.0",
     "volar-service-css": "^0.0.2",
     "volar-service-emmet": "^0.0.2",
     "volar-service-html": "^0.0.2",
@@ -40,8 +43,7 @@
     "volar-service-typescript": "^0.0.2",
     "volar-service-typescript-twoslash-queries": "^0.0.2",
     "vscode-html-languageservice": "^5.0.5",
-    "vscode-uri": "^3.0.7",
-    "fast-glob": "^3.2.12"
+    "vscode-uri": "^3.0.7"
   },
   "devDependencies": {
     "@astrojs/svelte": "^2.1.1",
@@ -49,6 +51,7 @@
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
     "@types/node": "^16.18.26",
+    "@types/prettier": "^2.7.2",
     "astro": "^2.4.4",
     "chai": "^4.3.7",
     "mocha": "^10.2.0",

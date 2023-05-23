@@ -61,6 +61,12 @@ importers:
       muggle-string:
         specifier: ^0.3.1
         version: 0.3.1
+      prettier:
+        specifier: ^2.8.8
+        version: 2.8.8
+      prettier-plugin-astro:
+        specifier: ^0.9.0
+        version: 0.9.0
       volar-service-css:
         specifier: ^0.0.2
         version: 0.0.2(@volar/language-service@1.6.2)
@@ -101,6 +107,9 @@ importers:
       '@types/node':
         specifier: ^16.18.26
         version: 16.18.26
+      '@types/prettier':
+        specifier: ^2.7.2
+        version: 2.7.2
       astro:
         specifier: ^2.4.4
         version: 2.4.4(@types/node@16.18.26)
@@ -1394,6 +1403,10 @@ packages:
 
   /@types/parse5@6.0.3:
     resolution: {integrity: sha512-SuT16Q1K51EAVPz1K29DJ/sXjhSQ0zjvsypYJ6tlwVsRV9jwW5Adq2ch8Dq8kDBCkYnELS7N7VNCSB5nC56t/g==}
+    dev: true
+
+  /@types/prettier@2.7.2:
+    resolution: {integrity: sha512-KufADq8uQqo1pYKVIYzfKbJfBAc0sOeXqGbFaSpv8MRmC/zXgowNZmFcbngndGk922QDmOASEXUZCaY48gs4cg==}
     dev: true
 
   /@types/resolve@1.20.2:
