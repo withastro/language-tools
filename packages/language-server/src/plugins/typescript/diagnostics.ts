@@ -1,4 +1,4 @@
-import type { Diagnostic } from '@volar/language-service';
+import type { Diagnostic } from '@volar/language-server';
 
 // List of codes:
 // https://github.com/Microsoft/TypeScript/blob/main/src/compiler/diagnosticMessages.json

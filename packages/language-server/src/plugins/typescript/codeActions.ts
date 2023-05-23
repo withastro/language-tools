@@ -1,4 +1,4 @@
-import { CodeAction, Range, TextDocumentEdit } from '@volar/language-service';
+import { CodeAction, Range, TextDocumentEdit } from '@volar/language-server';
 import type { TextDocument } from 'vscode-html-languageservice';
 import type { AstroFile } from '../../core/index.js';
 import {

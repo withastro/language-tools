@@ -3,20 +3,13 @@ import {
 	CompletionItemKind,
 	CompletionList,
 	ServiceContext,
-} from '@volar/language-service';
-import { getDefaultHTMLDataProvider } from 'vscode-html-languageservice';
+} from '@volar/language-server';
 import { AstroFile } from '../../core/index.js';
 import {
 	ensureRangeIsInFrontmatter,
 	getNewFrontmatterEdit,
 	getOpenFrontmatterEdit,
 } from '../../utils.js';
-
-const defaultHTMLProvider = getDefaultHTMLDataProvider();
-const defaultTags = new Set(defaultHTMLProvider.provideTags().map((tag) => tag.name));
-const defaultAttributes = new Set(
-	defaultHTMLProvider.provideTags().flatMap((tag) => tag.attributes.map((attr) => attr.name))
-);
 
 export function enhancedProvideCompletionItems(completions: CompletionList): CompletionList {
 	completions.items = completions.items.filter(isValidCompletion).map((completion) => {
@@ -101,7 +94,6 @@ function isValidCompletion(completion: CompletionItem) {
 	const isSvelte2tsxCompletion =
 		completion.label.startsWith('__sveltets_') || svelte2tsxTypes.has(completion.label);
 
-	if (defaultTags.has(completion.label) || defaultAttributes.has(completion.label)) return false;
 	if (isSvelte2tsxCompletion) return false;
 
 	return true;

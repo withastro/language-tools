@@ -1,18 +1,22 @@
-import type { Service } from '@volar/language-service';
+import type { Service } from '@volar/language-server';
 import createHtmlService from 'volar-service-html';
 import { AstroFile } from '../core/index.js';
 import { isInComponentStartTag } from '../utils.js';
 import { astroAttributes, astroElements, classListAttribute } from './html-data.js';
 
 export default (): Service =>
-	(context): ReturnType<Service> => {
-		const htmlPlugin = createHtmlService()(context);
+	(context, modules): ReturnType<Service> => {
+		const htmlPlugin = createHtmlService()(context, modules);
 
 		if (!context) {
 			return { triggerCharacters: htmlPlugin.triggerCharacters };
 		}
 
-		htmlPlugin.updateCustomData([astroAttributes, astroElements, classListAttribute]);
+		htmlPlugin.provide['html/updateCustomData']?.([
+			astroAttributes,
+			astroElements,
+			classListAttribute,
+		]);
 
 		return {
 			...htmlPlugin,

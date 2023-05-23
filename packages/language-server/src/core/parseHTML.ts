@@ -98,7 +98,7 @@ function getHTMLVirtualFile(fileName: string, preprocessedHTML: string): Virtual
 			{
 				sourceRange: [0, preprocessedHTML.length],
 				generatedRange: [0, preprocessedHTML.length],
-				data: { ...FileRangeCapabilities.full, completion: { additional: true } },
+				data: FileRangeCapabilities.full,
 			},
 		],
 		capabilities: {
