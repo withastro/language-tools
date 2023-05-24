@@ -54,7 +54,7 @@ export function isInsideFrontmatter(offset: number, frontmatter: FrontmatterStat
  * Transform a Point from the Astro compiler to an LSP Position
  */
 export function PointToPosition(point: Point) {
-	return Position.create(point.line, point.column);
+	return Position.create(point.line, point.column - 1);
 }
 
 /**
@@ -63,7 +63,6 @@ export function PointToPosition(point: Point) {
 export function ensureRangeIsInFrontmatter(range: Range, frontmatter: FrontmatterStatus): Range {
 	if (frontmatter.status === 'open' || frontmatter.status === 'closed') {
 		const position = PointToPosition(frontmatter.position.start);
-		position.line += 1;
 
 		return Range.create(position, position);
 	}
