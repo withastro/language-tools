@@ -91,7 +91,7 @@ export function framework2tsx(
 		return {
 			fileName: fileName + '.tsx',
 			capabilities: FileCapabilities.full,
-			kind: FileKind.TextFile,
+			kind: FileKind.TypeScriptHostFile,
 			snapshot: {
 				getText: (start, end) => content.substring(start, end),
 				getLength: () => content.length,

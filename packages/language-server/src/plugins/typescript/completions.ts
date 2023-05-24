@@ -51,6 +51,12 @@ export function enhancedResolveCompletionItem(
 	const newLine = context.host.getNewLine ? context.host.getNewLine() : '\n';
 
 	resolvedCompletion.additionalTextEdits = resolvedCompletion.additionalTextEdits?.map((edit) => {
+		// HACK: There's a weird situation sometimes where some components (especially Svelte) will get imported as type imports
+		// for some unknown reason. This work around the problem by always ensuring a normal import for components
+		if (resolvedCompletion.data.isComponent && edit.newText.includes('import type')) {
+			edit.newText.replace('import type', 'import');
+		}
+
 		if (file.astroMeta.frontmatter.status === 'doesnt-exist') {
 			return getNewFrontmatterEdit(edit, newLine);
 		}
