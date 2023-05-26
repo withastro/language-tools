@@ -7,7 +7,8 @@ describe('Initialize', async () => {
 	let languageServer: LanguageServer;
 
 	before(async function () {
-		this.timeout(10000);
+		// First init can sometimes be slow in CI, even though the rest of the tests will be fast.
+		this.timeout(20000);
 		languageServer = await getLanguageServer();
 	});
 
