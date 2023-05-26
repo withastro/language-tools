@@ -56,11 +56,13 @@ export class AstroCheck {
 				this.linter.logErrors(file, fileErrors);
 			}
 
-			errors.push({
-				errors: fileErrors,
-				fileContent: fileContent ?? '',
-				fileUrl: pathToFileURL(file),
-			});
+			if (fileErrors.length > 0) {
+				errors.push({
+					errors: fileErrors,
+					fileContent: fileContent ?? '',
+					fileUrl: pathToFileURL(file),
+				});
+			}
 		}
 
 		return errors;

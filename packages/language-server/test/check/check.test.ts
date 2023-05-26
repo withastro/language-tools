@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { before, describe, it } from 'mocha';
 import path from 'node:path';
 import { AstroCheck, CheckResult } from '../../dist/check.js';
 
