@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { before, describe, it } from 'mocha';
+import os from 'node:os';
 import path from 'node:path';
 import { AstroCheck, CheckResult } from '../../dist/check.js';
 
@@ -29,6 +30,8 @@ describe('AstroCheck', async () => {
 
 	it("Returns the file's content", async () => {
 		expect(errors[0].fileContent).to.not.be.undefined;
-		expect(errors[0].fileContent).to.deep.equal('---\nconsole.log(doesntExist);\n---\n');
+		expect(errors[0].fileContent).to.deep.equal(
+			`---${os.EOL}console.log(doesntExist);${os.EOL}---${os.EOL}`
+		);
 	});
 });
