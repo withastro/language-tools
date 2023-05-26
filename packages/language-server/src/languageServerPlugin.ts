@@ -55,6 +55,11 @@ export const plugin: LanguageServerPlugin = (
 		config.services.astro ??= createAstroPlugin();
 		config.services.prettier ??= createPrettierService({
 			languages: ['astro'],
+			resolveConfigOptions: {
+				// Prettier's cache is a bit cumbersome, because you need to reload the config yourself on change
+				// TODO: Upstream a fix for this
+				useCache: false,
+			},
 			additionalOptions: (resolvedConfig) => {
 				function getAstroPrettierPlugin() {
 					if (!ctx?.project.rootUri) return [];
@@ -70,6 +75,7 @@ export const plugin: LanguageServerPlugin = (
 				return {
 					plugins: [...getAstroPrettierPlugin(), ...(resolvedConfig.plugins ?? [])],
 					parser: 'astro',
+					...resolvedConfig,
 				};
 			},
 		});
