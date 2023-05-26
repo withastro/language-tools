@@ -8,8 +8,8 @@ import { getSvelteLanguageModule } from './core/svelte.js';
 import { getAstroInstall } from './core/utils';
 import { getVueLanguageModule } from './core/vue.js';
 import { getPrettierPluginPath, importPrettier } from './importPackage.js';
-import createAstroPlugin from './plugins/astro.js';
-import createHtmlPlugin from './plugins/html.js';
+import createAstroService from './plugins/astro.js';
+import createHtmlService from './plugins/html.js';
 import createTypeScriptService from './plugins/typescript/index.js';
 
 export const plugin: LanguageServerPlugin = (
@@ -47,12 +47,12 @@ export const plugin: LanguageServerPlugin = (
 		}
 
 		config.services ??= {};
-		config.services.html ??= createHtmlPlugin();
+		config.services.html ??= createHtmlService();
 		config.services.css ??= createCssService();
 		config.services.emmet ??= createEmmetService();
 		config.services.typescript ??= createTypeScriptService();
 		config.services.typescripttwoslash ??= createTypeScriptTwoSlashService();
-		config.services.astro ??= createAstroPlugin();
+		config.services.astro ??= createAstroService();
 		config.services.prettier ??= createPrettierService({
 			languages: ['astro'],
 			resolveConfigOptions: {
