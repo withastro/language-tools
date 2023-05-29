@@ -20,13 +20,13 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.1",
-    "@typescript-eslint/eslint-plugin": "^5.59.0",
-    "@typescript-eslint/parser": "^5.59.0",
-    "eslint": "^8.39.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.7",
+    "@typescript-eslint/parser": "^5.59.7",
+    "eslint": "^8.41.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.8.8",
-    "turbo": "1.9.3",
+    "turbo": "1.9.9",
     "typescript": "~5.0.4",
     "organize-imports-cli": "^0.10.0"
   },
