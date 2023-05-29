@@ -7,13 +7,16 @@
     "astro-vscode": "1.0.5"
   },
   "changesets": [
+    "fuzzy-carpets-collect",
     "good-ladybugs-shake",
+    "healthy-waves-explain",
     "late-squids-sparkle",
     "lazy-guests-attend",
     "lovely-hotels-smile",
     "red-avocados-lick",
     "silent-buckets-worry",
     "soft-moons-drop",
-    "sweet-buckets-wave"
+    "sweet-buckets-wave",
+    "tender-jobs-tickle"
   ]
 }
