@@ -1,5 +1,13 @@
 # @astrojs/language-server
 
+## 2.0.0-next.8
+
+### Patch Changes
+
+- 5a4e068: Fix completions not appearing for Svelte and Vue components in certain cases
+- 5a4e068: Fix Prettier config not being considered when formatting
+- 5a4e068: Fix auto-imports and quickfixes sometimes not properly inserting the import
+
 ## 2.0.0-next.7
 
 ### Patch Changes
