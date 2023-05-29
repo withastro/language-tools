@@ -48,15 +48,15 @@ export class AstroCheck {
 
 		const errors: CheckResult[] = [];
 		for (const file of files) {
-			const fileSnapshot = this.project.languageServiceHost.getScriptSnapshot(file);
-			const fileContent = fileSnapshot?.getText(0, fileSnapshot.getLength());
-
 			const fileErrors = await this.linter.check(file);
 			if (logErrors) {
 				this.linter.logErrors(file, fileErrors);
 			}
 
 			if (fileErrors.length > 0) {
+				const fileSnapshot = this.project.languageServiceHost.getScriptSnapshot(file);
+				const fileContent = fileSnapshot?.getText(0, fileSnapshot.getLength());
+
 				errors.push({
 					errors: fileErrors,
 					fileContent: fileContent ?? '',
@@ -70,7 +70,7 @@ export class AstroCheck {
 
 	private initialize() {
 		this.ts = this.typescriptPath ? require(this.typescriptPath) : require('typescript');
-		const tsconfig = this.getTsconfig();
+		const tsconfigPath = this.getTsconfig();
 
 		const config: kit.Config = {
 			languages: {
@@ -84,7 +84,13 @@ export class AstroCheck {
 			},
 		};
 
-		if (!tsconfig) {
+		if (tsconfigPath) {
+			this.project = kit.createProject(tsconfigPath, [
+				{ extension: 'astro', isMixedContent: true, scriptKind: 7 },
+				{ extension: 'vue', isMixedContent: true, scriptKind: 7 },
+				{ extension: 'svelte', isMixedContent: true, scriptKind: 7 },
+			]);
+		} else {
 			this.project = kit.createInferredProject(this.workspacePath, () => {
 				return fg.sync('**/*.astro', {
 					cwd: this.workspacePath,
@@ -92,12 +98,6 @@ export class AstroCheck {
 					absolute: true,
 				});
 			});
-		} else {
-			this.project = kit.createProject(tsconfig, [
-				{ extension: 'astro', isMixedContent: true, scriptKind: 7 },
-				{ extension: 'vue', isMixedContent: true, scriptKind: 7 },
-				{ extension: 'svelte', isMixedContent: true, scriptKind: 7 },
-			]);
 		}
 
 		this.linter = kit.createLinter(config, this.project.languageServiceHost);
