@@ -1,4 +1,4 @@
-import type { Service } from '@volar/language-server';
+import { CompletionItemKind, Service } from '@volar/language-server';
 import createHtmlService from 'volar-service-html';
 import { AstroFile } from '../core/index.js';
 import { isInComponentStartTag } from '../utils.js';
@@ -20,7 +20,7 @@ export default (): Service =>
 
 		return {
 			...htmlPlugin,
-			provideCompletionItems(document, position, completionContext, token) {
+			async provideCompletionItems(document, position, completionContext, token) {
 				if (document.languageId !== 'html') return;
 
 				const [_, source] = context.documents.getVirtualFileByUri(document.uri);
@@ -32,7 +32,27 @@ export default (): Service =>
 					return null;
 				}
 
-				return htmlPlugin.provideCompletionItems!(document, position, completionContext, token);
+				const completions = await htmlPlugin.provideCompletionItems!(
+					document,
+					position,
+					completionContext,
+					token
+				);
+
+				if (!completions) {
+					return null;
+				}
+
+				// We don't want completions for file references, as they're mostly invalid for Astro
+				completions.items = completions.items.filter(
+					(completion) => completion.kind !== CompletionItemKind.File
+				);
+
+				return completions;
+			},
+			// Document links provided by `vscode-html-languageservice` are invalid for Astro
+			provideDocumentLinks() {
+				return [];
 			},
 		};
 	};
