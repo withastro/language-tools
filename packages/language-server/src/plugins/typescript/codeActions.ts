@@ -1,5 +1,6 @@
 import { CodeAction, Range, TextDocumentEdit } from '@volar/language-server';
 import type { TextDocument } from 'vscode-html-languageservice';
+import { URI } from 'vscode-uri';
 import type { AstroFile } from '../../core/index.js';
 import {
 	PointToPosition,
@@ -12,10 +13,12 @@ export function enhancedProvideCodeActions(
 	codeActions: CodeAction[],
 	file: AstroFile,
 	document: TextDocument,
+	originalDocument: TextDocument,
 	newLine: string
 ): CodeAction[] {
 	codeActions = codeActions.map((codeAction) => {
 		if (!codeAction.edit) return codeAction;
+		if (file.scriptFiles.includes(URI.parse(originalDocument.uri).path)) return codeAction;
 
 		codeAction.edit.documentChanges = codeAction.edit.documentChanges?.map((change) => {
 			if (TextDocumentEdit.is(change)) {

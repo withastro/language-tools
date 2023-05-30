@@ -51,6 +51,7 @@ export default (): Service =>
 					codeActions,
 					file,
 					context.documents.getDocumentByFileName(file.snapshot, file.sourceFileName),
+					document,
 					newLine
 				);
 			},

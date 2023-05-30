@@ -58,13 +58,24 @@ export function PointToPosition(point: Point) {
 }
 
 /**
- * Force a range to be at the start of the frontmatter
+ * Force a range to be at the start of the frontmatter if it is outside
  */
 export function ensureRangeIsInFrontmatter(range: Range, frontmatter: FrontmatterStatus): Range {
 	if (frontmatter.status === 'open' || frontmatter.status === 'closed') {
-		const position = PointToPosition(frontmatter.position.start);
+		const frontmatterStartPosition = PointToPosition(frontmatter.position.start);
+		const frontmatterEndPosition = frontmatter.position.end
+			? PointToPosition(frontmatter.position.end)
+			: undefined;
 
-		return Range.create(position, position);
+		// If the range start is outside the frontmatter, return a range at the start of the frontmatter
+		if (
+			range.start.line < frontmatterStartPosition.line ||
+			(frontmatterEndPosition && range.start.line > frontmatterEndPosition.line)
+		) {
+			return Range.create(frontmatterStartPosition, frontmatterStartPosition);
+		}
+
+		return range;
 	}
 
 	return range;
