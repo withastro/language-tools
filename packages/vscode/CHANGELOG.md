@@ -63,6 +63,14 @@ In the background, this update means that we now have to maintain a lot less cod
 - Updated dependencies
   - @astrojs/language-server@2.0.0-next.0
 
+## 1.0.8
+
+### Patch Changes
+
+- c6cf1d7: Update Prettier plugin version
+- Updated dependencies [c6cf1d7]
+  - @astrojs/ts-plugin@1.0.7
+
 ## 1.0.7
 
 ### Patch Changes

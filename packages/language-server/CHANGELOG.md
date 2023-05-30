@@ -28,6 +28,12 @@
 
 In the background, this update means that we now have to maintain a lot less code ourselves, which means we'll be able to dedicate more time to offering fun, Astro-specific features instead of maintaining core features.
 
+## 1.0.8
+
+### Patch Changes
+
+- c6cf1d7: Update Prettier plugin version
+
 ## 1.0.5
 
 ### Patch Changes
