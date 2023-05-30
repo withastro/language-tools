@@ -10,7 +10,7 @@ export function parseHTML(
 	snapshot: ts.IScriptSnapshot,
 	frontmatterEnd: number
 ): { virtualFile: VirtualFile; htmlDocument: html.HTMLDocument } {
-	const htmlContent = preprocess(snapshot.getText(0, snapshot.getLength()), frontmatterEnd);
+	const htmlContent = preprocessHTML(snapshot.getText(0, snapshot.getLength()), frontmatterEnd);
 
 	return {
 		virtualFile: getHTMLVirtualFile(fileName, htmlContent),
@@ -27,7 +27,7 @@ const createScanner = htmlLs.createScanner as (
 /**
  * scan the text and remove any `>` or `<` that cause the tag to end short
  */
-function preprocess(text: string, frontmatterEnd?: number) {
+export function preprocessHTML(text: string, frontmatterEnd?: number) {
 	let content = text.split('').fill(' ', 0, frontmatterEnd).join('');
 
 	let scanner = createScanner(content);
@@ -111,5 +111,5 @@ function getHTMLVirtualFile(fileName: string, preprocessedHTML: string): Virtual
 }
 
 function getHTMLDocument(preprocessedHTML: string): html.HTMLDocument {
-	return htmlLs.parseHTMLDocument(<any>{ getText: () => preprocessedHTML });
+	return htmlLs.parseHTMLDocument({ getText: () => preprocessedHTML } as any);
 }

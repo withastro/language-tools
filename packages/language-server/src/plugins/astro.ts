@@ -14,7 +14,7 @@ import fg from 'fast-glob';
 import { dirname } from 'node:path';
 import type { TextDocument } from 'vscode-html-languageservice';
 import { AstroFile } from '../core/index.js';
-import { isTsDocument } from '../utils.js';
+import { isJSDocument } from '../utils.js';
 
 export default (): Service =>
 	(context, modules): ReturnType<Service> => {
@@ -62,7 +62,7 @@ export default (): Service =>
 			},
 			provideCodeLenses(document, token) {
 				if (token.isCancellationRequested) return;
-				if (!modules?.typescript || !context?.typescript || !isTsDocument(document.languageId))
+				if (!modules?.typescript || !context?.typescript || !isJSDocument(document.languageId))
 					return;
 
 				const ts = modules?.typescript;

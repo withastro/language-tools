@@ -3,7 +3,7 @@ import path from 'node:path';
 import { HTMLDocument, Node, Position, Range, TextEdit } from 'vscode-html-languageservice';
 import type { FrontmatterStatus } from './core/parseAstro.js';
 
-export function isTsDocument(languageId: string) {
+export function isJSDocument(languageId: string) {
 	return (
 		languageId === 'javascript' ||
 		languageId === 'typescript' ||
@@ -54,6 +54,7 @@ export function isInsideFrontmatter(offset: number, frontmatter: FrontmatterStat
  * Transform a Point from the Astro compiler to an LSP Position
  */
 export function PointToPosition(point: Point) {
+	// Columns are 0-based in LSP, but the compiler's Point are 1 based.
 	return Position.create(point.line, point.column - 1);
 }
 
