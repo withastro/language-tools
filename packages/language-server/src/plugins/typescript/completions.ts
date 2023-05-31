@@ -57,6 +57,7 @@ export function enhancedResolveCompletionItem(
 			edit.newText.replace('import type', 'import');
 		}
 
+		// Return a different edit depending on the state of the formatter
 		if (file.astroMeta.frontmatter.status === 'doesnt-exist') {
 			return getNewFrontmatterEdit(edit, newLine);
 		}
@@ -100,7 +101,13 @@ function isValidCompletion(completion: CompletionItem) {
 	const isSvelte2tsxCompletion =
 		completion.label.startsWith('__sveltets_') || svelte2tsxTypes.has(completion.label);
 
-	if (isSvelte2tsxCompletion) return false;
+	// Filter out completions for the children prop, as it doesn't work in Astro
+	const isChildrenCompletion =
+		completion.label === 'children?' &&
+		completion.kind === CompletionItemKind.Field &&
+		completion.filterText === 'children={$1}';
+
+	if (isSvelte2tsxCompletion || isChildrenCompletion) return false;
 
 	return true;
 }
