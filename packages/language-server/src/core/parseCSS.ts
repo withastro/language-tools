@@ -78,7 +78,8 @@ export function extractStylesheets(
 	return embeddedCSSFiles;
 }
 
-export function collectClassesAndIds(ast: ParseResult['ast']): string[] {
+// TODO: Provide completion for classes and IDs
+export function collectClassesAndIdsFromDocument(ast: ParseResult['ast']): string[] {
 	const classesAndIds: string[] = [];
 	function walkDown(parent: ParentNode) {
 		if (!parent.children) return;
