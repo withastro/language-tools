@@ -10,7 +10,11 @@ export default (): Service =>
 		const typeScriptPlugin = createTypeScriptService()(context, modules);
 
 		if (!context) {
-			return { triggerCharacters: typeScriptPlugin.triggerCharacters };
+			return {
+				triggerCharacters: typeScriptPlugin.triggerCharacters,
+				signatureHelpTriggerCharacters: typeScriptPlugin.signatureHelpTriggerCharacters,
+				signatureHelpRetriggerCharacters: typeScriptPlugin.signatureHelpRetriggerCharacters,
+			};
 		}
 
 		return {
