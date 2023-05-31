@@ -50,7 +50,7 @@ describe('Initialize', async () => {
 				workspaceDiagnostics: false,
 			},
 			renameProvider: { prepareProvider: true },
-			signatureHelpProvider: { triggerCharacters: [], retriggerCharacters: [] },
+			signatureHelpProvider: { triggerCharacters: ['(', ',', '<'], retriggerCharacters: [')'] },
 			completionProvider: {
 				triggerCharacters: [
 					'.',
