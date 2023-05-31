@@ -9,6 +9,8 @@ import {
 	getOpenFrontmatterEdit,
 } from '../../utils.js';
 
+// Q: Why provideCodeActions instead of resolveCodeAction?
+// A: TypeScript actions are already fully resolved in provideCodeActions, so editors won't call resolveCodeAction at all.
 export function enhancedProvideCodeActions(
 	codeActions: CodeAction[],
 	file: AstroFile,
