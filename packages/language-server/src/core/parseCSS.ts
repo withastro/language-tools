@@ -68,7 +68,7 @@ export function extractStylesheets(
 				getLength: () => text.length,
 				getChangeRange: () => undefined,
 			},
-			capabilities: {},
+			capabilities: { documentSymbol: true },
 			embeddedFiles: [],
 			kind: FileKind.TextFile,
 			mappings,
@@ -76,6 +76,31 @@ export function extractStylesheets(
 	}
 
 	return embeddedCSSFiles;
+}
+
+export function collectClassesAndIds(ast: ParseResult['ast']): string[] {
+	const classesAndIds: string[] = [];
+	function walkDown(parent: ParentNode) {
+		if (!parent.children) return;
+
+		parent.children.forEach((child) => {
+			if (is.element(child)) {
+				const classOrIDAttributes = child.attributes
+					.filter((attr) => attr.kind === 'quoted' && (attr.name === 'class' || attr.name === 'id'))
+					.flatMap((attr) => attr.value.split(' '));
+
+				classesAndIds.push(...classOrIDAttributes);
+			}
+
+			if (is.parent(child)) {
+				walkDown(child);
+			}
+		});
+	}
+
+	walkDown(ast);
+
+	return classesAndIds;
 }
 
 export function findInlineStyles(ast: ParseResult['ast']): AttributeNodeWithPosition[] {
