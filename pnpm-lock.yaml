@@ -185,7 +185,7 @@ importers:
         version: 0.9.1
     devDependencies:
       '@astrojs/language-server':
-        specifier: ^2.0.0-next.8
+        specifier: ^2.0.0-next.9
         version: link:../language-server
       '@types/glob':
         specifier: ^8.1.0
