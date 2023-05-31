@@ -1,5 +1,15 @@
 # @astrojs/language-server
 
+## 2.0.0-next.9
+
+### Patch Changes
+
+- 8b82179: Remove buggy links and paths completions on certain HTML attributes
+- 8b82179: Fix color pickers not showing for inline styles (style attributes)
+- 8b82179: Remove completion for certain irrelevant properties
+- 8b82179: Fix signature helpers not working
+- 8b82179: Fix auto imports and code actions not working under certain circumstances
+
 ## 2.0.0-next.8
 
 ### Patch Changes
