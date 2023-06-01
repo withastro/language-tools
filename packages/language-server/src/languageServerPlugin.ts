@@ -64,7 +64,7 @@ export const plugin: LanguageServerPlugin = (
 		config.services.typescripttwoslash ??= createTypeScriptTwoSlashService();
 		config.services.astro ??= createAstroService();
 
-		if (ctx && ctx.project.rootUri) {
+		if (ctx) {
 			const rootDir = ctx.env.uriToFileName(ctx.project.rootUri.toString());
 			const prettier = importPrettier(rootDir);
 			const prettierPluginPath = getPrettierPluginPath(rootDir);
