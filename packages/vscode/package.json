@@ -68,6 +68,14 @@
       {
         "command": "astro.findFileReferences",
         "title": "Astro: Find File References"
+      },
+      {
+        "command": "astro.selectTypescriptVersion",
+        "title": "Astro: Select Typescript Version..."
+      },
+      {
+        "command": "astro.openTsConfig",
+        "title": "Astro: Open TypeScript config"
       }
     ],
     "menus": {
@@ -78,6 +86,14 @@
         },
         {
           "command": "astro.findFileReferences",
+          "when": "editorLangId == astro"
+        },
+        {
+          "command": "astro.selectTypescriptVersion",
+          "when": "editorLangId == astro"
+        },
+        {
+          "command": "astro.openTsConfig",
           "when": "editorLangId == astro"
         }
       ],
@@ -223,6 +239,6 @@
   "dependencies": {
     "@astrojs/ts-plugin": "^1.0.7",
     "prettier": "^2.8.8",
-    "prettier-plugin-astro": "^0.9.1"
+    "prettier-plugin-astro": "^0.10.0"
   }
 }

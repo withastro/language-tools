@@ -4,6 +4,8 @@ import {
 	activateAutoInsertion,
 	activateFindFileReferences,
 	activateReloadProjects,
+	activateTsConfigStatusItem,
+	activateTsVersionStatusItem,
 	supportLabsVersion,
 	type ExportsInfoForLabs,
 } from '@volar/vscode';
@@ -75,6 +77,15 @@ export async function activate(context: vscode.ExtensionContext) {
 	activateAutoInsertion([client], (document) => document.languageId === 'astro');
 	activateFindFileReferences('astro.findFileReferences', client);
 	activateReloadProjects('astro.reloadProjects', [client]);
+	activateTsConfigStatusItem('astro.openTsConfig', client, () => false);
+	activateTsVersionStatusItem(
+		'astro.selectTypescriptVersion',
+		context,
+		client,
+		(document) => document.languageId === 'astro',
+		(text) => text,
+		true
+	);
 
 	return {
 		volarLabs: {
