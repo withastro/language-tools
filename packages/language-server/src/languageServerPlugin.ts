@@ -1,4 +1,8 @@
-import type { LanguageServerPlugin } from '@volar/language-server/node';
+import {
+	LanguageServerPlugin,
+	MessageType,
+	ShowMessageNotification,
+} from '@volar/language-server/node';
 import createCssService from 'volar-service-css';
 import createEmmetService from 'volar-service-emmet';
 import createPrettierService from 'volar-service-prettier';
@@ -38,10 +42,16 @@ export const plugin: LanguageServerPlugin = (
 	resolveConfig(config, ctx) {
 		config.languages ??= {};
 		if (ctx) {
-			config.languages.astro = getLanguageModule(
-				getAstroInstall([ctx.project.rootUri.fsPath]),
-				modules.typescript!
-			);
+			const astroInstall = getAstroInstall([ctx.project.rootUri.fsPath]);
+
+			if (!astroInstall) {
+				ctx.server.connection.sendNotification(ShowMessageNotification.type, {
+					message: `Couldn't find Astro in workspace "${ctx.project.rootUri.fsPath}". Experience might be degraded. For the best experience, please make sure Astro is installed into your project and restart the language server.`,
+					type: MessageType.Warning,
+				});
+			}
+
+			config.languages.astro = getLanguageModule(astroInstall, modules.typescript!);
 			config.languages.vue = getVueLanguageModule();
 			config.languages.svelte = getSvelteLanguageModule();
 		}
@@ -53,32 +63,48 @@ export const plugin: LanguageServerPlugin = (
 		config.services.typescript ??= createTypeScriptService();
 		config.services.typescripttwoslash ??= createTypeScriptTwoSlashService();
 		config.services.astro ??= createAstroService();
-		config.services.prettier ??= createPrettierService({
-			languages: ['astro'],
-			resolveConfigOptions: {
-				// Prettier's cache is a bit cumbersome, because you need to reload the config yourself on change
-				// TODO: Upstream a fix for this
-				useCache: false,
-			},
-			additionalOptions: (resolvedConfig) => {
-				function getAstroPrettierPlugin() {
-					if (!ctx?.project.rootUri) return [];
 
-					const rootDir = ctx.env.uriToFileName(ctx?.project.rootUri.toString());
-					const prettier = importPrettier(rootDir);
-					const hasPluginLoadedAlready = prettier
-						.getSupportInfo()
-						.languages.some((l: any) => l.name === 'astro');
-					return hasPluginLoadedAlready ? [] : [getPrettierPluginPath(rootDir)];
-				}
+		if (ctx && ctx.project.rootUri) {
+			const rootDir = ctx.env.uriToFileName(ctx.project.rootUri.toString());
+			const prettier = importPrettier(rootDir);
+			const prettierPluginPath = getPrettierPluginPath(rootDir);
 
-				return {
-					plugins: [...getAstroPrettierPlugin(), ...(resolvedConfig.plugins ?? [])],
-					parser: 'astro',
-					...resolvedConfig,
-				};
-			},
-		});
+			if (prettier && prettierPluginPath) {
+				config.services.prettier ??= createPrettierService({
+					languages: ['astro'],
+					resolveConfigOptions: {
+						// Prettier's cache is a bit cumbersome, because you need to reload the config yourself on change
+						// TODO: Upstream a fix for this
+						useCache: false,
+					},
+					additionalOptions: (resolvedConfig) => {
+						function getAstroPrettierPlugin() {
+							if (!prettier || !prettierPluginPath) {
+								return [];
+							}
+
+							const hasPluginLoadedAlready = prettier
+								.getSupportInfo()
+								.languages.some((l: any) => l.name === 'astro');
+
+							return hasPluginLoadedAlready ? [] : [prettierPluginPath];
+						}
+
+						return {
+							plugins: [...getAstroPrettierPlugin(), ...(resolvedConfig.plugins ?? [])],
+							parser: 'astro',
+							...resolvedConfig,
+						};
+					},
+				});
+			} else {
+				ctx.server.connection.sendNotification(ShowMessageNotification.type, {
+					message:
+						"Couldn't load `prettier` or `prettier-plugin-astro`. Formatting will not work. Please make sure those two packages are installed into your project.",
+					type: MessageType.Warning,
+				});
+			}
+		}
 
 		return config;
 	},
