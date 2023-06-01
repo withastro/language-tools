@@ -35,12 +35,12 @@ export function getLanguageModule(
 				getScriptFileNames() {
 					const fileNames = host.getScriptFileNames();
 					return [
+						...fileNames,
 						...(astroInstall
 							? ['./env.d.ts', './astro-jsx.d.ts'].map((filePath) =>
 									ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
 							  )
 							: []),
-						...fileNames,
 					];
 				},
 				getCompilationSettings() {
