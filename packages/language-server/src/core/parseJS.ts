@@ -1,4 +1,5 @@
-import type { ParentNode, ParseResult } from '@astrojs/compiler/types.js';
+import type { ParentNode, ParseResult } from '@astrojs/compiler/types';
+import { is } from '@astrojs/compiler/utils';
 import {
 	FileCapabilities,
 	FileKind,
@@ -9,7 +10,6 @@ import * as SourceMap from '@volar/source-map';
 import * as muggle from 'muggle-string';
 import type ts from 'typescript/lib/tsserverlibrary';
 import type { HTMLDocument, Node } from 'vscode-html-languageservice';
-import { is } from './compilerUtils.js';
 
 export function extractScriptTags(
 	fileName: string,

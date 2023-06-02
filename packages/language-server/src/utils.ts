@@ -1,6 +1,12 @@
-import type { Point } from '@astrojs/compiler/types';
+import type { AttributeNode, Position as CompilerPosition, Point } from '@astrojs/compiler/types';
 import path from 'node:path';
-import { HTMLDocument, Node, Position, Range, TextEdit } from 'vscode-html-languageservice';
+import {
+	HTMLDocument,
+	Position as LSPPosition,
+	Node,
+	Range,
+	TextEdit,
+} from 'vscode-html-languageservice';
 import type { FrontmatterStatus } from './core/parseAstro.js';
 
 export function isJSDocument(languageId: string) {
@@ -55,8 +61,26 @@ export function isInsideFrontmatter(offset: number, frontmatter: FrontmatterStat
  */
 export function PointToPosition(point: Point) {
 	// Columns are 0-based in LSP, but the compiler's Point are 1 based.
-	return Position.create(point.line, point.column - 1);
+	return LSPPosition.create(point.line, point.column - 1);
 }
+
+export function createCompilerPosition(start: Point, end: Point): CompilerPosition {
+	return {
+		start,
+		end,
+	};
+}
+
+export function createCompilerPoint(line: number, column: number, offset: number): Point {
+	return {
+		line,
+		column,
+		offset,
+	};
+}
+
+type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
+export type AttributeNodeWithPosition = WithRequired<AttributeNode, 'position'>;
 
 /**
  * Force a range to be at the start of the frontmatter if it is outside

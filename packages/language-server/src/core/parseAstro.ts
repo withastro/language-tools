@@ -1,6 +1,5 @@
-import type { Point } from '@astrojs/compiler/shared/ast';
 import { parse } from '@astrojs/compiler/sync';
-import type { ParseResult } from '@astrojs/compiler/types';
+import type { ParseResult, Point } from '@astrojs/compiler/types';
 
 type AstroMetadata = ParseResult & { frontmatter: FrontmatterStatus };
 

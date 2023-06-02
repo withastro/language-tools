@@ -1,10 +1,11 @@
 import type { ParentNode, ParseResult } from '@astrojs/compiler/types';
+import { is } from '@astrojs/compiler/utils';
 import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
 import * as SourceMap from '@volar/source-map';
 import * as muggle from 'muggle-string';
 import type ts from 'typescript/lib/tsserverlibrary';
 import type { HTMLDocument } from 'vscode-html-languageservice';
-import { AttributeNodeWithPosition, is } from './compilerUtils.js';
+import type { AttributeNodeWithPosition } from '../utils.js';
 
 export function extractStylesheets(
 	fileName: string,
