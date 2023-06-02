@@ -29,7 +29,7 @@ export default async function build(...args) {
 		plugins: [
 			copy({
 				assets: {
-					from: ['../language-server/node_modules/@astrojs/compiler/astro.wasm'],
+					from: ['../language-server/node_modules/@astrojs/compiler/dist/astro.wasm'],
 					to: ['../astro.wasm'],
 					watch: isDev,
 				},
