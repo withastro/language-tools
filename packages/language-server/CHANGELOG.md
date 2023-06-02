@@ -1,5 +1,12 @@
 # @astrojs/language-server
 
+## 2.0.0-next.10
+
+### Patch Changes
+
+- d5e2d51: Fix certain types being wrongly included into projects
+- d5e2d51: Added back "Select TypeScript version" command
+
 ## 2.0.0-next.9
 
 ### Patch Changes
