@@ -1,5 +1,11 @@
 # @astrojs/language-server
 
+## 2.0.0-next.12
+
+### Patch Changes
+
+- b108370: Fix crash on empty glob pattern
+
 ## 2.0.0-next.11
 
 ### Patch Changes
