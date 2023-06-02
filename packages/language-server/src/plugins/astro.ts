@@ -75,15 +75,17 @@ export default (): Service =>
 				function walk() {
 					return ts.forEachChild(sourceFile, function cb(node): void {
 						if (ts.isCallExpression(node) && node.expression.getText() === 'Astro.glob') {
-							const globText = node.arguments.at(0)!.getText()!.slice(1, -1)!;
+							const globArgument = node.arguments.at(0);
 
-							globcodeLens.push(
-								getGlobResultAsCodeLens(
-									globText,
-									dirname(context!.env.uriToFileName(document.uri)),
-									document.positionAt(node.arguments.pos)
-								)
-							);
+							if (globArgument) {
+								globcodeLens.push(
+									getGlobResultAsCodeLens(
+										globArgument.getText().slice(1, -1),
+										dirname(context!.env.uriToFileName(document.uri)),
+										document.positionAt(node.arguments.pos)
+									)
+								);
+							}
 						}
 						return ts.forEachChild(node, cb);
 					});
