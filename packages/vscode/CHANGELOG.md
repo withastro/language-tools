@@ -1,5 +1,11 @@
 # astro-vscode
 
+## 2.0.0-next.11
+
+### Patch Changes
+
+- af88980: Fix packaging error
+
 ## 2.0.0-next.10
 
 ### Patch Changes
