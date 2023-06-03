@@ -10,6 +10,7 @@ import {
 	Service,
 	TextEdit,
 } from '@volar/language-server';
+import type { Provide } from 'volar-service-typescript';
 import fg from 'fast-glob';
 import { dirname } from 'node:path';
 import type { TextDocument } from 'vscode-html-languageservice';
@@ -62,15 +63,16 @@ export default (): Service =>
 			},
 			provideCodeLenses(document, token) {
 				if (token.isCancellationRequested) return;
-				if (!modules?.typescript || !context?.typescript || !isJSDocument(document.languageId))
+				const languageService = context?.inject<keyof Provide>("typescript/languageService");
+				if (!modules?.typescript || !languageService || !isJSDocument(document.languageId))
 					return;
 
 				const ts = modules?.typescript;
-				const tsProgram = context.typescript.languageService.getProgram();
+				const tsProgram = languageService.getProgram();
 				if (!tsProgram) return;
 
 				const globcodeLens: CodeLens[] = [];
-				const sourceFile = tsProgram.getSourceFile(context.env.uriToFileName(document.uri))!;
+				const sourceFile = tsProgram.getSourceFile(context?.env.uriToFileName(document.uri))!;
 
 				function walk() {
 					return ts.forEachChild(sourceFile, function cb(node): void {
