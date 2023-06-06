@@ -1,9 +1,9 @@
-import type { AttributeNode, Point, Position as CompilerPosition } from '@astrojs/compiler/types';
+import type { AttributeNode, Position as CompilerPosition, Point } from '@astrojs/compiler/types';
 import path from 'node:path';
 import {
 	HTMLDocument,
-	Node,
 	Position as LSPPosition,
+	Node,
 	Range,
 	TextEdit,
 } from 'vscode-html-languageservice';
@@ -61,7 +61,7 @@ export function isInsideFrontmatter(offset: number, frontmatter: FrontmatterStat
  */
 export function PointToPosition(point: Point) {
 	// Columns are 0-based in LSP, but the compiler's Point are 1 based.
-	return LSPPosition.create(point.line, point.column - 1);
+	return LSPPosition.create(point.line - 1, point.column - 1);
 }
 
 export function createCompilerPosition(start: Point, end: Point): CompilerPosition {
@@ -87,17 +87,18 @@ export type AttributeNodeWithPosition = WithRequired<AttributeNode, 'position'>;
  */
 export function ensureRangeIsInFrontmatter(range: Range, frontmatter: FrontmatterStatus): Range {
 	if (frontmatter.status === 'open' || frontmatter.status === 'closed') {
-		const frontmatterStartPosition = PointToPosition(frontmatter.position.start);
+		// The frontmatter is in the same position in the result TSX, so we don't need to do any mapping here.
+		const frontmatterBeginningPosition = PointToPosition(frontmatter.position.start);
 		const frontmatterEndPosition = frontmatter.position.end
 			? PointToPosition(frontmatter.position.end)
 			: undefined;
 
 		// If the range start is outside the frontmatter, return a range at the start of the frontmatter
 		if (
-			range.start.line < frontmatterStartPosition.line ||
+			range.start.line < frontmatterBeginningPosition.line ||
 			(frontmatterEndPosition && range.start.line > frontmatterEndPosition.line)
 		) {
-			return Range.create(frontmatterStartPosition, frontmatterStartPosition);
+			return Range.create(frontmatterBeginningPosition, frontmatterBeginningPosition);
 		}
 
 		return range;
@@ -114,6 +115,9 @@ export function getNewFrontmatterEdit(edit: TextEdit, newLine: string) {
 }
 
 export function getOpenFrontmatterEdit(edit: TextEdit, newLine: string) {
+	// NOTE: This range is not accurate, but we kinda don't know the end of the frontmatter, so we'll
+	// just add our thing and close it, users can fix up their code themselves.
+	edit.range = Range.create(0, 0, 0, 0);
 	edit.newText = edit.newText.startsWith(newLine)
 		? `${edit.newText}---`
 		: `${newLine}${edit.newText}---`;

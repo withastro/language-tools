@@ -26,13 +26,13 @@
     "test:match": "pnpm run test -g"
   },
   "dependencies": {
-    "@astrojs/compiler": "^1.5.0",
     "@jridgewell/sourcemap-codec": "^1.4.15",
     "@volar/kit": "1.6.9",
     "@volar/language-core": "1.6.9",
     "@volar/language-server": "1.6.9",
     "@volar/language-service": "1.6.9",
     "@volar/source-map": "1.6.9",
+    "@astrojs/compiler": "link:../../../compiler/packages/compiler",
     "fast-glob": "^3.2.12",
     "muggle-string": "^0.3.1",
     "volar-service-css": "0.0.4",

@@ -109,14 +109,7 @@ function getVirtualFileTSX(
 	mappings.push({
 		sourceRange: [0, 0],
 		generatedRange: [0, 0],
-		data: {},
-	});
-
-	const ast = ts.createSourceFile('/a.tsx', tsx.code, ts.ScriptTarget.ESNext);
-	mappings.push({
-		sourceRange: [0, input.length],
-		generatedRange: [ast.statements[0].getStart(ast), tsx.code.length],
-		data: {},
+		data: FileRangeCapabilities.full,
 	});
 
 	return {

@@ -13,14 +13,10 @@ export enum DiagnosticCodes {
 	JSX_ELEMENT_NO_CALL = 2604, // JSX element type '{0}' does not have any construct or call signatures.
 }
 
-export function enhancedProvideSemanticDiagnostics(
-	originalDiagnostics: Diagnostic[],
-	documentLineCount: number
-) {
+export function enhancedProvideSemanticDiagnostics(originalDiagnostics: Diagnostic[]) {
 	const diagnostics = originalDiagnostics
 		.filter(
 			(diagnostic) =>
-				diagnostic.range.start.line <= documentLineCount &&
 				isNoCantReturnOutsideFunction(diagnostic) &&
 				isNoIsolatedModuleError(diagnostic) &&
 				isNoJsxCannotHaveMultipleAttrsError(diagnostic)

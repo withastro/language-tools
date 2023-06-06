@@ -38,8 +38,8 @@ importers:
   packages/language-server:
     dependencies:
       '@astrojs/compiler':
-        specifier: ^1.5.0
-        version: 1.5.0
+        specifier: link:../../../compiler/packages/compiler
+        version: link:../../../compiler/packages/compiler
       '@jridgewell/sourcemap-codec':
         specifier: ^1.4.15
         version: 1.4.15

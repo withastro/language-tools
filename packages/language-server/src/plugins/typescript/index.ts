@@ -45,9 +45,10 @@ export default (): Service =>
 				);
 				if (!codeActions) return null;
 
-				const [_, source] = context.documents.getVirtualFileByUri(document.uri);
+				const [virtualFile, source] = context.documents.getVirtualFileByUri(document.uri);
 				const file = source?.root;
 				if (!(file instanceof AstroFile) || !context.host) return codeActions;
+				if (!virtualFile) return codeActions;
 
 				const newLine = context.host.getNewLine ? context.host.getNewLine() : '\n';
 
@@ -58,6 +59,13 @@ export default (): Service =>
 					document,
 					newLine
 				);
+			},
+			async resolveCodeAction(codeAction, token) {
+				const resolvedCodeAction = await typeScriptPlugin.resolveCodeAction!(codeAction, token);
+
+				console.log(resolvedCodeAction);
+
+				return resolvedCodeAction;
 			},
 			async provideSemanticDiagnostics(document, token) {
 				const [_, source] = context.documents.getVirtualFileByUri(document.uri);
@@ -70,12 +78,7 @@ export default (): Service =>
 				const diagnostics = await typeScriptPlugin.provideSemanticDiagnostics!(document, token);
 				if (!diagnostics) return null;
 
-				const astroDocument = context.documents.getDocumentByFileName(
-					file.snapshot,
-					file.sourceFileName
-				);
-
-				return enhancedProvideSemanticDiagnostics(diagnostics, astroDocument.lineCount);
+				return enhancedProvideSemanticDiagnostics(diagnostics);
 			},
 		};
 	};

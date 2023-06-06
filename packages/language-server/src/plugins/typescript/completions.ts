@@ -44,10 +44,13 @@ export function enhancedResolveCompletionItem(
 	}
 
 	// Properly handle completions with actions to make sure their edits end up in the frontmatter when needed
-	const [_, source] = context.documents.getVirtualFileByUri(originalItem.data.uri);
+	const [virtualFile, source] = context.documents.getVirtualFileByUri(originalItem.data.uri);
 	const file = source?.root;
-	if (!(file instanceof AstroFile) || !context.host) return resolvedCompletion;
+	if (!(file instanceof AstroFile) || !context.host || !virtualFile) return resolvedCompletion;
 	if (file.scriptFiles.includes(originalItem.data.fileName)) return resolvedCompletion;
+
+	const document = context.documents.getDocumentByUri(virtualFile.snapshot, originalItem.data.uri);
+	if (!document) return resolvedCompletion;
 
 	const newLine = context.host.getNewLine ? context.host.getNewLine() : '\n';
 	resolvedCompletion.additionalTextEdits = resolvedCompletion.additionalTextEdits?.map((edit) => {
@@ -67,6 +70,9 @@ export function enhancedResolveCompletionItem(
 		}
 
 		edit.range = ensureRangeIsInFrontmatter(edit.range, file.astroMeta.frontmatter);
+		if (edit.range.start.line === 0 && edit.range.start.character === 0) {
+			edit.newText = newLine + edit.newText;
+		}
 
 		return edit;
 	});

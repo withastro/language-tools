@@ -3,10 +3,10 @@ import type { TextDocument } from 'vscode-html-languageservice';
 import { URI } from 'vscode-uri';
 import type { AstroFile } from '../../core/index.js';
 import {
+	PointToPosition,
 	ensureRangeIsInFrontmatter,
 	getNewFrontmatterEdit,
 	getOpenFrontmatterEdit,
-	PointToPosition,
 } from '../../utils.js';
 
 // Q: Why provideCodeActions instead of resolveCodeAction?
@@ -38,6 +38,9 @@ export function enhancedProvideCodeActions(
 						}
 
 						edit.range = ensureRangeIsInFrontmatter(edit.range, file.astroMeta.frontmatter);
+						if (edit.range.start.line === 0 && edit.range.start.character === 0) {
+							edit.newText = newLine + edit.newText;
+						}
 					}
 
 					// Some code actions will insert code at the end of the generated TSX file, so we'll manually
@@ -48,6 +51,7 @@ export function enhancedProvideCodeActions(
 								return getOpenFrontmatterEdit(edit, newLine);
 							case 'closed':
 								const position = PointToPosition(file.astroMeta.frontmatter.position.end);
+								position.character = 0;
 								edit.range = Range.create(position, position);
 								return edit;
 							case 'doesnt-exist':
@@ -65,4 +69,20 @@ export function enhancedProvideCodeActions(
 	});
 
 	return codeActions;
+}
+
+export function enhancedResolveCodeActions(resolvedCodeAction: CodeAction) {
+	if (!resolvedCodeAction.edit?.documentChanges) return resolvedCodeAction;
+
+	resolvedCodeAction.edit.documentChanges = resolvedCodeAction.edit.documentChanges.map(
+		(change) => {
+			if (TextDocumentEdit.is(change)) {
+				change.edits = change.edits.map((edit) => {
+					console.log(edit);
+					return edit;
+				});
+			}
+			return change;
+		}
+	);
 }
