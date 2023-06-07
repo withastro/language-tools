@@ -1,5 +1,5 @@
 import { CodeAction, Range, TextDocumentEdit } from '@volar/language-server';
-import type { TextDocument } from 'vscode-html-languageservice';
+import type { TextDocument, TextEdit } from 'vscode-html-languageservice';
 import { URI } from 'vscode-uri';
 import type { AstroFile } from '../../core/index.js';
 import {
@@ -71,18 +71,51 @@ export function enhancedProvideCodeActions(
 	return codeActions;
 }
 
-export function enhancedResolveCodeActions(resolvedCodeAction: CodeAction) {
-	if (!resolvedCodeAction.edit?.documentChanges) return resolvedCodeAction;
+export function enhancedResolveCodeActions(
+	resolvedCodeAction: CodeAction,
+	file: AstroFile,
+	document: TextDocument,
+	newLine: string
+) {
+	if (!resolvedCodeAction) return resolvedCodeAction;
+	if (!resolvedCodeAction.edit || !resolvedCodeAction.edit.documentChanges)
+		return resolvedCodeAction;
 
 	resolvedCodeAction.edit.documentChanges = resolvedCodeAction.edit.documentChanges.map(
 		(change) => {
 			if (TextDocumentEdit.is(change)) {
-				change.edits = change.edits.map((edit) => {
-					console.log(edit);
-					return edit;
-				});
+				// Edits that are outside the file are typically all for the frontmatter (ex: add all missing functions declaration)
+				// So we can merge them together and apply them in one batch, making it much easier to create edits that also create / close the frontmatter
+				const outOfRangeEdits = change.edits.filter(
+					(edit) => edit.range.start.line >= document.lineCount - 1
+				);
+				const inRangeEdits = change.edits.filter(
+					(edit) => edit.range.start.line < document.lineCount - 1
+				);
+
+				let mergedOutOfRangeEdits: TextEdit = {
+					newText: outOfRangeEdits.map((edit) => edit.newText).join(newLine),
+					range: Range.create(0, 0, 0, 0),
+				};
+
+				if (file.astroMeta.frontmatter.status === 'doesnt-exist') {
+					mergedOutOfRangeEdits = getNewFrontmatterEdit(mergedOutOfRangeEdits, newLine);
+				} else if (file.astroMeta.frontmatter.status === 'open') {
+					mergedOutOfRangeEdits = getOpenFrontmatterEdit(mergedOutOfRangeEdits, newLine);
+				} else {
+					mergedOutOfRangeEdits.range = ensureRangeIsInFrontmatter(
+						change.edits[0].range,
+						file.astroMeta.frontmatter,
+						'end'
+					);
+				}
+
+				change.edits = [mergedOutOfRangeEdits, ...inRangeEdits];
 			}
+
 			return change;
 		}
 	);
+
+	return resolvedCodeAction;
 }

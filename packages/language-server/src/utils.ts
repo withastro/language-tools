@@ -85,12 +85,16 @@ export type AttributeNodeWithPosition = WithRequired<AttributeNode, 'position'>;
 /**
  * Force a range to be at the start of the frontmatter if it is outside
  */
-export function ensureRangeIsInFrontmatter(range: Range, frontmatter: FrontmatterStatus): Range {
+export function ensureRangeIsInFrontmatter(
+	range: Range,
+	frontmatter: FrontmatterStatus,
+	position: 'start' | 'end' = 'start'
+): Range {
 	if (frontmatter.status === 'open' || frontmatter.status === 'closed') {
 		// The frontmatter is in the same position in the result TSX, so we don't need to do any mapping here.
 		const frontmatterBeginningPosition = PointToPosition(frontmatter.position.start);
 		const frontmatterEndPosition = frontmatter.position.end
-			? PointToPosition(frontmatter.position.end)
+			? { ...PointToPosition(frontmatter.position.end), character: 0 }
 			: undefined;
 
 		// If the range start is outside the frontmatter, return a range at the start of the frontmatter
@@ -98,7 +102,9 @@ export function ensureRangeIsInFrontmatter(range: Range, frontmatter: Frontmatte
 			range.start.line < frontmatterBeginningPosition.line ||
 			(frontmatterEndPosition && range.start.line > frontmatterEndPosition.line)
 		) {
-			return Range.create(frontmatterBeginningPosition, frontmatterBeginningPosition);
+			return frontmatterEndPosition && position === 'end'
+				? Range.create(frontmatterEndPosition, frontmatterEndPosition)
+				: Range.create(frontmatterBeginningPosition, frontmatterBeginningPosition);
 		}
 
 		return range;

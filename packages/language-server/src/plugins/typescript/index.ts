@@ -1,7 +1,7 @@
 import type { Service } from '@volar/language-service';
 import createTypeScriptService from 'volar-service-typescript';
 import { AstroFile } from '../../core/index.js';
-import { enhancedProvideCodeActions } from './codeActions.js';
+import { enhancedProvideCodeActions, enhancedResolveCodeActions } from './codeActions.js';
 import { enhancedProvideCompletionItems, enhancedResolveCompletionItem } from './completions.js';
 import { enhancedProvideSemanticDiagnostics } from './diagnostics.js';
 
@@ -45,10 +45,9 @@ export default (): Service =>
 				);
 				if (!codeActions) return null;
 
-				const [virtualFile, source] = context.documents.getVirtualFileByUri(document.uri);
+				const [_, source] = context.documents.getVirtualFileByUri(document.uri);
 				const file = source?.root;
 				if (!(file instanceof AstroFile) || !context.host) return codeActions;
-				if (!virtualFile) return codeActions;
 
 				const newLine = context.host.getNewLine ? context.host.getNewLine() : '\n';
 
@@ -63,9 +62,20 @@ export default (): Service =>
 			async resolveCodeAction(codeAction, token) {
 				const resolvedCodeAction = await typeScriptPlugin.resolveCodeAction!(codeAction, token);
 
-				console.log(resolvedCodeAction);
+				const [virtualFile, source] = context.documents.getVirtualFileByUri(codeAction.data.uri);
+				const file = source?.root;
+				if (!(file instanceof AstroFile) || !context.host) return resolvedCodeAction;
+				if (!virtualFile) return resolvedCodeAction;
 
-				return resolvedCodeAction;
+				const document = context.documents.getDocumentByUri(
+					virtualFile.snapshot,
+					codeAction.data.uri
+				);
+
+				if (!document) return resolvedCodeAction;
+
+				const newLine = context.host.getNewLine ? context.host.getNewLine() : '\n';
+				return enhancedResolveCodeActions(resolvedCodeAction, file, document, newLine);
 			},
 			async provideSemanticDiagnostics(document, token) {
 				const [_, source] = context.documents.getVirtualFileByUri(document.uri);
