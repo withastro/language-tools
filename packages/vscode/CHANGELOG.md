@@ -1,5 +1,18 @@
 # astro-vscode
 
+## 2.0.15
+
+### Patch Changes
+
+- 9d1cd4d: Fix crash when a file named 404.astro was present in the project
+
+## 2.0.14
+
+### Patch Changes
+
+- a8e39a9: Fix `astro.trace.server` not working
+- 0205f03: Fixed TypeScript error showing when deconstructing from Astro.props a variable with the same name as the normalized file name
+
 ## 2.0.13
 
 ### Patch Changes
