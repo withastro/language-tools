@@ -61,21 +61,7 @@ export default (): Service =>
 			},
 			async resolveCodeAction(codeAction, token) {
 				const resolvedCodeAction = await typeScriptPlugin.resolveCodeAction!(codeAction, token);
-
-				const [virtualFile, source] = context.documents.getVirtualFileByUri(codeAction.data.uri);
-				const file = source?.root;
-				if (!(file instanceof AstroFile) || !context.host) return resolvedCodeAction;
-				if (!virtualFile) return resolvedCodeAction;
-
-				const document = context.documents.getDocumentByUri(
-					virtualFile.snapshot,
-					codeAction.data.uri
-				);
-
-				if (!document) return resolvedCodeAction;
-
-				const newLine = context.host.getNewLine ? context.host.getNewLine() : '\n';
-				return enhancedResolveCodeActions(resolvedCodeAction, file, document, newLine);
+				return enhancedResolveCodeActions(resolvedCodeAction);
 			},
 			async provideSemanticDiagnostics(document, token) {
 				const [_, source] = context.documents.getVirtualFileByUri(document.uri);

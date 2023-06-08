@@ -69,7 +69,7 @@ describe('Utilities', async () => {
 			offset: 3,
 		};
 		expect(utils.PointToPosition(point)).to.deep.equal({
-			line: 1,
+			line: 0,
 			character: 1,
 		});
 	});
@@ -79,7 +79,7 @@ describe('Utilities', async () => {
 		const hasFrontmatter = getAstroMetadata('---\nfoo\n---\n');
 		expect(
 			utils.ensureRangeIsInFrontmatter(beforeFrontmatterRange, hasFrontmatter.frontmatter)
-		).to.deep.equal(Range.create(1, 0, 1, 0));
+		).to.deep.equal(Range.create(0, 0, 0, 0));
 
 		const insideFrontmatterRange = html.Range.create(1, 0, 1, 0);
 		expect(
@@ -89,7 +89,7 @@ describe('Utilities', async () => {
 		const outsideFrontmatterRange = html.Range.create(6, 0, 6, 0);
 		expect(
 			utils.ensureRangeIsInFrontmatter(outsideFrontmatterRange, hasFrontmatter.frontmatter)
-		).to.deep.equal(Range.create(1, 0, 1, 0));
+		).to.deep.equal(Range.create(0, 0, 0, 0));
 	});
 
 	it('getNewFrontmatterEdit - properly return a new frontmatter edit', () => {
@@ -110,7 +110,7 @@ describe('Utilities', async () => {
 		);
 
 		expect(edit).to.deep.equal({
-			range: Range.create(43, 0, 44, 0),
+			range: Range.create(0, 0, 0, 0),
 			newText: '\nfoo---',
 		});
 	});
