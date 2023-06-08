@@ -1,9 +1,9 @@
-import type { AttributeNode, Point, Position as CompilerPosition } from '@astrojs/compiler/types';
+import type { AttributeNode, Position as CompilerPosition, Point } from '@astrojs/compiler/types';
 import path from 'node:path';
 import {
 	HTMLDocument,
-	Node,
 	Position as LSPPosition,
+	Node,
 	Range,
 	TextEdit,
 } from 'vscode-html-languageservice';
@@ -81,6 +81,21 @@ export function createCompilerPoint(line: number, column: number, offset: number
 
 type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 export type AttributeNodeWithPosition = WithRequired<AttributeNode, 'position'>;
+
+export function ensureProperEditForFrontmatter(
+	edit: TextEdit,
+	frontmatter: FrontmatterStatus,
+	newLine: string
+): TextEdit {
+	switch (frontmatter.status) {
+		case 'open':
+			return getOpenFrontmatterEdit(edit, newLine);
+		case 'closed':
+			return { newText: edit.newText, range: ensureRangeIsInFrontmatter(edit.range, frontmatter) };
+		case 'doesnt-exist':
+			return getNewFrontmatterEdit(edit, newLine);
+	}
+}
 
 /**
  * Force a range to be at the start of the frontmatter if it is outside

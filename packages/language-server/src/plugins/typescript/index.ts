@@ -1,7 +1,7 @@
-import type { Service } from '@volar/language-service';
+import { Service, TextDocumentEdit } from '@volar/language-server';
 import createTypeScriptService from 'volar-service-typescript';
 import { AstroFile } from '../../core/index.js';
-import { enhancedProvideCodeActions } from './codeActions.js';
+import { ensureProperEditForFrontmatter } from '../../utils.js';
 import { enhancedProvideCompletionItems, enhancedResolveCompletionItem } from './completions.js';
 import { enhancedProvideSemanticDiagnostics } from './diagnostics.js';
 
@@ -19,6 +19,55 @@ export default (): Service =>
 
 		return {
 			...typeScriptPlugin,
+			transformCompletionItem(item) {
+				const [_, source] = context.documents.getVirtualFileByUri(item.data.uri);
+				const file = source?.root;
+				if (!(file instanceof AstroFile) || !context.host) return undefined;
+				if (file.scriptFiles.includes(item.data.fileName)) return undefined;
+
+				const newLine = context.host.getCompilationSettings().newLine?.toString() ?? '\n';
+				if (item.additionalTextEdits) {
+					item.additionalTextEdits = item.additionalTextEdits.map((edit) => {
+						// HACK: There's a weird situation sometimes where some components (especially Svelte) will get imported as type imports
+						// for some unknown reason. This work around the problem by always ensuring a normal import for components
+						if (item.data.isComponent && edit.newText.includes('import type')) {
+							edit.newText.replace('import type', 'import');
+						}
+
+						return ensureProperEditForFrontmatter(edit, file.astroMeta.frontmatter, newLine);
+					});
+				}
+
+				return item;
+			},
+			transformCodeAction(item) {
+				if (item.kind !== 'quickfix') return item;
+				const [_, source] = context.documents.getVirtualFileByUri(item.data.uri);
+				const file = source?.root;
+				if (!(file instanceof AstroFile) || !context.host) return item;
+				if (
+					file.scriptFiles.includes(item.diagnostics?.[0].data.documentUri.replace('file://', '')) // TODO: do this properly
+				)
+					return undefined;
+
+				const newLine = context.host.getCompilationSettings().newLine?.toString() ?? '\n';
+				if (item.edit && item.edit.documentChanges) {
+					item.edit.documentChanges = item.edit.documentChanges.map((change) => {
+						if (TextDocumentEdit.is(change)) {
+							change.textDocument = {
+								uri: item.data.uri.replace('.tsx', ''), // TODO: do this properly
+								version: null,
+							};
+							change.edits = change.edits.map((edit) => {
+								return ensureProperEditForFrontmatter(edit, file.astroMeta.frontmatter, newLine);
+							});
+						}
+						return change;
+					});
+				}
+
+				return item;
+			},
 			async provideCompletionItems(document, position, completionContext, token) {
 				const originalCompletions = await typeScriptPlugin.provideCompletionItems!(
 					document,
@@ -34,29 +83,7 @@ export default (): Service =>
 				const resolvedCompletionItem = await typeScriptPlugin.resolveCompletionItem!(item, token);
 				if (!resolvedCompletionItem) return item;
 
-				return enhancedResolveCompletionItem(resolvedCompletionItem, item, context);
-			},
-			async provideCodeActions(document, range, codeActionContext, token) {
-				const codeActions = await typeScriptPlugin.provideCodeActions!(
-					document,
-					range,
-					codeActionContext,
-					token
-				);
-				if (!codeActions) return null;
-
-				const [_, source] = context.documents.getVirtualFileByUri(document.uri);
-				const file = source?.root;
-				if (!(file instanceof AstroFile) || !context.host) return codeActions;
-
-				const newLine = context.host.getCompilationSettings().newLine?.toString() ?? '\n';
-				return enhancedProvideCodeActions(
-					codeActions,
-					file,
-					context.documents.getDocumentByFileName(file.snapshot, file.sourceFileName),
-					document,
-					newLine
-				);
+				return enhancedResolveCompletionItem(resolvedCompletionItem);
 			},
 			async provideSemanticDiagnostics(document, token) {
 				const [_, source] = context.documents.getVirtualFileByUri(document.uri);
