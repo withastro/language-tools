@@ -1,7 +1,11 @@
 import { Service, TextDocumentEdit } from '@volar/language-server';
 import createTypeScriptService from 'volar-service-typescript';
 import { AstroFile } from '../../core/index.js';
-import { ensureProperEditForFrontmatter } from '../../utils.js';
+import {
+	editShouldBeInFrontmatter,
+	ensureProperEditForFrontmatter,
+	ensureRangeIsInFrontmatter,
+} from '../utils.js';
 import { enhancedProvideCompletionItems, enhancedResolveCompletionItem } from './completions.js';
 import { enhancedProvideSemanticDiagnostics } from './diagnostics.js';
 
@@ -34,37 +38,80 @@ export default (): Service =>
 							edit.newText.replace('import type', 'import');
 						}
 
-						return ensureProperEditForFrontmatter(edit, file.astroMeta.frontmatter, newLine);
+						if (editShouldBeInFrontmatter(edit.range)) {
+							return ensureProperEditForFrontmatter(edit, file.astroMeta.frontmatter, newLine);
+						}
+
+						return edit;
 					});
 				}
 
 				return item;
 			},
 			transformCodeAction(item) {
-				if (item.kind !== 'quickfix') return item;
-				const [_, source] = context.documents.getVirtualFileByUri(item.data.uri);
+				if (item.kind !== 'quickfix') return undefined;
+				const originalFileName = item.data.uri.replace('.tsx', '');
+
+				const [_, source] = context.documents.getVirtualFileByUri(originalFileName);
 				const file = source?.root;
-				if (!(file instanceof AstroFile) || !context.host) return item;
+				if (!(file instanceof AstroFile) || !context.host) return undefined;
 				if (
-					file.scriptFiles.includes(item.diagnostics?.[0].data.documentUri.replace('file://', '')) // TODO: do this properly
+					file.scriptFiles.includes(item.diagnostics?.[0].data.documentUri.replace('file://', ''))
 				)
 					return undefined;
 
+				const document = context.getTextDocument(originalFileName);
+				if (!document) return undefined;
+
 				const newLine = context.host.getCompilationSettings().newLine?.toString() ?? '\n';
-				if (item.edit && item.edit.documentChanges) {
-					item.edit.documentChanges = item.edit.documentChanges.map((change) => {
-						if (TextDocumentEdit.is(change)) {
-							change.textDocument = {
-								uri: item.data.uri.replace('.tsx', ''), // TODO: do this properly
-								version: null,
-							};
+				if (!item.edit?.documentChanges) return undefined;
+				item.edit.documentChanges = item.edit.documentChanges.map((change) => {
+					if (TextDocumentEdit.is(change)) {
+						change.textDocument.uri = originalFileName;
+						if (change.edits.length === 1) {
 							change.edits = change.edits.map((edit) => {
-								return ensureProperEditForFrontmatter(edit, file.astroMeta.frontmatter, newLine);
+								const editInFrontmatter = editShouldBeInFrontmatter(edit.range, document);
+								if (editInFrontmatter.itShould) {
+									return ensureProperEditForFrontmatter(
+										edit,
+										file.astroMeta.frontmatter,
+										newLine,
+										editInFrontmatter.position
+									);
+								}
+
+								return edit;
 							});
+						} else {
+							if (file.astroMeta.frontmatter.status === 'closed') {
+								change.edits = change.edits.map((edit) => {
+									const editInFrontmatter = editShouldBeInFrontmatter(edit.range, document);
+									if (editInFrontmatter.itShould) {
+										edit.range = ensureRangeIsInFrontmatter(
+											edit.range,
+											file.astroMeta.frontmatter,
+											editInFrontmatter.position
+										);
+									}
+									return edit;
+								});
+							} else {
+								// TODO: Handle when there's multiple edits and a new frontmatter is potentially needed
+								if (
+									change.edits.some((edit) => {
+										return editShouldBeInFrontmatter(edit.range, document).itShould;
+									})
+								) {
+									console.error(
+										'Code actions with multiple edits that require potentially creating a frontmatter are currently not implemented. In the meantime, please manually insert a frontmatter in your file before using this code action.'
+									);
+									change.edits = [];
+								}
+							}
 						}
-						return change;
-					});
-				}
+					}
+					return change;
+				});
 
 				return item;
 			},
