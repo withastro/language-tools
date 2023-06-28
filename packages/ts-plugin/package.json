@@ -27,18 +27,8 @@
   "author": "withastro",
   "license": "MIT",
   "dependencies": {
-    "@astrojs/compiler": "^1.5.1",
-    "@jridgewell/trace-mapping": "^0.3.18"
-  },
-  "devDependencies": {
-    "@types/chai": "^4.3.5",
-    "@types/mocha": "^10.0.1",
-    "@types/node": "^16.18.26",
-    "@types/vscode": "1.67.0",
-    "@vscode/test-electron": "^2.3.2",
-    "chai": "^4.3.7",
-    "glob": "^8.0.3",
-    "mocha": "^10.2.0",
-    "typescript": "~5.1.3"
+    "@astrojs/language-server": "file:../language-server",
+    "@volar/language-core": "1.7.10",
+    "@volar/typescript": "1.7.10"
   }
 }

@@ -56,7 +56,7 @@
     ],
     "typescriptServerPlugins": [
       {
-        "name": "@astrojs/ts-plugin",
+        "name": "astro-ts-plugin-bundle",
         "enableForWorkspaceTypeScriptVersions": true
       }
     ],
@@ -217,17 +217,17 @@
     "update-grammar-snapshots": "node ./test/grammar/test.mjs --updateSnapshot"
   },
   "devDependencies": {
-    "@astrojs/language-server": "^2.0.17",
+    "@astrojs/language-server": "file:../language-server",
+    "@astrojs/ts-plugin": "file:../ts-plugin",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "^16.18.26",
     "@types/vscode": "1.67.0",
-    "@volar/language-server": "1.7.4",
-    "@volar/vscode": "1.7.4",
+    "@volar/language-server": "1.7.10",
+    "@volar/vscode": "1.7.10",
     "@vscode/test-electron": "^2.3.2",
     "@vscode/vsce": "latest",
     "esbuild": "^0.17.19",
-    "esbuild-plugin-copy": "^2.1.1",
     "glob": "^8.0.3",
     "js-yaml": "^4.1.0",
     "kleur": "^4.1.5",
@@ -237,7 +237,6 @@
     "vscode-tmgrammar-test": "^0.1.1"
   },
   "dependencies": {
-    "@astrojs/ts-plugin": "^1.0.10",
     "prettier": "^2.8.8",
     "prettier-plugin-astro": "^0.10.0"
   }

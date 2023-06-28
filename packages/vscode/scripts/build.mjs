@@ -1,6 +1,5 @@
 // @ts-check
 import esbuild from 'esbuild';
-import { copy } from 'esbuild-plugin-copy';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import { rebuildPlugin } from './shared.mjs';
@@ -16,13 +15,14 @@ export default async function build() {
 	 */
 	const config = {
 		entryPoints: {
-			client: './src/client.ts',
-			server: './node_modules/@astrojs/language-server/bin/nodeServer.js',
+			'dist/node/client': './src/client.ts',
+			'dist/node/server': './node_modules/@astrojs/language-server/bin/nodeServer.js',
+			'node_modules/astro-ts-plugin-bundle/index': './node_modules/@astrojs/ts-plugin/dist/index.js',
 		},
 		bundle: true,
 		metafile: metaFile,
 		sourcemap: isDev,
-		outdir: './dist/node',
+		outdir: '.',
 		external: ['vscode'],
 		format: 'cjs',
 		platform: 'node',
@@ -30,13 +30,6 @@ export default async function build() {
 		define: { 'process.env.NODE_ENV': '"production"' },
 		minify: process.argv.includes('--minify'),
 		plugins: [
-			copy({
-				assets: {
-					from: ['../language-server/node_modules/@astrojs/compiler/dist/astro.wasm'],
-					to: ['../astro.wasm'],
-					watch: isDev,
-				},
-			}),
 			{
 				name: 'umd2esm',
 				setup(pluginBuild) {
@@ -47,6 +40,19 @@ export default async function build() {
 							// Call twice the replace is to solve the problem of the path in Windows
 							const pathEsm = pathUmdMay.replace('/umd/', '/esm/').replace('\\umd\\', '\\esm\\');
 							return { path: pathEsm };
+						}
+					);
+				},
+			},
+			{
+				name: 'astro.wasm',
+				setup(pluginBuild) {
+					pluginBuild.onLoad(
+						{ filter: /.*\/node_modules\/@astrojs\/compiler\/dist\/node\/sync.cjs/ },
+						(loadArgs) => {
+							let text = fs.readFileSync(loadArgs.path, 'utf-8');
+							text = text.replace('"../astro.wasm"', '"../../node_modules/@astrojs/compiler/dist/astro.wasm"');
+							return { contents: text };
 						}
 					);
 				},

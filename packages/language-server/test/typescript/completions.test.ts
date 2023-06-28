@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { before, describe, it } from 'mocha';
-import { Position } from 'vscode-languageserver-protocol';
+import { Position } from '@volar/language-server';
 import { LanguageServer, getLanguageServer } from '../server.js';
 
 describe('TypeScript - Completions', async () => {

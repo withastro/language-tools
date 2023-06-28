@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { describe } from 'mocha';
-import { Position } from 'vscode-languageserver-protocol';
+import { Position } from '@volar/language-server';
 import { LanguageServer, getLanguageServer } from '../server.js';
 
 describe('CSS - Completions', () => {
