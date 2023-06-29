@@ -23,7 +23,7 @@ export default async function build() {
 		metafile: metaFile,
 		sourcemap: isDev,
 		outdir: '.',
-		external: ['vscode'],
+		external: ['vscode', '@astrojs/compiler'],
 		format: 'cjs',
 		platform: 'node',
 		tsconfig: './tsconfig.json',
@@ -40,19 +40,6 @@ export default async function build() {
 							// Call twice the replace is to solve the problem of the path in Windows
 							const pathEsm = pathUmdMay.replace('/umd/', '/esm/').replace('\\umd\\', '\\esm\\');
 							return { path: pathEsm };
-						}
-					);
-				},
-			},
-			{
-				name: 'astro.wasm',
-				setup(pluginBuild) {
-					pluginBuild.onLoad(
-						{ filter: /.*\/node_modules\/@astrojs\/compiler\/dist\/node\/sync.cjs/ },
-						(loadArgs) => {
-							let text = fs.readFileSync(loadArgs.path, 'utf-8');
-							text = text.replace('"../astro.wasm"', '"../../node_modules/@astrojs/compiler/dist/astro.wasm"');
-							return { contents: text };
 						}
 					);
 				},
