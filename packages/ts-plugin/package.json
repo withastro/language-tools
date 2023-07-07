@@ -28,7 +28,7 @@
   "license": "MIT",
   "dependencies": {
     "@astrojs/language-server": "file:../language-server",
-    "@volar/language-core": "1.7.10",
-    "@volar/typescript": "1.7.10"
+    "@volar/language-core": "~1.8.0",
+    "@volar/typescript": "~1.8.0"
   }
 }
