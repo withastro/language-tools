@@ -36,6 +36,10 @@
   },
   "packageManager": "pnpm@8.2.0",
   "pnpm": {
+    "overrides": {
+      "@astrojs/language-server": "workspace:*",
+      "@astrojs/ts-plugin": "workspace:*"
+    },
     "peerDependencyRules": {
       "ignoreMissing": [
         "vue",
