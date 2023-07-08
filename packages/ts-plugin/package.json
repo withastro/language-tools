@@ -20,14 +20,15 @@
     "dist/**/*.d.ts"
   ],
   "scripts": {
-    "build": "tsc",
+    "prebuild": "cd ../language-server && pnpm build",
+    "build": "pnpm prebuild && tsc",
     "dev": "tsc --watch",
     "test": "node ./test/runTest.js"
   },
   "author": "withastro",
   "license": "MIT",
   "dependencies": {
-    "@astrojs/language-server": "file:../language-server",
+    "@astrojs/language-server": "^2.0.17",
     "@volar/language-core": "~1.8.0",
     "@volar/typescript": "~1.8.0"
   },

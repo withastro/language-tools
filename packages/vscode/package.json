@@ -208,7 +208,8 @@
     ]
   },
   "scripts": {
-    "build": "node scripts/build.mjs -- --minify",
+    "prebuild": "cd ../ts-plugin && pnpm build",
+    "build": "pnpm prebuild && node scripts/build.mjs -- --minify",
     "dev": "node scripts/build.mjs -- --watch",
     "build:grammar": "npx js-yaml syntaxes/astro.tmLanguage.src.yaml > syntaxes/astro.tmLanguage.json",
     "test": "pnpm test:vscode && pnpm test:grammar",
@@ -217,8 +218,8 @@
     "update-grammar-snapshots": "node ./test/grammar/test.mjs --updateSnapshot"
   },
   "devDependencies": {
-    "@astrojs/language-server": "file:../language-server",
-    "@astrojs/ts-plugin": "file:../ts-plugin",
+    "@astrojs/language-server": "^2.0.17",
+    "@astrojs/ts-plugin": "^1.0.10",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "^16.18.26",
@@ -237,6 +238,7 @@
     "vscode-tmgrammar-test": "^0.1.1"
   },
   "dependencies": {
+    "@astrojs/compiler": "^1.5.1",
     "prettier": "^2.8.8",
     "prettier-plugin-astro": "^0.10.0"
   }
