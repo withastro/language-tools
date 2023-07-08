@@ -28,7 +28,6 @@
   "author": "withastro",
   "license": "MIT",
   "dependencies": {
-    "@astrojs/language-server": "^2.0.17",
     "@volar/language-core": "~1.8.0",
     "@volar/typescript": "~1.8.0"
   },
@@ -42,5 +41,8 @@
     "glob": "^8.0.3",
     "mocha": "^10.2.0",
     "typescript": "~5.1.3"
+  },
+  "peerDependencies": {
+    "@astrojs/language-server": "*"
   }
 }
