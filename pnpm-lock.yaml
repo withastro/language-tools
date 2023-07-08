@@ -142,6 +142,9 @@ importers:
         specifier: ~1.8.0
         version: 1.8.0
     devDependencies:
+      '@astrojs/language-server':
+        specifier: workspace
+        version: link:../language-server
       '@types/chai':
         specifier: ^4.3.5
         version: 4.3.5
@@ -183,11 +186,11 @@ importers:
         version: 0.10.0
     devDependencies:
       '@astrojs/language-server':
-        specifier: file:../language-server
-        version: file:packages/language-server(prettier-plugin-astro@0.10.0)(prettier@2.8.8)(typescript@5.1.3)
+        specifier: workspace
+        version: link:../language-server
       '@astrojs/ts-plugin':
-        specifier: file:../ts-plugin
-        version: file:packages/ts-plugin(@astrojs/language-server@2.0.17)
+        specifier: workspace
+        version: link:../ts-plugin
       '@types/glob':
         specifier: ^8.1.0
         version: 8.1.0
@@ -1640,6 +1643,7 @@ packages:
       typescript: 5.1.3
       vscode-languageserver-textdocument: 1.0.8
       vscode-uri: 3.0.7
+    dev: false
 
   /@volar/language-core@1.8.0:
     resolution: {integrity: sha512-ZHTvZPM3pEbOOuaq+ybNz5TQlHUqPQPK0G1+SonvApGq0e3qgGijjhtL5T7hsCtUEmxfix8FrAuCH14tMBOhTg==}
@@ -5116,6 +5120,7 @@ packages:
       '@astrojs/compiler': 1.5.1
       prettier: 2.8.8
       sass-formatter: 0.7.6
+    dev: false
 
   /prettier-plugin-astro@0.9.1:
     resolution: {integrity: sha512-pYZXSbdq0eElvzoIMArzv1SBn1NUXzopjlcnt6Ql8VW32PjC12NovwBjXJ6rh8qQLi7vF8jNqAbraKW03UPfag==}
@@ -6181,6 +6186,7 @@ packages:
     resolution: {integrity: sha512-Rq6/q4O9iyqUdjvOoyas7x/Qf9nWUMeqpP3YeTaLA+uECgfy5wOhfOS+SW/+fZ/uI/ZcKaf+2/ZhFzXh8xfofQ==}
     dependencies:
       semver: 7.5.3
+    dev: false
 
   /typescript@5.1.3:
     resolution: {integrity: sha512-XH627E9vkeqhlZFQuL+UsyAXEnibT0kWR2FWONlr4sTjvxyJYnyefgrkyECLzM5NenmKzRAy2rR/OlYLA1HkZw==}
@@ -6408,6 +6414,7 @@ packages:
       '@volar/language-service': 1.8.0
       vscode-css-languageservice: 6.2.6
       vscode-uri: 3.0.7
+    dev: false
 
   /volar-service-emmet@0.0.9(@volar/language-service@1.8.0):
     resolution: {integrity: sha512-HXDAzzNNRkeOMZiewlcclHRbEYsRinh9MTs/KtehWWcvcASP7CB9KvyG2uQ40RMCxxwj6OihfpYy6WModBPu5w==}
@@ -6420,6 +6427,7 @@ packages:
       '@volar/language-service': 1.8.0
       '@vscode/emmet-helper': 2.9.2
       volar-service-html: 0.0.9(@volar/language-service@1.8.0)
+    dev: false
 
   /volar-service-html@0.0.9(@volar/language-service@1.8.0):
     resolution: {integrity: sha512-3y3S8Jw8f86IpkPkvFraYrKmiMj0cuGOz3O7g/SdwxpuFHhcU8ldFF+LheI/c49RpCHpbl8a4Zn7rePCvehHnA==}
@@ -6432,6 +6440,7 @@ packages:
       '@volar/language-service': 1.8.0
       vscode-html-languageservice: 5.0.6
       vscode-uri: 3.0.7
+    dev: false
 
   /volar-service-prettier@0.0.9(@volar/language-service@1.8.0)(prettier@2.8.8):
     resolution: {integrity: sha512-zio51v4BD/eV2p+2tSj2bQGTG3IqICQ8Fn5KzHVjnvaPDSLO04n21/Ejc8sR4E/YOVAj6ADYv59u1Uge7UtVMQ==}
@@ -6444,6 +6453,7 @@ packages:
     dependencies:
       '@volar/language-service': 1.8.0
       prettier: 2.8.8
+    dev: false
 
   /volar-service-typescript-twoslash-queries@0.0.9(@volar/language-service@1.8.0):
     resolution: {integrity: sha512-NMSzeBtSxrHPyNKNDSurpZLHgPXu2/KqYjjGi5SghxeHhDA7SmKyYNtu5Mis5uZR+XULqGVnx+A+RNSfMW9toQ==}
@@ -6454,6 +6464,7 @@ packages:
         optional: true
     dependencies:
       '@volar/language-service': 1.8.0
+    dev: false
 
   /volar-service-typescript@0.0.9(@volar/language-service@1.8.0)(@volar/typescript@1.8.0):
     resolution: {integrity: sha512-ZJSO2U9b4gnBuhDQpKA/wfH5XHpgv3n0qThVh0hfOUEpCHX8oCWI844jd+XXuQVNw0xafyUMQsNBrypDHg3kIQ==}
@@ -6471,6 +6482,7 @@ packages:
       vscode-languageserver-textdocument: 1.0.8
       vscode-nls: 5.2.0
       vscode-uri: 3.0.7
+    dev: false
 
   /vscode-css-languageservice@6.2.6:
     resolution: {integrity: sha512-SA2WkeOecIpUiEbZnjOsP/fI5CRITZEiQGSHXKiDQDwLApfKcnLhZwMtOBbIifSzESVcQa7b/shX/nbnF4NoCg==}
@@ -6791,56 +6803,4 @@ packages:
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
-    dev: true
-
-  file:packages/language-server(prettier-plugin-astro@0.10.0)(prettier@2.8.8)(typescript@5.1.3):
-    resolution: {directory: packages/language-server, type: directory}
-    id: file:packages/language-server
-    name: '@astrojs/language-server'
-    version: 2.0.17
-    hasBin: true
-    peerDependencies:
-      prettier: ^2.8.8
-      prettier-plugin-astro: ^0.10.0
-    peerDependenciesMeta:
-      prettier:
-        optional: true
-      prettier-plugin-astro:
-        optional: true
-    dependencies:
-      '@astrojs/compiler': 1.5.1
-      '@jridgewell/sourcemap-codec': 1.4.15
-      '@volar/kit': 1.8.0(typescript@5.1.3)
-      '@volar/language-core': 1.8.0
-      '@volar/language-server': 1.8.0
-      '@volar/language-service': 1.8.0
-      '@volar/source-map': 1.8.0
-      '@volar/typescript': 1.8.0
-      fast-glob: 3.2.12
-      muggle-string: 0.3.1
-      prettier: 2.8.8
-      prettier-plugin-astro: 0.10.0
-      volar-service-css: 0.0.9(@volar/language-service@1.8.0)
-      volar-service-emmet: 0.0.9(@volar/language-service@1.8.0)
-      volar-service-html: 0.0.9(@volar/language-service@1.8.0)
-      volar-service-prettier: 0.0.9(@volar/language-service@1.8.0)(prettier@2.8.8)
-      volar-service-typescript: 0.0.9(@volar/language-service@1.8.0)(@volar/typescript@1.8.0)
-      volar-service-typescript-twoslash-queries: 0.0.9(@volar/language-service@1.8.0)
-      vscode-html-languageservice: 5.0.6
-      vscode-uri: 3.0.7
-    transitivePeerDependencies:
-      - typescript
-    dev: true
-
-  file:packages/ts-plugin(@astrojs/language-server@2.0.17):
-    resolution: {directory: packages/ts-plugin, type: directory}
-    id: file:packages/ts-plugin
-    name: '@astrojs/ts-plugin'
-    version: 1.0.10
-    peerDependencies:
-      '@astrojs/language-server': '*'
-    dependencies:
-      '@astrojs/language-server': file:packages/language-server(prettier-plugin-astro@0.10.0)(prettier@2.8.8)(typescript@5.1.3)
-      '@volar/language-core': 1.8.0
-      '@volar/typescript': 1.8.0
     dev: true

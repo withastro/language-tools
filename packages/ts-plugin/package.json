@@ -32,6 +32,7 @@
     "@volar/typescript": "~1.8.0"
   },
   "devDependencies": {
+    "@astrojs/language-server": "workspace",
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
     "@types/node": "^16.18.26",

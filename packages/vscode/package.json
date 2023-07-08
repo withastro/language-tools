@@ -218,8 +218,8 @@
     "update-grammar-snapshots": "node ./test/grammar/test.mjs --updateSnapshot"
   },
   "devDependencies": {
-    "@astrojs/language-server": "file:../language-server",
-    "@astrojs/ts-plugin": "file:../ts-plugin",
+    "@astrojs/language-server": "workspace",
+    "@astrojs/ts-plugin": "workspace",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "^16.18.26",
