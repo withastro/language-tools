@@ -34,12 +34,8 @@
     "node": ">=16.12.0",
     "pnpm": ">=8.2.0"
   },
-  "packageManager": "pnpm@8.2.0",
+  "packageManager": "pnpm@8.6.2",
   "pnpm": {
-    "overrides": {
-      "@astrojs/language-server": "workspace:*",
-      "@astrojs/ts-plugin": "workspace:*"
-    },
     "peerDependencyRules": {
       "ignoreMissing": [
         "vue",

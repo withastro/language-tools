@@ -17,18 +17,15 @@ export default async function build() {
 		entryPoints: {
 			'dist/node/client': './src/client.ts',
 			'dist/node/server': './node_modules/@astrojs/language-server/bin/nodeServer.js',
-			'node_modules/astro-ts-plugin-bundle/index': './node_modules/@astrojs/ts-plugin/dist/index.js',
+			// We need to generate this inside node_modules so VS Code can resolve it
+			'node_modules/astro-ts-plugin-bundle/index':
+				'./node_modules/@astrojs/ts-plugin/dist/index.js',
 		},
 		bundle: true,
 		metafile: metaFile,
 		sourcemap: isDev,
 		outdir: '.',
-		external: [
-			'vscode',
-			'@astrojs/compiler',
-			'prettier',
-			'prettier-plugin-astro',
-		],
+		external: ['vscode', '@astrojs/compiler', 'prettier', 'prettier-plugin-astro'],
 		format: 'cjs',
 		platform: 'node',
 		tsconfig: './tsconfig.json',

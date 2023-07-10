@@ -1,16 +1,13 @@
 import { createVirtualFiles } from '@volar/language-core';
 import { decorateLanguageService, decorateLanguageServiceHost } from '@volar/typescript';
-import type * as ts from 'typescript/lib/tsserverlibrary';
-import { getLanguageModule } from '@astrojs/language-server/dist/core';
+import type ts from 'typescript/lib/tsserverlibrary';
+import { getLanguageModule } from './language.js';
 
 const init: ts.server.PluginModuleFactory = (modules) => {
 	const { typescript: ts } = modules;
 	const pluginModule: ts.server.PluginModule = {
 		create(info) {
-
-			const virtualFiles = createVirtualFiles([
-				getLanguageModule(undefined, ts),
-			]);
+			const virtualFiles = createVirtualFiles([getLanguageModule(ts)]);
 
 			decorateLanguageService(virtualFiles, info.languageService, true);
 			decorateLanguageServiceHost(virtualFiles, info.languageServiceHost, ts, ['.astro']);
