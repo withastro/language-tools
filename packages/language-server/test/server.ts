@@ -4,7 +4,7 @@ import cp from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import * as protocol from '@volar/language-server';
+import * as protocol from 'vscode-languageserver-protocol/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
 

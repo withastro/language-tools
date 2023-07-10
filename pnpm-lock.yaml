@@ -129,6 +129,9 @@ importers:
       typescript:
         specifier: ~5.1.3
         version: 5.1.3
+      vscode-languageserver-protocol:
+        specifier: ^3.17.3
+        version: 3.17.3
       vscode-languageserver-textdocument:
         specifier: ^1.0.8
         version: 1.0.8
