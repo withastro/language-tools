@@ -222,8 +222,8 @@
     "@types/mocha": "^10.0.1",
     "@types/node": "^16.18.26",
     "@types/vscode": "1.67.0",
-    "@volar/language-server": "~1.8.0",
-    "@volar/vscode": "~1.8.0",
+    "@volar/language-server": "~1.8.3",
+    "@volar/vscode": "~1.8.3",
     "@vscode/test-electron": "^2.3.2",
     "@vscode/vsce": "latest",
     "esbuild": "^0.17.19",
@@ -238,7 +238,7 @@
   },
   "dependencies": {
     "@astrojs/ts-plugin": "^1.0.10",
-    "prettier": "^2.8.8",
-    "prettier-plugin-astro": "^0.10.0"
+    "prettier": "^3.0.0",
+    "prettier-plugin-astro": "^0.11.0"
   }
 }
