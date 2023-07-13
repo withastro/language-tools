@@ -20,30 +20,6 @@ export function getLanguageModule(
 		updateVirtualFile(astroFile, snapshot) {
 			astroFile.update(snapshot);
 		},
-		resolveHost(host) {
-			return {
-				...host,
-				getCompilationSettings() {
-					const baseCompilationSettings = host.getCompilationSettings();
-					return {
-						...baseCompilationSettings,
-						module: ts.ModuleKind.ESNext ?? 99,
-						target: ts.ScriptTarget.ESNext ?? 99,
-						jsx: ts.JsxEmit.Preserve ?? 1,
-						jsxImportSource: undefined,
-						jsxFactory: 'astroHTML',
-						resolveJsonModule: true,
-						allowJs: true,
-						isolatedModules: true,
-						moduleResolution:
-							baseCompilationSettings.moduleResolution === ts.ModuleResolutionKind.Classic ||
-							!baseCompilationSettings.moduleResolution
-								? ts.ModuleResolutionKind.Node10
-								: baseCompilationSettings.moduleResolution,
-					};
-				},
-			};
-		},
 	};
 }
 
