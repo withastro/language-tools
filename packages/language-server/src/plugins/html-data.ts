@@ -182,7 +182,7 @@ export const astroAttributes = newHTMLDataProvider('astro-attributes', {
 		},
 		{
 			name: 'transition:animate',
-			description: 'Specifies an animation to use with this element on page transition',
+			description: 'Specifies an animation to use with this element on page transition.',
 			references: [
 				{
 					name: 'Astro reference',
