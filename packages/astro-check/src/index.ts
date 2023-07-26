@@ -16,14 +16,14 @@ export function parseArgsAsCheckConfig(args: string[]) {
 
 export type Flags = Pick<ReturnType<typeof parseArgsAsCheckConfig>, keyof typeof options>;
 
-export async function check(flags: Flags & { watch: true }): Promise<void>;
-export async function check(flags: Flags & { watch: false }): Promise<boolean>;
-export async function check(flags: Flags): Promise<boolean | void>;
+export async function check(flags: Partial<Flags> & { watch: true }): Promise<void>;
+export async function check(flags: Partial<Flags> & { watch: false }): Promise<boolean>;
+export async function check(flags: Partial<Flags>): Promise<boolean | void>;
 /**
  * Print diagnostics according to the given flags, and return whether or not the program should exit with an error code.
  */
-export async function check(flags: Flags): Promise<boolean | void> {
-	const workspaceRoot = path.resolve(flags.root);
+export async function check(flags: Partial<Flags>): Promise<boolean | void> {
+	const workspaceRoot = path.resolve(flags.root ?? process.cwd());
 	const require = createRequire(import.meta.url);
 	const checker = new AstroCheck(
 		workspaceRoot,
@@ -73,24 +73,23 @@ export async function check(flags: Flags): Promise<boolean | void> {
 		const isCanceled = () => currentReq !== req;
 		if (isCanceled()) return;
 
+		const minimumSeverity = flags.minimumSeverity || 'hint';
 		const result = await checker.lint({
 			logErrors: {
-				level: flags.minimumSeverity,
+				level: minimumSeverity,
 			},
 			cancel: isCanceled,
 		});
 		console.info(
 			[
 				bold(`Result (${result.fileChecked} file${result.fileChecked === 1 ? '' : 's'}): `),
-				flags.minimumSeverity === 'error' ||
-				flags.minimumSeverity === 'warning' ||
-				flags.minimumSeverity === 'hint'
+				['error', 'warning', 'hint'].includes(minimumSeverity)
 					? bold(red(`${result.errors} ${result.errors === 1 ? 'error' : 'errors'}`))
 					: undefined,
-				flags.minimumSeverity === 'warning' || flags.minimumSeverity === 'hint'
+				['warning', 'hint'].includes(minimumSeverity)
 					? bold(yellow(`${result.warnings} ${result.warnings === 1 ? 'warning' : 'warnings'}`))
 					: undefined,
-				flags.minimumSeverity === 'hint'
+				['hint'].includes(minimumSeverity)
 					? dim(`${result.hints} ${result.hints === 1 ? 'hint' : 'hints'}\n`)
 					: undefined,
 			]
@@ -115,5 +114,6 @@ export async function check(flags: Flags): Promise<boolean | void> {
 	}
 
 	// Always lint on first run, even in watch mode.
-	await lint();
+	const lintResult = await lint();
+	if (!flags.watch) return lintResult;
 }

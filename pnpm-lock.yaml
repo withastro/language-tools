@@ -57,12 +57,27 @@ importers:
         specifier: ^17.7.2
         version: 17.7.2
     devDependencies:
+      '@types/chai':
+        specifier: ^4.3.5
+        version: 4.3.5
+      '@types/mocha':
+        specifier: ^10.0.1
+        version: 10.0.1
       '@types/node':
         specifier: ^16.18.26
         version: 16.18.26
       '@types/yargs':
         specifier: ^17.0.24
         version: 17.0.24
+      chai:
+        specifier: ^4.3.7
+        version: 4.3.7
+      mocha:
+        specifier: ^10.2.0
+        version: 10.2.0
+      tsx:
+        specifier: ^3.12.7
+        version: 3.12.7
 
   packages/language-server:
     dependencies:
