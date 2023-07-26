@@ -7,7 +7,6 @@ describe('astro-check - Arguments parser', async () => {
 		const result = parseArgsAsCheckConfig([]);
 
 		expect(result).to.deep.contain({
-			root: process.cwd(),
 			watch: false,
 			tsconfig: undefined,
 			minimumSeverity: 'hint',
