@@ -35,7 +35,7 @@ export async function check(flags: Partial<Flags>): Promise<boolean | void> {
 
 	if (flags.watch) {
 		function createWatcher(rootPath: string, extensions: string[]) {
-			return watch(`${rootPath}/**/*.{${extensions.join(',')}}`, {
+			return watch(`${rootPath}/**/*{${extensions.join(',')}}`, {
 				ignored: (ignoredPath) => ignoredPath.includes('node_modules'),
 				ignoreInitial: true,
 			});
@@ -64,7 +64,7 @@ export async function check(flags: Partial<Flags>): Promise<boolean | void> {
 
 	async function update() {
 		if (!flags.preserveWatchOutput) process.stdout.write('\x1Bc');
-		lint();
+		await lint();
 	}
 
 	async function lint() {
