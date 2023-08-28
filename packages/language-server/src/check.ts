@@ -10,7 +10,7 @@ import createTypeScriptService from './plugins/typescript/index.js';
 import { getAstroInstall } from './utils.js';
 
 // Export those for downstream consumers
-export { DiagnosticSeverity, Diagnostic };
+export { Diagnostic, DiagnosticSeverity };
 
 export interface CheckResult {
 	status: 'completed' | 'cancelled' | undefined;
@@ -22,6 +22,7 @@ export interface CheckResult {
 		errors: kit.Diagnostic[];
 		fileUrl: URL;
 		fileContent: string;
+		text: string;
 	}[];
 }
 
@@ -73,7 +74,10 @@ export class AstroCheck {
 				result.status = 'cancelled';
 				return result;
 			}
-			const fileDiagnostics = (await this.linter.check(file)).filter((diag) => {
+			const fileDiagnostics = await this.linter.check(file);
+
+			// Filter diagnostics based on the logErrors level
+			const fileDiagnosticsToPrint = fileDiagnostics.filter((diag) => {
 				const severity = diag.severity ?? DiagnosticSeverity.Error;
 				switch (logErrors?.level ?? 'error') {
 					case 'error':
@@ -85,11 +89,13 @@ export class AstroCheck {
 				}
 			});
 
-			if (logErrors) {
-				this.linter.logErrors(file, fileDiagnostics);
-			}
-
 			if (fileDiagnostics.length > 0) {
+				const errorText = this.linter.printErrors(file, fileDiagnosticsToPrint);
+
+				if (logErrors !== undefined && errorText) {
+					console.info(errorText);
+				}
+
 				const fileSnapshot = this.project.languageHost.getScriptSnapshot(file);
 				const fileContent = fileSnapshot?.getText(0, fileSnapshot.getLength());
 
@@ -97,7 +103,9 @@ export class AstroCheck {
 					errors: fileDiagnostics,
 					fileContent: fileContent ?? '',
 					fileUrl: pathToFileURL(file),
+					text: errorText,
 				});
+
 				result.errors += fileDiagnostics.filter(
 					(diag) => diag.severity === DiagnosticSeverity.Error
 				).length;
