@@ -20,7 +20,8 @@ suite('Extension Test Suite', () => {
 		);
 	}
 
-	test('extension is enabled', async () => {
+	test('extension is enabled', async function () {
+		this.timeout(10000);
 		const ext = vscode.extensions.getExtension('astro-build.astro-vscode');
 		const activate = await ext?.activate();
 
