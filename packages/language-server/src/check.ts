@@ -1,6 +1,7 @@
 import * as kit from '@volar/kit';
 import { Diagnostic, DiagnosticSeverity } from '@volar/language-server';
 import fg from 'fast-glob';
+import { existsSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { getLanguageModule } from './core/index.js';
 import { getSvelteLanguageModule } from './core/svelte.js';
@@ -160,7 +161,15 @@ export class AstroCheck {
 	}
 
 	private getTsconfig() {
-		const searchPath = this.tsconfigPath ?? this.workspacePath;
+		if (this.tsconfigPath) {
+			if (!existsSync(this.tsconfigPath)) {
+				throw new Error(`Specified tsconfig file \`${this.tsconfigPath}\` does not exist.`);
+			}
+
+			return this.tsconfigPath;
+		}
+
+		const searchPath = this.workspacePath;
 
 		const tsconfig =
 			this.ts.findConfigFile(searchPath, this.ts.sys.fileExists) ||
