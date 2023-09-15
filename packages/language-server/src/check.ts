@@ -8,7 +8,7 @@ import { getSvelteLanguageModule } from './core/svelte.js';
 import { getVueLanguageModule } from './core/vue.js';
 import { getAstroInstall } from './utils.js';
 
-import { create as createAstroService } from './plugins/astro.js';
+import { create as createAstroService } from './plugins/astro/index.js';
 import { create as createTypeScriptService } from './plugins/typescript/index.js';
 
 // Export those for downstream consumers

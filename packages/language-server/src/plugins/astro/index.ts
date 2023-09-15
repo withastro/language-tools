@@ -14,8 +14,9 @@ import fg from 'fast-glob';
 import { dirname } from 'node:path';
 import type { Provide } from 'volar-service-typescript';
 import type { TextDocument } from 'vscode-html-languageservice';
-import { AstroFile } from '../core/index.js';
-import { isJSDocument } from './utils.js';
+import { AstroFile } from '../../core/index.js';
+import { isJSDocument } from '../utils.js';
+import { getA11YDiagnostics } from './a11y.js';
 
 export const create =
 	(): Service =>
@@ -39,13 +40,16 @@ export const create =
 					items: items,
 				};
 			},
-			provideSemanticDiagnostics(document, token) {
+			async provideSemanticDiagnostics(document, token) {
 				if (token.isCancellationRequested) return [];
 
 				const [file] = context!.documents.getVirtualFileByUri(document.uri);
 				if (!(file instanceof AstroFile)) return;
 
-				return file.compilerDiagnostics.map(compilerMessageToDiagnostic);
+				return [
+					...file.compilerDiagnostics.map(compilerMessageToDiagnostic),
+					...(await getA11YDiagnostics(file.astroMeta.ast)),
+				];
 
 				function compilerMessageToDiagnostic(message: DiagnosticMessage): Diagnostic {
 					return {
