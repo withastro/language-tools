@@ -11,9 +11,6 @@ const diagnostics = {
 		message: (somethingElse: string) =>
 			`Empty element.\n\nElements with no text content are inaccessible to users using screen readers or other assistive technologies.${somethingElse}`,
 	},
-	'astro/missing-lang': {
-		message: (something: number, whatever: string) => `${something}${whatever}`,
-	},
 } as const satisfies Record<string, { message: (...args: any) => string | string }>;
 
 export async function getA11YDiagnostics(ast: ParseResult['ast']): Promise<Diagnostic[]> {
