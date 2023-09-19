@@ -26,8 +26,19 @@ A TypeScript plugin adding support for importing and exporting Astro components 
 
 HTML, CSS and TypeScript settings can be configured through the `html`, `css` and `typescript` namespaces respectively. For example, HTML documentation on hover can be disabled using `'html.hover.documentation': false`. Formatting can be configured through [Prettier's different configuration methods](https://prettier.io/docs/en/configuration.html).
 
+
+
 ## Troubleshooting
 
+### Auto-formatting for `.astro` files does not work
+
+To enable auto-formatting on VS code for `.astro` files make sure to add this line to your vs code settings:
+
+```
+"[astro]": {
+"editor.defaultFormatter": "astro-build.astro-vscode"
+}
+```
 ### Inlay Hints don't work
 
 Currently, only inlay hints provided by TypeScript are supported. TypeScript inlay hints are disabled by default and needs to be enabled using the settings under the `typescript.inlayHints` namespace, for example, to enable inlay hints for parameter names, you would do the following:
