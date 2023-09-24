@@ -17,44 +17,11 @@ export function extractScriptTags(
 	htmlDocument: HTMLDocument,
 	ast: ParseResult['ast']
 ): VirtualFile[] {
-	const embeddedJSFiles: VirtualFile['embeddedFiles'] = [];
-	for (const [index, root] of htmlDocument.roots.entries()) {
-		if (
-			root.tag === 'script' &&
-			root.startTagEnd !== undefined &&
-			root.endTagStart !== undefined &&
-			isIsolatedScriptTag(root)
-		) {
-			const scriptText = snapshot.getText(root.startTagEnd, root.endTagStart);
-
-			embeddedJSFiles.push({
-				fileName: fileName + `.${index}.mts`,
-				kind: FileKind.TypeScriptHostFile,
-				snapshot: {
-					getText: (start, end) => scriptText.substring(start, end),
-					getLength: () => scriptText.length,
-					getChangeRange: () => undefined,
-				},
-				codegenStacks: [],
-				mappings: [
-					{
-						sourceRange: [root.startTagEnd, root.endTagStart],
-						generatedRange: [0, scriptText.length],
-						data: FileRangeCapabilities.full,
-					},
-				],
-				capabilities: {
-					diagnostic: true,
-					codeAction: true,
-					inlayHint: true,
-					documentSymbol: true,
-					foldingRange: true,
-					documentFormatting: false,
-				},
-				embeddedFiles: [],
-			});
-		}
-	}
+	const embeddedJSFiles: VirtualFile['embeddedFiles'] = extractEmbeddedJSFilesRecursively(
+		fileName,
+		snapshot,
+		htmlDocument.roots
+	);
 
 	const javascriptContexts = [
 		...findInlineScripts(htmlDocument, snapshot),
@@ -92,6 +59,57 @@ export function extractScriptTags(
 	}
 
 	return embeddedJSFiles;
+}
+
+function extractEmbeddedJSFilesRecursively(
+	fileName: string,
+	snapshot: ts.IScriptSnapshot,
+	roots: Node[],
+	array: VirtualFile['embeddedFiles'] = []
+): VirtualFile['embeddedFiles'] {
+	for (const [index, root] of roots.entries()) {
+		if (root.tag !== 'script') continue; // Early return if tag is not 'script'
+
+		if (
+			root.startTagEnd !== undefined &&
+			root.endTagStart !== undefined &&
+			isIsolatedScriptTag(root)
+		) {
+			const scriptText = snapshot.getText(root.startTagEnd, root.endTagStart);
+
+			array.push({
+				fileName: fileName + `.${index}.mts`,
+				kind: FileKind.TypeScriptHostFile,
+				snapshot: {
+					getText: (start, end) => scriptText.substring(start, end),
+					getLength: () => scriptText.length,
+					getChangeRange: () => undefined,
+				},
+				codegenStacks: [],
+				mappings: [
+					{
+						sourceRange: [root.startTagEnd, root.endTagStart],
+						generatedRange: [0, scriptText.length],
+						data: FileRangeCapabilities.full,
+					},
+				],
+				capabilities: {
+					diagnostic: true,
+					codeAction: true,
+					inlayHint: true,
+					documentSymbol: true,
+					foldingRange: true,
+					documentFormatting: false,
+				},
+				embeddedFiles: [],
+			});
+		}
+
+		if (!root.children?.length) continue; // Early return if no children (no need to recurse)
+		extractEmbeddedJSFilesRecursively(fileName, snapshot, root.children, array);
+	}
+
+	return array;
 }
 
 interface JavaScriptContext {
