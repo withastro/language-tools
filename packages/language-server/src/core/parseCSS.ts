@@ -4,7 +4,7 @@ import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-co
 import * as SourceMap from '@volar/source-map';
 import * as muggle from 'muggle-string';
 import type ts from 'typescript/lib/tsserverlibrary';
-import type { HTMLDocument } from 'vscode-html-languageservice';
+import type { HTMLDocument, Node } from 'vscode-html-languageservice';
 import type { AttributeNodeWithPosition } from './compilerUtils.js';
 
 export function extractStylesheets(
@@ -13,36 +13,11 @@ export function extractStylesheets(
 	htmlDocument: HTMLDocument,
 	ast: ParseResult['ast']
 ): VirtualFile[] {
-	const embeddedCSSFiles: VirtualFile['embeddedFiles'] = [];
-	for (const [index, root] of htmlDocument.roots.entries()) {
-		if (root.tag === 'style' && root.startTagEnd !== undefined && root.endTagStart !== undefined) {
-			const styleText = snapshot.getText(root.startTagEnd, root.endTagStart);
-			embeddedCSSFiles.push({
-				fileName: fileName + `.${index}.css`,
-				kind: FileKind.TextFile,
-				snapshot: {
-					getText: (start, end) => styleText.substring(start, end),
-					getLength: () => styleText.length,
-					getChangeRange: () => undefined,
-				},
-				codegenStacks: [],
-				mappings: [
-					{
-						sourceRange: [root.startTagEnd, root.endTagStart],
-						generatedRange: [0, styleText.length],
-						data: FileRangeCapabilities.full,
-					},
-				],
-				capabilities: {
-					diagnostic: false,
-					documentSymbol: true,
-					foldingRange: true,
-					documentFormatting: false,
-				},
-				embeddedFiles: [],
-			});
-		}
-	}
+	const embeddedCSSFiles: VirtualFile['embeddedFiles'] = extractEmbeddedCSSFilesRecursively(
+		fileName,
+		snapshot,
+		htmlDocument.roots
+	);
 
 	const inlineStyles = findInlineStyles(ast);
 	if (inlineStyles.length > 0) {
@@ -77,6 +52,52 @@ export function extractStylesheets(
 	}
 
 	return embeddedCSSFiles;
+}
+
+function extractEmbeddedCSSFilesRecursively(
+	fileName: string,
+	snapshot: ts.IScriptSnapshot,
+	roots: Node[],
+	array: VirtualFile['embeddedFiles'] = [],
+	level: string[] = []
+): VirtualFile['embeddedFiles'] {
+	for (const [index, root] of roots.entries()) {
+		const currentLevel = [...level, index.toString()]; // Append current index to the level
+		const newFileName = `${fileName}.${currentLevel.join('.')}`;
+
+		if (root.tag === 'style' && root.startTagEnd !== undefined && root.endTagStart !== undefined) {
+			const styleText = snapshot.getText(root.startTagEnd, root.endTagStart);
+			array.push({
+				fileName: newFileName + '.css',
+				kind: FileKind.TextFile,
+				snapshot: {
+					getText: (start, end) => styleText.substring(start, end),
+					getLength: () => styleText.length,
+					getChangeRange: () => undefined,
+				},
+				codegenStacks: [],
+				mappings: [
+					{
+						sourceRange: [root.startTagEnd, root.endTagStart],
+						generatedRange: [0, styleText.length],
+						data: FileRangeCapabilities.full,
+					},
+				],
+				capabilities: {
+					diagnostic: false,
+					documentSymbol: true,
+					foldingRange: true,
+					documentFormatting: false,
+				},
+				embeddedFiles: [],
+			});
+		}
+
+		if (!root.children?.length) continue; // Early return if no children (no need to recurse)
+		extractEmbeddedCSSFilesRecursively(newFileName, snapshot, root.children, array, currentLevel);
+	}
+
+	return array;
 }
 
 // TODO: Provide completion for classes and IDs
