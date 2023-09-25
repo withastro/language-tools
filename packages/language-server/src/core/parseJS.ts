@@ -65,12 +65,15 @@ function extractEmbeddedJSFilesRecursively(
 	fileName: string,
 	snapshot: ts.IScriptSnapshot,
 	roots: Node[],
-	array: VirtualFile['embeddedFiles'] = []
+	array: VirtualFile['embeddedFiles'] = [],
+	level: string[] = []
 ): VirtualFile['embeddedFiles'] {
 	for (const [index, root] of roots.entries()) {
-		if (root.tag !== 'script') continue; // Early return if tag is not 'script'
+		const currentLevel = [...level, index.toString()]; // Append current index to the level
+		const newFileName = `${fileName}.${currentLevel.join('.')}`;
 
 		if (
+			root.tag === 'script' &&
 			root.startTagEnd !== undefined &&
 			root.endTagStart !== undefined &&
 			isIsolatedScriptTag(root)
@@ -78,7 +81,7 @@ function extractEmbeddedJSFilesRecursively(
 			const scriptText = snapshot.getText(root.startTagEnd, root.endTagStart);
 
 			array.push({
-				fileName: fileName + `.${index}.mts`,
+				fileName: newFileName + '.mts',
 				kind: FileKind.TypeScriptHostFile,
 				snapshot: {
 					getText: (start, end) => scriptText.substring(start, end),
@@ -106,7 +109,7 @@ function extractEmbeddedJSFilesRecursively(
 		}
 
 		if (!root.children?.length) continue; // Early return if no children (no need to recurse)
-		extractEmbeddedJSFilesRecursively(fileName, snapshot, root.children, array);
+		extractEmbeddedJSFilesRecursively(newFileName, snapshot, root.children, array, currentLevel);
 	}
 
 	return array;
