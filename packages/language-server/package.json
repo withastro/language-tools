@@ -46,12 +46,12 @@
     "vscode-uri": "^3.0.8"
   },
   "devDependencies": {
-    "@astrojs/svelte": "^3.0.0",
-    "@astrojs/vue": "^2.2.1",
+    "@astrojs/svelte": "^4.0.3",
+    "@astrojs/vue": "^3.0.1",
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
     "@types/node": "^16.18.26",
-    "astro": "^2.6.2",
+    "astro": "^3.3.0",
     "chai": "^4.3.7",
     "mocha": "^10.2.0",
     "tsx": "^3.12.7",

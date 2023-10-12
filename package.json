@@ -37,9 +37,6 @@
   },
   "packageManager": "pnpm@8.6.2",
   "pnpm": {
-    "overrides": {
-      "@astrojs/language-server": "file:./packages/language-server"
-    },
     "peerDependencyRules": {
       "ignoreMissing": [
         "vue",
