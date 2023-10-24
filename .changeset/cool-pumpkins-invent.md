@@ -3,4 +3,4 @@
 'astro-vscode': patch
 ---
 
-Fix intellisense not working in nested script and style tags
+Fix errors on JSON script tags
