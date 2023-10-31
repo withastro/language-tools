@@ -64,8 +64,8 @@ importers:
         specifier: ^10.0.1
         version: 10.0.1
       '@types/node':
-        specifier: ^16.18.26
-        version: 16.18.26
+        specifier: ^18.17.8
+        version: 18.17.8
       '@types/yargs':
         specifier: ^17.0.24
         version: 17.0.24
@@ -149,11 +149,11 @@ importers:
         specifier: ^10.0.1
         version: 10.0.1
       '@types/node':
-        specifier: ^16.18.26
-        version: 16.18.26
+        specifier: ^18.17.8
+        version: 18.17.8
       astro:
         specifier: ^3.3.0
-        version: 3.3.0(@types/node@16.18.26)(typescript@5.2.2)
+        version: 3.3.0(@types/node@18.17.8)(typescript@5.2.2)
       chai:
         specifier: ^4.3.7
         version: 4.3.7
@@ -163,6 +163,9 @@ importers:
       tsx:
         specifier: ^3.12.7
         version: 3.12.7
+      typescript:
+        specifier: ^5.2.2
+        version: 5.2.2
       vscode-languageserver-protocol:
         specifier: ^3.17.5
         version: 3.17.5
@@ -198,8 +201,8 @@ importers:
         specifier: ^10.0.1
         version: 10.0.1
       '@types/node':
-        specifier: ^16.18.26
-        version: 16.18.26
+        specifier: ^18.17.8
+        version: 18.17.8
       '@types/semver':
         specifier: ^7.3.13
         version: 7.5.0
@@ -238,8 +241,8 @@ importers:
         specifier: ^10.0.1
         version: 10.0.1
       '@types/node':
-        specifier: ^16.18.26
-        version: 16.18.26
+        specifier: ^18.17.8
+        version: 18.17.8
       '@types/vscode':
         specifier: ^1.82.0
         version: 1.83.0
@@ -254,7 +257,7 @@ importers:
         version: 2.3.2
       '@vscode/vsce':
         specifier: latest
-        version: 2.22.0
+        version: 2.21.1
       esbuild:
         specifier: ^0.17.19
         version: 0.17.19
@@ -304,7 +307,7 @@ packages:
       astro: ^3.3.0
     dependencies:
       '@astrojs/prism': 3.0.0
-      astro: 3.3.0(@types/node@16.18.26)(typescript@5.2.2)
+      astro: 3.3.0(@types/node@18.17.8)(typescript@5.2.2)
       github-slugger: 2.0.0
       import-meta-resolve: 3.0.0
       mdast-util-definitions: 6.0.0
@@ -340,7 +343,7 @@ packages:
         optional: true
     dependencies:
       '@sveltejs/vite-plugin-svelte': 2.4.6
-      astro: 3.3.0(@types/node@16.18.26)(typescript@5.2.2)
+      astro: 3.3.0(@types/node@18.17.8)(typescript@5.2.2)
       svelte2tsx: 0.6.23(typescript@5.2.2)
     transitivePeerDependencies:
       - supports-color
@@ -377,7 +380,7 @@ packages:
       '@vitejs/plugin-vue-jsx': 3.0.2
       '@vue/babel-plugin-jsx': 1.1.5(@babel/core@7.23.2)
       '@vue/compiler-sfc': 3.3.4
-      astro: 3.3.0(@types/node@16.18.26)(typescript@5.2.2)
+      astro: 3.3.0(@types/node@18.17.8)(typescript@5.2.2)
     transitivePeerDependencies:
       - '@babel/core'
       - supports-color
@@ -1788,7 +1791,7 @@ packages:
     resolution: {integrity: sha512-IO+MJPVhoqz+28h1qLAcBEH2+xHMK6MTyHJc7MTnnYb6wsoLR29POVGJ7LycmVXIqyy/4/2ShP5sUwTXuOwb/w==}
     dependencies:
       '@types/minimatch': 5.1.2
-      '@types/node': 16.18.26
+      '@types/node': 18.17.8
     dev: true
 
   /@types/hast@2.3.4:
@@ -1855,8 +1858,8 @@ packages:
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
     dev: true
 
-  /@types/node@16.18.26:
-    resolution: {integrity: sha512-pCNBzNQqCXE4A6FWDmrn/o1Qu+qBf8tnorBlNoPNSBQJF+jXzvTKNI/aMiE+hGJbK5sDAD65g7OS/YwSHIEJdw==}
+  /@types/node@18.17.8:
+    resolution: {integrity: sha512-Av/7MqX/iNKwT9Tr60V85NqMnsmh8ilfJoBlIVibkXfitk9Q22D9Y5mSpm+FvG5DET7EbVfB40bOiLzKgYFgPw==}
     dev: true
 
   /@types/normalize-package-data@2.4.1:
@@ -2161,8 +2164,8 @@ packages:
       - supports-color
     dev: true
 
-  /@vscode/vsce@2.22.0:
-    resolution: {integrity: sha512-8df4uJiM3C6GZ2Sx/KilSKVxsetrTBBIUb3c0W4B1EWHcddioVs5mkyDKtMNP0khP/xBILVSzlXxhV+nm2rC9A==}
+  /@vscode/vsce@2.21.1:
+    resolution: {integrity: sha512-f45/aT+HTubfCU2oC7IaWnH9NjOWp668ML002QiFObFRVUCoLtcwepp9mmql/ArFUy+HCHp54Xrq4koTcOD6TA==}
     engines: {node: '>= 14'}
     hasBin: true
     dependencies:
@@ -2394,7 +2397,7 @@ packages:
     resolution: {integrity: sha512-jgsaNduz+ndvGyFt3uSuWqvy4lCnIJiovtouQN5JZHOKCS2QuhEdbcQHFhVksz2N2U9hXJo8odG7ETyWlEeuDw==}
     dev: true
 
-  /astro@3.3.0(@types/node@16.18.26)(typescript@5.2.2):
+  /astro@3.3.0(@types/node@18.17.8)(typescript@5.2.2):
     resolution: {integrity: sha512-O3MsXULamxQMy6sBgv07iVe5teJ41o+9tVScB/Yo2Io0XwvLXVhjVrjAxKpulBcKpU3/LyOpVfj/x63fcONbPA==}
     engines: {node: '>=18.14.1', npm: '>=6.14.0'}
     hasBin: true
@@ -2449,7 +2452,7 @@ packages:
       tsconfck: 3.0.0-next.9(typescript@5.2.2)
       unist-util-visit: 4.1.2
       vfile: 5.3.7
-      vite: 4.4.11(@types/node@16.18.26)
+      vite: 4.4.11(@types/node@18.17.8)
       vitefu: 0.2.4(vite@4.4.11)
       which-pm: 2.1.1
       yargs-parser: 21.1.1
@@ -7036,7 +7039,7 @@ packages:
       vfile-message: 4.0.2
     dev: true
 
-  /vite@4.4.11(@types/node@16.18.26):
+  /vite@4.4.11(@types/node@18.17.8):
     resolution: {integrity: sha512-ksNZJlkcU9b0lBwAGZGGaZHCMqHsc8OpgtoYhsQ4/I2v5cnpmmmqe5pM4nv/4Hn6G/2GhTdj0DhZh2e+Er1q5A==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
@@ -7064,7 +7067,7 @@ packages:
       terser:
         optional: true
     dependencies:
-      '@types/node': 16.18.26
+      '@types/node': 18.17.8
       esbuild: 0.18.20
       postcss: 8.4.31
       rollup: 3.29.4
@@ -7080,7 +7083,7 @@ packages:
       vite:
         optional: true
     dependencies:
-      vite: 4.4.11(@types/node@16.18.26)
+      vite: 4.4.11(@types/node@18.17.8)
     dev: true
 
   /volar-service-css@0.0.16(@volar/language-service@1.10.9):

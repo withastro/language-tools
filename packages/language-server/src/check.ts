@@ -22,7 +22,7 @@ export interface CheckResult {
 	hints: number;
 	fileResult: {
 		errors: kit.Diagnostic[];
-		fileUrl: import('url').URL;
+		fileUrl: URL;
 		fileContent: string;
 		text: string;
 	}[];
