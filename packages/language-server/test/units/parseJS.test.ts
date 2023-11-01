@@ -37,7 +37,7 @@ describe('parseJS - Can find all the scripts in an Astro file', () => {
 		expect(scriptTags.length).to.equal(0);
 	});
 
-	it('returns the proper capabilities for inline script tags zzzz', () => {
+	it('returns the proper capabilities for inline script tags', () => {
 		const input = `<script is:inline>console.log('hi')</script>`;
 		const snapshot = ts.ScriptSnapshot.fromString(input);
 		const html = parseHTML('something/something/hello.astro', snapshot, 0);
