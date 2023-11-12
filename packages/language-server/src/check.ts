@@ -81,7 +81,7 @@ export class AstroCheck {
 			// Filter diagnostics based on the logErrors level
 			const fileDiagnosticsToPrint = fileDiagnostics.filter((diag) => {
 				const severity = diag.severity ?? DiagnosticSeverity.Error;
-				switch (logErrors?.level ?? 'error') {
+				switch (logErrors?.level ?? 'hint') {
 					case 'error':
 						return severity <= DiagnosticSeverity.Error;
 					case 'warning':
