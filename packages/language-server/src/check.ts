@@ -83,7 +83,7 @@ export class AstroCheck {
 				const severity = diag.severity ?? DiagnosticSeverity.Error;
 				switch (logErrors?.level ?? 'error') {
 					case 'error':
-						return true;
+						return severity <= DiagnosticSeverity.Error;
 					case 'warning':
 						return severity <= DiagnosticSeverity.Warning;
 					case 'hint':
