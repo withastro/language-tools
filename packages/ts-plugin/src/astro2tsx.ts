@@ -127,6 +127,7 @@ function getVirtualFileTSX(
 
 	return {
 		fileName: fileName + '.tsx',
+		languageId: 'typescriptreact',
 		kind: FileKind.TypeScriptHostFile,
 		capabilities: {
 			codeAction: true,

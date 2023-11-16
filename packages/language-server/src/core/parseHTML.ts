@@ -87,6 +87,7 @@ export function preprocessHTML(text: string, frontmatterEnd?: number) {
 function getHTMLVirtualFile(fileName: string, preprocessedHTML: string): VirtualFile {
 	return {
 		fileName: fileName + `.html`,
+		languageId: 'html',
 		kind: FileKind.TextFile,
 		snapshot: {
 			getText: (start, end) => preprocessedHTML.substring(start, end),

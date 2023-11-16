@@ -44,7 +44,7 @@ export async function check(flags: Partial<Flags>): Promise<boolean | void> {
 		// Dynamically get the list of extensions to watch from the files already included in the project
 		const checkedExtensions = Array.from(
 			new Set(
-				checker.project.languageHost.getScriptFileNames().map((fileName) => path.extname(fileName))
+				checker.project.typescript!.projectHost.getScriptFileNames().map((fileName) => path.extname(fileName))
 			)
 		);
 		createWatcher(workspaceRoot, checkedExtensions)

@@ -27,6 +27,7 @@ class VueFile implements VirtualFile {
 	capabilities = FileCapabilities.full;
 
 	fileName: string;
+	languageId = 'vue';
 	mappings!: Mapping<FileRangeCapabilities>[];
 	embeddedFiles!: VirtualFile[];
 	codegenStacks = [];

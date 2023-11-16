@@ -27,10 +27,10 @@ export const create =
 			transformCompletionItem(item) {
 				const [_, source] = context.documents.getVirtualFileByUri(item.data.uri);
 				const file = source?.root;
-				if (!(file instanceof AstroFile) || !context.host) return undefined;
+				if (!(file instanceof AstroFile) || !context.project.typescript) return undefined;
 				if (file.scriptFiles.includes(item.data.fileName)) return undefined;
 
-				const newLine = context.host.getCompilationSettings().newLine?.toString() ?? '\n';
+				const newLine = context.project.typescript.projectHost.getCompilationSettings().newLine?.toString() ?? '\n';
 				if (item.additionalTextEdits) {
 					item.additionalTextEdits = item.additionalTextEdits.map((edit) => {
 						// HACK: There's a weird situation sometimes where some components (especially Svelte) will get imported as type imports
@@ -55,7 +55,7 @@ export const create =
 
 				const [_, source] = context.documents.getVirtualFileByUri(originalFileName);
 				const file = source?.root;
-				if (!(file instanceof AstroFile) || !context.host) return undefined;
+				if (!(file instanceof AstroFile) || !context.project.typescript) return undefined;
 				if (
 					file.scriptFiles.includes(item.diagnostics?.[0].data.documentUri.replace('file://', ''))
 				)
@@ -64,7 +64,7 @@ export const create =
 				const document = context.getTextDocument(originalFileName);
 				if (!document) return undefined;
 
-				const newLine = context.host.getCompilationSettings().newLine?.toString() ?? '\n';
+				const newLine = context.project.typescript.projectHost.getCompilationSettings().newLine?.toString() ?? '\n';
 				if (!item.edit?.documentChanges) return undefined;
 				item.edit.documentChanges = item.edit.documentChanges.map((change) => {
 					if (TextDocumentEdit.is(change)) {
@@ -146,7 +146,8 @@ export const create =
 
 				const astroDocument = context.documents.getDocumentByFileName(
 					file.snapshot,
-					file.sourceFileName
+					file.sourceFileName,
+					file.languageId
 				);
 
 				return enhancedProvideSemanticDiagnostics(diagnostics, astroDocument.lineCount);

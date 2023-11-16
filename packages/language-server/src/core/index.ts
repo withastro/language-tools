@@ -29,7 +29,7 @@ export function getLanguageModule(
 		updateVirtualFile(astroFile, snapshot) {
 			astroFile.update(snapshot);
 		},
-		resolveHost(host) {
+		resolveTypeScriptProjectHost(host) {
 			return {
 				...host,
 				resolveModuleName(moduleName, impliedNodeFormat) {
@@ -83,6 +83,7 @@ export class AstroFile implements VirtualFile {
 	capabilities = FileCapabilities.full;
 
 	fileName: string;
+	languageId = 'astro';
 	mappings!: VirtualFile['mappings'];
 	embeddedFiles!: VirtualFile['embeddedFiles'];
 	astroMeta!: ParseResult & { frontmatter: FrontmatterStatus };

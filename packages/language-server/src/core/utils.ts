@@ -30,6 +30,7 @@ export function framework2tsx(
 	function getVirtualFile(content: string): VirtualFile {
 		return {
 			fileName: fileName + '.tsx',
+			languageId: 'typescript',
 			capabilities: FileCapabilities.full,
 			kind: FileKind.TypeScriptHostFile,
 			snapshot: {

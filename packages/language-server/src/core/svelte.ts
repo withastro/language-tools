@@ -27,6 +27,7 @@ class SvelteFile implements VirtualFile {
 	capabilities = FileCapabilities.full;
 
 	fileName: string;
+	languageId = 'svelte';
 	mappings!: Mapping<FileRangeCapabilities>[];
 	embeddedFiles!: VirtualFile[];
 	codegenStacks = [];

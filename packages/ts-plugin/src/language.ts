@@ -28,6 +28,7 @@ export class AstroFile implements VirtualFile {
 	capabilities = FileCapabilities.full;
 
 	fileName: string;
+	languageId = 'astro';
 	mappings!: VirtualFile['mappings'];
 	embeddedFiles!: VirtualFile['embeddedFiles'];
 	codegenStacks = [];

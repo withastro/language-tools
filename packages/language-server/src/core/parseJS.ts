@@ -69,6 +69,7 @@ function findIsolatedScripts(
 				const scriptText = snapshot.getText(node.startTagEnd, node.endTagStart);
 				embeddedScripts.push({
 					fileName: fileName + `.${scriptIndex}.mts`,
+					languageId: 'typescript',
 					kind: FileKind.TypeScriptHostFile,
 					snapshot: {
 						getText: (start, end) => scriptText.substring(start, end),
@@ -214,6 +215,7 @@ function mergeJSContexts(fileName: string, javascriptContexts: JavaScriptContext
 
 	return {
 		fileName: fileName + '.inline.mjs',
+		languageId: 'javascript',
 		codegenStacks: [],
 		snapshot: {
 			getText: (start, end) => text.substring(start, end),

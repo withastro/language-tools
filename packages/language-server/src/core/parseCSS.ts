@@ -38,6 +38,7 @@ export function extractStylesheets(
 
 		embeddedCSSFiles.push({
 			fileName: fileName + '.inline.css',
+			languageId: 'css',
 			codegenStacks: [],
 			snapshot: {
 				getText: (start, end) => text.substring(start, end),
@@ -78,6 +79,7 @@ function findEmbeddedStyles(
 				const styleText = snapshot.getText(node.startTagEnd, node.endTagStart);
 				embeddedCSSFiles.push({
 					fileName: fileName + `.${cssIndex}.css`,
+					languageId: 'css',
 					kind: FileKind.TextFile,
 					snapshot: {
 						getText: (start, end) => styleText.substring(start, end),

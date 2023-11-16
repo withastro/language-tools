@@ -1,4 +1,4 @@
-import { createVirtualFiles } from '@volar/language-core';
+import { createFileProvider } from '@volar/language-core';
 import {
 	decorateLanguageService,
 	decorateLanguageServiceHost,
@@ -14,7 +14,7 @@ const init: ts.server.PluginModuleFactory = (modules) => {
 	const { typescript: ts } = modules;
 	const pluginModule: ts.server.PluginModule = {
 		create(info) {
-			const virtualFiles = createVirtualFiles([getLanguageModule(ts)]);
+			const virtualFiles = createFileProvider([getLanguageModule(ts)], () => {});
 
 			decorateLanguageService(virtualFiles, info.languageService, true);
 			decorateLanguageServiceHost(virtualFiles, info.languageServiceHost, ts, ['.astro']);
