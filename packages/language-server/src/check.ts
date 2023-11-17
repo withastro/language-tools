@@ -30,8 +30,7 @@ export interface CheckResult {
 
 export class AstroCheck {
 	private ts!: typeof import('typescript/lib/tsserverlibrary.js');
-	public project!: kit.Project;
-	private linter!: ReturnType<typeof kit.createLinter>;
+	public linter!: ReturnType<typeof kit['createTypeScriptChecker']>;
 
 	constructor(
 		private readonly workspacePath: string,
@@ -61,7 +60,7 @@ export class AstroCheck {
 			| undefined;
 	}): Promise<CheckResult> {
 		const files =
-			fileNames !== undefined ? fileNames : this.project.typescript!.projectHost.getScriptFileNames();
+			fileNames !== undefined ? fileNames : this.linter.projectHost.getScriptFileNames();
 
 		const result: CheckResult = {
 			status: undefined,
@@ -98,7 +97,7 @@ export class AstroCheck {
 					console.info(errorText);
 				}
 
-				const fileSnapshot = this.project.typescript!.projectHost.getScriptSnapshot(file);
+				const fileSnapshot = this.linter.projectHost.getScriptSnapshot(file);
 				const fileContent = fileSnapshot?.getText(0, fileSnapshot.getLength());
 
 				result.fileResult.push({
@@ -130,7 +129,7 @@ export class AstroCheck {
 		this.ts = this.typescriptPath ? require(this.typescriptPath) : require('typescript');
 		const tsconfigPath = this.getTsconfig();
 
-		const languages: kit.Language[] = [
+		const languages = [
 			getLanguageModule(getAstroInstall([this.workspacePath]), this.ts),
 			getSvelteLanguageModule(),
 			getVueLanguageModule(),
@@ -139,16 +138,15 @@ export class AstroCheck {
 			createTypeScriptService(),
 			createAstroService(),
 		];
-		const env = kit.createServiceEnvironment();
 
 		if (tsconfigPath) {
-			this.project = kit.createTypeScriptKitProject(languages, env, tsconfigPath, [
+			this.linter = kit.createTypeScriptChecker(languages, services, tsconfigPath, [
 				{ extension: 'astro', isMixedContent: true, scriptKind: 7 },
 				{ extension: 'vue', isMixedContent: true, scriptKind: 7 },
 				{ extension: 'svelte', isMixedContent: true, scriptKind: 7 },
 			]);
 		} else {
-			this.project = kit.createTypeScriptInferredKitProject(languages, env, () => {
+			this.linter = kit.createTypeScriptInferredChecker(languages, services, () => {
 				return fg.sync('**/*.astro', {
 					cwd: this.workspacePath,
 					ignore: ['node_modules'],
@@ -156,8 +154,6 @@ export class AstroCheck {
 				});
 			});
 		}
-
-		this.linter = kit.createLinter(services, env, this.project);
 	}
 
 	private getTsconfig() {
