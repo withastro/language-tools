@@ -1,4 +1,4 @@
-import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
+import { FileKind, VirtualFile } from '@volar/language-core';
 import type ts from 'typescript/lib/tsserverlibrary';
 import * as html from 'vscode-html-languageservice';
 import { isInsideExpression } from '../plugins/utils';
@@ -84,9 +84,9 @@ export function preprocessHTML(text: string, frontmatterEnd?: number) {
 	}
 }
 
-function getHTMLVirtualFile(fileName: string, preprocessedHTML: string): VirtualFile {
+function getHTMLVirtualFile(fileId: string, preprocessedHTML: string): VirtualFile {
 	return {
-		fileName: fileName + `.html`,
+		id: fileId + `.html`,
 		languageId: 'html',
 		kind: FileKind.TextFile,
 		snapshot: {
@@ -94,19 +94,15 @@ function getHTMLVirtualFile(fileName: string, preprocessedHTML: string): Virtual
 			getLength: () => preprocessedHTML.length,
 			getChangeRange: () => undefined,
 		},
-		codegenStacks: [],
 		mappings: [
 			{
 				sourceRange: [0, preprocessedHTML.length],
 				generatedRange: [0, preprocessedHTML.length],
-				data: FileRangeCapabilities.full,
+				data: {
+					formattingEdits: false,
+				},
 			},
 		],
-		capabilities: {
-			documentSymbol: true,
-			foldingRange: true,
-			documentFormatting: false,
-		},
 		embeddedFiles: [],
 	};
 }

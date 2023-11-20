@@ -1,6 +1,6 @@
 import type { ParentNode, ParseResult } from '@astrojs/compiler/types';
 import { is } from '@astrojs/compiler/utils';
-import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
+import { FileKind, CodeInformations, VirtualFile } from '@volar/language-core';
 import * as SourceMap from '@volar/source-map';
 import * as muggle from 'muggle-string';
 import type ts from 'typescript/lib/tsserverlibrary';
@@ -49,7 +49,7 @@ function isIsolatedScriptTag(scriptTag: Node): boolean {
  * All the isolated scripts are passed to the TypeScript language server as separate `.mts` files.
  */
 function findIsolatedScripts(
-	fileName: string,
+	fileId: string,
 	snapshot: ts.IScriptSnapshot,
 	roots: Node[]
 ): VirtualFile[] {
@@ -68,7 +68,7 @@ function findIsolatedScripts(
 			) {
 				const scriptText = snapshot.getText(node.startTagEnd, node.endTagStart);
 				embeddedScripts.push({
-					fileName: fileName + `.${scriptIndex}.mts`,
+					id: fileId + `.${scriptIndex}.mts`,
 					languageId: 'typescript',
 					kind: FileKind.TypeScriptHostFile,
 					snapshot: {
@@ -76,22 +76,15 @@ function findIsolatedScripts(
 						getLength: () => scriptText.length,
 						getChangeRange: () => undefined,
 					},
-					codegenStacks: [],
 					mappings: [
 						{
 							sourceRange: [node.startTagEnd, node.endTagStart],
 							generatedRange: [0, scriptText.length],
-							data: FileRangeCapabilities.full,
+							data: {
+								formattingEdits: false,
+							},
 						},
 					],
-					capabilities: {
-						diagnostic: true,
-						codeAction: true,
-						inlayHint: true,
-						documentSymbol: true,
-						foldingRange: true,
-						documentFormatting: false,
-					},
 					embeddedFiles: [],
 				});
 				scriptIndex++;
@@ -198,15 +191,17 @@ function findEventAttributes(ast: ParseResult['ast']): JavaScriptContext[] {
 /**
  * Merge all the inline and non-hoisted scripts into a single `.mjs` file
  */
-function mergeJSContexts(fileName: string, javascriptContexts: JavaScriptContext[]): VirtualFile {
-	const codes: muggle.Segment<FileRangeCapabilities>[] = [];
+function mergeJSContexts(fileId: string, javascriptContexts: JavaScriptContext[]): VirtualFile {
+	const codes: muggle.Segment<CodeInformations>[] = [];
 
 	for (const javascriptContext of javascriptContexts) {
 		codes.push([
 			javascriptContext.content,
 			undefined,
 			javascriptContext.startOffset,
-			FileRangeCapabilities.full,
+			{
+				formattingEdits: false,
+			},
 		]);
 	}
 
@@ -214,21 +209,12 @@ function mergeJSContexts(fileName: string, javascriptContexts: JavaScriptContext
 	const text = muggle.toString(codes);
 
 	return {
-		fileName: fileName + '.inline.mjs',
+		id: fileId + '.inline.mjs',
 		languageId: 'javascript',
-		codegenStacks: [],
 		snapshot: {
 			getText: (start, end) => text.substring(start, end),
 			getLength: () => text.length,
 			getChangeRange: () => undefined,
-		},
-		capabilities: {
-			codeAction: true,
-			diagnostic: true,
-			documentFormatting: false,
-			documentSymbol: true,
-			foldingRange: true,
-			inlayHint: true,
 		},
 		embeddedFiles: [],
 		kind: FileKind.TypeScriptHostFile,

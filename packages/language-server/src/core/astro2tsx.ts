@@ -1,7 +1,7 @@
 import { convertToTSX } from '@astrojs/compiler/sync';
 import type { ConvertToTSXOptions, TSXResult } from '@astrojs/compiler/types';
 import { decode } from '@jridgewell/sourcemap-codec';
-import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
+import { FileKind, CodeInformations, VirtualFile } from '@volar/language-core';
 import { HTMLDocument, TextDocument } from 'vscode-html-languageservice';
 import { patchTSX } from './utils.js';
 
@@ -38,14 +38,14 @@ function safeConvertToTSX(content: string, options: ConvertToTSXOptions) {
 
 export function astro2tsx(
 	input: string,
-	fileName: string,
+	fileId: string,
 	ts: typeof import('typescript/lib/tsserverlibrary.js'),
 	htmlDocument: HTMLDocument
 ) {
-	const tsx = safeConvertToTSX(input, { filename: fileName });
+	const tsx = safeConvertToTSX(input, { filename: fileId });
 
 	return {
-		virtualFile: getVirtualFileTSX(input, tsx, fileName, ts, htmlDocument),
+		virtualFile: getVirtualFileTSX(input, tsx, fileId, ts, htmlDocument),
 		diagnostics: tsx.diagnostics,
 	};
 }
@@ -53,14 +53,14 @@ export function astro2tsx(
 function getVirtualFileTSX(
 	input: string,
 	tsx: TSXResult,
-	fileName: string,
+	fileId: string,
 	ts: typeof import('typescript/lib/tsserverlibrary.js'),
 	htmlDocument: HTMLDocument
 ): VirtualFile {
-	tsx.code = patchTSX(tsx.code, fileName);
+	tsx.code = patchTSX(tsx.code, fileId);
 	const v3Mappings = decode(tsx.map.mappings);
-	const sourcedDoc = TextDocument.create(fileName, 'astro', 0, input);
-	const genDoc = TextDocument.create(fileName + '.tsx', 'typescriptreact', 0, tsx.code);
+	const sourcedDoc = TextDocument.create(fileId, 'astro', 0, input);
+	const genDoc = TextDocument.create(fileId + '.tsx', 'typescriptreact', 0, tsx.code);
 
 	const mappings: VirtualFile['mappings'] = [];
 
@@ -102,19 +102,29 @@ function getVirtualFileTSX(
 						// Disable features inside script tags. This is a bit annoying to do, I wonder if maybe leaving script tags
 						// unmapped would be better.
 						const node = htmlDocument.findNodeAt(current.sourceOffset);
-						const rangeCapabilities: FileRangeCapabilities =
+						const rangeCapabilities: CodeInformations =
 							node.tag !== 'script'
-								? FileRangeCapabilities.full
+								? {}
 								: {
-										completion: false,
-										definition: false,
-										diagnostic: false,
-										displayWithLink: false,
-										hover: false,
-										references: false,
-										referencesCodeLens: false,
-										rename: false,
-										semanticTokens: false,
+									diagnostics: false,
+									renameEdits: false,
+									formattingEdits: false,
+									definitions: false,
+									references: false,
+									foldingRanges: false,
+									inlayHints: false,
+									codeActions: false,
+									symbols: false,
+									selectionRanges: false,
+									linkedEditingRanges: false,
+									colors: false,
+									autoInserts: false,
+									codeLenses: false,
+									highlights: false,
+									links: false,
+									semanticTokens: false,
+									hover: false,
+									signatureHelps: false,
 								  };
 
 						mappings.push({
@@ -146,18 +156,9 @@ function getVirtualFileTSX(
 	}
 
 	return {
-		fileName: fileName + '.tsx',
+		id: fileId + '.tsx',
 		languageId: 'typescriptreact',
 		kind: FileKind.TypeScriptHostFile,
-		capabilities: {
-			codeAction: true,
-			documentFormatting: false,
-			diagnostic: true,
-			documentSymbol: true,
-			inlayHint: true,
-			foldingRange: true,
-		},
-		codegenStacks: [],
 		snapshot: {
 			getText: (start, end) => tsx.code.substring(start, end),
 			getLength: () => tsx.code.length,

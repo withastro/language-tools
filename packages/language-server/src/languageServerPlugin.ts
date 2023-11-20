@@ -42,14 +42,16 @@ export function createPlugin(connection: Connection): TypeScriptServerPlugin {
 			'vue',
 			'svelte',
 		],
-		resolveConfig(config, env, projectHost) {
+		resolveConfig(config, env, projectContext) {
 			config.languages ??= {};
-			if (projectHost) {
-				const astroInstall = getAstroInstall([projectHost.getCurrentDirectory()]);
+			if (env && projectContext) {
+				const workspacePath = env.uriToFileName(env.workspaceFolder.uri.toString());
+				// const tsconfigPath = projectContext.configFileName ? env.uriToFileName(projectContext.configFileName) : undefined;
+				const astroInstall = getAstroInstall([workspacePath]);
 
 				if (!astroInstall) {
 					connection.sendNotification(ShowMessageNotification.type, {
-						message: `Couldn't find Astro in workspace "${projectHost.getCurrentDirectory()}". Experience might be degraded. For the best experience, please make sure Astro is installed into your project and restart the language server.`,
+						message: `Couldn't find Astro in workspace "${workspacePath}". Experience might be degraded. For the best experience, please make sure Astro is installed into your project and restart the language server.`,
 						type: MessageType.Warning,
 					});
 				}
@@ -68,10 +70,10 @@ export function createPlugin(connection: Connection): TypeScriptServerPlugin {
 			config.services.typescriptaddons ??= createTypescriptAddonsService();
 			config.services.astro ??= createAstroService();
 
-			if (env && projectHost) {
-				const rootDir = projectHost.getCurrentDirectory();
-				const prettier = importPrettier(rootDir);
-				const prettierPluginPath = getPrettierPluginPath(rootDir);
+			if (env && projectContext) {
+				const workspacePath = env.uriToFileName(env.workspaceFolder.uri.toString());
+				const prettier = importPrettier(workspacePath);
+				const prettierPluginPath = getPrettierPluginPath(workspacePath);
 
 				if (prettier && prettierPluginPath) {
 					config.services.prettier ??= createPrettierService({

@@ -25,12 +25,12 @@ export const create =
 		return {
 			...typeScriptPlugin,
 			transformCompletionItem(item) {
-				const [_, source] = context.documents.getVirtualFileByUri(item.data.uri);
+				const [_, source] = context.project.fileProvider.getVirtualFile(item.data.uri);
 				const file = source?.root;
 				if (!(file instanceof AstroFile) || !context.project.typescript) return undefined;
-				if (file.scriptFiles.includes(item.data.fileName)) return undefined;
+				if (file.scriptFileIds.includes(context.env.fileNameToUri(item.data.fileName))) return undefined;
 
-				const newLine = context.project.typescript.projectHost.getCompilationSettings().newLine?.toString() ?? '\n';
+				const newLine = context.project.typescript.languageServiceHost.getCompilationSettings().newLine?.toString() ?? '\n';
 				if (item.additionalTextEdits) {
 					item.additionalTextEdits = item.additionalTextEdits.map((edit) => {
 						// HACK: There's a weird situation sometimes where some components (especially Svelte) will get imported as type imports
@@ -51,24 +51,22 @@ export const create =
 			},
 			transformCodeAction(item) {
 				if (item.kind !== 'quickfix') return undefined;
-				const originalFileName = item.data.uri.replace('.tsx', '');
+				const originalUri = item.data.uri.replace('.tsx', '');
 
-				const [_, source] = context.documents.getVirtualFileByUri(originalFileName);
+				const [_, source] = context.project.fileProvider.getVirtualFile(originalUri);
 				const file = source?.root;
 				if (!(file instanceof AstroFile) || !context.project.typescript) return undefined;
 				if (
-					file.scriptFiles.includes(item.diagnostics?.[0].data.documentUri.replace('file://', ''))
+					file.scriptFileIds.includes(item.diagnostics?.[0].data.documentUri)
 				)
 					return undefined;
 
-				const document = context.getTextDocument(originalFileName);
-				if (!document) return undefined;
-
-				const newLine = context.project.typescript.projectHost.getCompilationSettings().newLine?.toString() ?? '\n';
+				const document = context.documents.get(file.id, file.languageId, file.snapshot);
+				const newLine = context.project.typescript.languageServiceHost.getCompilationSettings().newLine?.toString() ?? '\n';
 				if (!item.edit?.documentChanges) return undefined;
 				item.edit.documentChanges = item.edit.documentChanges.map((change) => {
 					if (TextDocumentEdit.is(change)) {
-						change.textDocument.uri = originalFileName;
+						change.textDocument.uri = originalUri;
 						if (change.edits.length === 1) {
 							change.edits = change.edits.map((edit) => {
 								const editInFrontmatter = editShouldBeInFrontmatter(edit.range, document);
@@ -134,7 +132,7 @@ export const create =
 				return enhancedResolveCompletionItem(resolvedCompletionItem);
 			},
 			async provideSemanticDiagnostics(document, token) {
-				const [_, source] = context.documents.getVirtualFileByUri(document.uri);
+				const [_, source] = context.project.fileProvider.getVirtualFile(document.uri);
 				const file = source?.root;
 				if (!(file instanceof AstroFile)) return null;
 
@@ -144,10 +142,10 @@ export const create =
 				const diagnostics = await typeScriptPlugin.provideSemanticDiagnostics!(document, token);
 				if (!diagnostics) return null;
 
-				const astroDocument = context.documents.getDocumentByFileName(
-					file.snapshot,
-					file.sourceFileName,
-					file.languageId
+				const astroDocument = context.documents.get(
+					file.sourceFileId,
+					file.languageId,
+					file.snapshot
 				);
 
 				return enhancedProvideSemanticDiagnostics(diagnostics, astroDocument.lineCount);

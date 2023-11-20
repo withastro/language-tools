@@ -24,7 +24,7 @@ export const create =
 			async provideCompletionItems(document, position, completionContext, token) {
 				if (document.languageId !== 'html') return;
 
-				const [_, source] = context.documents.getVirtualFileByUri(document.uri);
+				const [_, source] = context.project.fileProvider.getVirtualFile(document.uri);
 				const rootVirtualFile = source?.root;
 				if (!(rootVirtualFile instanceof AstroFile)) return;
 

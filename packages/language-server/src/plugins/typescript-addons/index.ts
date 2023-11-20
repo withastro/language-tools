@@ -23,7 +23,7 @@ export const create =
 				)
 					return null;
 
-				const [_, source] = context.documents.getVirtualFileByUri(document.uri);
+				const [_, source] = context.project.fileProvider.getVirtualFile(document.uri);
 				const file = source?.root;
 				if (!(file instanceof AstroFile)) return undefined;
 

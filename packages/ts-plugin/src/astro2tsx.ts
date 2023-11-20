@@ -1,7 +1,7 @@
 import { convertToTSX } from '@astrojs/compiler/sync';
 import type { ConvertToTSXOptions, TSXResult } from '@astrojs/compiler/types';
 import { decode } from '@jridgewell/sourcemap-codec';
-import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
+import { FileKind, VirtualFile } from '@volar/language-core';
 import path from 'node:path';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
@@ -52,21 +52,21 @@ export function astro2tsx(
 function getVirtualFileTSX(
 	input: string,
 	tsx: TSXResult,
-	fileName: string,
+	fileId: string,
 	ts: typeof import('typescript/lib/tsserverlibrary.js')
 ): VirtualFile {
-	tsx.code = patchTSX(tsx.code, fileName);
+	tsx.code = patchTSX(tsx.code, fileId);
 	const v3Mappings = decode(tsx.map.mappings);
-	const sourcedDoc = TextDocument.create(fileName, 'astro', 0, input);
-	const genDoc = TextDocument.create(fileName + '.tsx', 'typescriptreact', 0, tsx.code);
+	const sourcedDoc = TextDocument.create(fileId, 'astro', 0, input);
+	const genDoc = TextDocument.create(fileId + '.tsx', 'typescriptreact', 0, tsx.code);
 
 	const mappings: VirtualFile['mappings'] = [];
 
 	let current:
 		| {
-				genOffset: number;
-				sourceOffset: number;
-		  }
+			genOffset: number;
+			sourceOffset: number;
+		}
 		| undefined;
 
 	for (let genLine = 0; genLine < v3Mappings.length; genLine++) {
@@ -100,7 +100,7 @@ function getVirtualFileTSX(
 						mappings.push({
 							sourceRange: [current.sourceOffset, current.sourceOffset + length],
 							generatedRange: [current.genOffset, current.genOffset + length],
-							data: FileRangeCapabilities.full,
+							data: {},
 						});
 					}
 				}
@@ -125,19 +125,12 @@ function getVirtualFileTSX(
 		});
 	}
 
+	mappings.forEach(mapping => mapping.data.formattingEdits = false);
+
 	return {
-		fileName: fileName + '.tsx',
+		id: fileId + '.tsx',
 		languageId: 'typescriptreact',
 		kind: FileKind.TypeScriptHostFile,
-		capabilities: {
-			codeAction: true,
-			documentFormatting: false,
-			diagnostic: true,
-			documentSymbol: true,
-			inlayHint: true,
-			foldingRange: true,
-		},
-		codegenStacks: [],
 		snapshot: {
 			getText: (start, end) => tsx.code.substring(start, end),
 			getLength: () => tsx.code.length,

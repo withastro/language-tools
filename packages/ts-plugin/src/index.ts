@@ -14,7 +14,7 @@ const init: ts.server.PluginModuleFactory = (modules) => {
 	const { typescript: ts } = modules;
 	const pluginModule: ts.server.PluginModule = {
 		create(info) {
-			const virtualFiles = createFileProvider([getLanguageModule(ts)], () => {});
+			const virtualFiles = createFileProvider([getLanguageModule(ts)], ts.sys.useCaseSensitiveFileNames, () => {});
 
 			decorateLanguageService(virtualFiles, info.languageService, true);
 			decorateLanguageServiceHost(virtualFiles, info.languageServiceHost, ts, ['.astro']);

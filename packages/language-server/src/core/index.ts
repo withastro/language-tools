@@ -1,8 +1,6 @@
 import type { DiagnosticMessage, ParseResult } from '@astrojs/compiler/types';
 import {
-	FileCapabilities,
 	FileKind,
-	FileRangeCapabilities,
 	type Language,
 	type VirtualFile,
 } from '@volar/language-core';
@@ -21,83 +19,83 @@ export function getLanguageModule(
 	ts: typeof import('typescript/lib/tsserverlibrary.js')
 ): Language<AstroFile> {
 	return {
-		createVirtualFile(fileName, snapshot) {
-			if (fileName.endsWith('.astro')) {
-				return new AstroFile(fileName, snapshot, ts);
+		createVirtualFile(id, languageId, snapshot) {
+			if (languageId === 'astro') {
+				return new AstroFile(id, snapshot, ts);
 			}
 		},
 		updateVirtualFile(astroFile, snapshot) {
 			astroFile.update(snapshot);
 		},
-		resolveTypeScriptProjectHost(host) {
-			return {
-				...host,
-				resolveModuleName(moduleName, impliedNodeFormat) {
-					if (
-						impliedNodeFormat === ts.ModuleKind.ESNext &&
-						(moduleName.endsWith('.astro') ||
-							moduleName.endsWith('.vue') ||
-							moduleName.endsWith('.svelte'))
-					) {
-						return `${moduleName}.js`;
-					}
-					return host.resolveModuleName?.(moduleName, impliedNodeFormat) ?? moduleName;
-				},
-				getScriptFileNames() {
-					const fileNames = host.getScriptFileNames();
-					return [
-						...fileNames,
-						...(astroInstall
-							? ['./env.d.ts', './astro-jsx.d.ts'].map((filePath) =>
+		typescript: {
+			resolveModuleName(moduleName, impliedNodeFormat) {
+				if (
+					impliedNodeFormat === ts.ModuleKind.ESNext &&
+					(moduleName.endsWith('.astro') ||
+						moduleName.endsWith('.vue') ||
+						moduleName.endsWith('.svelte'))
+				) {
+					return `${moduleName}.js`;
+				}
+			},
+			resolveLanguageServiceHost(host) {
+				return {
+					...host,
+					getScriptFileNames() {
+						const fileNames = host.getScriptFileNames();
+						return [
+							...fileNames,
+							...(astroInstall
+								? ['./env.d.ts', './astro-jsx.d.ts'].map((filePath) =>
 									ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
-							  )
-							: []),
-					];
-				},
-				getCompilationSettings() {
-					const baseCompilationSettings = host.getCompilationSettings();
-					return {
-						...baseCompilationSettings,
-						module: ts.ModuleKind.ESNext ?? 99,
-						target: ts.ScriptTarget.ESNext ?? 99,
-						jsx: ts.JsxEmit.Preserve ?? 1,
-						jsxImportSource: undefined,
-						jsxFactory: 'astroHTML',
-						resolveJsonModule: true,
-						allowJs: true,
-						isolatedModules: true,
-						moduleResolution:
-							baseCompilationSettings.moduleResolution === ts.ModuleResolutionKind.Classic ||
-							!baseCompilationSettings.moduleResolution
-								? ts.ModuleResolutionKind.Node10
-								: baseCompilationSettings.moduleResolution,
-					};
-				},
-			};
+								)
+								: []),
+						];
+					},
+					getCompilationSettings() {
+						const baseCompilationSettings = host.getCompilationSettings();
+						return {
+							...baseCompilationSettings,
+							module: ts.ModuleKind.ESNext ?? 99,
+							target: ts.ScriptTarget.ESNext ?? 99,
+							jsx: ts.JsxEmit.Preserve ?? 1,
+							jsxImportSource: undefined,
+							jsxFactory: 'astroHTML',
+							resolveJsonModule: true,
+							allowJs: true,
+							isolatedModules: true,
+							moduleResolution:
+								baseCompilationSettings.moduleResolution === ts.ModuleResolutionKind.Classic ||
+									!baseCompilationSettings.moduleResolution
+									? ts.ModuleResolutionKind.Node10
+									: baseCompilationSettings.moduleResolution,
+						};
+					},
+				};
+			},
 		},
 	};
 }
 
 export class AstroFile implements VirtualFile {
 	kind = FileKind.TextFile;
-	capabilities = FileCapabilities.full;
 
-	fileName: string;
+	id: string;
 	languageId = 'astro';
 	mappings!: VirtualFile['mappings'];
 	embeddedFiles!: VirtualFile['embeddedFiles'];
 	astroMeta!: ParseResult & { frontmatter: FrontmatterStatus };
 	compilerDiagnostics!: DiagnosticMessage[];
 	htmlDocument!: HTMLDocument;
-	scriptFiles!: string[];
+	scriptFileIds!: string[];
 	codegenStacks = [];
 
 	constructor(
-		public sourceFileName: string,
+		public sourceFileId: string,
 		public snapshot: ts.IScriptSnapshot,
 		private readonly ts: typeof import('typescript/lib/tsserverlibrary.js')
 	) {
-		this.fileName = sourceFileName;
+		this.id = sourceFileId;
 		this.onSnapshotUpdated();
 	}
 
@@ -115,14 +113,14 @@ export class AstroFile implements VirtualFile {
 			{
 				sourceRange: [0, this.snapshot.getLength()],
 				generatedRange: [0, this.snapshot.getLength()],
-				data: FileRangeCapabilities.full,
+				data: {},
 			},
 		];
 
 		this.astroMeta = getAstroMetadata(this.snapshot.getText(0, this.snapshot.getLength()));
 
 		const { htmlDocument, virtualFile: htmlVirtualFile } = parseHTML(
-			this.fileName,
+			this.id,
 			this.snapshot,
 			this.astroMeta.frontmatter.status === 'closed'
 				? this.astroMeta.frontmatter.position.end.offset
@@ -131,16 +129,16 @@ export class AstroFile implements VirtualFile {
 		this.htmlDocument = htmlDocument;
 
 		const scriptTags = extractScriptTags(
-			this.fileName,
+			this.id,
 			this.snapshot,
 			htmlDocument,
 			this.astroMeta.ast
 		);
 
-		this.scriptFiles = scriptTags.map((scriptTag) => scriptTag.fileName);
+		this.scriptFileIds = scriptTags.map((scriptTag) => scriptTag.id);
 
 		htmlVirtualFile.embeddedFiles.push(
-			...extractStylesheets(this.fileName, this.snapshot, htmlDocument, this.astroMeta.ast),
+			...extractStylesheets(this.id, this.snapshot, htmlDocument, this.astroMeta.ast),
 			...scriptTags
 		);
 
@@ -149,7 +147,7 @@ export class AstroFile implements VirtualFile {
 
 		const tsx = astro2tsx(
 			this.snapshot.getText(0, this.snapshot.getLength()),
-			this.fileName,
+			this.id,
 			this.ts,
 			htmlDocument
 		);

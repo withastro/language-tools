@@ -26,7 +26,7 @@ export const create =
 				if (token.isCancellationRequested) return null;
 				let items: CompletionItem[] = [];
 
-				const [file] = context!.documents.getVirtualFileByUri(document.uri);
+				const [file] = context!.project.fileProvider.getVirtualFile(document.uri);
 				if (!(file instanceof AstroFile)) return;
 
 				if (completionContext.triggerCharacter === '-') {
@@ -42,7 +42,7 @@ export const create =
 			provideSemanticDiagnostics(document, token) {
 				if (token.isCancellationRequested) return [];
 
-				const [file] = context!.documents.getVirtualFileByUri(document.uri);
+				const [file] = context!.project.fileProvider.getVirtualFile(document.uri);
 				if (!(file instanceof AstroFile)) return;
 
 				return file.compilerDiagnostics.map(compilerMessageToDiagnostic);

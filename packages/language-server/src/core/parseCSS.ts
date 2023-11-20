@@ -1,6 +1,6 @@
 import type { ParentNode, ParseResult } from '@astrojs/compiler/types';
 import { is } from '@astrojs/compiler/utils';
-import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
+import { FileKind, CodeInformations, VirtualFile } from '@volar/language-core';
 import * as SourceMap from '@volar/source-map';
 import * as muggle from 'muggle-string';
 import type ts from 'typescript/lib/tsserverlibrary';
@@ -8,27 +8,48 @@ import type { HTMLDocument, Node } from 'vscode-html-languageservice';
 import type { AttributeNodeWithPosition } from './compilerUtils.js';
 
 export function extractStylesheets(
-	fileName: string,
+	fileId: string,
 	snapshot: ts.IScriptSnapshot,
 	htmlDocument: HTMLDocument,
 	ast: ParseResult['ast']
 ): VirtualFile[] {
 	const embeddedCSSFiles: VirtualFile[] = findEmbeddedStyles(
-		fileName,
+		fileId,
 		snapshot,
 		htmlDocument.roots
 	);
 
 	const inlineStyles = findInlineStyles(ast);
 	if (inlineStyles.length > 0) {
-		const codes: muggle.Segment<FileRangeCapabilities>[] = [];
+		const codes: muggle.Segment<CodeInformations>[] = [];
 		for (const inlineStyle of inlineStyles) {
 			codes.push('x { ');
 			codes.push([
 				inlineStyle.value,
 				undefined,
 				inlineStyle.position.start.offset + 'style="'.length,
-				FileRangeCapabilities.full,
+				// disable all but only keep document colors
+				{
+					diagnostics: false,
+					renameEdits: false,
+					formattingEdits: false,
+					definitions: false,
+					references: false,
+					foldingRanges: false,
+					inlayHints: false,
+					codeActions: false,
+					symbols: false,
+					selectionRanges: false,
+					linkedEditingRanges: false,
+					// colors: false,
+					autoInserts: false,
+					codeLenses: false,
+					highlights: false,
+					links: false,
+					semanticTokens: false,
+					hover: false,
+					signatureHelps: false,
+				},
 			]);
 			codes.push(' }\n');
 		}
@@ -37,15 +58,13 @@ export function extractStylesheets(
 		const text = muggle.toString(codes);
 
 		embeddedCSSFiles.push({
-			fileName: fileName + '.inline.css',
+			id: fileId + '.inline.css',
 			languageId: 'css',
-			codegenStacks: [],
 			snapshot: {
 				getText: (start, end) => text.substring(start, end),
 				getLength: () => text.length,
 				getChangeRange: () => undefined,
 			},
-			capabilities: { documentSymbol: true },
 			embeddedFiles: [],
 			kind: FileKind.TextFile,
 			mappings,
@@ -60,7 +79,7 @@ export function extractStylesheets(
  * Embedded styles are styles that are defined in `<style>` tags.
  */
 function findEmbeddedStyles(
-	fileName: string,
+	fileId: string,
 	snapshot: ts.IScriptSnapshot,
 	roots: Node[]
 ): VirtualFile[] {
@@ -78,7 +97,7 @@ function findEmbeddedStyles(
 			) {
 				const styleText = snapshot.getText(node.startTagEnd, node.endTagStart);
 				embeddedCSSFiles.push({
-					fileName: fileName + `.${cssIndex}.css`,
+					id: fileId + `.${cssIndex}.css`,
 					languageId: 'css',
 					kind: FileKind.TextFile,
 					snapshot: {
@@ -86,20 +105,16 @@ function findEmbeddedStyles(
 						getLength: () => styleText.length,
 						getChangeRange: () => undefined,
 					},
-					codegenStacks: [],
 					mappings: [
 						{
 							sourceRange: [node.startTagEnd, node.endTagStart],
 							generatedRange: [0, styleText.length],
-							data: FileRangeCapabilities.full,
+							data: {
+								diagnostics: false,
+								formattingEdits: false,
+							},
 						},
 					],
-					capabilities: {
-						diagnostic: false,
-						documentSymbol: true,
-						foldingRange: true,
-						documentFormatting: false,
-					},
 					embeddedFiles: [],
 				});
 				cssIndex++;
