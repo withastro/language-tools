@@ -10,9 +10,9 @@ export function getLanguageModule(
 	ts: typeof import('typescript/lib/tsserverlibrary.js')
 ): Language<AstroFile> {
 	return {
-		createVirtualFile(fileName, languageId, snapshot) {
+		createVirtualFile(id, languageId, snapshot) {
 			if (languageId === 'astro') {
-				return new AstroFile(fileName, snapshot, ts);
+				return new AstroFile(id, snapshot, ts);
 			}
 		},
 		updateVirtualFile(astroFile, snapshot) {

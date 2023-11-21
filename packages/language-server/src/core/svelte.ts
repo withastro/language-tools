@@ -1,6 +1,5 @@
-import {
-	FileKind,
-	CodeInformations,
+import type {
+	CodeInformation,
 	Language,
 	VirtualFile,
 } from '@volar/language-core';
@@ -22,11 +21,9 @@ export function getSvelteLanguageModule(): Language<SvelteFile> {
 }
 
 class SvelteFile implements VirtualFile {
-	kind = FileKind.TextFile;
-
 	id: string;
 	languageId = 'svelte';
-	mappings!: Mapping<CodeInformations>[];
+	mappings!: Mapping<CodeInformation>[];
 	embeddedFiles!: VirtualFile[];
 	codegenStacks = [];
 

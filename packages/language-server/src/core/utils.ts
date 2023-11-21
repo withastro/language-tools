@@ -1,7 +1,4 @@
-import {
-	FileKind,
-	type VirtualFile,
-} from '@volar/language-core';
+import type { VirtualFile } from '@volar/language-core';
 import * as path from 'node:path';
 import { URI, Utils } from 'vscode-uri';
 import { importSvelteIntegration, importVueIntegration } from '../importPackage';
@@ -29,7 +26,10 @@ export function framework2tsx(
 		return {
 			id: fileId + '.tsx',
 			languageId: 'typescript',
-			kind: FileKind.TypeScriptHostFile,
+			typescript: {
+				scriptKind: 4 satisfies import('typescript/lib/tsserverlibrary').ScriptKind.TSX,
+				isLanguageServiceSourceFile: true,
+			},
 			snapshot: {
 				getText: (start, end) => content.substring(start, end),
 				getLength: () => content.length,

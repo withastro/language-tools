@@ -1,9 +1,5 @@
 import type { DiagnosticMessage, ParseResult } from '@astrojs/compiler/types';
-import {
-	FileKind,
-	type Language,
-	type VirtualFile,
-} from '@volar/language-core';
+import type { Language, VirtualFile } from '@volar/language-core';
 import * as path from 'node:path';
 import type ts from 'typescript/lib/tsserverlibrary';
 import type { HTMLDocument } from 'vscode-html-languageservice';
@@ -78,8 +74,6 @@ export function getLanguageModule(
 }
 
 export class AstroFile implements VirtualFile {
-	kind = FileKind.TextFile;
-
 	id: string;
 	languageId = 'astro';
 	mappings!: VirtualFile['mappings'];

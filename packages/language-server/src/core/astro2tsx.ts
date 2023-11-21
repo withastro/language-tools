@@ -1,7 +1,7 @@
 import { convertToTSX } from '@astrojs/compiler/sync';
 import type { ConvertToTSXOptions, TSXResult } from '@astrojs/compiler/types';
 import { decode } from '@jridgewell/sourcemap-codec';
-import { FileKind, CodeInformations, VirtualFile } from '@volar/language-core';
+import type { CodeInformation, VirtualFile } from '@volar/language-core';
 import { HTMLDocument, TextDocument } from 'vscode-html-languageservice';
 import { patchTSX } from './utils.js';
 
@@ -102,7 +102,7 @@ function getVirtualFileTSX(
 						// Disable features inside script tags. This is a bit annoying to do, I wonder if maybe leaving script tags
 						// unmapped would be better.
 						const node = htmlDocument.findNodeAt(current.sourceOffset);
-						const rangeCapabilities: CodeInformations =
+						const rangeCapabilities: CodeInformation =
 							node.tag !== 'script'
 								? {}
 								: {
@@ -158,7 +158,10 @@ function getVirtualFileTSX(
 	return {
 		id: fileId + '.tsx',
 		languageId: 'typescriptreact',
-		kind: FileKind.TypeScriptHostFile,
+		typescript: {
+			scriptKind: ts.ScriptKind.TSX,
+			isLanguageServiceSourceFile: true,
+		},
 		snapshot: {
 			getText: (start, end) => tsx.code.substring(start, end),
 			getLength: () => tsx.code.length,

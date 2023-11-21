@@ -1,6 +1,5 @@
-import {
-	FileKind,
-	CodeInformations,
+import type {
+	CodeInformation,
 	Language,
 	VirtualFile,
 } from '@volar/language-core';
@@ -22,11 +21,9 @@ export function getVueLanguageModule(): Language<VueFile> {
 }
 
 class VueFile implements VirtualFile {
-	kind = FileKind.TextFile;
-
 	id: string;
 	languageId = 'vue';
-	mappings!: Mapping<CodeInformations>[];
+	mappings!: Mapping<CodeInformation>[];
 	embeddedFiles!: VirtualFile[];
 	codegenStacks = [];
 

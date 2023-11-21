@@ -24,7 +24,7 @@ export const create =
 					return null;
 
 				const [_, source] = context.project.fileProvider.getVirtualFile(document.uri);
-				const file = source?.root;
+				const file = source?.virtualFile?.[0];
 				if (!(file instanceof AstroFile)) return undefined;
 
 				if (!isInsideFrontmatter(document.offsetAt(position), file.astroMeta.frontmatter))

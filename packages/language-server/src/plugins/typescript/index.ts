@@ -26,7 +26,7 @@ export const create =
 			...typeScriptPlugin,
 			transformCompletionItem(item) {
 				const [_, source] = context.project.fileProvider.getVirtualFile(item.data.uri);
-				const file = source?.root;
+				const file = source?.virtualFile?.[0];
 				if (!(file instanceof AstroFile) || !context.project.typescript) return undefined;
 				if (file.scriptFileIds.includes(context.env.fileNameToUri(item.data.fileName))) return undefined;
 
@@ -54,7 +54,7 @@ export const create =
 				const originalUri = item.data.uri.replace('.tsx', '');
 
 				const [_, source] = context.project.fileProvider.getVirtualFile(originalUri);
-				const file = source?.root;
+				const file = source?.virtualFile?.[0];
 				if (!(file instanceof AstroFile) || !context.project.typescript) return undefined;
 				if (
 					file.scriptFileIds.includes(item.diagnostics?.[0].data.documentUri)
@@ -133,7 +133,7 @@ export const create =
 			},
 			async provideSemanticDiagnostics(document, token) {
 				const [_, source] = context.project.fileProvider.getVirtualFile(document.uri);
-				const file = source?.root;
+				const file = source?.virtualFile?.[0];
 				if (!(file instanceof AstroFile)) return null;
 
 				// If we have compiler errors, our TSX isn't valid so don't bother showing TS errors

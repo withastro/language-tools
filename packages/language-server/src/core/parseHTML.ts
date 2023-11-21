@@ -1,4 +1,4 @@
-import { FileKind, VirtualFile } from '@volar/language-core';
+import type { VirtualFile } from '@volar/language-core';
 import type ts from 'typescript/lib/tsserverlibrary';
 import * as html from 'vscode-html-languageservice';
 import { isInsideExpression } from '../plugins/utils';
@@ -88,7 +88,6 @@ function getHTMLVirtualFile(fileId: string, preprocessedHTML: string): VirtualFi
 	return {
 		id: fileId + `.html`,
 		languageId: 'html',
-		kind: FileKind.TextFile,
 		snapshot: {
 			getText: (start, end) => preprocessedHTML.substring(start, end),
 			getLength: () => preprocessedHTML.length,

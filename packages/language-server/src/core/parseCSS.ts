@@ -1,6 +1,6 @@
 import type { ParentNode, ParseResult } from '@astrojs/compiler/types';
 import { is } from '@astrojs/compiler/utils';
-import { FileKind, CodeInformations, VirtualFile } from '@volar/language-core';
+import type { CodeInformation, VirtualFile } from '@volar/language-core';
 import * as SourceMap from '@volar/source-map';
 import * as muggle from 'muggle-string';
 import type ts from 'typescript/lib/tsserverlibrary';
@@ -21,7 +21,7 @@ export function extractStylesheets(
 
 	const inlineStyles = findInlineStyles(ast);
 	if (inlineStyles.length > 0) {
-		const codes: muggle.Segment<CodeInformations>[] = [];
+		const codes: muggle.Segment<CodeInformation>[] = [];
 		for (const inlineStyle of inlineStyles) {
 			codes.push('x { ');
 			codes.push([
@@ -66,7 +66,6 @@ export function extractStylesheets(
 				getChangeRange: () => undefined,
 			},
 			embeddedFiles: [],
-			kind: FileKind.TextFile,
 			mappings,
 		});
 	}
@@ -99,7 +98,6 @@ function findEmbeddedStyles(
 				embeddedCSSFiles.push({
 					id: fileId + `.${cssIndex}.css`,
 					languageId: 'css',
-					kind: FileKind.TextFile,
 					snapshot: {
 						getText: (start, end) => styleText.substring(start, end),
 						getLength: () => styleText.length,

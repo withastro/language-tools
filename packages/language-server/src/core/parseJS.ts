@@ -1,6 +1,6 @@
 import type { ParentNode, ParseResult } from '@astrojs/compiler/types';
 import { is } from '@astrojs/compiler/utils';
-import { FileKind, CodeInformations, VirtualFile } from '@volar/language-core';
+import type { CodeInformation, VirtualFile } from '@volar/language-core';
 import * as SourceMap from '@volar/source-map';
 import * as muggle from 'muggle-string';
 import type ts from 'typescript/lib/tsserverlibrary';
@@ -70,7 +70,10 @@ function findIsolatedScripts(
 				embeddedScripts.push({
 					id: fileId + `.${scriptIndex}.mts`,
 					languageId: 'typescript',
-					kind: FileKind.TypeScriptHostFile,
+					typescript: {
+						scriptKind: 3 satisfies ts.ScriptKind.TS,
+						isLanguageServiceSourceFile: true,
+					},
 					snapshot: {
 						getText: (start, end) => scriptText.substring(start, end),
 						getLength: () => scriptText.length,
@@ -192,7 +195,7 @@ function findEventAttributes(ast: ParseResult['ast']): JavaScriptContext[] {
  * Merge all the inline and non-hoisted scripts into a single `.mjs` file
  */
 function mergeJSContexts(fileId: string, javascriptContexts: JavaScriptContext[]): VirtualFile {
-	const codes: muggle.Segment<CodeInformations>[] = [];
+	const codes: muggle.Segment<CodeInformation>[] = [];
 
 	for (const javascriptContext of javascriptContexts) {
 		codes.push([
@@ -211,13 +214,16 @@ function mergeJSContexts(fileId: string, javascriptContexts: JavaScriptContext[]
 	return {
 		id: fileId + '.inline.mjs',
 		languageId: 'javascript',
+		typescript: {
+			scriptKind: 1 satisfies ts.ScriptKind.JS,
+			isLanguageServiceSourceFile: true,
+		},
 		snapshot: {
 			getText: (start, end) => text.substring(start, end),
 			getLength: () => text.length,
 			getChangeRange: () => undefined,
 		},
 		embeddedFiles: [],
-		kind: FileKind.TypeScriptHostFile,
 		mappings,
 	};
 }

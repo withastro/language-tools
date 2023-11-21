@@ -25,7 +25,7 @@ export const create =
 				if (document.languageId !== 'html') return;
 
 				const [_, source] = context.project.fileProvider.getVirtualFile(document.uri);
-				const rootVirtualFile = source?.root;
+				const rootVirtualFile = source?.virtualFile?.[0];
 				if (!(rootVirtualFile instanceof AstroFile)) return;
 
 				// Don't return completions if the current node is a component
