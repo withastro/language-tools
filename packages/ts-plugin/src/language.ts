@@ -1,8 +1,4 @@
-import {
-	FileKind,
-	type Language,
-	type VirtualFile,
-} from '@volar/language-core';
+import type { Language, VirtualFile } from '@volar/language-core';
 import type ts from 'typescript/lib/tsserverlibrary.js';
 import { astro2tsx } from './astro2tsx.js';
 
@@ -22,8 +18,6 @@ export function getLanguageModule(
 }
 
 export class AstroFile implements VirtualFile {
-	kind = FileKind.TextFile;
-
 	id: string;
 	languageId = 'astro';
 	mappings!: VirtualFile['mappings'];

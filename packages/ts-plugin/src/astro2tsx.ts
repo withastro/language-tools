@@ -1,7 +1,7 @@
 import { convertToTSX } from '@astrojs/compiler/sync';
 import type { ConvertToTSXOptions, TSXResult } from '@astrojs/compiler/types';
 import { decode } from '@jridgewell/sourcemap-codec';
-import { FileKind, VirtualFile } from '@volar/language-core';
+import type { VirtualFile } from '@volar/language-core';
 import path from 'node:path';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
@@ -130,7 +130,10 @@ function getVirtualFileTSX(
 	return {
 		id: fileId + '.tsx',
 		languageId: 'typescriptreact',
-		kind: FileKind.TypeScriptHostFile,
+		typescript: {
+			scriptKind: ts.ScriptKind.TSX,
+			isLanguageServiceSourceFile: true,
+		},
 		snapshot: {
 			getText: (start, end) => tsx.code.substring(start, end),
 			getLength: () => tsx.code.length,
