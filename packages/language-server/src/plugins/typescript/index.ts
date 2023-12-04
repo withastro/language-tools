@@ -21,9 +21,13 @@ export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): 
 					const [_, source] = context.language.files.getVirtualFile(item.data.uri);
 					const file = source?.virtualFile?.[0];
 					if (!(file instanceof AstroFile) || !context.language.typescript) return undefined;
-					if (file.scriptFileIds.includes(context.env.fileNameToUri(item.data.fileName))) return undefined;
+					if (file.scriptFileIds.includes(context.env.fileNameToUri(item.data.fileName)))
+						return undefined;
 
-					const newLine = context.language.typescript.languageServiceHost.getCompilationSettings().newLine?.toString() ?? '\n';
+					const newLine =
+						context.language.typescript.languageServiceHost
+							.getCompilationSettings()
+							.newLine?.toString() ?? '\n';
 					if (item.additionalTextEdits) {
 						item.additionalTextEdits = item.additionalTextEdits.map((edit) => {
 							// HACK: There's a weird situation sometimes where some components (especially Svelte) will get imported as type imports
@@ -49,13 +53,13 @@ export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): 
 					const [_, source] = context.language.files.getVirtualFile(originalUri);
 					const file = source?.virtualFile?.[0];
 					if (!(file instanceof AstroFile) || !context.language.typescript) return undefined;
-					if (
-						file.scriptFileIds.includes(item.diagnostics?.[0].data.documentUri)
-					)
-						return undefined;
+					if (file.scriptFileIds.includes(item.diagnostics?.[0].data.documentUri)) return undefined;
 
 					const document = context.documents.get(file.id, file.languageId, file.snapshot);
-					const newLine = context.language.typescript.languageServiceHost.getCompilationSettings().newLine?.toString() ?? '\n';
+					const newLine =
+						context.language.typescript.languageServiceHost
+							.getCompilationSettings()
+							.newLine?.toString() ?? '\n';
 					if (!item.edit?.documentChanges) return undefined;
 					item.edit.documentChanges = item.edit.documentChanges.map((change) => {
 						if (TextDocumentEdit.is(change)) {

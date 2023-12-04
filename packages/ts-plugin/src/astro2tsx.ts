@@ -64,9 +64,9 @@ function getVirtualFileTSX(
 
 	let current:
 		| {
-			genOffset: number;
-			sourceOffset: number;
-		}
+				genOffset: number;
+				sourceOffset: number;
+		  }
 		| undefined;
 
 	for (let genLine = 0; genLine < v3Mappings.length; genLine++) {

@@ -66,9 +66,9 @@ function getVirtualFileTSX(
 
 	let current:
 		| {
-			genOffset: number;
-			sourceOffset: number;
-		}
+				genOffset: number;
+				sourceOffset: number;
+		  }
 		| undefined;
 
 	for (let genLine = 0; genLine < v3Mappings.length; genLine++) {
@@ -104,21 +104,21 @@ function getVirtualFileTSX(
 						const rangeCapabilities: CodeInformation =
 							node.tag !== 'script'
 								? {
-									verification: true,
-									completion: true,
-									semantic: true,
-									navigation: true,
-									structure: true,
-									format: true,
-								}
+										verification: true,
+										completion: true,
+										semantic: true,
+										navigation: true,
+										structure: true,
+										format: true,
+								  }
 								: {
-									verification: false,
-									completion: false,
-									semantic: false,
-									navigation: false,
-									structure: false,
-									format: false,
-								};
+										verification: false,
+										completion: false,
+										semantic: false,
+										navigation: false,
+										structure: false,
+										format: false,
+								  };
 
 						mappings.push({
 							sourceOffsets: [current.sourceOffset],

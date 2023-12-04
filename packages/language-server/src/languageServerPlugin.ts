@@ -1,8 +1,8 @@
 import {
-	TypeScriptServerPlugin,
+	Connection,
 	MessageType,
 	ShowMessageNotification,
-	Connection,
+	TypeScriptServerPlugin,
 } from '@volar/language-server/node';
 import { getLanguageModule } from './core';
 import { getSvelteLanguageModule } from './core/svelte.js';
@@ -92,8 +92,9 @@ export function createPlugin(connection: Connection): TypeScriptServerPlugin {
 								}
 
 								const hasPluginLoadedAlready =
-									(await prettier.getSupportInfo()).languages.some((l: any) => l.name === 'astro') ||
-									resolvedConfig.plugins?.includes('prettier-plugin-astro'); // getSupportInfo doesn't seems to work very well in Prettier 3 for plugins
+									(await prettier.getSupportInfo()).languages.some(
+										(l: any) => l.name === 'astro'
+									) || resolvedConfig.plugins?.includes('prettier-plugin-astro'); // getSupportInfo doesn't seems to work very well in Prettier 3 for plugins
 
 								return hasPluginLoadedAlready ? [] : [prettierPluginPath];
 							}

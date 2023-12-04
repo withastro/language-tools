@@ -57,11 +57,7 @@ export class AstroFile implements VirtualFile {
 
 		this.embeddedFiles = [];
 
-		const tsx = astro2tsx(
-			this.snapshot.getText(0, this.snapshot.getLength()),
-			this.id,
-			this.ts
-		);
+		const tsx = astro2tsx(this.snapshot.getText(0, this.snapshot.getLength()), this.id, this.ts);
 
 		this.embeddedFiles.push(tsx.virtualFile);
 	}

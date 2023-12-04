@@ -30,7 +30,7 @@ export interface CheckResult {
 
 export class AstroCheck {
 	private ts!: typeof import('typescript/lib/tsserverlibrary.js');
-	public linter!: ReturnType<typeof kit['createTypeScriptChecker']>;
+	public linter!: ReturnType<(typeof kit)['createTypeScriptChecker']>;
 
 	constructor(
 		private readonly workspacePath: string,
@@ -54,10 +54,10 @@ export class AstroCheck {
 		fileNames?: string[] | undefined;
 		cancel?: () => boolean;
 		logErrors?:
-		| {
-			level: 'error' | 'warning' | 'hint';
-		}
-		| undefined;
+			| {
+					level: 'error' | 'warning' | 'hint';
+			  }
+			| undefined;
 	}): Promise<CheckResult> {
 		const files =
 			fileNames !== undefined ? fileNames : this.linter.projectHost.getScriptFileNames();
@@ -134,10 +134,7 @@ export class AstroCheck {
 			getSvelteLanguageModule(),
 			getVueLanguageModule(),
 		];
-		const services = [
-			createTypeScriptService(this.ts),
-			createAstroService(this.ts),
-		];
+		const services = [createTypeScriptService(this.ts), createAstroService(this.ts)];
 
 		if (tsconfigPath) {
 			this.linter = kit.createTypeScriptChecker(languages, services, tsconfigPath, [

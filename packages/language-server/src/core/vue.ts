@@ -1,9 +1,4 @@
-import type {
-	CodeInformation,
-	LanguagePlugin,
-	Mapping,
-	VirtualFile
-} from '@volar/language-core';
+import type { CodeInformation, LanguagePlugin, Mapping, VirtualFile } from '@volar/language-core';
 import type ts from 'typescript/lib/tsserverlibrary';
 import { framework2tsx } from './utils.js';
 
@@ -59,12 +54,7 @@ class VueFile implements VirtualFile {
 
 		this.embeddedFiles = [];
 		this.embeddedFiles.push(
-			framework2tsx(
-				this.id,
-				this.id,
-				this.snapshot.getText(0, this.snapshot.getLength()),
-				'vue'
-			)
+			framework2tsx(this.id, this.id, this.snapshot.getText(0, this.snapshot.getLength()), 'vue')
 		);
 	}
 }

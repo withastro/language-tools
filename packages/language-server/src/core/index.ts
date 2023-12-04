@@ -1,5 +1,5 @@
 import type { DiagnosticMessage, ParseResult } from '@astrojs/compiler/types';
-import type { Language, LanguagePlugin, VirtualFile } from '@volar/language-core';
+import type { LanguagePlugin, VirtualFile } from '@volar/language-core';
 import * as path from 'node:path';
 import type ts from 'typescript/lib/tsserverlibrary';
 import type { HTMLDocument } from 'vscode-html-languageservice';
@@ -49,8 +49,8 @@ export function getLanguageModule(
 							...fileNames,
 							...(astroInstall
 								? ['./env.d.ts', './astro-jsx.d.ts'].map((filePath) =>
-									ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
-								)
+										ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
+								  )
 								: []),
 						];
 					},
@@ -68,7 +68,7 @@ export function getLanguageModule(
 							isolatedModules: true,
 							moduleResolution:
 								baseCompilationSettings.moduleResolution === ts.ModuleResolutionKind.Classic ||
-									!baseCompilationSettings.moduleResolution
+								!baseCompilationSettings.moduleResolution
 									? ts.ModuleResolutionKind.Node10
 									: baseCompilationSettings.moduleResolution,
 						};
@@ -136,12 +136,7 @@ export class AstroFile implements VirtualFile {
 		);
 		this.htmlDocument = htmlDocument;
 
-		const scriptTags = extractScriptTags(
-			this.id,
-			this.snapshot,
-			htmlDocument,
-			this.astroMeta.ast
-		);
+		const scriptTags = extractScriptTags(this.id, this.snapshot, htmlDocument, this.astroMeta.ast);
 
 		this.scriptFileIds = scriptTags.map((scriptTag) => scriptTag.id);
 
