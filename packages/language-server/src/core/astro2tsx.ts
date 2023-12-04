@@ -140,23 +140,6 @@ function getVirtualFileTSX(
 		}
 	}
 
-	const ast = ts.createSourceFile('/a.tsx', tsx.code, ts.ScriptTarget.ESNext);
-	if (ast.statements[0]) {
-		mappings.push({
-			sourceOffsets: [0],
-			generatedOffsets: [ast.statements[0].getStart(ast)],
-			lengths: [0],
-			data: {
-				verification: true,
-				completion: true,
-				semantic: true,
-				navigation: true,
-				structure: true,
-				format: true,
-			},
-		});
-	}
-
 	return {
 		id: fileId + '.tsx',
 		languageId: 'typescriptreact',
