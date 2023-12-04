@@ -145,7 +145,7 @@ function getVirtualFileTSX(
 		mappings.push({
 			sourceOffsets: [0],
 			generatedOffsets: [ast.statements[0].getStart(ast)],
-			lengths: [input.length],
+			lengths: [0],
 			data: {
 				verification: true,
 				completion: true,
