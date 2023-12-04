@@ -54,10 +54,10 @@ export class AstroCheck {
 		fileNames?: string[] | undefined;
 		cancel?: () => boolean;
 		logErrors?:
-			| {
-					level: 'error' | 'warning' | 'hint';
-			  }
-			| undefined;
+		| {
+			level: 'error' | 'warning' | 'hint';
+		}
+		| undefined;
 	}): Promise<CheckResult> {
 		const files =
 			fileNames !== undefined ? fileNames : this.linter.projectHost.getScriptFileNames();
@@ -135,8 +135,8 @@ export class AstroCheck {
 			getVueLanguageModule(),
 		];
 		const services = [
-			createTypeScriptService(),
-			createAstroService(),
+			createTypeScriptService(this.ts),
+			createAstroService(this.ts),
 		];
 
 		if (tsconfigPath) {

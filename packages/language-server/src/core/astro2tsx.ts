@@ -66,9 +66,9 @@ function getVirtualFileTSX(
 
 	let current:
 		| {
-				genOffset: number;
-				sourceOffset: number;
-		  }
+			genOffset: number;
+			sourceOffset: number;
+		}
 		| undefined;
 
 	for (let genLine = 0; genLine < v3Mappings.length; genLine++) {
@@ -93,43 +93,37 @@ function getVirtualFileTSX(
 					const lastMapping = mappings.length ? mappings[mappings.length - 1] : undefined;
 					if (
 						lastMapping &&
-						lastMapping.generatedRange[1] === current.genOffset &&
-						lastMapping.sourceRange[1] === current.sourceOffset
+						lastMapping.generatedOffsets[0] + lastMapping.lengths[0] === current.genOffset &&
+						lastMapping.sourceOffsets[0] + lastMapping.lengths[0] === current.sourceOffset
 					) {
-						lastMapping.generatedRange[1] = current.genOffset + length;
-						lastMapping.sourceRange[1] = current.sourceOffset + length;
+						lastMapping.lengths[0] += length;
 					} else {
 						// Disable features inside script tags. This is a bit annoying to do, I wonder if maybe leaving script tags
 						// unmapped would be better.
 						const node = htmlDocument.findNodeAt(current.sourceOffset);
 						const rangeCapabilities: CodeInformation =
 							node.tag !== 'script'
-								? {}
+								? {
+									verification: true,
+									completion: true,
+									semantic: true,
+									navigation: true,
+									structure: true,
+									format: true,
+								}
 								: {
-									diagnostics: false,
-									renameEdits: false,
-									formattingEdits: false,
-									definitions: false,
-									references: false,
-									foldingRanges: false,
-									inlayHints: false,
-									codeActions: false,
-									symbols: false,
-									selectionRanges: false,
-									linkedEditingRanges: false,
-									colors: false,
-									autoInserts: false,
-									codeLenses: false,
-									highlights: false,
-									links: false,
-									semanticTokens: false,
-									hover: false,
-									signatureHelps: false,
-								  };
+									verification: false,
+									completion: false,
+									semantic: false,
+									navigation: false,
+									structure: false,
+									format: false,
+								};
 
 						mappings.push({
-							sourceRange: [current.sourceOffset, current.sourceOffset + length],
-							generatedRange: [current.genOffset, current.genOffset + length],
+							sourceOffsets: [current.sourceOffset],
+							generatedOffsets: [current.genOffset],
+							lengths: [length],
 							data: rangeCapabilities,
 						});
 					}
@@ -149,9 +143,17 @@ function getVirtualFileTSX(
 	const ast = ts.createSourceFile('/a.tsx', tsx.code, ts.ScriptTarget.ESNext);
 	if (ast.statements[0]) {
 		mappings.push({
-			sourceRange: [0, input.length],
-			generatedRange: [ast.statements[0].getStart(ast), tsx.code.length],
-			data: {},
+			sourceOffsets: [0],
+			generatedOffsets: [ast.statements[0].getStart(ast)],
+			lengths: [input.length],
+			data: {
+				verification: true,
+				completion: true,
+				semantic: true,
+				navigation: true,
+				structure: true,
+				format: true,
+			},
 		});
 	}
 
@@ -160,7 +162,6 @@ function getVirtualFileTSX(
 		languageId: 'typescriptreact',
 		typescript: {
 			scriptKind: ts.ScriptKind.TSX,
-			isLanguageServiceSourceFile: true,
 		},
 		snapshot: {
 			getText: (start, end) => tsx.code.substring(start, end),

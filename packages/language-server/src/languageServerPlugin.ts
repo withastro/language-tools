@@ -65,10 +65,10 @@ export function createPlugin(connection: Connection): TypeScriptServerPlugin {
 			config.services.html ??= createHtmlService();
 			config.services.css ??= createCssService();
 			config.services.emmet ??= createEmmetService();
-			config.services.typescript ??= createTypeScriptService();
+			config.services.typescript ??= createTypeScriptService(modules.typescript!);
 			config.services.typescripttwoslash ??= createTypeScriptTwoSlashService();
 			config.services.typescriptaddons ??= createTypescriptAddonsService();
-			config.services.astro ??= createAstroService();
+			config.services.astro ??= createAstroService(modules.typescript!);
 
 			if (env && projectContext) {
 				const workspacePath = env.uriToFileName(env.workspaceFolder.uri.toString());

@@ -28,7 +28,6 @@ export function framework2tsx(
 			languageId: 'typescript',
 			typescript: {
 				scriptKind: 4 satisfies import('typescript/lib/tsserverlibrary').ScriptKind.TSX,
-				isLanguageServiceSourceFile: true,
 			},
 			snapshot: {
 				getText: (start, end) => content.substring(start, end),
@@ -37,9 +36,17 @@ export function framework2tsx(
 			},
 			mappings: [
 				{
-					sourceRange: [0, content.length],
-					generatedRange: [0, 0],
-					data: {},
+					sourceOffsets: [0],
+					generatedOffsets: [0],
+					lengths: [content.length],
+					data: {
+						verification: true,
+						completion: true,
+						semantic: true,
+						navigation: true,
+						structure: true,
+						format: true,
+					},
 				},
 			],
 			embeddedFiles: [],

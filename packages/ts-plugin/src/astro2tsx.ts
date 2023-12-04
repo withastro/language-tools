@@ -91,16 +91,23 @@ function getVirtualFileTSX(
 					const lastMapping = mappings.length ? mappings[mappings.length - 1] : undefined;
 					if (
 						lastMapping &&
-						lastMapping.generatedRange[1] === current.genOffset &&
-						lastMapping.sourceRange[1] === current.sourceOffset
+						lastMapping.generatedOffsets[0] + lastMapping.lengths[0] === current.genOffset &&
+						lastMapping.sourceOffsets[0] + lastMapping.lengths[0] === current.sourceOffset
 					) {
-						lastMapping.generatedRange[1] = current.genOffset + length;
-						lastMapping.sourceRange[1] = current.sourceOffset + length;
+						lastMapping.lengths[0] += length;
 					} else {
 						mappings.push({
-							sourceRange: [current.sourceOffset, current.sourceOffset + length],
-							generatedRange: [current.genOffset, current.genOffset + length],
-							data: {},
+							sourceOffsets: [current.sourceOffset],
+							generatedOffsets: [current.genOffset],
+							lengths: [length],
+							data: {
+								verification: true,
+								completion: true,
+								semantic: true,
+								navigation: true,
+								structure: true,
+								format: false,
+							},
 						});
 					}
 				}
@@ -119,20 +126,25 @@ function getVirtualFileTSX(
 	const ast = ts.createSourceFile('/a.tsx', tsx.code, ts.ScriptTarget.ESNext);
 	if (ast.statements[0]) {
 		mappings.push({
-			sourceRange: [0, input.length],
-			generatedRange: [ast.statements[0].getStart(ast), tsx.code.length],
-			data: {},
+			sourceOffsets: [0],
+			generatedOffsets: [ast.statements[0].getStart(ast)],
+			lengths: [input.length],
+			data: {
+				verification: true,
+				completion: true,
+				semantic: true,
+				navigation: true,
+				structure: true,
+				format: false,
+			},
 		});
 	}
-
-	mappings.forEach(mapping => mapping.data.formattingEdits = false);
 
 	return {
 		id: fileId + '.tsx',
 		languageId: 'typescriptreact',
 		typescript: {
 			scriptKind: ts.ScriptKind.TSX,
-			isLanguageServiceSourceFile: true,
 		},
 		snapshot: {
 			getText: (start, end) => tsx.code.substring(start, end),

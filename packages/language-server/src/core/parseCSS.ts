@@ -1,8 +1,6 @@
 import type { ParentNode, ParseResult } from '@astrojs/compiler/types';
 import { is } from '@astrojs/compiler/utils';
-import type { CodeInformation, VirtualFile } from '@volar/language-core';
-import * as SourceMap from '@volar/source-map';
-import * as muggle from 'muggle-string';
+import { buildMappings, toString, type CodeInformation, type VirtualFile, Segment } from '@volar/language-core';
 import type ts from 'typescript/lib/tsserverlibrary';
 import type { HTMLDocument, Node } from 'vscode-html-languageservice';
 import type { AttributeNodeWithPosition } from './compilerUtils.js';
@@ -21,7 +19,7 @@ export function extractStylesheets(
 
 	const inlineStyles = findInlineStyles(ast);
 	if (inlineStyles.length > 0) {
-		const codes: muggle.Segment<CodeInformation>[] = [];
+		const codes: Segment<CodeInformation>[] = [];
 		for (const inlineStyle of inlineStyles) {
 			codes.push('x { ');
 			codes.push([
@@ -30,32 +28,19 @@ export function extractStylesheets(
 				inlineStyle.position.start.offset + 'style="'.length,
 				// disable all but only keep document colors
 				{
-					diagnostics: false,
-					renameEdits: false,
-					formattingEdits: false,
-					definitions: false,
-					references: false,
-					foldingRanges: false,
-					inlayHints: false,
-					codeActions: false,
-					symbols: false,
-					selectionRanges: false,
-					linkedEditingRanges: false,
-					// colors: false,
-					autoInserts: false,
-					codeLenses: false,
-					highlights: false,
-					links: false,
-					semanticTokens: false,
-					hover: false,
-					signatureHelps: false,
+					verification: false,
+					completion: false,
+					semantic: false,
+					navigation: false,
+					structure: true, // keep document colors
+					format: false,
 				},
 			]);
 			codes.push(' }\n');
 		}
 
-		const mappings = SourceMap.buildMappings(codes);
-		const text = muggle.toString(codes);
+		const mappings = buildMappings(codes);
+		const text = toString(codes);
 
 		embeddedCSSFiles.push({
 			id: fileId + '.inline.css',
@@ -105,11 +90,16 @@ function findEmbeddedStyles(
 					},
 					mappings: [
 						{
-							sourceRange: [node.startTagEnd, node.endTagStart],
-							generatedRange: [0, styleText.length],
+							sourceOffsets: [node.startTagEnd],
+							generatedOffsets: [0],
+							lengths: [styleText.length],
 							data: {
-								diagnostics: false,
-								formattingEdits: false,
+								verification: false,
+								completion: true,
+								semantic: true,
+								navigation: true,
+								structure: true,
+								format: false,
 							},
 						},
 					],

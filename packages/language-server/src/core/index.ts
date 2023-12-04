@@ -1,5 +1,5 @@
 import type { DiagnosticMessage, ParseResult } from '@astrojs/compiler/types';
-import type { Language, VirtualFile } from '@volar/language-core';
+import type { Language, LanguagePlugin, VirtualFile } from '@volar/language-core';
 import * as path from 'node:path';
 import type ts from 'typescript/lib/tsserverlibrary';
 import type { HTMLDocument } from 'vscode-html-languageservice';
@@ -13,7 +13,7 @@ import { extractScriptTags } from './parseJS.js';
 export function getLanguageModule(
 	astroInstall: AstroInstall | undefined,
 	ts: typeof import('typescript/lib/tsserverlibrary.js')
-): Language<AstroFile> {
+): LanguagePlugin<AstroFile> {
 	return {
 		createVirtualFile(id, languageId, snapshot) {
 			if (languageId === 'astro') {
@@ -24,6 +24,12 @@ export function getLanguageModule(
 			astroFile.update(snapshot);
 		},
 		typescript: {
+			resolveSourceFileName(tsFileName) {
+				const baseName = path.basename(tsFileName);
+				if (baseName.indexOf('.astro.')) {
+					return tsFileName.substring(0, tsFileName.lastIndexOf('.astro.') + '.astro'.length);
+				}
+			},
 			resolveModuleName(moduleName, impliedNodeFormat) {
 				if (
 					impliedNodeFormat === ts.ModuleKind.ESNext &&
@@ -105,9 +111,17 @@ export class AstroFile implements VirtualFile {
 	onSnapshotUpdated() {
 		this.mappings = [
 			{
-				sourceRange: [0, this.snapshot.getLength()],
-				generatedRange: [0, this.snapshot.getLength()],
-				data: {},
+				sourceOffsets: [0],
+				generatedOffsets: [0],
+				lengths: [this.snapshot.getLength()],
+				data: {
+					verification: true,
+					completion: true,
+					semantic: true,
+					navigation: true,
+					structure: true,
+					format: true,
+				},
 			},
 		];
 

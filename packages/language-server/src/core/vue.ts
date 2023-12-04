@@ -1,13 +1,13 @@
 import type {
 	CodeInformation,
-	Language,
-	VirtualFile,
+	LanguagePlugin,
+	Mapping,
+	VirtualFile
 } from '@volar/language-core';
-import type { Mapping } from '@volar/source-map';
 import type ts from 'typescript/lib/tsserverlibrary';
 import { framework2tsx } from './utils.js';
 
-export function getVueLanguageModule(): Language<VueFile> {
+export function getVueLanguageModule(): LanguagePlugin<VueFile> {
 	return {
 		createVirtualFile(id, languageId, snapshot) {
 			if (languageId === 'vue') {
@@ -43,9 +43,17 @@ class VueFile implements VirtualFile {
 	private onSnapshotUpdated() {
 		this.mappings = [
 			{
-				sourceRange: [0, this.snapshot.getLength()],
-				generatedRange: [0, this.snapshot.getLength()],
-				data: {},
+				sourceOffsets: [0],
+				generatedOffsets: [0],
+				lengths: [this.snapshot.getLength()],
+				data: {
+					verification: true,
+					completion: true,
+					semantic: true,
+					navigation: true,
+					structure: true,
+					format: true,
+				},
 			},
 		];
 

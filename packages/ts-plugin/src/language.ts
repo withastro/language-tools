@@ -1,10 +1,10 @@
-import type { Language, VirtualFile } from '@volar/language-core';
+import type { LanguagePlugin, VirtualFile } from '@volar/language-core';
 import type ts from 'typescript/lib/tsserverlibrary.js';
 import { astro2tsx } from './astro2tsx.js';
 
 export function getLanguageModule(
 	ts: typeof import('typescript/lib/tsserverlibrary.js')
-): Language<AstroFile> {
+): LanguagePlugin<AstroFile> {
 	return {
 		createVirtualFile(id, languageId, snapshot) {
 			if (languageId === 'astro') {
@@ -41,9 +41,17 @@ export class AstroFile implements VirtualFile {
 	onSnapshotUpdated() {
 		this.mappings = [
 			{
-				sourceRange: [0, this.snapshot.getLength()],
-				generatedRange: [0, this.snapshot.getLength()],
-				data: {},
+				sourceOffsets: [0],
+				generatedOffsets: [0],
+				lengths: [this.snapshot.getLength()],
+				data: {
+					verification: true,
+					completion: true,
+					semantic: true,
+					navigation: true,
+					structure: true,
+					format: false,
+				},
 			},
 		];
 

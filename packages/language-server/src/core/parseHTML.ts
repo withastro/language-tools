@@ -95,10 +95,16 @@ function getHTMLVirtualFile(fileId: string, preprocessedHTML: string): VirtualFi
 		},
 		mappings: [
 			{
-				sourceRange: [0, preprocessedHTML.length],
-				generatedRange: [0, preprocessedHTML.length],
+				sourceOffsets: [0],
+				generatedOffsets: [0],
+				lengths: [preprocessedHTML.length],
 				data: {
-					formattingEdits: false,
+					verification: true,
+					completion: true,
+					semantic: true,
+					navigation: true,
+					structure: true,
+					format: false,
 				},
 			},
 		],
