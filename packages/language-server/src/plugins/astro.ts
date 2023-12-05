@@ -7,7 +7,7 @@ import {
 	InsertTextFormat,
 	Position,
 	Range,
-	Service,
+	ServicePluginInstance,
 	ServicePlugin,
 	TextEdit,
 } from '@volar/language-server';
@@ -21,7 +21,7 @@ import { isJSDocument } from './utils.js';
 export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): ServicePlugin => {
 	return {
 		triggerCharacters: ['-'],
-		create(context): Service {
+		create(context): ServicePluginInstance {
 			return {
 				provideCompletionItems(document, position, completionContext, token) {
 					if (token.isCancellationRequested) return null;

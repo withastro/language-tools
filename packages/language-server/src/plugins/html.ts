@@ -1,4 +1,4 @@
-import { CompletionItemKind, Service, ServicePlugin } from '@volar/language-server';
+import { CompletionItemKind, ServicePluginInstance, ServicePlugin } from '@volar/language-server';
 import { create as createHtmlService } from 'volar-service-html';
 import { AstroFile } from '../core/index.js';
 import { astroAttributes, astroElements, classListAttribute } from './html-data.js';
@@ -8,7 +8,7 @@ export const create = (): ServicePlugin => {
 	const htmlServicePlugin = createHtmlService();
 	return {
 		...htmlServicePlugin,
-		create(context): Service {
+		create(context): ServicePluginInstance {
 			const htmlPlugin = htmlServicePlugin.create(context);
 
 			htmlPlugin.provide['html/updateCustomData']?.([

@@ -1,4 +1,4 @@
-import { Service, ServicePlugin, TextDocumentEdit } from '@volar/language-server';
+import { ServicePluginInstance, ServicePlugin, TextDocumentEdit } from '@volar/language-server';
 import { create as createTypeScriptService } from 'volar-service-typescript';
 import { AstroFile } from '../../core/index.js';
 import {
@@ -13,7 +13,7 @@ export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): 
 	const tsServicePlugin = createTypeScriptService(ts);
 	return {
 		...tsServicePlugin,
-		create(context): Service {
+		create(context): ServicePluginInstance {
 			const tsService = tsServicePlugin.create(context);
 			return {
 				...tsService,

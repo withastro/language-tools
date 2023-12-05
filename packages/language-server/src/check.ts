@@ -60,7 +60,7 @@ export class AstroCheck {
 			| undefined;
 	}): Promise<CheckResult> {
 		const files =
-			fileNames !== undefined ? fileNames : this.linter.projectHost.getScriptFileNames();
+			fileNames !== undefined ? fileNames : this.linter.languageHost.getScriptFileNames();
 
 		const result: CheckResult = {
 			status: undefined,
@@ -97,7 +97,7 @@ export class AstroCheck {
 					console.info(errorText);
 				}
 
-				const fileSnapshot = this.linter.projectHost.getScriptSnapshot(file);
+				const fileSnapshot = this.linter.languageHost.getScriptSnapshot(file);
 				const fileContent = fileSnapshot?.getText(0, fileSnapshot.getLength());
 
 				result.fileResult.push({

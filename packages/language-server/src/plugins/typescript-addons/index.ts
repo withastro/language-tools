@@ -1,11 +1,11 @@
-import type { CompletionList, Service, ServicePlugin } from '@volar/language-server';
+import type { CompletionList, ServicePluginInstance, ServicePlugin } from '@volar/language-server';
 import { AstroFile } from '../../core/index.js';
 import { isInsideFrontmatter, isJSDocument } from '../utils.js';
 import { getSnippetCompletions } from './snippets.js';
 
 export const create = (): ServicePlugin => {
 	return {
-		create(context): Service {
+		create(context): ServicePluginInstance {
 			return {
 				isAdditionalCompletion: true,
 				// Q: Why the empty transform and resolve functions?
