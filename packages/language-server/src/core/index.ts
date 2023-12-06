@@ -118,7 +118,10 @@ export class AstroFile implements VirtualFile {
 			},
 		];
 
-		this.astroMeta = getAstroMetadata(this.snapshot.getText(0, this.snapshot.getLength()));
+		this.astroMeta = getAstroMetadata(
+			this.fileName,
+			this.snapshot.getText(0, this.snapshot.getLength())
+		);
 
 		const { htmlDocument, virtualFile: htmlVirtualFile } = parseHTML(
 			this.fileName,
