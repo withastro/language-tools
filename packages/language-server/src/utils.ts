@@ -77,6 +77,10 @@ export function getAstroInstall(
 		}
 	}
 
+	if (!version) {
+		return 'not-found';
+	}
+
 	let [major, minor, patch] = version.split('.');
 
 	if (patch.includes('-')) {
