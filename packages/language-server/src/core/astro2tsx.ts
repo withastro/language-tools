@@ -38,14 +38,14 @@ function safeConvertToTSX(content: string, options: ConvertToTSXOptions) {
 
 export function astro2tsx(
 	input: string,
-	filename: string,
+	fileName: string,
 	ts: typeof import('typescript/lib/tsserverlibrary.js'),
 	htmlDocument: HTMLDocument
 ) {
-	const tsx = safeConvertToTSX(input, { filename });
+	const tsx = safeConvertToTSX(input, { filename: fileName });
 
 	return {
-		virtualFile: getVirtualFileTSX(input, tsx, filename, ts, htmlDocument),
+		virtualFile: getVirtualFileTSX(input, tsx, fileName, ts, htmlDocument),
 		diagnostics: tsx.diagnostics,
 	};
 }

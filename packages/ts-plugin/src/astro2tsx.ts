@@ -52,13 +52,13 @@ export function astro2tsx(
 function getVirtualFileTSX(
 	input: string,
 	tsx: TSXResult,
-	fileId: string,
+	fileName: string,
 	ts: typeof import('typescript/lib/tsserverlibrary.js')
 ): VirtualFile {
-	tsx.code = patchTSX(tsx.code, fileId);
+	tsx.code = patchTSX(tsx.code, fileName);
 	const v3Mappings = decode(tsx.map.mappings);
-	const sourcedDoc = TextDocument.create(fileId, 'astro', 0, input);
-	const genDoc = TextDocument.create(fileId + '.tsx', 'typescriptreact', 0, tsx.code);
+	const sourcedDoc = TextDocument.create(fileName, 'astro', 0, input);
+	const genDoc = TextDocument.create(fileName + '.tsx', 'typescriptreact', 0, tsx.code);
 
 	const mappings: VirtualFile['mappings'] = [];
 
@@ -124,7 +124,7 @@ function getVirtualFileTSX(
 	}
 
 	return {
-		id: fileId + '.tsx',
+		fileName: fileName + '.tsx',
 		languageId: 'typescriptreact',
 		typescript: {
 			scriptKind: ts.ScriptKind.TSX,

@@ -4,9 +4,9 @@ import { framework2tsx } from './utils.js';
 
 export function getVueLanguageModule(): LanguagePlugin<VueFile> {
 	return {
-		createVirtualFile(id, languageId, snapshot) {
+		createVirtualFile(fileName, languageId, snapshot) {
 			if (languageId === 'vue') {
-				return new VueFile(id, snapshot);
+				return new VueFile(fileName, snapshot);
 			}
 		},
 		updateVirtualFile(vueFile, snapshot) {

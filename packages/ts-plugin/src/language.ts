@@ -6,9 +6,9 @@ export function getLanguageModule(
 	ts: typeof import('typescript/lib/tsserverlibrary.js')
 ): LanguagePlugin<AstroFile> {
 	return {
-		createVirtualFile(id, languageId, snapshot) {
+		createVirtualFile(fileName, languageId, snapshot) {
 			if (languageId === 'astro') {
-				return new AstroFile(id, snapshot, ts);
+				return new AstroFile(fileName, snapshot, ts);
 			}
 		},
 		updateVirtualFile(astroFile, snapshot) {
@@ -18,18 +18,18 @@ export function getLanguageModule(
 }
 
 export class AstroFile implements VirtualFile {
-	id: string;
+	fileName: string;
 	languageId = 'astro';
 	mappings!: VirtualFile['mappings'];
 	embeddedFiles!: VirtualFile['embeddedFiles'];
 	codegenStacks = [];
 
 	constructor(
-		public sourceFileId: string,
+		public sourceFileName: string,
 		public snapshot: ts.IScriptSnapshot,
 		private readonly ts: typeof import('typescript/lib/tsserverlibrary.js')
 	) {
-		this.id = sourceFileId;
+		this.fileName = sourceFileName;
 		this.onSnapshotUpdated();
 	}
 
@@ -57,7 +57,7 @@ export class AstroFile implements VirtualFile {
 
 		this.embeddedFiles = [];
 
-		const tsx = astro2tsx(this.snapshot.getText(0, this.snapshot.getLength()), this.id, this.ts);
+		const tsx = astro2tsx(this.snapshot.getText(0, this.snapshot.getLength()), this.fileName, this.ts);
 
 		this.embeddedFiles.push(tsx.virtualFile);
 	}
