@@ -87,7 +87,7 @@ export class AstroFile implements VirtualFile {
 	astroMeta!: ParseResult & { frontmatter: FrontmatterStatus };
 	compilerDiagnostics!: DiagnosticMessage[];
 	htmlDocument!: HTMLDocument;
-	scriptFileIds!: string[];
+	scriptFiles!: string[];
 	codegenStacks = [];
 
 	constructor(
@@ -143,7 +143,7 @@ export class AstroFile implements VirtualFile {
 			this.astroMeta.ast
 		);
 
-		this.scriptFileIds = scriptTags.map((scriptTag) => scriptTag.fileName);
+		this.scriptFiles = scriptTags.map((scriptTag) => scriptTag.fileName);
 
 		htmlVirtualFile.embeddedFiles.push(
 			...extractStylesheets(this.fileName, this.snapshot, htmlDocument, this.astroMeta.ast),

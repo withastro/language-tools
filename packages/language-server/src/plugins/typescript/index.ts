@@ -23,7 +23,7 @@ export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): 
 					);
 					const file = source?.virtualFile?.[0];
 					if (!(file instanceof AstroFile) || !context.language.typescript) return undefined;
-					if (file.scriptFileIds.includes(context.env.fileNameToUri(item.data.fileName)))
+					if (file.scriptFiles.includes(item.data.fileName))
 						return undefined;
 
 					const newLine =
@@ -57,7 +57,7 @@ export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): 
 					);
 					const file = source?.virtualFile?.[0];
 					if (!(file instanceof AstroFile) || !context.language.typescript) return undefined;
-					if (file.scriptFileIds.includes(item.diagnostics?.[0].data.documentUri)) return undefined;
+					if (file.scriptFiles.includes(context.env.uriToFileName(item.diagnostics?.[0].data.documentUri))) return undefined;
 
 					const document = context.documents.get(
 						context.env.fileNameToUri(file.fileName),
