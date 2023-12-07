@@ -45,18 +45,31 @@ export function createPlugin(connection: Connection): TypeScriptServerPlugin {
 		resolveConfig(config, env, projectContext) {
 			config.languages ??= {};
 			if (env && projectContext) {
-				const workspacePath = env.uriToFileName(env.workspaceFolder.uri.toString());
-				// const tsconfigPath = projectContext.configFileName ? env.uriToFileName(projectContext.configFileName) : undefined;
-				const astroInstall = getAstroInstall([workspacePath]);
+				const rootPath = projectContext.configFileName
+					? projectContext.configFileName.split('/').slice(0, -1).join('/')
+					: env.uriToFileName(env.workspaceFolder.uri.toString());
+				const nearestPackageJson = modules.typescript?.findConfigFile(
+					rootPath,
+					modules.typescript.sys.fileExists,
+					'package.json'
+				);
 
-				if (!astroInstall) {
+				const astroInstall = getAstroInstall([rootPath], {
+					nearestPackageJson: nearestPackageJson,
+					readDirectory: modules.typescript!.sys.readDirectory,
+				});
+
+				if (astroInstall === 'not-found') {
 					connection.sendNotification(ShowMessageNotification.type, {
-						message: `Couldn't find Astro in workspace "${workspacePath}". Experience might be degraded. For the best experience, please make sure Astro is installed into your project and restart the language server.`,
+						message: `Couldn't find Astro in workspace "${rootPath}". Experience might be degraded. For the best experience, please make sure Astro is installed into your project and restart the language server.`,
 						type: MessageType.Warning,
 					});
 				}
 
-				config.languages.astro = getLanguageModule(astroInstall, modules.typescript!);
+				config.languages.astro = getLanguageModule(
+					typeof astroInstall === 'string' ? undefined : astroInstall,
+					modules.typescript!
+				);
 				config.languages.vue = getVueLanguageModule();
 				config.languages.svelte = getSvelteLanguageModule();
 			}

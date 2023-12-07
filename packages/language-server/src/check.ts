@@ -54,10 +54,10 @@ export class AstroCheck {
 		fileNames?: string[] | undefined;
 		cancel?: () => boolean;
 		logErrors?:
-			| {
-					level: 'error' | 'warning' | 'hint';
-			  }
-			| undefined;
+		| {
+			level: 'error' | 'warning' | 'hint';
+		}
+		| undefined;
 	}): Promise<CheckResult> {
 		const files =
 			fileNames !== undefined ? fileNames : this.linter.languageHost.getScriptFileNames();
@@ -129,8 +129,12 @@ export class AstroCheck {
 		this.ts = this.typescriptPath ? require(this.typescriptPath) : require('typescript');
 		const tsconfigPath = this.getTsconfig();
 
+		const astroInstall = getAstroInstall([this.workspacePath]);
 		const languages = [
-			getLanguageModule(getAstroInstall([this.workspacePath]), this.ts),
+			getLanguageModule(
+				typeof astroInstall === 'string' ? undefined : astroInstall,
+				this.ts
+			),
 			getSvelteLanguageModule(),
 			getVueLanguageModule(),
 		];
