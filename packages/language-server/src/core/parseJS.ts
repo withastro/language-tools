@@ -68,7 +68,10 @@ function findModuleScripts(
 				const scriptText = snapshot.getText(node.startTagEnd, node.endTagStart);
 				const extension = getScriptType(node) === 'processed module' ? 'mts' : 'mjs';
 				const languageId = getScriptType(node) === 'processed module' ? 'typescript' : 'javascript';
-				const scriptKind = getScriptType(node) === 'processed module' ? 3 satisfies ts.ScriptKind.TS : 1 satisfies ts.ScriptKind.JS;
+				const scriptKind =
+					getScriptType(node) === 'processed module'
+						? (3 satisfies ts.ScriptKind.TS)
+						: (1 satisfies ts.ScriptKind.JS);
 				embeddedScripts.push({
 					fileName: fileName + `.${scriptIndex}.${extension}`,
 					languageId: languageId,

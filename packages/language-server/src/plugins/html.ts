@@ -22,7 +22,9 @@ export const create = (): ServicePlugin => {
 				async provideCompletionItems(document, position, completionContext, token) {
 					if (document.languageId !== 'html') return;
 
-					const [_, source] = context.language.files.getVirtualFile(context.env.uriToFileName(document.uri));
+					const [_, source] = context.language.files.getVirtualFile(
+						context.env.uriToFileName(document.uri)
+					);
 					const rootVirtualFile = source?.virtualFile?.[0];
 					if (!(rootVirtualFile instanceof AstroFile)) return;
 

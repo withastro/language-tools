@@ -23,7 +23,9 @@ export const create = (): ServicePlugin => {
 					)
 						return null;
 
-					const [_, source] = context.language.files.getVirtualFile(context.env.uriToFileName(document.uri));
+					const [_, source] = context.language.files.getVirtualFile(
+						context.env.uriToFileName(document.uri)
+					);
 					const file = source?.virtualFile?.[0];
 					if (!(file instanceof AstroFile)) return undefined;
 

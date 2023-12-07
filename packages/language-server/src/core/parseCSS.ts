@@ -17,7 +17,11 @@ export function extractStylesheets(
 	htmlDocument: HTMLDocument,
 	ast: ParseResult['ast']
 ): VirtualFile[] {
-	const embeddedCSSFiles: VirtualFile[] = findEmbeddedStyles(fileName, snapshot, htmlDocument.roots);
+	const embeddedCSSFiles: VirtualFile[] = findEmbeddedStyles(
+		fileName,
+		snapshot,
+		htmlDocument.roots
+	);
 
 	const inlineStyles = findInlineStyles(ast);
 	if (inlineStyles.length > 0) {

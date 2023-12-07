@@ -18,7 +18,9 @@ export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): 
 			return {
 				...tsService,
 				transformCompletionItem(item) {
-					const [_, source] = context.language.files.getVirtualFile(context.env.uriToFileName(item.data.uri));
+					const [_, source] = context.language.files.getVirtualFile(
+						context.env.uriToFileName(item.data.uri)
+					);
 					const file = source?.virtualFile?.[0];
 					if (!(file instanceof AstroFile) || !context.language.typescript) return undefined;
 					if (file.scriptFileIds.includes(context.env.fileNameToUri(item.data.fileName)))
@@ -50,12 +52,18 @@ export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): 
 					if (item.kind !== 'quickfix') return undefined;
 					const originalUri = item.data.uri.replace('.tsx', '');
 
-					const [_, source] = context.language.files.getVirtualFile(context.env.uriToFileName(originalUri));
+					const [_, source] = context.language.files.getVirtualFile(
+						context.env.uriToFileName(originalUri)
+					);
 					const file = source?.virtualFile?.[0];
 					if (!(file instanceof AstroFile) || !context.language.typescript) return undefined;
 					if (file.scriptFileIds.includes(item.diagnostics?.[0].data.documentUri)) return undefined;
 
-					const document = context.documents.get(context.env.fileNameToUri(file.fileName), file.languageId, file.snapshot);
+					const document = context.documents.get(
+						context.env.fileNameToUri(file.fileName),
+						file.languageId,
+						file.snapshot
+					);
 					const newLine =
 						context.language.typescript.languageServiceHost
 							.getCompilationSettings()
@@ -129,7 +137,9 @@ export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): 
 					return enhancedResolveCompletionItem(resolvedCompletionItem);
 				},
 				async provideSemanticDiagnostics(document, token) {
-					const [_, source] = context.language.files.getVirtualFile(context.env.uriToFileName(document.uri));
+					const [_, source] = context.language.files.getVirtualFile(
+						context.env.uriToFileName(document.uri)
+					);
 					const file = source?.virtualFile?.[0];
 					if (!(file instanceof AstroFile)) return null;
 

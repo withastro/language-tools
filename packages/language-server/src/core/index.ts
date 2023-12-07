@@ -136,7 +136,12 @@ export class AstroFile implements VirtualFile {
 		);
 		this.htmlDocument = htmlDocument;
 
-		const scriptTags = extractScriptTags(this.fileName, this.snapshot, htmlDocument, this.astroMeta.ast);
+		const scriptTags = extractScriptTags(
+			this.fileName,
+			this.snapshot,
+			htmlDocument,
+			this.astroMeta.ast
+		);
 
 		this.scriptFileIds = scriptTags.map((scriptTag) => scriptTag.fileName);
 

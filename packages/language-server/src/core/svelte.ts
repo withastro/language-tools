@@ -54,7 +54,12 @@ class SvelteFile implements VirtualFile {
 
 		this.embeddedFiles = [];
 		this.embeddedFiles.push(
-			framework2tsx(this.fileName, this.fileName, this.snapshot.getText(0, this.snapshot.getLength()), 'svelte')
+			framework2tsx(
+				this.fileName,
+				this.fileName,
+				this.snapshot.getText(0, this.snapshot.getLength()),
+				'svelte'
+			)
 		);
 	}
 }
