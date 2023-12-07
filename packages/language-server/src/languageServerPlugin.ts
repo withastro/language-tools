@@ -83,7 +83,7 @@ export function createPlugin(connection: Connection): TypeScriptServerPlugin {
 			config.services.typescriptaddons ??= createTypescriptAddonsService();
 			config.services.astro ??= createAstroService(modules.typescript!);
 
-			if (env && projectContext) {
+			if (env) {
 				const workspacePath = env.uriToFileName(env.workspaceFolder.uri.toString());
 				const prettier = importPrettier(workspacePath);
 				const prettierPluginPath = getPrettierPluginPath(workspacePath);
