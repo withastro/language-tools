@@ -12,12 +12,12 @@ import type { HTMLDocument, Node } from 'vscode-html-languageservice';
 import type { AttributeNodeWithPosition } from './compilerUtils.js';
 
 export function extractStylesheets(
-	fileId: string,
+	fileName: string,
 	snapshot: ts.IScriptSnapshot,
 	htmlDocument: HTMLDocument,
 	ast: ParseResult['ast']
 ): VirtualFile[] {
-	const embeddedCSSFiles: VirtualFile[] = findEmbeddedStyles(fileId, snapshot, htmlDocument.roots);
+	const embeddedCSSFiles: VirtualFile[] = findEmbeddedStyles(fileName, snapshot, htmlDocument.roots);
 
 	const inlineStyles = findInlineStyles(ast);
 	if (inlineStyles.length > 0) {
@@ -45,7 +45,7 @@ export function extractStylesheets(
 		const text = toString(codes);
 
 		embeddedCSSFiles.push({
-			id: fileId + '.inline.css',
+			fileName: fileName + '.inline.css',
 			languageId: 'css',
 			snapshot: {
 				getText: (start, end) => text.substring(start, end),
@@ -83,7 +83,7 @@ function findEmbeddedStyles(
 			) {
 				const styleText = snapshot.getText(node.startTagEnd, node.endTagStart);
 				embeddedCSSFiles.push({
-					id: fileId + `.${cssIndex}.css`,
+					fileName: fileId + `.${cssIndex}.css`,
 					languageId: 'css',
 					snapshot: {
 						getText: (start, end) => styleText.substring(start, end),

@@ -53,7 +53,7 @@ function isIsolatedScriptTag(scriptTag: Node): boolean {
  * All the isolated scripts are passed to the TypeScript language server as separate `.mts` files.
  */
 function findIsolatedScripts(
-	fileId: string,
+	fileName: string,
 	snapshot: ts.IScriptSnapshot,
 	roots: Node[]
 ): VirtualFile[] {
@@ -72,7 +72,7 @@ function findIsolatedScripts(
 			) {
 				const scriptText = snapshot.getText(node.startTagEnd, node.endTagStart);
 				embeddedScripts.push({
-					id: fileId + `.${scriptIndex}.mts`,
+					fileName: fileName + `.${scriptIndex}.mts`,
 					languageId: 'typescript',
 					typescript: {
 						scriptKind: 3 satisfies ts.ScriptKind.TS,
@@ -226,7 +226,7 @@ function mergeJSContexts(fileId: string, javascriptContexts: JavaScriptContext[]
 	const text = toString(codes);
 
 	return {
-		id: fileId + '.inline.mjs',
+		fileName: fileId + '.inline.mjs',
 		languageId: 'javascript',
 		typescript: {
 			scriptKind: 1 satisfies ts.ScriptKind.JS,

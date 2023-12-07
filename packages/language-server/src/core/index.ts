@@ -80,7 +80,7 @@ export function getLanguageModule(
 }
 
 export class AstroFile implements VirtualFile {
-	id: string;
+	fileName: string;
 	languageId = 'astro';
 	mappings!: VirtualFile['mappings'];
 	embeddedFiles!: VirtualFile['embeddedFiles'];
@@ -91,11 +91,11 @@ export class AstroFile implements VirtualFile {
 	codegenStacks = [];
 
 	constructor(
-		public sourceFileId: string,
+		public sourceFileName: string,
 		public snapshot: ts.IScriptSnapshot,
 		private readonly ts: typeof import('typescript/lib/tsserverlibrary.js')
 	) {
-		this.id = sourceFileId;
+		this.fileName = sourceFileName;
 		this.onSnapshotUpdated();
 	}
 
@@ -128,7 +128,7 @@ export class AstroFile implements VirtualFile {
 		this.astroMeta = getAstroMetadata(this.snapshot.getText(0, this.snapshot.getLength()));
 
 		const { htmlDocument, virtualFile: htmlVirtualFile } = parseHTML(
-			this.id,
+			this.fileName,
 			this.snapshot,
 			this.astroMeta.frontmatter.status === 'closed'
 				? this.astroMeta.frontmatter.position.end.offset
@@ -136,12 +136,12 @@ export class AstroFile implements VirtualFile {
 		);
 		this.htmlDocument = htmlDocument;
 
-		const scriptTags = extractScriptTags(this.id, this.snapshot, htmlDocument, this.astroMeta.ast);
+		const scriptTags = extractScriptTags(this.fileName, this.snapshot, htmlDocument, this.astroMeta.ast);
 
-		this.scriptFileIds = scriptTags.map((scriptTag) => scriptTag.id);
+		this.scriptFileIds = scriptTags.map((scriptTag) => scriptTag.fileName);
 
 		htmlVirtualFile.embeddedFiles.push(
-			...extractStylesheets(this.id, this.snapshot, htmlDocument, this.astroMeta.ast),
+			...extractStylesheets(this.fileName, this.snapshot, htmlDocument, this.astroMeta.ast),
 			...scriptTags
 		);
 
@@ -150,7 +150,7 @@ export class AstroFile implements VirtualFile {
 
 		const tsx = astro2tsx(
 			this.snapshot.getText(0, this.snapshot.getLength()),
-			this.id,
+			this.fileName,
 			this.ts,
 			htmlDocument
 		);

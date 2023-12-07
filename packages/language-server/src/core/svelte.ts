@@ -4,9 +4,9 @@ import { framework2tsx } from './utils.js';
 
 export function getSvelteLanguageModule(): LanguagePlugin<SvelteFile> {
 	return {
-		createVirtualFile(id, languageId, snapshot) {
+		createVirtualFile(fileName, languageId, snapshot) {
 			if (languageId === 'svelte') {
-				return new SvelteFile(id, snapshot);
+				return new SvelteFile(fileName, snapshot);
 			}
 		},
 		updateVirtualFile(svelteFile, snapshot) {
@@ -16,7 +16,7 @@ export function getSvelteLanguageModule(): LanguagePlugin<SvelteFile> {
 }
 
 class SvelteFile implements VirtualFile {
-	id: string;
+	fileName: string;
 	languageId = 'svelte';
 	mappings!: Mapping<CodeInformation>[];
 	embeddedFiles!: VirtualFile[];
@@ -26,7 +26,7 @@ class SvelteFile implements VirtualFile {
 		public sourceFileId: string,
 		public snapshot: ts.IScriptSnapshot
 	) {
-		this.id = sourceFileId;
+		this.fileName = sourceFileId;
 		this.onSnapshotUpdated();
 	}
 
@@ -54,7 +54,7 @@ class SvelteFile implements VirtualFile {
 
 		this.embeddedFiles = [];
 		this.embeddedFiles.push(
-			framework2tsx(this.id, this.id, this.snapshot.getText(0, this.snapshot.getLength()), 'svelte')
+			framework2tsx(this.fileName, this.fileName, this.snapshot.getText(0, this.snapshot.getLength()), 'svelte')
 		);
 	}
 }

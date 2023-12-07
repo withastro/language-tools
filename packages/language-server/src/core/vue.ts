@@ -16,17 +16,17 @@ export function getVueLanguageModule(): LanguagePlugin<VueFile> {
 }
 
 class VueFile implements VirtualFile {
-	id: string;
+	fileName: string;
 	languageId = 'vue';
 	mappings!: Mapping<CodeInformation>[];
 	embeddedFiles!: VirtualFile[];
 	codegenStacks = [];
 
 	constructor(
-		public sourceFileId: string,
+		public sourceFileName: string,
 		public snapshot: ts.IScriptSnapshot
 	) {
-		this.id = sourceFileId;
+		this.fileName = sourceFileName;
 		this.onSnapshotUpdated();
 	}
 
@@ -54,7 +54,7 @@ class VueFile implements VirtualFile {
 
 		this.embeddedFiles = [];
 		this.embeddedFiles.push(
-			framework2tsx(this.id, this.id, this.snapshot.getText(0, this.snapshot.getLength()), 'vue')
+			framework2tsx(this.fileName, this.fileName, this.snapshot.getText(0, this.snapshot.getLength()), 'vue')
 		);
 	}
 }

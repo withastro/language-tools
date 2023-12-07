@@ -4,7 +4,7 @@ import { URI, Utils } from 'vscode-uri';
 import { importSvelteIntegration, importVueIntegration } from '../importPackage';
 
 export function framework2tsx(
-	fileId: string,
+	fileName: string,
 	filePath: string,
 	sourceCode: string,
 	framework: 'vue' | 'svelte'
@@ -18,13 +18,13 @@ export function framework2tsx(
 	}
 
 	const className = classNameFromFilename(filePath);
-	const tsx = patchTSX(integrationEditorEntrypoint.toTSX(sourceCode, className), fileId);
+	const tsx = patchTSX(integrationEditorEntrypoint.toTSX(sourceCode, className), fileName);
 
 	return getVirtualFile(tsx);
 
 	function getVirtualFile(content: string): VirtualFile {
 		return {
-			id: fileId + '.tsx',
+			fileName: fileName + '.tsx',
 			languageId: 'typescript',
 			typescript: {
 				scriptKind: 4 satisfies import('typescript/lib/tsserverlibrary').ScriptKind.TSX,

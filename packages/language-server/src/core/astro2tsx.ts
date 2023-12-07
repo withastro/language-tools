@@ -38,14 +38,14 @@ function safeConvertToTSX(content: string, options: ConvertToTSXOptions) {
 
 export function astro2tsx(
 	input: string,
-	fileId: string,
+	filename: string,
 	ts: typeof import('typescript/lib/tsserverlibrary.js'),
 	htmlDocument: HTMLDocument
 ) {
-	const tsx = safeConvertToTSX(input, { filename: fileId });
+	const tsx = safeConvertToTSX(input, { filename });
 
 	return {
-		virtualFile: getVirtualFileTSX(input, tsx, fileId, ts, htmlDocument),
+		virtualFile: getVirtualFileTSX(input, tsx, filename, ts, htmlDocument),
 		diagnostics: tsx.diagnostics,
 	};
 }
@@ -53,14 +53,14 @@ export function astro2tsx(
 function getVirtualFileTSX(
 	input: string,
 	tsx: TSXResult,
-	fileId: string,
+	fileName: string,
 	ts: typeof import('typescript/lib/tsserverlibrary.js'),
 	htmlDocument: HTMLDocument
 ): VirtualFile {
-	tsx.code = patchTSX(tsx.code, fileId);
+	tsx.code = patchTSX(tsx.code, fileName);
 	const v3Mappings = decode(tsx.map.mappings);
-	const sourcedDoc = TextDocument.create(fileId, 'astro', 0, input);
-	const genDoc = TextDocument.create(fileId + '.tsx', 'typescriptreact', 0, tsx.code);
+	const sourcedDoc = TextDocument.create('file://' + fileName, 'astro', 0, input);
+	const genDoc = TextDocument.create('file://' + fileName + '.tsx', 'typescriptreact', 0, tsx.code);
 
 	const mappings: VirtualFile['mappings'] = [];
 
@@ -141,7 +141,7 @@ function getVirtualFileTSX(
 	}
 
 	return {
-		id: fileId + '.tsx',
+		fileName: fileName + '.tsx',
 		languageId: 'typescriptreact',
 		typescript: {
 			scriptKind: ts.ScriptKind.TSX,

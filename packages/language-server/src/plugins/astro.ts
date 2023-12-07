@@ -27,7 +27,7 @@ export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): 
 					if (token.isCancellationRequested) return null;
 					let items: CompletionItem[] = [];
 
-					const [file] = context.language.files.getVirtualFile(document.uri);
+					const [file] = context.language.files.getVirtualFile(context.env.uriToFileName(document.uri));
 					if (!(file instanceof AstroFile)) return;
 
 					if (completionContext.triggerCharacter === '-') {
@@ -43,7 +43,7 @@ export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): 
 				provideSemanticDiagnostics(document, token) {
 					if (token.isCancellationRequested) return [];
 
-					const [file] = context.language.files.getVirtualFile(document.uri);
+					const [file] = context.language.files.getVirtualFile(context.env.uriToFileName(document.uri));
 					if (!(file instanceof AstroFile)) return;
 
 					return file.compilerDiagnostics.map(compilerMessageToDiagnostic);
@@ -67,7 +67,7 @@ export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): 
 					if (token.isCancellationRequested) return;
 					if (!isJSDocument(document.languageId)) return;
 
-					const languageService = context.inject<keyof Provide>('typescript/languageService');
+					const languageService = context.inject<Provide, 'typescript/languageService'>('typescript/languageService');
 					if (!languageService) return;
 
 					const tsProgram = languageService.getProgram();
