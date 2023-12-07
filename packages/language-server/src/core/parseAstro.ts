@@ -8,7 +8,7 @@ export function getAstroMetadata(
 	input: string,
 	options: ParseOptions = { position: true }
 ): AstroMetadata {
-	const parseResult = safeParseAstro(fileName, input, options);
+	const parseResult = safeParseAst(fileName, input, options);
 
 	return {
 		...parseResult,
@@ -16,7 +16,7 @@ export function getAstroMetadata(
 	};
 }
 
-function safeParseAstro(fileName: string, input: string, parseOptions: ParseOptions): ParseResult {
+function safeParseAst(fileName: string, input: string, parseOptions: ParseOptions): ParseResult {
 	try {
 		const parseResult = parse(input, parseOptions);
 		return parseResult;
