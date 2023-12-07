@@ -69,7 +69,7 @@ export function extractStylesheets(
  * Embedded styles are styles that are defined in `<style>` tags.
  */
 function findEmbeddedStyles(
-	fileId: string,
+	fileName: string,
 	snapshot: ts.IScriptSnapshot,
 	roots: Node[]
 ): VirtualFile[] {
@@ -87,7 +87,7 @@ function findEmbeddedStyles(
 			) {
 				const styleText = snapshot.getText(node.startTagEnd, node.endTagStart);
 				embeddedCSSFiles.push({
-					fileName: fileId + `.${cssIndex}.css`,
+					fileName: fileName + `.${cssIndex}.css`,
 					languageId: 'css',
 					snapshot: {
 						getText: (start, end) => styleText.substring(start, end),

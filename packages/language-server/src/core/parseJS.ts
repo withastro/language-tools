@@ -204,7 +204,7 @@ function findEventAttributes(ast: ParseResult['ast']): JavaScriptContext[] {
 /**
  * Merge all the inline and non-hoisted scripts into a single `.mjs` file
  */
-function mergeJSContexts(fileId: string, javascriptContexts: JavaScriptContext[]): VirtualFile {
+function mergeJSContexts(fileName: string, javascriptContexts: JavaScriptContext[]): VirtualFile {
 	const codes: Segment<CodeInformation>[] = [];
 
 	for (const javascriptContext of javascriptContexts) {
@@ -227,7 +227,7 @@ function mergeJSContexts(fileId: string, javascriptContexts: JavaScriptContext[]
 	const text = toString(codes);
 
 	return {
-		fileName: fileId + '.inline.mjs',
+		fileName: fileName + '.inline.mjs',
 		languageId: 'javascript',
 		typescript: {
 			scriptKind: 1 satisfies ts.ScriptKind.JS,
