@@ -1,21 +1,22 @@
 import { Position } from '@volar/language-server';
+import type { LanguageServerHandle } from '@volar/test-utils';
 import { expect } from 'chai';
 import { before, describe, it } from 'mocha';
-import { LanguageServer, getLanguageServer } from '../server.js';
+import { getLanguageServer } from '../server.js';
 
 describe('TypeScript Addons - Completions', async () => {
-	let languageServer: LanguageServer;
+	let serverHandle: LanguageServerHandle;
 
-	before(async () => (languageServer = await getLanguageServer()));
+	before(async () => ({ serverHandle } = await getLanguageServer()));
 	it('Can provide neat snippets', async () => {
-		const document = await languageServer.helpers.openFakeDocument('---\nprerender\n---');
-		const completions = await languageServer.helpers.requestCompletion(
-			document,
+		const document = await serverHandle.openUntitledTextDocument('---\nprerender\n---', 'astro');
+		const completions = await serverHandle.sendCompletionRequest(
+			document.uri,
 			Position.create(1, 10)
 		);
 
-		const prerenderCompletions = completions.items.filter((item) => item.label === 'prerender');
+		const prerenderCompletions = completions?.items.filter((item) => item.label === 'prerender');
 		expect(prerenderCompletions).to.not.be.empty;
-		expect(prerenderCompletions[0].data.serviceId).to.equal('typescriptaddons');
+		expect(prerenderCompletions?.[0].data.serviceId).to.equal('typescriptaddons');
 	});
 });

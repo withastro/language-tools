@@ -2,7 +2,7 @@ import {
 	Connection,
 	MessageType,
 	ShowMessageNotification,
-	TypeScriptServerPlugin,
+	ServerPlugin,
 } from '@volar/language-server/node';
 import { getLanguageModule } from './core';
 import { getSvelteLanguageModule } from './core/svelte.js';
@@ -21,13 +21,15 @@ import { create as createHtmlService } from './plugins/html.js';
 import { create as createTypescriptAddonsService } from './plugins/typescript-addons/index.js';
 import { create as createTypeScriptService } from './plugins/typescript/index.js';
 
-export function createPlugin(connection: Connection): TypeScriptServerPlugin {
-	return ({ modules }): ReturnType<TypeScriptServerPlugin> => ({
-		extraFileExtensions: [
-			{ extension: 'astro', isMixedContent: true, scriptKind: 7 },
-			{ extension: 'vue', isMixedContent: true, scriptKind: 7 },
-			{ extension: 'svelte', isMixedContent: true, scriptKind: 7 },
-		],
+export function createPlugin(connection: Connection): ServerPlugin {
+	return ({ modules }): ReturnType<ServerPlugin> => ({
+		typescript: {
+			extraFileExtensions: [
+				{ extension: 'astro', isMixedContent: true, scriptKind: 7 },
+				{ extension: 'vue', isMixedContent: true, scriptKind: 7 },
+				{ extension: 'svelte', isMixedContent: true, scriptKind: 7 },
+			],
+		},
 		watchFileExtensions: [
 			'js',
 			'cjs',
@@ -44,9 +46,9 @@ export function createPlugin(connection: Connection): TypeScriptServerPlugin {
 		],
 		resolveConfig(config, env, projectContext) {
 			config.languages ??= {};
-			if (env && projectContext) {
-				const rootPath = projectContext.configFileName
-					? projectContext.configFileName.split('/').slice(0, -1).join('/')
+			if (env && projectContext?.typescript) {
+				const rootPath = projectContext.typescript.configFileName
+					? projectContext.typescript.configFileName.split('/').slice(0, -1).join('/')
 					: env.uriToFileName(env.workspaceFolder.uri.toString());
 				const nearestPackageJson = modules.typescript?.findConfigFile(
 					rootPath,

@@ -1,19 +1,19 @@
-import type { ServerCapabilities } from '@volar/language-server';
+import type { InitializeResult, ServerCapabilities } from '@volar/language-server';
 import { expect } from 'chai';
 import { before, describe, it } from 'mocha';
-import { LanguageServer, getLanguageServer } from '../server.js';
+import { getLanguageServer } from '../server.js';
 
 describe('Initialize', async () => {
-	let languageServer: LanguageServer;
+	let initializeResult: InitializeResult;
 
 	before(async function () {
 		// First init can sometimes be slow in CI, even though the rest of the tests will be fast.
 		this.timeout(50000);
-		languageServer = await getLanguageServer();
+		initializeResult = (await getLanguageServer()).initializeResult;
 	});
 
 	it('Can start server', async () => {
-		expect(languageServer.initResult).not.be.null;
+		expect(initializeResult).not.be.null;
 	});
 
 	it('Has proper capabilities', async () => {
@@ -143,6 +143,6 @@ describe('Initialize', async () => {
 			workspaceSymbolProvider: true,
 		};
 
-		expect(languageServer.initResult.capabilities).to.deep.equal(capabilities);
+		expect(initializeResult.capabilities).to.deep.equal(capabilities);
 	});
 });

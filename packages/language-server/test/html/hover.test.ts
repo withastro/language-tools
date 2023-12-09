@@ -1,25 +1,24 @@
 import { Position } from '@volar/language-server';
+import type { LanguageServerHandle } from '@volar/test-utils';
 import { expect } from 'chai';
 import { describe } from 'mocha';
-import { LanguageServer, getLanguageServer } from '../server.js';
+import { getLanguageServer } from '../server.js';
 
 describe('HTML - Hover', () => {
-	let languageServer: LanguageServer;
+	let serverHandle: LanguageServerHandle;
 
-	before(async () => {
-		languageServer = await getLanguageServer();
-	});
+	before(async () => ({ serverHandle } = await getLanguageServer()));
 
 	it('Can provide hover for HTML tags', async () => {
-		const document = await languageServer.helpers.openFakeDocument(`<q`);
-		const hover = await languageServer.helpers.requestHover(document, Position.create(0, 2));
+		const document = await serverHandle.openUntitledTextDocument(`<q`, 'astro');
+		const hover = await serverHandle.sendHoverRequest(document.uri, Position.create(0, 2));
 
 		expect(hover).to.not.be.null;
 	});
 
 	it('Can provide hover for HTML attributes', async () => {
-		const document = await languageServer.helpers.openFakeDocument(`<blockquote c`);
-		const hover = await languageServer.helpers.requestHover(document, Position.create(0, 13));
+		const document = await serverHandle.openUntitledTextDocument(`<blockquote c`, 'astro');
+		const hover = await serverHandle.sendHoverRequest(document.uri, Position.create(0, 13));
 
 		expect(hover).to.not.be.null;
 	});

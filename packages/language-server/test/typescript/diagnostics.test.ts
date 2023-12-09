@@ -1,16 +1,24 @@
-import { DiagnosticSeverity, Range, type Diagnostic } from '@volar/language-server';
+import {
+	DiagnosticSeverity,
+	Range,
+	type Diagnostic,
+	FullDocumentDiagnosticReport,
+} from '@volar/language-server';
+import type { LanguageServerHandle } from '@volar/test-utils';
 import { expect } from 'chai';
 import { before, describe, it } from 'mocha';
-import { LanguageServer, getLanguageServer } from '../server.js';
+import { getLanguageServer } from '../server.js';
 
 describe('TypeScript - Diagnostics', async () => {
-	let languageServer: LanguageServer;
+	let serverHandle: LanguageServerHandle;
 
-	before(async () => (languageServer = await getLanguageServer()));
+	before(async () => ({ serverHandle } = await getLanguageServer()));
 
 	it('Can get diagnostics in the frontmatter', async () => {
-		const document = await languageServer.helpers.openFakeDocument('---\nNotAThing\n---', 'astro');
-		const diagnostics = await languageServer.helpers.requestDiagnostics(document);
+		const document = await serverHandle.openUntitledTextDocument('---\nNotAThing\n---', 'astro');
+		const diagnostics = (await serverHandle.sendDocumentDiagnosticRequest(
+			document.uri
+		)) as FullDocumentDiagnosticReport;
 
 		// We should only have one error here.
 		expect(diagnostics.items).length(1);
@@ -29,8 +37,10 @@ describe('TypeScript - Diagnostics', async () => {
 	});
 
 	it('Can get diagnostics in the template', async () => {
-		const document = await languageServer.helpers.openFakeDocument('---\n\n---\n{nope}', 'astro');
-		const diagnostics = await languageServer.helpers.requestDiagnostics(document);
+		const document = await serverHandle.openUntitledTextDocument('---\n\n---\n{nope}', 'astro');
+		const diagnostics = (await serverHandle.sendDocumentDiagnosticRequest(
+			document.uri
+		)) as FullDocumentDiagnosticReport;
 		expect(diagnostics.items).length(1);
 
 		const diagnostic: Diagnostic = { ...diagnostics.items[0], data: {} };
@@ -45,11 +55,13 @@ describe('TypeScript - Diagnostics', async () => {
 	});
 
 	it('shows enhanced diagnostics', async () => {
-		const document = await languageServer.helpers.openFakeDocument(
+		const document = await serverHandle.openUntitledTextDocument(
 			'---\nimport {getEntryBySlug} from "astro:content";getEntryBySlug\n---\n<div client:idle></div><div>',
 			'astro'
 		);
-		const diagnostics = await languageServer.helpers.requestDiagnostics(document);
+		const diagnostics = (await serverHandle.sendDocumentDiagnosticRequest(
+			document.uri
+		)) as FullDocumentDiagnosticReport;
 		expect(diagnostics.items).length(2);
 
 		diagnostics.items = diagnostics.items.map((diag) => ({ ...diag, data: {} }));
