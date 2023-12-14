@@ -20,7 +20,7 @@ const init: ts.server.PluginModuleFactory = (modules) => {
 				() => {}
 			);
 
-			decorateLanguageService(virtualFiles, info.languageService, true);
+			decorateLanguageService(virtualFiles, info.languageService);
 			decorateLanguageServiceHost(virtualFiles, info.languageServiceHost, ts, ['.astro']);
 
 			if (semver.lt(ts.version, '5.3.0')) {
