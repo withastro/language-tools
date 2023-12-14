@@ -1,16 +1,16 @@
 import { Position } from '@volar/language-server';
-import type { LanguageServerHandle } from '@volar/test-utils';
 import { expect } from 'chai';
 import { before, describe, it } from 'mocha';
-import { getLanguageServer } from '../server.js';
+import { getLanguageServer, type LanguageServer } from '../server.js';
 
 describe('TypeScript Addons - Completions', async () => {
-	let serverHandle: LanguageServerHandle;
+	let languageServer: LanguageServer;
 
-	before(async () => ({ serverHandle } = await getLanguageServer()));
+	before(async () => (languageServer = await getLanguageServer()));
+
 	it('Can provide neat snippets', async () => {
-		const document = await serverHandle.openUntitledDocument('---\nprerender\n---', 'astro');
-		const completions = await serverHandle.sendCompletionRequest(
+		const document = await languageServer.openFakeDocument('---\nprerender\n---', 'astro');
+		const completions = await languageServer.handle.sendCompletionRequest(
 			document.uri,
 			Position.create(1, 10)
 		);

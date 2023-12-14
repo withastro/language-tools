@@ -1,20 +1,16 @@
 import { Position } from '@volar/language-server';
-import type { LanguageServerHandle } from '@volar/test-utils';
 import { expect } from 'chai';
 import { describe } from 'mocha';
-import { getLanguageServer } from '../server.js';
+import { LanguageServer, getLanguageServer } from '../server.js';
 
 describe('CSS - Completions', () => {
-	let serverHandle: LanguageServerHandle;
+	let languageServer: LanguageServer;
 
-	before(async () => ({ serverHandle } = await getLanguageServer()));
+	before(async () => (languageServer = await getLanguageServer()));
 
 	it('Can provide completions for CSS properties', async () => {
-		const document = await serverHandle.openUntitledDocument(
-			`<style>.foo { colo }</style>`,
-			'astro'
-		);
-		const completions = await serverHandle.sendCompletionRequest(
+		const document = await languageServer.openFakeDocument(`<style>.foo { colo }</style>`, 'astro');
+		const completions = await languageServer.handle.sendCompletionRequest(
 			document.uri,
 			Position.create(0, 18)
 		);
@@ -23,11 +19,11 @@ describe('CSS - Completions', () => {
 	});
 
 	it('Can provide completions for CSS values', async () => {
-		const document = await serverHandle.openUntitledDocument(
+		const document = await languageServer.openFakeDocument(
 			`<style>.foo { color: re }</style>`,
 			'astro'
 		);
-		const completions = await serverHandle.sendCompletionRequest(
+		const completions = await languageServer.handle.sendCompletionRequest(
 			document.uri,
 			Position.create(0, 21)
 		);

@@ -1,17 +1,16 @@
 import { Position } from '@volar/language-server';
-import type { LanguageServerHandle } from '@volar/test-utils';
 import { expect } from 'chai';
 import { before, describe, it } from 'mocha';
-import { getLanguageServer } from '../server.js';
+import { getLanguageServer, type LanguageServer } from '../server.js';
 
 describe('TypeScript - Completions', async () => {
-	let serverHandle: LanguageServerHandle;
+	let languageServer: LanguageServer;
 
-	before(async () => ({ serverHandle } = await getLanguageServer()));
+	before(async () => (languageServer = await getLanguageServer()));
 
 	it('Can get completions in the frontmatter', async () => {
-		const document = await serverHandle.openUntitledDocument('---\nc\n---', 'astro');
-		const completions = await serverHandle.sendCompletionRequest(
+		const document = await languageServer.openFakeDocument('---\nc\n---', 'astro');
+		const completions = await languageServer.handle.sendCompletionRequest(
 			document.uri,
 			Position.create(1, 1)
 		);
@@ -20,8 +19,8 @@ describe('TypeScript - Completions', async () => {
 	});
 
 	it('Can get completions in the template', async () => {
-		const document = await serverHandle.openUntitledDocument('{c}', 'astro');
-		const completions = await serverHandle.sendCompletionRequest(
+		const document = await languageServer.openFakeDocument('{c}', 'astro');
+		const completions = await languageServer.handle.sendCompletionRequest(
 			document.uri,
 			Position.create(0, 1)
 		);
@@ -30,8 +29,8 @@ describe('TypeScript - Completions', async () => {
 	});
 
 	it('sort completions starting with `astro:` higher than other imports', async () => {
-		const document = await serverHandle.openUntitledDocument('<Image', 'astro');
-		const completions = await serverHandle.sendCompletionRequest(
+		const document = await languageServer.openFakeDocument('<Image', 'astro');
+		const completions = await languageServer.handle.sendCompletionRequest(
 			document.uri,
 			Position.create(0, 6)
 		);

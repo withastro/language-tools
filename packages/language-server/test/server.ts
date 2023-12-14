@@ -1,14 +1,22 @@
 /* eslint-disable no-console */
 import { LanguageServerHandle, startLanguageServer } from '@volar/test-utils';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as protocol from 'vscode-languageserver-protocol/node';
+import type { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
 
 let serverHandle: LanguageServerHandle | undefined;
 let initializeResult: protocol.InitializeResult | undefined;
 
-export async function getLanguageServer() {
+export type LanguageServer = {
+	handle: LanguageServerHandle;
+	initializeResult: protocol.InitializeResult;
+	openFakeDocument: (content: string, languageId: string) => Promise<TextDocument>;
+};
+
+export async function getLanguageServer(): Promise<LanguageServer> {
 	if (!serverHandle) {
 		serverHandle = startLanguageServer(
 			path.resolve('./bin/nodeServer.js'),
@@ -41,8 +49,14 @@ export async function getLanguageServer() {
 	}
 
 	return {
-		serverHandle: serverHandle,
+		handle: serverHandle,
 		initializeResult: initializeResult,
-		connection: serverHandle.connection,
+		openFakeDocument: async (content: string, languageId: string) => {
+			const hash = createHash('sha256').update(content).digest('base64url');
+			const uri = URI.file(`does-not-exists-${hash}-.astro`).toString();
+			const textDocument = await serverHandle!.openInMemoryDocument(uri, languageId, content);
+
+			return textDocument;
+		},
 	};
 }

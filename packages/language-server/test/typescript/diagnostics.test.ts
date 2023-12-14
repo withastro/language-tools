@@ -1,22 +1,21 @@
 import {
 	DiagnosticSeverity,
+	FullDocumentDiagnosticReport,
 	Range,
 	type Diagnostic,
-	FullDocumentDiagnosticReport,
 } from '@volar/language-server';
-import type { LanguageServerHandle } from '@volar/test-utils';
 import { expect } from 'chai';
 import { before, describe, it } from 'mocha';
-import { getLanguageServer } from '../server.js';
+import { getLanguageServer, type LanguageServer } from '../server.js';
 
 describe('TypeScript - Diagnostics', async () => {
-	let serverHandle: LanguageServerHandle;
+	let languageServer: LanguageServer;
 
-	before(async () => ({ serverHandle } = await getLanguageServer()));
+	before(async () => (languageServer = await getLanguageServer()));
 
 	it('Can get diagnostics in the frontmatter', async () => {
-		const document = await serverHandle.openUntitledDocument('---\nNotAThing\n---', 'astro');
-		const diagnostics = (await serverHandle.sendDocumentDiagnosticRequest(
+		const document = await languageServer.openFakeDocument('---\nNotAThing\n---', 'astro');
+		const diagnostics = (await languageServer.handle.sendDocumentDiagnosticRequest(
 			document.uri
 		)) as FullDocumentDiagnosticReport;
 
@@ -37,8 +36,8 @@ describe('TypeScript - Diagnostics', async () => {
 	});
 
 	it('Can get diagnostics in the template', async () => {
-		const document = await serverHandle.openUntitledDocument('---\n\n---\n{nope}', 'astro');
-		const diagnostics = (await serverHandle.sendDocumentDiagnosticRequest(
+		const document = await languageServer.openFakeDocument('---\n\n---\n{nope}', 'astro');
+		const diagnostics = (await languageServer.handle.sendDocumentDiagnosticRequest(
 			document.uri
 		)) as FullDocumentDiagnosticReport;
 		expect(diagnostics.items).length(1);
@@ -55,11 +54,11 @@ describe('TypeScript - Diagnostics', async () => {
 	});
 
 	it('shows enhanced diagnostics', async () => {
-		const document = await serverHandle.openUntitledDocument(
+		const document = await languageServer.openFakeDocument(
 			'---\nimport {getEntryBySlug} from "astro:content";getEntryBySlug\n---\n<div client:idle></div><div>',
 			'astro'
 		);
-		const diagnostics = (await serverHandle.sendDocumentDiagnosticRequest(
+		const diagnostics = (await languageServer.handle.sendDocumentDiagnosticRequest(
 			document.uri
 		)) as FullDocumentDiagnosticReport;
 		expect(diagnostics.items).length(2);
