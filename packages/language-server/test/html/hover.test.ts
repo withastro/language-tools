@@ -10,14 +10,14 @@ describe('HTML - Hover', () => {
 	before(async () => ({ serverHandle } = await getLanguageServer()));
 
 	it('Can provide hover for HTML tags', async () => {
-		const document = await serverHandle.openUntitledTextDocument(`<q`, 'astro');
+		const document = await serverHandle.openUntitledDocument(`<q`, 'astro');
 		const hover = await serverHandle.sendHoverRequest(document.uri, Position.create(0, 2));
 
 		expect(hover).to.not.be.null;
 	});
 
 	it('Can provide hover for HTML attributes', async () => {
-		const document = await serverHandle.openUntitledTextDocument(`<blockquote c`, 'astro');
+		const document = await serverHandle.openUntitledDocument(`<blockquote c`, 'astro');
 		const hover = await serverHandle.sendHoverRequest(document.uri, Position.create(0, 13));
 
 		expect(hover).to.not.be.null;

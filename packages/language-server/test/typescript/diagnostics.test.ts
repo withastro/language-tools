@@ -15,7 +15,7 @@ describe('TypeScript - Diagnostics', async () => {
 	before(async () => ({ serverHandle } = await getLanguageServer()));
 
 	it('Can get diagnostics in the frontmatter', async () => {
-		const document = await serverHandle.openUntitledTextDocument('---\nNotAThing\n---', 'astro');
+		const document = await serverHandle.openUntitledDocument('---\nNotAThing\n---', 'astro');
 		const diagnostics = (await serverHandle.sendDocumentDiagnosticRequest(
 			document.uri
 		)) as FullDocumentDiagnosticReport;
@@ -37,7 +37,7 @@ describe('TypeScript - Diagnostics', async () => {
 	});
 
 	it('Can get diagnostics in the template', async () => {
-		const document = await serverHandle.openUntitledTextDocument('---\n\n---\n{nope}', 'astro');
+		const document = await serverHandle.openUntitledDocument('---\n\n---\n{nope}', 'astro');
 		const diagnostics = (await serverHandle.sendDocumentDiagnosticRequest(
 			document.uri
 		)) as FullDocumentDiagnosticReport;
@@ -55,7 +55,7 @@ describe('TypeScript - Diagnostics', async () => {
 	});
 
 	it('shows enhanced diagnostics', async () => {
-		const document = await serverHandle.openUntitledTextDocument(
+		const document = await serverHandle.openUntitledDocument(
 			'---\nimport {getEntryBySlug} from "astro:content";getEntryBySlug\n---\n<div client:idle></div><div>',
 			'astro'
 		);

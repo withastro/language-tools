@@ -10,7 +10,7 @@ describe('Formatting', () => {
 	before(async () => ({ serverHandle } = await getLanguageServer()));
 
 	it('Can format document', async () => {
-		const document = await serverHandle.openUntitledTextDocument(`---\n\n\n---`, 'astro');
+		const document = await serverHandle.openUntitledDocument(`---\n\n\n---`, 'astro');
 		const formatEdits = await serverHandle.sendDocumentFormattingRequest(document.uri, {
 			tabSize: 2,
 			insertSpaces: true,

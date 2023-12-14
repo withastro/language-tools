@@ -9,7 +9,7 @@ describe('TypeScript Addons - Completions', async () => {
 
 	before(async () => ({ serverHandle } = await getLanguageServer()));
 	it('Can provide neat snippets', async () => {
-		const document = await serverHandle.openUntitledTextDocument('---\nprerender\n---', 'astro');
+		const document = await serverHandle.openUntitledDocument('---\nprerender\n---', 'astro');
 		const completions = await serverHandle.sendCompletionRequest(
 			document.uri,
 			Position.create(1, 10)

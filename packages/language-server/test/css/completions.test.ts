@@ -10,7 +10,7 @@ describe('CSS - Completions', () => {
 	before(async () => ({ serverHandle } = await getLanguageServer()));
 
 	it('Can provide completions for CSS properties', async () => {
-		const document = await serverHandle.openUntitledTextDocument(
+		const document = await serverHandle.openUntitledDocument(
 			`<style>.foo { colo }</style>`,
 			'astro'
 		);
@@ -24,7 +24,7 @@ describe('CSS - Completions', () => {
 	});
 
 	it('Can provide completions for CSS values', async () => {
-		const document = await serverHandle.openUntitledTextDocument(
+		const document = await serverHandle.openUntitledDocument(
 			`<style>.foo { color: re }</style>`,
 			'astro'
 		);

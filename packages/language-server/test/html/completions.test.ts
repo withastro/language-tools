@@ -10,7 +10,7 @@ describe('HTML - Completions', () => {
 	before(async () => ({ serverHandle } = await getLanguageServer()));
 
 	it('Can provide completions for HTML tags', async () => {
-		const document = await serverHandle.openUntitledTextDocument(`<q`, 'astro');
+		const document = await serverHandle.openUntitledDocument(`<q`, 'astro');
 		const completions = await serverHandle.sendCompletionRequest(
 			document.uri,
 			Position.create(0, 2)
@@ -22,7 +22,7 @@ describe('HTML - Completions', () => {
 	});
 
 	it('Can provide completions for HTML attributes', async () => {
-		const document = await serverHandle.openUntitledTextDocument(`<blockquote c`, 'astro');
+		const document = await serverHandle.openUntitledDocument(`<blockquote c`, 'astro');
 		const completions = await serverHandle.sendCompletionRequest(
 			document.uri,
 			Position.create(0, 13)

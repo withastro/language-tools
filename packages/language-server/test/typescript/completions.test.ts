@@ -10,7 +10,7 @@ describe('TypeScript - Completions', async () => {
 	before(async () => ({ serverHandle } = await getLanguageServer()));
 
 	it('Can get completions in the frontmatter', async () => {
-		const document = await serverHandle.openUntitledTextDocument('---\nc\n---', 'astro');
+		const document = await serverHandle.openUntitledDocument('---\nc\n---', 'astro');
 		const completions = await serverHandle.sendCompletionRequest(
 			document.uri,
 			Position.create(1, 1)
@@ -20,7 +20,7 @@ describe('TypeScript - Completions', async () => {
 	});
 
 	it('Can get completions in the template', async () => {
-		const document = await serverHandle.openUntitledTextDocument('{c}', 'astro');
+		const document = await serverHandle.openUntitledDocument('{c}', 'astro');
 		const completions = await serverHandle.sendCompletionRequest(
 			document.uri,
 			Position.create(0, 1)
@@ -30,7 +30,7 @@ describe('TypeScript - Completions', async () => {
 	});
 
 	it('sort completions starting with `astro:` higher than other imports', async () => {
-		const document = await serverHandle.openUntitledTextDocument('<Image', 'astro');
+		const document = await serverHandle.openUntitledDocument('<Image', 'astro');
 		const completions = await serverHandle.sendCompletionRequest(
 			document.uri,
 			Position.create(0, 6)
