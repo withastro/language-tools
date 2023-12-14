@@ -124,8 +124,16 @@ export class AstroFile implements VirtualFile {
 				},
 			},
 		];
+		this.compilerDiagnostics = [];
 
-		this.astroMeta = getAstroMetadata(this.snapshot.getText(0, this.snapshot.getLength()));
+		this.astroMeta = getAstroMetadata(
+			this.fileName,
+			this.snapshot.getText(0, this.snapshot.getLength())
+		);
+
+		if (this.astroMeta.diagnostics.length > 0) {
+			this.compilerDiagnostics.push(...this.astroMeta.diagnostics);
+		}
 
 		const { htmlDocument, virtualFile: htmlVirtualFile } = parseHTML(
 			this.fileName,
@@ -160,7 +168,7 @@ export class AstroFile implements VirtualFile {
 			htmlDocument
 		);
 
-		this.compilerDiagnostics = tsx.diagnostics;
+		this.compilerDiagnostics.push(...tsx.diagnostics);
 		this.embeddedFiles.push(tsx.virtualFile);
 	}
 }

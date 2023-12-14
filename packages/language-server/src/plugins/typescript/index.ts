@@ -145,21 +145,23 @@ export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): 
 						context.env.uriToFileName(document.uri)
 					);
 					const file = source?.virtualFile?.[0];
-					if (!(file instanceof AstroFile)) return null;
+					let astroDocument = undefined;
 
-					// If we have compiler errors, our TSX isn't valid so don't bother showing TS errors
-					if (file.hasCompilationErrors) return null;
+					if (file instanceof AstroFile) {
+						// If we have compiler errors, our TSX isn't valid so don't bother showing TS errors
+						if (file.hasCompilationErrors) return null;
+
+						astroDocument = context.documents.get(
+							context.env.fileNameToUri(file.sourceFileName),
+							file.languageId,
+							file.snapshot
+						);
+					}
 
 					const diagnostics = await tsService.provideSemanticDiagnostics!(document, token);
 					if (!diagnostics) return null;
 
-					const astroDocument = context.documents.get(
-						context.env.fileNameToUri(file.sourceFileName),
-						file.languageId,
-						file.snapshot
-					);
-
-					return enhancedProvideSemanticDiagnostics(diagnostics, astroDocument.lineCount);
+					return enhancedProvideSemanticDiagnostics(diagnostics, astroDocument?.lineCount);
 				},
 			};
 		},
