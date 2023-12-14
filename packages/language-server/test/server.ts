@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { startLanguageServer, LanguageServerHandle } from '@volar/test-utils';
+import { LanguageServerHandle, startLanguageServer } from '@volar/test-utils';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as protocol from 'vscode-languageserver-protocol/node';
@@ -14,6 +14,7 @@ export async function getLanguageServer() {
 			path.resolve('./bin/nodeServer.js'),
 			fileURLToPath(new URL('./fixture', import.meta.url))
 		);
+
 		initializeResult = await serverHandle.initialize(
 			URI.file(fileURLToPath(new URL('./fixture', import.meta.url))).toString(),
 			{
@@ -34,8 +35,14 @@ export async function getLanguageServer() {
 			protocol.Position.create(0, 0)
 		);
 	}
+
+	if (!initializeResult || !serverHandle) {
+		throw new Error('Server not initialized');
+	}
+
 	return {
-		serverHandle: serverHandle!,
-		initializeResult: initializeResult!,
+		serverHandle: serverHandle,
+		initializeResult: initializeResult,
+		connection: serverHandle.connection,
 	};
 }

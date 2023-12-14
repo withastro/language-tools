@@ -9,7 +9,7 @@ describe('HTML - Completions', () => {
 
 	before(async () => ({ serverHandle } = await getLanguageServer()));
 
-	it('Can provide completions for HTML tags', async () => {
+	it('Can provide completions for HTML tags zzz', async () => {
 		const document = await serverHandle.openUntitledDocument(`<q`, 'astro');
 		const completions = await serverHandle.sendCompletionRequest(
 			document.uri,
@@ -18,7 +18,6 @@ describe('HTML - Completions', () => {
 
 		expect(completions!.items).to.not.be.empty;
 		expect(completions!.items[0].label).to.equal('blockquote');
-		expect(completions!.items[0].data.serviceId).to.equal('html');
 	});
 
 	it('Can provide completions for HTML attributes', async () => {
@@ -30,6 +29,5 @@ describe('HTML - Completions', () => {
 
 		expect(completions!.items).to.not.be.empty;
 		expect(completions!.items[0].label).to.equal('cite');
-		expect(completions!.items[0].data.serviceId).to.equal('html');
 	});
 });

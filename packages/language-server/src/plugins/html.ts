@@ -1,4 +1,4 @@
-import { CompletionItemKind, ServicePluginInstance, ServicePlugin } from '@volar/language-server';
+import { CompletionItemKind, ServicePlugin, ServicePluginInstance } from '@volar/language-server';
 import { create as createHtmlService } from 'volar-service-html';
 import { AstroFile } from '../core/index.js';
 import { astroAttributes, astroElements, classListAttribute } from './html-data.js';

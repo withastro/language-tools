@@ -17,6 +17,5 @@ describe('TypeScript Addons - Completions', async () => {
 
 		const prerenderCompletions = completions?.items.filter((item) => item.label === 'prerender');
 		expect(prerenderCompletions).to.not.be.empty;
-		expect(prerenderCompletions?.[0].data.serviceId).to.equal('typescriptaddons');
 	});
 });

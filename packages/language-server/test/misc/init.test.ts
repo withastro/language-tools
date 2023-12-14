@@ -39,16 +39,16 @@ describe('Initialize', async () => {
 			documentSymbolProvider: true,
 			documentFormattingProvider: true,
 			documentRangeFormattingProvider: true,
+			documentOnTypeFormattingProvider: {
+				firstTriggerCharacter: ';',
+				moreTriggerCharacter: ['}', '\n'],
+			},
 			referencesProvider: true,
 			implementationProvider: true,
 			definitionProvider: true,
 			typeDefinitionProvider: true,
 			callHierarchyProvider: true,
 			hoverProvider: true,
-			diagnosticProvider: {
-				interFileDependencies: true,
-				workspaceDiagnostics: false,
-			},
 			renameProvider: { prepareProvider: true },
 			signatureHelpProvider: { triggerCharacters: ['(', ',', '<'], retriggerCharacters: [')'] },
 			completionProvider: {

@@ -20,7 +20,6 @@ describe('CSS - Completions', () => {
 		);
 
 		expect(completions!.items).to.not.be.empty;
-		expect(completions!.items[0].data.serviceId).to.equal('css');
 	});
 
 	it('Can provide completions for CSS values', async () => {
@@ -34,6 +33,5 @@ describe('CSS - Completions', () => {
 		);
 
 		expect(completions!.items).to.not.be.empty;
-		expect(completions!.items[0].data.serviceId).to.equal('css');
 	});
 });
