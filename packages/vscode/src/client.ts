@@ -2,10 +2,6 @@ import { DiagnosticModel, InitializationOptions } from '@volar/language-server';
 import * as protocol from '@volar/language-server/protocol';
 import {
 	activateAutoInsertion,
-	activateFindFileReferences,
-	activateReloadProjects,
-	activateTsConfigStatusItem,
-	activateTsVersionStatusItem,
 	getTsdk,
 	supportLabsVersion,
 	type ExportsInfoForLabs,
@@ -17,6 +13,8 @@ import * as lsp from 'vscode-languageclient/node';
 let client: lsp.BaseLanguageClient;
 
 export async function activate(context: vscode.ExtensionContext): Promise<ExportsInfoForLabs> {
+	vscode.extensions.getExtension('vscode.typescript-language-features')?.activate();
+
 	const runtimeConfig = vscode.workspace.getConfiguration('astro.language-server');
 
 	const { workspaceFolders } = vscode.workspace;
@@ -65,22 +63,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<Export
 	const clientOptions: lsp.LanguageClientOptions = {
 		documentSelector: [{ language: 'astro' }],
 		initializationOptions,
+		markdown: {
+			isTrusted: true,
+			supportHtml: true,
+		},
 	};
 	client = new lsp.LanguageClient('astro', 'Astro Language Server', serverOptions, clientOptions);
 	await client.start();
 
 	// support for auto close tag
 	activateAutoInsertion('astro', client);
-	activateFindFileReferences('astro.findFileReferences', client);
-	activateReloadProjects('astro.reloadProjects', client);
-	activateTsConfigStatusItem('astro', 'astro.openTsConfig', client);
-	activateTsVersionStatusItem(
-		'astro',
-		'astro.selectTypescriptVersion',
-		context,
-		client,
-		(text) => text
-	);
 
 	return {
 		volarLabs: {
@@ -142,3 +134,28 @@ async function getConfiguredServerPath(workspaceState: vscode.Memento) {
 		return lsPath;
 	}
 }
+
+// Track https://github.com/microsoft/vscode/issues/200511
+try {
+	const tsExtension = vscode.extensions.getExtension('vscode.typescript-language-features');
+	if (tsExtension) {
+		const readFileSync = require('fs').readFileSync;
+		const extensionJsPath = require.resolve('./dist/extension.js', { paths: [tsExtension.extensionPath] });
+
+		// @ts-expect-error
+		require('fs').readFileSync = (...args) => {
+			if (args[0] === extensionJsPath) {
+				let text = readFileSync(...args) as string;
+
+				// patch jsTsLanguageModes
+				text = text.replace('t.$u=[t.$r,t.$s,t.$p,t.$q]', s => s + '.concat("astro")');
+
+				// patch isSupportedLanguageMode
+				text = text.replace('s.languages.match([t.$p,t.$q,t.$r,t.$s]', s => s + '.concat("astro")');
+
+				return text;
+			}
+			return readFileSync(...args);
+		};
+	}
+} catch { }

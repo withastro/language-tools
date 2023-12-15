@@ -57,64 +57,42 @@
     "typescriptServerPlugins": [
       {
         "name": "astro-ts-plugin-bundle",
-        "enableForWorkspaceTypeScriptVersions": true
-      }
-    ],
-    "commands": [
-      {
-        "command": "astro.reloadProjects",
-        "title": "Astro: Reload Projects"
-      },
-      {
-        "command": "astro.findFileReferences",
-        "title": "Astro: Find File References"
-      },
-      {
-        "command": "astro.selectTypescriptVersion",
-        "title": "Astro: Select Typescript Version..."
-      },
-      {
-        "command": "astro.openTsConfig",
-        "title": "Astro: Open TypeScript config"
+        "enableForWorkspaceTypeScriptVersions": true,
+        "configNamespace": "typescript",
+        "languages": [
+          "astro"
+        ]
       }
     ],
     "menus": {
-      "commandPalette": [
-        {
-          "command": "astro.reloadProjects",
-          "when": "editorLangId == astro"
-        },
-        {
-          "command": "astro.findFileReferences",
-          "when": "editorLangId == astro"
-        },
-        {
-          "command": "astro.selectTypescriptVersion",
-          "when": "editorLangId == astro"
-        },
-        {
-          "command": "astro.openTsConfig",
-          "when": "editorLangId == astro"
-        }
-      ],
       "editor/context": [
         {
-          "command": "astro.findFileReferences",
-          "when": "editorLangId == astro",
+          "command": "typescript.goToSourceDefinition",
+          "when": "tsSupportsSourceDefinition && resourceLangId == mdx",
+          "group": "navigation@9"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "typescript.findAllFileReferences",
+          "when": "tsSupportsFileReferences && resourceLangId == mdx",
           "group": "4_search"
         }
       ],
       "editor/title/context": [
         {
-          "command": "astro.findFileReferences",
-          "when": "resourceLangId == astro && resourceScheme == file"
+          "command": "typescript.findAllFileReferences",
+          "when": "tsSupportsFileReferences && resourceLangId == mdx"
         }
       ],
-      "explorer/context": [
+      "commandPalette": [
         {
-          "command": "astro.findFileReferences",
-          "when": "resourceLangId == astro",
-          "group": "4_search"
+          "command": "typescript.reloadProjects",
+          "when": "editorLangId == mdx && typescript.isManagedFile"
+        },
+        {
+          "command": "typescript.goToProjectConfig",
+          "when": "editorLangId == mdx"
         }
       ]
     },
