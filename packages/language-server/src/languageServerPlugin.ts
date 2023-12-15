@@ -46,8 +46,8 @@ export function createPlugin(connection: Connection): ServerPlugin {
 		],
 		resolveConfig(config, env, projectContext) {
 			config.languages ??= {};
-			if (env && projectContext?.typescript) {
-				const rootPath = projectContext.typescript.configFileName
+			if (env) {
+				const rootPath = projectContext?.typescript?.configFileName
 					? projectContext.typescript.configFileName.split('/').slice(0, -1).join('/')
 					: env.uriToFileName(env.workspaceFolder.uri.toString());
 				const nearestPackageJson = modules.typescript?.findConfigFile(

@@ -31,14 +31,12 @@
     "@volar/typescript": "2.0.0-alpha.6",
     "@astrojs/compiler": "^2.2.2",
     "@jridgewell/sourcemap-codec": "^1.4.15",
-    "semver": "^7.3.8",
     "vscode-languageserver-textdocument": "^1.0.11"
   },
   "devDependencies": {
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.17.8",
-    "@types/semver": "^7.3.13",
     "chai": "^4.3.7",
     "glob": "^8.0.3",
     "mocha": "^10.2.0"
