@@ -267,5 +267,15 @@ export const astroDirectives = newHTMLDataProvider('astro-directives', {
 				},
 			],
 		},
+		{
+			name: 'client:params',
+			description: 'Blank for now',
+			references: [
+				{
+					name: 'Astro reference',
+					url: 'https://docs.astro.build/en/reference/directives-reference/#clientparams',
+				},
+			],
+		},
 	],
 });

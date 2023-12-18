@@ -23,12 +23,14 @@ declare namespace astroHTML.JSX {
 		children?: Children;
 	}
 
+	type ClientParamsProp = null | { directive: string; value?: any };
 	interface AstroBuiltinProps {
 		'client:load'?: boolean;
 		'client:idle'?: boolean;
 		'client:media'?: string;
 		'client:visible'?: boolean;
 		'client:only'?: boolean | string;
+		'client:params'?: ClientParamsProp;
 	}
 
 	interface AstroBuiltinAttributes {
