@@ -3,7 +3,7 @@ import {
 	createNodeServer,
 	createTypeScriptProjectProvider,
 } from '@volar/language-server/node';
-import { createPlugin } from './languageServerPlugin.js';
+import { createServerOptions } from './languageServerPlugin.js';
 
 const connection = createConnection();
 const server = createNodeServer(connection);
@@ -14,7 +14,7 @@ connection.onInitialize((params) => {
 	return server.initialize(
 		params,
 		createTypeScriptProjectProvider,
-		createPlugin(connection, server.modules)
+		createServerOptions(connection, server.modules)
 	);
 });
 

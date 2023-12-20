@@ -25,7 +25,7 @@ import { create as createHtmlService } from './plugins/html.js';
 import { create as createTypescriptAddonsService } from './plugins/typescript-addons/index.js';
 import { create as createTypeScriptService } from './plugins/typescript/index.js';
 
-export function createPlugin(
+export function createServerOptions(
 	connection: Connection,
 	modules: { typescript: typeof import('typescript') | undefined }
 ): ServerOptions {
