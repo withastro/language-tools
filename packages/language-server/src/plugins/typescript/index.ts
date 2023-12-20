@@ -1,4 +1,4 @@
-import { ServicePluginInstance, ServicePlugin, TextDocumentEdit } from '@volar/language-server';
+import { ServicePlugin, ServicePluginInstance, TextDocumentEdit } from '@volar/language-server';
 import { create as createTypeScriptService } from 'volar-service-typescript';
 import { AstroFile } from '../../core/index.js';
 import {
@@ -37,8 +37,8 @@ export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): 
 								edit.newText.replace('import type', 'import');
 							}
 
-							if (editShouldBeInFrontmatter(edit.range)) {
-								return ensureProperEditForFrontmatter(edit, file.astroMeta.frontmatter, newLine);
+							if (editShouldBeInFrontmatter(edit.range, file.astroMeta.tsxStartLine).itShould) {
+								return ensureProperEditForFrontmatter(edit, file.astroMeta, newLine);
 							}
 
 							return edit;
@@ -78,11 +78,15 @@ export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): 
 							change.textDocument.uri = originalUri;
 							if (change.edits.length === 1) {
 								change.edits = change.edits.map((edit) => {
-									const editInFrontmatter = editShouldBeInFrontmatter(edit.range, document);
+									const editInFrontmatter = editShouldBeInFrontmatter(
+										edit.range,
+										file.astroMeta.tsxStartLine,
+										document
+									);
 									if (editInFrontmatter.itShould) {
 										return ensureProperEditForFrontmatter(
 											edit,
-											file.astroMeta.frontmatter,
+											file.astroMeta,
 											newLine,
 											editInFrontmatter.position
 										);
@@ -93,11 +97,15 @@ export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): 
 							} else {
 								if (file.astroMeta.frontmatter.status === 'closed') {
 									change.edits = change.edits.map((edit) => {
-										const editInFrontmatter = editShouldBeInFrontmatter(edit.range, document);
+										const editInFrontmatter = editShouldBeInFrontmatter(
+											edit.range,
+											file.astroMeta.tsxStartLine,
+											document
+										);
 										if (editInFrontmatter.itShould) {
 											edit.range = ensureRangeIsInFrontmatter(
 												edit.range,
-												file.astroMeta.frontmatter,
+												file.astroMeta,
 												editInFrontmatter.position
 											);
 										}
@@ -107,7 +115,11 @@ export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): 
 									// TODO: Handle when there's multiple edits and a new frontmatter is potentially needed
 									if (
 										change.edits.some((edit) => {
-											return editShouldBeInFrontmatter(edit.range, document).itShould;
+											return editShouldBeInFrontmatter(
+												edit.range,
+												file.astroMeta.tsxStartLine,
+												document
+											).itShould;
 										})
 									) {
 										console.error(

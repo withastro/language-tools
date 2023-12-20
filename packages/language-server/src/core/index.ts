@@ -1,11 +1,11 @@
-import type { DiagnosticMessage, ParseResult } from '@astrojs/compiler/types';
+import type { DiagnosticMessage } from '@astrojs/compiler/types';
 import type { LanguagePlugin, VirtualFile } from '@volar/language-core';
 import * as path from 'node:path';
 import type ts from 'typescript/lib/tsserverlibrary';
 import type { HTMLDocument } from 'vscode-html-languageservice';
 import type { AstroInstall } from '../utils.js';
 import { astro2tsx } from './astro2tsx';
-import { FrontmatterStatus, getAstroMetadata } from './parseAstro';
+import { AstroMetadata, getAstroMetadata } from './parseAstro';
 import { extractStylesheets } from './parseCSS';
 import { parseHTML } from './parseHTML';
 import { extractScriptTags } from './parseJS.js';
@@ -61,9 +61,9 @@ export function getLanguageModule(
 							module: ts.ModuleKind.ESNext ?? 99,
 							target: ts.ScriptTarget.ESNext ?? 99,
 							jsx: ts.JsxEmit.Preserve ?? 1,
-							jsxImportSource: undefined,
-							jsxFactory: 'astroHTML',
+							// Always true for Astro
 							resolveJsonModule: true,
+							// Necessary for inline script tags that are JavaScript
 							allowJs: true,
 							isolatedModules: true,
 							moduleResolution:
@@ -84,7 +84,7 @@ export class AstroFile implements VirtualFile {
 	languageId = 'astro';
 	mappings!: VirtualFile['mappings'];
 	embeddedFiles!: VirtualFile['embeddedFiles'];
-	astroMeta!: ParseResult & { frontmatter: FrontmatterStatus };
+	astroMeta!: AstroMetadata;
 	compilerDiagnostics!: DiagnosticMessage[];
 	htmlDocument!: HTMLDocument;
 	scriptFiles!: string[];

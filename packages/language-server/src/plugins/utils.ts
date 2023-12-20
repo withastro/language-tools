@@ -1,5 +1,5 @@
 import { HTMLDocument, Node, Range, TextDocument, TextEdit } from 'vscode-html-languageservice';
-import type { FrontmatterStatus } from '../core/parseAstro.js';
+import type { AstroMetadata, FrontmatterStatus } from '../core/parseAstro.js';
 
 export function isJSDocument(languageId: string) {
 	return (
@@ -52,17 +52,22 @@ type FrontmatterEditPosition = 'top' | 'bottom';
 
 export function ensureProperEditForFrontmatter(
 	edit: TextEdit,
-	frontmatter: FrontmatterStatus,
+	metadata: AstroMetadata,
 	newLine: string,
 	position: FrontmatterEditPosition = 'top'
 ): TextEdit {
-	switch (frontmatter.status) {
+	switch (metadata.frontmatter.status) {
 		case 'open':
 			return getOpenFrontmatterEdit(edit, newLine);
 		case 'closed':
+			const newRange = ensureRangeIsInFrontmatter(edit.range, metadata, position);
 			return {
-				newText: edit.newText,
-				range: ensureRangeIsInFrontmatter(edit.range, frontmatter, position),
+				newText:
+					newRange.start.line === metadata.frontmatter.position.start.line &&
+					edit.newText.startsWith(newLine)
+						? edit.newText.trimStart()
+						: edit.newText,
+				range: newRange,
 			};
 		case 'doesnt-exist':
 			return getNewFrontmatterEdit(edit, newLine);
@@ -74,25 +79,26 @@ export function ensureProperEditForFrontmatter(
  */
 export function ensureRangeIsInFrontmatter(
 	range: Range,
-	frontmatter: FrontmatterStatus,
+	metadata: AstroMetadata,
 	position: FrontmatterEditPosition = 'top'
 ): Range {
-	if (frontmatter.status === 'open' || frontmatter.status === 'closed') {
+	if (metadata.frontmatter.status === 'open' || metadata.frontmatter.status === 'closed') {
 		// Q: Why not use PointToPosition?
 		// A: The Astro compiler returns positions at the exact line where the frontmatter is, which is not adequate for mapping
 		// edits as we want edits *inside* the frontmatter and not on the same line, or you would end up with things like `---import ...`
 		const frontmatterStartPosition = {
-			line: frontmatter.position.start.line,
-			character: frontmatter.position.start.column - 1,
+			line: metadata.frontmatter.position.start.line,
+			character: metadata.frontmatter.position.start.column - 1,
 		};
-		const frontmatterEndPosition = frontmatter.position.end
-			? { line: frontmatter.position.end.line - 1, character: 0 }
+		const frontmatterEndPosition = metadata.frontmatter.position.end
+			? { line: metadata.frontmatter.position.end.line - 1, character: 0 }
 			: undefined;
 
 		// If the range start is outside the frontmatter, return a range at the start of the frontmatter
+		const adjustedStartLine = range.start.line - metadata.tsxStartLine;
 		if (
-			range.start.line < frontmatterStartPosition.line ||
-			(frontmatterEndPosition && range.start.line > frontmatterEndPosition.line)
+			adjustedStartLine < frontmatterStartPosition.line ||
+			(frontmatterEndPosition && adjustedStartLine > frontmatterEndPosition.line)
 		) {
 			if (frontmatterEndPosition && position === 'bottom') {
 				return Range.create(frontmatterEndPosition, frontmatterEndPosition);
@@ -108,7 +114,9 @@ export function ensureRangeIsInFrontmatter(
 }
 
 export function getNewFrontmatterEdit(edit: TextEdit, newLine: string) {
-	edit.newText = `---${newLine}${edit.newText}---${newLine}${newLine}`;
+	edit.newText = `---${edit.newText.startsWith(newLine) ? '' : newLine}${
+		edit.newText
+	}---${newLine}${newLine}`;
 	edit.range = Range.create(0, 0, 0, 0);
 
 	return edit;
@@ -125,15 +133,16 @@ type FrontmatterEditValidity =
 	| { itShould: false; position: undefined }
 	| { itShould: true; position: FrontmatterEditPosition };
 
-// Most edits that are at 0:0, or outside the document are intended for the frontmatter
+// Most edits that are at the beginning of the TSX, or outside the document are intended for the frontmatter
 export function editShouldBeInFrontmatter(
 	range: Range,
+	tsxStartLine: number,
 	astroDocument?: TextDocument
 ): FrontmatterEditValidity {
-	const isAtZeroZero = range.start.line === 0 && range.start.character === 0;
+	const isAtTSXStart = range.start.line === tsxStartLine && range.start.character === 0;
 
 	const isPastFile = astroDocument && range.start.line > astroDocument.lineCount;
-	const shouldIt = isAtZeroZero || isPastFile;
+	const shouldIt = isAtTSXStart || isPastFile;
 
 	return shouldIt
 		? { itShould: true, position: isPastFile ? 'bottom' : 'top' }
