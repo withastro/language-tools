@@ -28,7 +28,7 @@ import { create as createTypeScriptService } from './plugins/typescript/index.js
 export function createPlugin(
 	connection: Connection,
 	modules: { typescript: typeof import('typescript') | undefined }
-): ServerOptions & { typescript: { extraFileExtensions: any[] } } {
+): ServerOptions {
 	const ts = getTypeScriptModule();
 	const servicePlugins: ServicePlugin[] = [
 		createHtmlService(),
@@ -41,13 +41,6 @@ export function createPlugin(
 	];
 
 	return {
-		typescript: {
-			extraFileExtensions: [
-				{ extension: 'astro', isMixedContent: true, scriptKind: 7 },
-				{ extension: 'vue', isMixedContent: true, scriptKind: 7 },
-				{ extension: 'svelte', isMixedContent: true, scriptKind: 7 },
-			],
-		},
 		watchFileExtensions: [
 			'js',
 			'cjs',
