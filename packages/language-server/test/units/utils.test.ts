@@ -77,20 +77,20 @@ describe('Utilities', async () => {
 
 	it('ensureRangeIsInFrontmatter - properly return a range inside the frontmatter', () => {
 		const beforeFrontmatterRange = html.Range.create(0, 0, 0, 0);
-		const hasFrontmatter = getAstroMetadata('file.astro', '---\nfoo\n---\n');
-		expect(
-			utils.ensureRangeIsInFrontmatter(beforeFrontmatterRange, hasFrontmatter.frontmatter)
-		).to.deep.equal(Range.create(1, 0, 1, 0));
+		const astroMetadata = getAstroMetadata('file.astro', '---\nfoo\n---\n');
+		expect(utils.ensureRangeIsInFrontmatter(beforeFrontmatterRange, astroMetadata)).to.deep.equal(
+			Range.create(1, 0, 1, 0)
+		);
 
 		const insideFrontmatterRange = html.Range.create(1, 0, 1, 0);
-		expect(
-			utils.ensureRangeIsInFrontmatter(insideFrontmatterRange, hasFrontmatter.frontmatter)
-		).to.deep.equal(Range.create(1, 0, 1, 0));
+		expect(utils.ensureRangeIsInFrontmatter(insideFrontmatterRange, astroMetadata)).to.deep.equal(
+			Range.create(1, 0, 1, 0)
+		);
 
 		const outsideFrontmatterRange = html.Range.create(6, 0, 6, 0);
-		expect(
-			utils.ensureRangeIsInFrontmatter(outsideFrontmatterRange, hasFrontmatter.frontmatter)
-		).to.deep.equal(Range.create(1, 0, 1, 0));
+		expect(utils.ensureRangeIsInFrontmatter(outsideFrontmatterRange, astroMetadata)).to.deep.equal(
+			Range.create(1, 0, 1, 0)
+		);
 	});
 
 	it('getNewFrontmatterEdit - properly return a new frontmatter edit', () => {
