@@ -60,8 +60,16 @@ export class AstroCheck {
 			  }
 			| undefined;
 	}): Promise<CheckResult> {
-		const files =
+		let files =
 			fileNames !== undefined ? fileNames : this.project.languageHost.getScriptFileNames();
+
+		if (files.some((file) => file.endsWith('.jsx') || file.endsWith('.tsx'))) {
+			console.warn(
+				'Checking `.jsx` and `.tsx` files is currently disabled due to an issue in the Astro language server and TypeScript. See https://github.com/withastro/language-tools/issues/727 for more details. In the meantime, such files can be checked using `tsc --noEmit`.'
+			);
+
+			files = files.filter((file) => !file.endsWith('.jsx') && !file.endsWith('.tsx'));
+		}
 
 		const result: CheckResult = {
 			status: undefined,
