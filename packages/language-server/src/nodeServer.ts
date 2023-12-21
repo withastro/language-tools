@@ -14,7 +14,7 @@ connection.onInitialize((params) => {
 	return server.initialize(
 		params,
 		createTypeScriptProjectProvider,
-		createServerOptions(connection, server.modules)
+		createServerOptions(connection, server)
 	);
 });
 

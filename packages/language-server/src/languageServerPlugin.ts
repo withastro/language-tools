@@ -19,7 +19,7 @@ import { create as createEmmetService } from 'volar-service-emmet';
 import { create as createPrettierService } from 'volar-service-prettier';
 import { create as createTypeScriptTwoSlashService } from 'volar-service-typescript-twoslash-queries';
 
-import type { ServerOptions } from '@volar/language-server/lib/server.js';
+import type { ServerOptions, createServer } from '@volar/language-server/lib/server.js';
 import { create as createAstroService } from './plugins/astro.js';
 import { create as createHtmlService } from './plugins/html.js';
 import { create as createTypescriptAddonsService } from './plugins/typescript-addons/index.js';
@@ -27,19 +27,8 @@ import { create as createTypeScriptService } from './plugins/typescript/index.js
 
 export function createServerOptions(
 	connection: Connection,
-	modules: { typescript: typeof import('typescript') | undefined }
+	server: ReturnType<typeof createServer>
 ): ServerOptions {
-	const ts = getTypeScriptModule();
-	const servicePlugins: ServicePlugin[] = [
-		createHtmlService(),
-		createCssService(),
-		createEmmetService(),
-		createTypeScriptService(ts),
-		createTypeScriptTwoSlashService(),
-		createTypescriptAddonsService(),
-		createAstroService(ts),
-	];
-
 	return {
 		watchFileExtensions: [
 			'js',
@@ -56,11 +45,33 @@ export function createServerOptions(
 			'svelte',
 		],
 		getServerCapabilitiesSetup() {
+			const ts = getTypeScriptModule();
+			const servicePlugins: ServicePlugin[] = [
+				createHtmlService(),
+				createCssService(),
+				createEmmetService(),
+				createTypeScriptService(ts),
+				createTypeScriptTwoSlashService(),
+				createTypescriptAddonsService(),
+				createAstroService(ts),
+			];
+
 			return {
 				servicePlugins: servicePlugins,
 			};
 		},
 		getProjectSetup(serviceEnv, projectContext) {
+			const ts = getTypeScriptModule();
+			const servicePlugins: ServicePlugin[] = [
+				createHtmlService(),
+				createCssService(),
+				createEmmetService(),
+				createTypeScriptService(ts),
+				createTypeScriptTwoSlashService(),
+				createTypescriptAddonsService(),
+				createAstroService(ts),
+			];
+
 			const languagePlugins: LanguagePlugin<VirtualFile>[] = [
 				getVueLanguageModule(),
 				getSvelteLanguageModule(),
@@ -70,7 +81,7 @@ export function createServerOptions(
 				const rootPath = projectContext.typescript.configFileName
 					? projectContext.typescript.configFileName.split('/').slice(0, -1).join('/')
 					: serviceEnv.uriToFileName(serviceEnv.workspaceFolder.uri.toString());
-				const nearestPackageJson = modules.typescript?.findConfigFile(
+				const nearestPackageJson = server.modules.typescript?.findConfigFile(
 					rootPath,
 					ts.sys.fileExists,
 					'package.json'
@@ -102,7 +113,7 @@ export function createServerOptions(
 	};
 
 	function getTypeScriptModule() {
-		const tsModule = modules.typescript;
+		const tsModule = server.modules.typescript;
 		if (!tsModule) {
 			throw new Error('TypeScript module is missing');
 		}
