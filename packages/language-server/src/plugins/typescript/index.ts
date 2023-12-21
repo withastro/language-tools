@@ -9,8 +9,10 @@ import {
 import { enhancedProvideCompletionItems, enhancedResolveCompletionItem } from './completions.js';
 import { enhancedProvideSemanticDiagnostics } from './diagnostics.js';
 
-export const create = (ts: typeof import('typescript/lib/tsserverlibrary.js')): ServicePlugin => {
-	const tsServicePlugin = createTypeScriptService(ts);
+export const create = (ts: typeof import('typescript')): ServicePlugin => {
+	const tsServicePlugin = createTypeScriptService(
+		ts as typeof import('typescript/lib/tsserverlibrary')
+	);
 	return {
 		...tsServicePlugin,
 		create(context): ServicePluginInstance {
