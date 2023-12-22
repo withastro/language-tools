@@ -44,14 +44,27 @@ export function getLanguageModule(
 					return host.resolveModuleName?.(moduleName, impliedNodeFormat) ?? moduleName;
 				},
 				getScriptFileNames() {
+					let languageServerDirectory: string;
+					try {
+						languageServerDirectory = path.dirname(require.resolve('@astrojs/language-server'));
+					} catch (e) {
+						languageServerDirectory = __dirname;
+					}
+
 					const fileNames = host.getScriptFileNames();
 					return [
 						...fileNames,
+						// TODO: This is a hack to get the JSX types to work, but this can probably be done in Astro itself
+						...['../types/jsx-runtime-augment.d.ts'].map((f) =>
+							ts.sys.resolvePath(path.resolve(languageServerDirectory, f))
+						),
 						...(astroInstall
 							? ['./env.d.ts', './astro-jsx.d.ts'].map((filePath) =>
 									ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
 							  )
-							: []),
+							: ['../types/env.d.ts', '../types/astro-jsx.d.ts'].map((f) =>
+									ts.sys.resolvePath(path.resolve(languageServerDirectory, f))
+							  )),
 					];
 				},
 				getCompilationSettings() {
@@ -61,8 +74,6 @@ export function getLanguageModule(
 						module: ts.ModuleKind.ESNext ?? 99,
 						target: ts.ScriptTarget.ESNext ?? 99,
 						jsx: ts.JsxEmit.Preserve ?? 1,
-						jsxImportSource: undefined,
-						jsxFactory: 'astroHTML',
 						resolveJsonModule: true,
 						allowJs: true,
 						isolatedModules: true,
