@@ -1,20 +1,22 @@
 import { parse } from '@astrojs/compiler/sync';
 import type { ParseOptions, ParseResult, Point } from '@astrojs/compiler/types';
+import type { LSPTSXRanges } from './astro2tsx.js';
 
-export type AstroMetadata = ParseResult & { frontmatter: FrontmatterStatus; tsxStartLine: number };
+export type AstroMetadata = ParseResult & {
+	frontmatter: FrontmatterStatus;
+	tsxRanges: LSPTSXRanges;
+};
 
 export function getAstroMetadata(
 	fileName: string,
 	input: string,
 	options: ParseOptions = { position: true }
-): AstroMetadata {
+): Omit<AstroMetadata, 'tsxRanges'> {
 	const parseResult = safeParseAst(fileName, input, options);
 
 	return {
 		...parseResult,
 		frontmatter: getFrontmatterStatus(parseResult.ast, input),
-		// TODO: The compiler could probably return the TSX start line, but for now we'll just assume it's always 1
-		tsxStartLine: 1,
 	};
 }
 

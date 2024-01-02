@@ -52,20 +52,39 @@ export function getLanguageModule(
 					}
 
 					const fileNames = host.getScriptFileNames();
-					return [
-						...fileNames,
-						// TODO: This is a hack to get the JSX types to work, but this can probably be done in Astro itself
-						...['../types/jsx-runtime-augment.d.ts'].map((f) =>
-							ts.sys.resolvePath(path.resolve(languageServerDirectory, f))
-						),
-						...(astroInstall
-							? ['./env.d.ts', './astro-jsx.d.ts'].map((filePath) =>
-									ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
-							  )
-							: ['../types/env.d.ts', '../types/astro-jsx.d.ts'].map((f) =>
-									ts.sys.resolvePath(path.resolve(languageServerDirectory, f))
-							  )),
-					];
+
+					const addedFileNames = [];
+
+					if (astroInstall) {
+						addedFileNames.push(
+							...['./env.d.ts', './astro-jsx.d.ts'].map((filePath) =>
+								ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
+							)
+						);
+
+						// If Astro version is < 4.0.8, add jsx-runtime-augment.d.ts to the files to fake `JSX` being available from "astro/jsx-runtime".
+						// TODO: Remove this once a majority of users are on Astro 4.0.8+, erika - 2023-12-28
+						if (
+							astroInstall.version.major >= 4 &&
+							(astroInstall.version.minor > 0 || astroInstall.version.patch >= 8)
+						) {
+							addedFileNames.push(
+								...['../jsx-runtime-augment.d.ts'].map((filePath) =>
+									ts.sys.resolvePath(path.resolve(languageServerDirectory, filePath))
+								)
+							);
+						}
+					} else {
+						// If we're running in the language server, add the fallback types from the language server's.
+						// See the README in packages/language-server/types for more information.
+						addedFileNames.push(
+							...['../types/env.d.ts', '../types/astro-jsx.d.ts'].map((f) =>
+								ts.sys.resolvePath(path.resolve(languageServerDirectory, f))
+							)
+						);
+					}
+
+					return [...fileNames, ...addedFileNames];
 				},
 				getCompilationSettings() {
 					const baseCompilationSettings = host.getCompilationSettings();
@@ -130,20 +149,20 @@ export class AstroFile implements VirtualFile {
 		];
 		this.compilerDiagnostics = [];
 
-		this.astroMeta = getAstroMetadata(
+		const astroMetadata = getAstroMetadata(
 			this.fileName,
 			this.snapshot.getText(0, this.snapshot.getLength())
 		);
 
-		if (this.astroMeta.diagnostics.length > 0) {
-			this.compilerDiagnostics.push(...this.astroMeta.diagnostics);
+		if (astroMetadata.diagnostics.length > 0) {
+			this.compilerDiagnostics.push(...astroMetadata.diagnostics);
 		}
 
 		const { htmlDocument, virtualFile: htmlVirtualFile } = parseHTML(
 			this.fileName,
 			this.snapshot,
-			this.astroMeta.frontmatter.status === 'closed'
-				? this.astroMeta.frontmatter.position.end.offset
+			astroMetadata.frontmatter.status === 'closed'
+				? astroMetadata.frontmatter.position.end.offset
 				: 0
 		);
 		this.htmlDocument = htmlDocument;
@@ -152,13 +171,13 @@ export class AstroFile implements VirtualFile {
 			this.fileName,
 			this.snapshot,
 			htmlDocument,
-			this.astroMeta.ast
+			astroMetadata.ast
 		);
 
 		this.scriptFiles = scriptTags.map((scriptTag) => scriptTag.fileName);
 
 		htmlVirtualFile.embeddedFiles.push(
-			...extractStylesheets(this.fileName, this.snapshot, htmlDocument, this.astroMeta.ast),
+			...extractStylesheets(this.fileName, this.snapshot, htmlDocument, astroMetadata.ast),
 			...scriptTags
 		);
 
@@ -172,6 +191,7 @@ export class AstroFile implements VirtualFile {
 			htmlDocument
 		);
 
+		this.astroMeta = { ...astroMetadata, tsxRanges: tsx.ranges };
 		this.compilerDiagnostics.push(...tsx.diagnostics);
 		this.embeddedFiles.push(tsx.virtualFile);
 	}
