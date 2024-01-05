@@ -4,4 +4,4 @@
 'astro-vscode': minor
 ---
 
-Internally type Astro files individually instead of applying a specific configuration to every file loaded in the Astro language server, this should generally result in more accurate types when using JSX frameworks. But should generally be an invisible change for most users.
+Enables more accurate types when using JSX-based frameworks. This internal refactor to Astro's JSX types will be an invisible change for most users, but fixes a number of type checking problems for users of other JSX frameworks.
