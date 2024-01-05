@@ -81,8 +81,6 @@ export function astro2tsx(
 ): Astro2TSXResult {
 	const tsx = safeConvertToTSX(input, { filename: fileName });
 
-	const textDocument = TextDocument.create(fileName, 'typescriptreact', 0, tsx.code);
-
 	return {
 		virtualFile: getVirtualFileTSX(input, tsx, fileName, ts, htmlDocument),
 		diagnostics: tsx.diagnostics,
