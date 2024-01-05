@@ -75,12 +75,14 @@ export function getLanguageModule(
 							);
 						}
 					} else {
-						// If we're running in the language server, add the fallback types from the language server's.
+						// If we don't have an Astro installation, add the fallback types from the language server.
 						// See the README in packages/language-server/types for more information.
 						addedFileNames.push(
-							...['../types/env.d.ts', '../types/astro-jsx.d.ts'].map((f) =>
-								ts.sys.resolvePath(path.resolve(languageServerDirectory, f))
-							)
+							...[
+								'../types/env.d.ts',
+								'../types/astro-jsx.d.ts',
+								'../types/jsx-runtime-fallback.d.ts',
+							].map((f) => ts.sys.resolvePath(path.resolve(languageServerDirectory, f)))
 						);
 					}
 
@@ -94,7 +96,7 @@ export function getLanguageModule(
 						target: ts.ScriptTarget.ESNext ?? 99,
 						jsx: ts.JsxEmit.Preserve ?? 1,
 						resolveJsonModule: true,
-						allowJs: true,
+						allowJs: true, // Needed for inline scripts, which are virtual .js files
 						isolatedModules: true,
 						moduleResolution:
 							baseCompilationSettings.moduleResolution === ts.ModuleResolutionKind.Classic ||
