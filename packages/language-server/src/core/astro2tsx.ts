@@ -17,7 +17,7 @@ interface Astro2TSXResult {
 	ranges: LSPTSXRanges;
 }
 
-function safeConvertToTSX(content: string, options: ConvertToTSXOptions) {
+export function safeConvertToTSX(content: string, options: ConvertToTSXOptions) {
 	try {
 		const tsx = convertToTSX(content, { filename: options.filename });
 		return tsx;
@@ -58,6 +58,21 @@ function safeConvertToTSX(content: string, options: ConvertToTSXOptions) {
 	}
 }
 
+export function getTSXRangesAsLSPRanges(tsx: TSXResult): LSPTSXRanges {
+	const textDocument = TextDocument.create('', 'typescriptreact', 0, tsx.code);
+
+	return {
+		frontmatter: Range.create(
+			textDocument.positionAt(tsx.metaRanges.frontmatter.start),
+			textDocument.positionAt(tsx.metaRanges.frontmatter.end)
+		),
+		body: Range.create(
+			textDocument.positionAt(tsx.metaRanges.body.start),
+			textDocument.positionAt(tsx.metaRanges.body.end)
+		),
+	};
+}
+
 export function astro2tsx(
 	input: string,
 	fileName: string,
@@ -71,16 +86,7 @@ export function astro2tsx(
 	return {
 		virtualFile: getVirtualFileTSX(input, tsx, fileName, ts, htmlDocument),
 		diagnostics: tsx.diagnostics,
-		ranges: {
-			frontmatter: Range.create(
-				textDocument.positionAt(tsx.metaRanges.frontmatter.start),
-				textDocument.positionAt(tsx.metaRanges.frontmatter.end)
-			),
-			body: Range.create(
-				textDocument.positionAt(tsx.metaRanges.body.start),
-				textDocument.positionAt(tsx.metaRanges.body.end)
-			),
-		},
+		ranges: getTSXRangesAsLSPRanges(tsx),
 	};
 }
 
