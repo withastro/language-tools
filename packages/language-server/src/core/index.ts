@@ -61,8 +61,8 @@ export function getLanguageModule(
 							...fileNames,
 							...(astroInstall
 								? ['./env.d.ts', './astro-jsx.d.ts'].map((filePath) =>
-									ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
-								)
+										ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
+								  )
 								: []),
 						];
 					},
@@ -80,7 +80,7 @@ export function getLanguageModule(
 							isolatedModules: true,
 							moduleResolution:
 								baseCompilationSettings.moduleResolution === ts.ModuleResolutionKind.Classic ||
-									!baseCompilationSettings.moduleResolution
+								!baseCompilationSettings.moduleResolution
 									? ts.ModuleResolutionKind.Node10
 									: baseCompilationSettings.moduleResolution,
 						};
