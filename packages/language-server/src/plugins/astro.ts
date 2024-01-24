@@ -15,7 +15,7 @@ import fg from 'fast-glob';
 import { dirname } from 'node:path';
 import type { Provide } from 'volar-service-typescript';
 import type { TextDocument } from 'vscode-html-languageservice';
-import { AstroFile } from '../core/index.js';
+import { AstroVirtualCode } from '../core/index.js';
 import { isJSDocument } from './utils.js';
 
 export const create = (ts: typeof import('typescript')): ServicePlugin => {
@@ -27,10 +27,8 @@ export const create = (ts: typeof import('typescript')): ServicePlugin => {
 					if (token.isCancellationRequested) return null;
 					let items: CompletionItem[] = [];
 
-					const [file] = context.language.files.getVirtualFile(
-						context.env.uriToFileName(document.uri)
-					);
-					if (!(file instanceof AstroFile)) return;
+					const [file] = context.documents.getVirtualCodeByUri(document.uri);
+					if (!(file instanceof AstroVirtualCode)) return;
 
 					if (completionContext.triggerCharacter === '-') {
 						const frontmatterCompletion = getFrontmatterCompletion(file, document, position);
@@ -45,10 +43,8 @@ export const create = (ts: typeof import('typescript')): ServicePlugin => {
 				provideSemanticDiagnostics(document, token) {
 					if (token.isCancellationRequested) return [];
 
-					const [file] = context.language.files.getVirtualFile(
-						context.env.uriToFileName(document.uri)
-					);
-					if (!(file instanceof AstroFile)) return;
+					const [file] = context.documents.getVirtualCodeByUri(document.uri);
+					if (!(file instanceof AstroVirtualCode)) return;
 
 					return file.compilerDiagnostics.map(compilerMessageToDiagnostic);
 
@@ -80,7 +76,7 @@ export const create = (ts: typeof import('typescript')): ServicePlugin => {
 					if (!tsProgram) return;
 
 					const globcodeLens: CodeLens[] = [];
-					const sourceFile = tsProgram.getSourceFile(context.env.uriToFileName(document.uri))!;
+					const sourceFile = tsProgram.getSourceFile(document.uri)!;
 
 					function walk() {
 						return ts.forEachChild(sourceFile, function cb(node): void {
@@ -91,7 +87,7 @@ export const create = (ts: typeof import('typescript')): ServicePlugin => {
 									globcodeLens.push(
 										getGlobResultAsCodeLens(
 											globArgument.getText().slice(1, -1),
-											dirname(context.env.uriToFileName(document.uri)),
+											dirname(context.env.typescript!.uriToFileName(document.uri)),
 											document.positionAt(node.arguments.pos)
 										)
 									);
@@ -122,7 +118,11 @@ function getGlobResultAsCodeLens(globText: string, dir: string, position: Positi
 	};
 }
 
-function getFrontmatterCompletion(file: AstroFile, document: TextDocument, position: Position) {
+function getFrontmatterCompletion(
+	file: AstroVirtualCode,
+	document: TextDocument,
+	position: Position
+) {
 	const base: CompletionItem = {
 		kind: CompletionItemKind.Snippet,
 		label: '---',

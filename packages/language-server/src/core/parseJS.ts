@@ -5,18 +5,17 @@ import {
 	toString,
 	type CodeInformation,
 	type Segment,
-	type VirtualFile,
+	type VirtualCode,
 } from '@volar/language-core';
-import type ts from 'typescript/lib/tsserverlibrary';
+import type ts from 'typescript';
 import type { HTMLDocument, Node } from 'vscode-html-languageservice';
 
 export function extractScriptTags(
-	fileName: string,
 	snapshot: ts.IScriptSnapshot,
 	htmlDocument: HTMLDocument,
 	ast: ParseResult['ast']
-): VirtualFile[] {
-	const embeddedJSFiles: VirtualFile[] = findModuleScripts(fileName, snapshot, htmlDocument.roots);
+): VirtualCode[] {
+	const embeddedJSCodes: VirtualCode[] = findModuleScripts(snapshot, htmlDocument.roots);
 
 	const javascriptContexts = [
 		...findClassicScripts(htmlDocument, snapshot),
@@ -26,10 +25,10 @@ export function extractScriptTags(
 	if (javascriptContexts.length > 0) {
 		// classic scripts share the same scope
 		// merging them brings about redeclaration errors
-		embeddedJSFiles.push(mergeJSContexts(fileName, javascriptContexts));
+		embeddedJSCodes.push(mergeJSContexts(javascriptContexts));
 	}
 
-	return embeddedJSFiles;
+	return embeddedJSCodes;
 }
 
 function getScriptType(scriptTag: Node): 'classic' | 'module' | 'processed module' {
@@ -47,12 +46,8 @@ function getScriptType(scriptTag: Node): 'classic' | 'module' | 'processed modul
  * Isolated scripts are scripts that are hoisted by Astro and as such, are isolated from the rest of the code because of the implicit `type="module"`
  * All the isolated scripts are passed to the TypeScript language server as separate `.mts` files.
  */
-function findModuleScripts(
-	fileName: string,
-	snapshot: ts.IScriptSnapshot,
-	roots: Node[]
-): VirtualFile[] {
-	const embeddedScripts: VirtualFile[] = [];
+function findModuleScripts(snapshot: ts.IScriptSnapshot, roots: Node[]): VirtualCode[] {
+	const embeddedScripts: VirtualCode[] = [];
 	let scriptIndex = 0;
 
 	getEmbeddedScriptsInNodes(roots);
@@ -68,16 +63,9 @@ function findModuleScripts(
 				const scriptText = snapshot.getText(node.startTagEnd, node.endTagStart);
 				const extension = getScriptType(node) === 'processed module' ? 'mts' : 'mjs';
 				const languageId = getScriptType(node) === 'processed module' ? 'typescript' : 'javascript';
-				const scriptKind =
-					getScriptType(node) === 'processed module'
-						? (3 satisfies ts.ScriptKind.TS)
-						: (1 satisfies ts.ScriptKind.JS);
 				embeddedScripts.push({
-					fileName: fileName + `.${scriptIndex}.${extension}`,
+					id: `${scriptIndex}.${extension}`,
 					languageId: languageId,
-					typescript: {
-						scriptKind: scriptKind,
-					},
 					snapshot: {
 						getText: (start, end) => scriptText.substring(start, end),
 						getLength: () => scriptText.length,
@@ -98,7 +86,7 @@ function findModuleScripts(
 							},
 						},
 					],
-					embeddedFiles: [],
+					embeddedCodes: [],
 				});
 				scriptIndex++;
 			}
@@ -207,7 +195,7 @@ function findEventAttributes(ast: ParseResult['ast']): JavaScriptContext[] {
 /**
  * Merge all the inline and non-hoisted scripts into a single `.mjs` file
  */
-function mergeJSContexts(fileName: string, javascriptContexts: JavaScriptContext[]): VirtualFile {
+function mergeJSContexts(javascriptContexts: JavaScriptContext[]): VirtualCode {
 	const codes: Segment<CodeInformation>[] = [];
 
 	for (const javascriptContext of javascriptContexts) {
@@ -230,17 +218,14 @@ function mergeJSContexts(fileName: string, javascriptContexts: JavaScriptContext
 	const text = toString(codes);
 
 	return {
-		fileName: fileName + '.inline.mjs',
+		id: 'inline.mjs',
 		languageId: 'javascript',
-		typescript: {
-			scriptKind: 1 satisfies ts.ScriptKind.JS,
-		},
 		snapshot: {
 			getText: (start, end) => text.substring(start, end),
 			getLength: () => text.length,
 			getChangeRange: () => undefined,
 		},
-		embeddedFiles: [],
+		embeddedCodes: [],
 		mappings,
 	};
 }

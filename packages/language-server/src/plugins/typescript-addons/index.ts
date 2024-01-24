@@ -1,5 +1,5 @@
 import type { CompletionList, ServicePlugin, ServicePluginInstance } from '@volar/language-server';
-import { AstroFile } from '../../core/index.js';
+import { AstroVirtualCode } from '../../core/index.js';
 import { isInsideFrontmatter, isJSDocument } from '../utils.js';
 import { getSnippetCompletions } from './snippets.js';
 
@@ -23,13 +23,11 @@ export const create = (): ServicePlugin => {
 					)
 						return null;
 
-					const [_, source] = context.language.files.getVirtualFile(
-						context.env.uriToFileName(document.uri)
-					);
-					const file = source?.virtualFile?.[0];
-					if (!(file instanceof AstroFile)) return undefined;
+					const [_, source] = context.documents.getVirtualCodeByUri(document.uri);
+					const code = source?.generated?.code;
+					if (!(code instanceof AstroVirtualCode)) return undefined;
 
-					if (!isInsideFrontmatter(document.offsetAt(position), file.astroMeta.frontmatter))
+					if (!isInsideFrontmatter(document.offsetAt(position), code.astroMeta.frontmatter))
 						return null;
 
 					const completionList: CompletionList = {
@@ -37,7 +35,7 @@ export const create = (): ServicePlugin => {
 						isIncomplete: false,
 					};
 
-					completionList.items.push(...getSnippetCompletions(file.astroMeta.frontmatter));
+					completionList.items.push(...getSnippetCompletions(code.astroMeta.frontmatter));
 
 					return completionList;
 				},

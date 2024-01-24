@@ -5,23 +5,18 @@ import {
 	Segment,
 	toString,
 	type CodeInformation,
-	type VirtualFile,
+	type VirtualCode,
 } from '@volar/language-core';
-import type ts from 'typescript/lib/tsserverlibrary';
+import type ts from 'typescript';
 import type { HTMLDocument, Node } from 'vscode-html-languageservice';
 import type { AttributeNodeWithPosition } from './compilerUtils.js';
 
 export function extractStylesheets(
-	fileName: string,
 	snapshot: ts.IScriptSnapshot,
 	htmlDocument: HTMLDocument,
 	ast: ParseResult['ast']
-): VirtualFile[] {
-	const embeddedCSSFiles: VirtualFile[] = findEmbeddedStyles(
-		fileName,
-		snapshot,
-		htmlDocument.roots
-	);
+): VirtualCode[] {
+	const embeddedCSSCodes: VirtualCode[] = findEmbeddedStyles(snapshot, htmlDocument.roots);
 
 	const inlineStyles = findInlineStyles(ast);
 	if (inlineStyles.length > 0) {
@@ -48,32 +43,28 @@ export function extractStylesheets(
 		const mappings = buildMappings(codes);
 		const text = toString(codes);
 
-		embeddedCSSFiles.push({
-			fileName: fileName + '.inline.css',
+		embeddedCSSCodes.push({
+			id: 'inline.css',
 			languageId: 'css',
 			snapshot: {
 				getText: (start, end) => text.substring(start, end),
 				getLength: () => text.length,
 				getChangeRange: () => undefined,
 			},
-			embeddedFiles: [],
+			embeddedCodes: [],
 			mappings,
 		});
 	}
 
-	return embeddedCSSFiles;
+	return embeddedCSSCodes;
 }
 
 /**
  * Find all embedded styles in a document.
  * Embedded styles are styles that are defined in `<style>` tags.
  */
-function findEmbeddedStyles(
-	fileName: string,
-	snapshot: ts.IScriptSnapshot,
-	roots: Node[]
-): VirtualFile[] {
-	const embeddedCSSFiles: VirtualFile[] = [];
+function findEmbeddedStyles(snapshot: ts.IScriptSnapshot, roots: Node[]): VirtualCode[] {
+	const embeddedCSSFiles: VirtualCode[] = [];
 	let cssIndex = 0;
 
 	getEmbeddedCSSInNodes(roots);
@@ -87,7 +78,7 @@ function findEmbeddedStyles(
 			) {
 				const styleText = snapshot.getText(node.startTagEnd, node.endTagStart);
 				embeddedCSSFiles.push({
-					fileName: fileName + `.${cssIndex}.css`,
+					id: `${cssIndex}.css`,
 					languageId: 'css',
 					snapshot: {
 						getText: (start, end) => styleText.substring(start, end),
@@ -109,7 +100,7 @@ function findEmbeddedStyles(
 							},
 						},
 					],
-					embeddedFiles: [],
+					embeddedCodes: [],
 				});
 				cssIndex++;
 			}

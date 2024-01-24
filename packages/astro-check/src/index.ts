@@ -25,11 +25,7 @@ export async function check(flags: Partial<Flags>): Promise<boolean | void>;
 export async function check(flags: Partial<Flags>): Promise<boolean | void> {
 	const workspaceRoot = path.resolve(flags.root ?? process.cwd());
 	const require = createRequire(import.meta.url);
-	const checker = new AstroCheck(
-		workspaceRoot,
-		require.resolve('typescript/lib/tsserverlibrary.js'),
-		flags.tsconfig
-	);
+	const checker = new AstroCheck(workspaceRoot, require.resolve('typescript'), flags.tsconfig);
 
 	let req = 0;
 

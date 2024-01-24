@@ -1,7 +1,12 @@
 import type { DiagnosticMessage, ParseResult } from '@astrojs/compiler/types';
-import type { LanguagePlugin, VirtualFile } from '@volar/language-core';
+import {
+	forEachEmbeddedCode,
+	type CodeMapping,
+	type LanguagePlugin,
+	type VirtualCode,
+} from '@volar/language-core';
 import * as path from 'node:path';
-import type ts from 'typescript/lib/tsserverlibrary';
+import type ts from 'typescript';
 import type { HTMLDocument } from 'vscode-html-languageservice';
 import type { AstroInstall } from '../utils.js';
 import { astro2tsx } from './astro2tsx';
@@ -13,32 +18,35 @@ import { extractScriptTags } from './parseJS.js';
 export function getLanguageModule(
 	astroInstall: AstroInstall | undefined,
 	ts: typeof import('typescript')
-): LanguagePlugin<AstroFile> {
+): LanguagePlugin<AstroVirtualCode> {
 	return {
-		createVirtualFile(fileName, languageId, snapshot) {
+		createVirtualCode(fileId, languageId, snapshot) {
 			if (languageId === 'astro') {
-				return new AstroFile(fileName, snapshot, ts);
+				const fileName = fileId.includes('://') ? fileId.split('://')[1] : fileId;
+				return new AstroVirtualCode(fileName, snapshot);
 			}
 		},
-		updateVirtualFile(astroFile, snapshot) {
-			astroFile.update(snapshot);
+		updateVirtualCode(_fileId, astroCode, snapshot) {
+			astroCode.update(snapshot);
+			return astroCode;
 		},
 		typescript: {
 			extraFileExtensions: [{ extension: 'astro', isMixedContent: true, scriptKind: 7 }],
-			resolveSourceFileName(tsFileName) {
-				const baseName = path.basename(tsFileName);
-				if (baseName.indexOf('.astro.')) {
-					return tsFileName.substring(0, tsFileName.lastIndexOf('.astro.') + '.astro'.length);
-				}
-			},
-			resolveModuleName(moduleName, impliedNodeFormat) {
-				if (
-					impliedNodeFormat === ts.ModuleKind.ESNext &&
-					(moduleName.endsWith('.astro') ||
-						moduleName.endsWith('.vue') ||
-						moduleName.endsWith('.svelte'))
-				) {
-					return `${moduleName}.js`;
+			getScript(rootVirtualCode) {
+				for (const code of forEachEmbeddedCode(rootVirtualCode)) {
+					if (code.id.endsWith('.mjs')) {
+						return {
+							code,
+							extension: '.mjs',
+							scriptKind: 1 satisfies ts.ScriptKind.JS,
+						};
+					} else if (code.id === 'tsx') {
+						return {
+							code,
+							extension: '.tsx',
+							scriptKind: 4 satisfies ts.ScriptKind.TSX,
+						};
+					}
 				}
 			},
 			resolveLanguageServiceHost(host) {
@@ -80,23 +88,21 @@ export function getLanguageModule(
 	};
 }
 
-export class AstroFile implements VirtualFile {
-	fileName: string;
+export class AstroVirtualCode implements VirtualCode {
+	id = 'root';
 	languageId = 'astro';
-	mappings!: VirtualFile['mappings'];
-	embeddedFiles!: VirtualFile['embeddedFiles'];
+	mappings!: CodeMapping[];
+	embeddedCodes!: VirtualCode[];
 	astroMeta!: ParseResult & { frontmatter: FrontmatterStatus };
 	compilerDiagnostics!: DiagnosticMessage[];
 	htmlDocument!: HTMLDocument;
-	scriptFiles!: string[];
+	scriptCodeIds!: string[];
 	codegenStacks = [];
 
 	constructor(
-		public sourceFileName: string,
-		public snapshot: ts.IScriptSnapshot,
-		private readonly ts: typeof import('typescript')
+		public fileName: string,
+		public snapshot: ts.IScriptSnapshot
 	) {
-		this.fileName = sourceFileName;
 		this.onSnapshotUpdated();
 	}
 
@@ -136,8 +142,7 @@ export class AstroFile implements VirtualFile {
 			this.compilerDiagnostics.push(...this.astroMeta.diagnostics);
 		}
 
-		const { htmlDocument, virtualFile: htmlVirtualFile } = parseHTML(
-			this.fileName,
+		const { htmlDocument, virtualCode: htmlVirtualCode } = parseHTML(
 			this.snapshot,
 			this.astroMeta.frontmatter.status === 'closed'
 				? this.astroMeta.frontmatter.position.end.offset
@@ -145,31 +150,25 @@ export class AstroFile implements VirtualFile {
 		);
 		this.htmlDocument = htmlDocument;
 
-		const scriptTags = extractScriptTags(
-			this.fileName,
-			this.snapshot,
-			htmlDocument,
-			this.astroMeta.ast
-		);
+		const scriptTags = extractScriptTags(this.snapshot, htmlDocument, this.astroMeta.ast);
 
-		this.scriptFiles = scriptTags.map((scriptTag) => scriptTag.fileName);
+		this.scriptCodeIds = scriptTags.map((scriptTag) => scriptTag.id);
 
-		htmlVirtualFile.embeddedFiles.push(
-			...extractStylesheets(this.fileName, this.snapshot, htmlDocument, this.astroMeta.ast),
+		htmlVirtualCode.embeddedCodes.push(
+			...extractStylesheets(this.snapshot, htmlDocument, this.astroMeta.ast),
 			...scriptTags
 		);
 
-		this.embeddedFiles = [];
-		this.embeddedFiles.push(htmlVirtualFile);
+		this.embeddedCodes = [];
+		this.embeddedCodes.push(htmlVirtualCode);
 
 		const tsx = astro2tsx(
 			this.snapshot.getText(0, this.snapshot.getLength()),
 			this.fileName,
-			this.ts,
 			htmlDocument
 		);
 
 		this.compilerDiagnostics.push(...tsx.diagnostics);
-		this.embeddedFiles.push(tsx.virtualFile);
+		this.embeddedCodes.push(tsx.virtualCode);
 	}
 }

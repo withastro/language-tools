@@ -1,7 +1,7 @@
 import { convertToTSX } from '@astrojs/compiler/sync';
 import type { ConvertToTSXOptions, TSXResult } from '@astrojs/compiler/types';
 import { decode } from '@jridgewell/sourcemap-codec';
-import type { VirtualFile } from '@volar/language-core';
+import type { CodeMapping, VirtualCode } from '@volar/language-core';
 import path from 'node:path';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
@@ -36,11 +36,7 @@ function safeConvertToTSX(content: string, options: ConvertToTSXOptions) {
 	}
 }
 
-export function astro2tsx(
-	input: string,
-	fileName: string,
-	ts: typeof import('typescript/lib/tsserverlibrary.js')
-) {
+export function astro2tsx(input: string, fileName: string, ts: typeof import('typescript')) {
 	const tsx = safeConvertToTSX(input, { filename: fileName });
 
 	return {
@@ -53,14 +49,13 @@ function getVirtualFileTSX(
 	input: string,
 	tsx: TSXResult,
 	fileName: string,
-	ts: typeof import('typescript/lib/tsserverlibrary.js')
-): VirtualFile {
+	ts: typeof import('typescript')
+): VirtualCode {
 	tsx.code = patchTSX(tsx.code, fileName);
 	const v3Mappings = decode(tsx.map.mappings);
 	const sourcedDoc = TextDocument.create(fileName, 'astro', 0, input);
 	const genDoc = TextDocument.create(fileName + '.tsx', 'typescriptreact', 0, tsx.code);
-
-	const mappings: VirtualFile['mappings'] = [];
+	const mappings: CodeMapping[] = [];
 
 	let current:
 		| {
@@ -124,18 +119,15 @@ function getVirtualFileTSX(
 	}
 
 	return {
-		fileName: fileName + '.tsx',
+		id: 'tsx',
 		languageId: 'typescriptreact',
-		typescript: {
-			scriptKind: ts.ScriptKind.TSX,
-		},
 		snapshot: {
 			getText: (start, end) => tsx.code.substring(start, end),
 			getLength: () => tsx.code.length,
 			getChangeRange: () => undefined,
 		},
 		mappings: mappings,
-		embeddedFiles: [],
+		embeddedCodes: [],
 	};
 }
 

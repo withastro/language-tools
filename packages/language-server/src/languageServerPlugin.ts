@@ -3,9 +3,8 @@ import {
 	LanguagePlugin,
 	MessageType,
 	ServiceEnvironment,
-	ServicePlugin,
 	ShowMessageNotification,
-	VirtualFile,
+	VirtualCode,
 } from '@volar/language-server/node';
 import { getLanguageModule } from './core';
 import { getSvelteLanguageModule } from './core/svelte.js';
@@ -19,7 +18,7 @@ import { create as createEmmetService } from 'volar-service-emmet';
 import { create as createPrettierService } from 'volar-service-prettier';
 import { create as createTypeScriptTwoSlashService } from 'volar-service-typescript-twoslash-queries';
 
-import type { createServer, ServerOptions } from '@volar/language-server/lib/server.js';
+import type { createServerBase, ServerOptions } from '@volar/language-server/lib/server';
 import { create as createAstroService } from './plugins/astro.js';
 import { create as createHtmlService } from './plugins/html.js';
 import { create as createTypescriptAddonsService } from './plugins/typescript-addons/index.js';
@@ -27,7 +26,7 @@ import { create as createTypeScriptService } from './plugins/typescript/index.js
 
 export function createServerOptions(
 	connection: Connection,
-	server: ReturnType<typeof createServer>
+	server: ReturnType<typeof createServerBase>
 ): ServerOptions {
 	return {
 		watchFileExtensions: [
@@ -44,9 +43,9 @@ export function createServerOptions(
 			'vue',
 			'svelte',
 		],
-		getServerCapabilitiesSetup() {
+		getServicePlugins() {
 			const ts = getTypeScriptModule();
-			const servicePlugins: ServicePlugin[] = [
+			return [
 				createHtmlService(),
 				createCssService(),
 				createEmmetService(),
@@ -54,33 +53,20 @@ export function createServerOptions(
 				createTypeScriptTwoSlashService(),
 				createTypescriptAddonsService(),
 				createAstroService(ts),
+				getPrettierService(),
 			];
-
-			return {
-				servicePlugins: servicePlugins,
-			};
 		},
-		getProjectSetup(serviceEnv, projectContext) {
+		getLanguagePlugins(serviceEnv, projectContext) {
 			const ts = getTypeScriptModule();
-			const servicePlugins: ServicePlugin[] = [
-				createHtmlService(),
-				createCssService(),
-				createEmmetService(),
-				createTypeScriptService(ts),
-				createTypeScriptTwoSlashService(),
-				createTypescriptAddonsService(),
-				createAstroService(ts),
-			];
-
-			const languagePlugins: LanguagePlugin<VirtualFile>[] = [
+			const languagePlugins: LanguagePlugin<VirtualCode>[] = [
 				getVueLanguageModule(),
 				getSvelteLanguageModule(),
 			];
 
-			if (serviceEnv && projectContext?.typescript) {
+			if (projectContext.typescript) {
 				const rootPath = projectContext.typescript.configFileName
 					? projectContext.typescript.configFileName.split('/').slice(0, -1).join('/')
-					: serviceEnv.uriToFileName(serviceEnv.workspaceFolder.uri.toString());
+					: serviceEnv.typescript!.uriToFileName(serviceEnv.workspaceFolder);
 				const nearestPackageJson = server.modules.typescript?.findConfigFile(
 					rootPath,
 					ts.sys.fileExists,
@@ -103,12 +89,8 @@ export function createServerOptions(
 					getLanguageModule(typeof astroInstall === 'string' ? undefined : astroInstall, ts)
 				);
 			}
-			const prettierService = getPrettierService(serviceEnv);
 
-			return {
-				languagePlugins: languagePlugins,
-				servicePlugins: [...servicePlugins, ...(prettierService ? [prettierService] : [])],
-			};
+			return languagePlugins;
 		},
 	};
 
@@ -120,49 +102,51 @@ export function createServerOptions(
 		return tsModule;
 	}
 
-	function getPrettierService(env: ServiceEnvironment) {
-		const workspacePath = env.uriToFileName(env.workspaceFolder.uri.toString());
-		const prettier = importPrettier(workspacePath);
-		const prettierPluginPath = getPrettierPluginPath(workspacePath);
-
-		if (prettier && prettierPluginPath) {
-			return createPrettierService({
-				prettier: prettier,
-				languages: ['astro'],
-				ignoreIdeOptions: true,
-				useIdeOptionsFallback: true,
-				resolveConfigOptions: {
-					// This seems to be broken since Prettier 3, and it'll always use its cumbersome cache. Hopefully it works one day.
-					useCache: false,
-				},
-				additionalOptions: async (resolvedConfig) => {
-					async function getAstroPrettierPlugin() {
-						if (!prettier || !prettierPluginPath) {
-							return [];
-						}
-
-						const hasPluginLoadedAlready =
-							(await prettier.getSupportInfo()).languages.some((l: any) => l.name === 'astro') ||
-							resolvedConfig.plugins?.includes('prettier-plugin-astro'); // getSupportInfo doesn't seems to work very well in Prettier 3 for plugins
-
-						return hasPluginLoadedAlready ? [] : [prettierPluginPath];
+	function getPrettierService() {
+		let prettier: ReturnType<typeof importPrettier>;
+		let prettierPluginPath: ReturnType<typeof getPrettierPluginPath>;
+		return createPrettierService({
+			getPrettier(env) {
+				const workspacePath = env.typescript!.uriToFileName(env.workspaceFolder);
+				prettier = importPrettier(workspacePath);
+				prettierPluginPath = getPrettierPluginPath(workspacePath);
+				if (!prettier || !prettierPluginPath) {
+					connection.sendNotification(ShowMessageNotification.type, {
+						message:
+							"Couldn't load `prettier` or `prettier-plugin-astro`. Formatting will not work. Please make sure those two packages are installed into your project.",
+						type: MessageType.Warning,
+					});
+				}
+				return prettier;
+			},
+			languages: ['astro'],
+			ignoreIdeOptions: true,
+			useIdeOptionsFallback: true,
+			resolveConfigOptions: {
+				// This seems to be broken since Prettier 3, and it'll always use its cumbersome cache. Hopefully it works one day.
+				useCache: false,
+			},
+			additionalOptions: async (resolvedConfig) => {
+				async function getAstroPrettierPlugin() {
+					if (!prettier || !prettierPluginPath) {
+						return [];
 					}
 
-					const plugins = [...(await getAstroPrettierPlugin()), ...(resolvedConfig.plugins ?? [])];
+					const hasPluginLoadedAlready =
+						(await prettier.getSupportInfo()).languages.some((l: any) => l.name === 'astro') ||
+						resolvedConfig.plugins?.includes('prettier-plugin-astro'); // getSupportInfo doesn't seems to work very well in Prettier 3 for plugins
 
-					return {
-						...resolvedConfig,
-						plugins: plugins,
-						parser: 'astro',
-					};
-				},
-			});
-		} else {
-			connection.sendNotification(ShowMessageNotification.type, {
-				message:
-					"Couldn't load `prettier` or `prettier-plugin-astro`. Formatting will not work. Please make sure those two packages are installed into your project.",
-				type: MessageType.Warning,
-			});
-		}
+					return hasPluginLoadedAlready ? [] : [prettierPluginPath];
+				}
+
+				const plugins = [...(await getAstroPrettierPlugin()), ...(resolvedConfig.plugins ?? [])];
+
+				return {
+					...resolvedConfig,
+					plugins: plugins,
+					parser: 'astro',
+				};
+			},
+		});
 	}
 }

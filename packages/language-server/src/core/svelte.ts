@@ -1,32 +1,59 @@
-import type { CodeInformation, LanguagePlugin, Mapping, VirtualFile } from '@volar/language-core';
-import type ts from 'typescript/lib/tsserverlibrary';
+import {
+	forEachEmbeddedCode,
+	type CodeInformation,
+	type LanguagePlugin,
+	type Mapping,
+	type VirtualCode,
+} from '@volar/language-core';
+import type ts from 'typescript';
 import { framework2tsx } from './utils.js';
 
-export function getSvelteLanguageModule(): LanguagePlugin<SvelteFile> {
+export function getSvelteLanguageModule(): LanguagePlugin<SvelteVirtualCode> {
 	return {
-		createVirtualFile(fileName, languageId, snapshot) {
+		createVirtualCode(fileId, languageId, snapshot) {
 			if (languageId === 'svelte') {
-				return new SvelteFile(fileName, snapshot);
+				const fileName = fileId.includes('://') ? fileId.split('://')[1] : fileId;
+				return new SvelteVirtualCode(fileName, snapshot);
 			}
 		},
-		updateVirtualFile(svelteFile, snapshot) {
-			svelteFile.update(snapshot);
+		updateVirtualCode(_fileId, svelteCode, snapshot) {
+			svelteCode.update(snapshot);
+			return svelteCode;
+		},
+		typescript: {
+			extraFileExtensions: [{ extension: 'svelte', isMixedContent: true, scriptKind: 7 }],
+			getScript(rootVirtualCode) {
+				for (const code of forEachEmbeddedCode(rootVirtualCode)) {
+					if (code.id.endsWith('.mjs')) {
+						return {
+							code,
+							extension: '.mjs',
+							scriptKind: 1 satisfies ts.ScriptKind.JS,
+						};
+					} else if (code.id === 'tsx') {
+						return {
+							code,
+							extension: '.tsx',
+							scriptKind: 4 satisfies ts.ScriptKind.TSX,
+						};
+					}
+				}
+			},
 		},
 	};
 }
 
-class SvelteFile implements VirtualFile {
-	fileName: string;
+class SvelteVirtualCode implements VirtualCode {
+	id = 'root';
 	languageId = 'svelte';
 	mappings!: Mapping<CodeInformation>[];
-	embeddedFiles!: VirtualFile[];
+	embeddedCodes!: VirtualCode[];
 	codegenStacks = [];
 
 	constructor(
-		public sourceFileId: string,
+		public fileName: string,
 		public snapshot: ts.IScriptSnapshot
 	) {
-		this.fileName = sourceFileId;
 		this.onSnapshotUpdated();
 	}
 
@@ -52,14 +79,9 @@ class SvelteFile implements VirtualFile {
 			},
 		];
 
-		this.embeddedFiles = [];
-		this.embeddedFiles.push(
-			framework2tsx(
-				this.fileName,
-				this.fileName,
-				this.snapshot.getText(0, this.snapshot.getLength()),
-				'svelte'
-			)
+		this.embeddedCodes = [];
+		this.embeddedCodes.push(
+			framework2tsx(this.fileName, this.snapshot.getText(0, this.snapshot.getLength()), 'svelte')
 		);
 	}
 }

@@ -1,6 +1,6 @@
 import { CompletionItemKind, ServicePlugin, ServicePluginInstance } from '@volar/language-server';
 import { create as createHtmlService } from 'volar-service-html';
-import { AstroFile } from '../core/index.js';
+import { AstroVirtualCode } from '../core/index.js';
 import { astroAttributes, astroElements, classListAttribute } from './html-data.js';
 import { isInComponentStartTag } from './utils.js';
 
@@ -22,14 +22,12 @@ export const create = (): ServicePlugin => {
 				async provideCompletionItems(document, position, completionContext, token) {
 					if (document.languageId !== 'html') return;
 
-					const [_, source] = context.language.files.getVirtualFile(
-						context.env.uriToFileName(document.uri)
-					);
-					const rootVirtualFile = source?.virtualFile?.[0];
-					if (!(rootVirtualFile instanceof AstroFile)) return;
+					const [_, source] = context.documents.getVirtualCodeByUri(document.uri);
+					const code = source?.generated?.code;
+					if (!(code instanceof AstroVirtualCode)) return;
 
 					// Don't return completions if the current node is a component
-					if (isInComponentStartTag(rootVirtualFile.htmlDocument, document.offsetAt(position))) {
+					if (isInComponentStartTag(code.htmlDocument, document.offsetAt(position))) {
 						return null;
 					}
 

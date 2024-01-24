@@ -1,7 +1,7 @@
 import { convertToTSX } from '@astrojs/compiler/sync';
 import type { ConvertToTSXOptions, TSXResult } from '@astrojs/compiler/types';
 import { decode } from '@jridgewell/sourcemap-codec';
-import type { CodeInformation, VirtualFile } from '@volar/language-core';
+import type { CodeInformation, CodeMapping, VirtualCode } from '@volar/language-core';
 import { HTMLDocument, TextDocument } from 'vscode-html-languageservice';
 import { patchTSX } from './utils.js';
 
@@ -36,33 +36,26 @@ function safeConvertToTSX(content: string, options: ConvertToTSXOptions) {
 	}
 }
 
-export function astro2tsx(
-	input: string,
-	fileName: string,
-	ts: typeof import('typescript'),
-	htmlDocument: HTMLDocument
-) {
+export function astro2tsx(input: string, fileName: string, htmlDocument: HTMLDocument) {
 	const tsx = safeConvertToTSX(input, { filename: fileName });
 
 	return {
-		virtualFile: getVirtualFileTSX(input, tsx, fileName, ts, htmlDocument),
+		virtualCode: getVirtualCodeTSX(input, tsx, fileName, htmlDocument),
 		diagnostics: tsx.diagnostics,
 	};
 }
 
-function getVirtualFileTSX(
+function getVirtualCodeTSX(
 	input: string,
 	tsx: TSXResult,
 	fileName: string,
-	ts: typeof import('typescript'),
 	htmlDocument: HTMLDocument
-): VirtualFile {
+): VirtualCode {
 	tsx.code = patchTSX(tsx.code, fileName);
 	const v3Mappings = decode(tsx.map.mappings);
-	const sourcedDoc = TextDocument.create('file://' + fileName, 'astro', 0, input);
-	const genDoc = TextDocument.create('file://' + fileName + '.tsx', 'typescriptreact', 0, tsx.code);
-
-	const mappings: VirtualFile['mappings'] = [];
+	const sourcedDoc = TextDocument.create('', 'astro', 0, input);
+	const genDoc = TextDocument.create('', 'typescriptreact', 0, tsx.code);
+	const mappings: CodeMapping[] = [];
 
 	let current:
 		| {
@@ -141,17 +134,14 @@ function getVirtualFileTSX(
 	}
 
 	return {
-		fileName: fileName + '.tsx',
+		id: 'tsx',
 		languageId: 'typescriptreact',
-		typescript: {
-			scriptKind: ts.ScriptKind.TSX,
-		},
 		snapshot: {
 			getText: (start, end) => tsx.code.substring(start, end),
 			getLength: () => tsx.code.length,
 			getChangeRange: () => undefined,
 		},
 		mappings: mappings,
-		embeddedFiles: [],
+		embeddedCodes: [],
 	};
 }

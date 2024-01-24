@@ -1,12 +1,12 @@
 import {
 	createConnection,
-	createNodeServer,
+	createServer,
 	createTypeScriptProjectProvider,
 } from '@volar/language-server/node';
 import { createServerOptions } from './languageServerPlugin.js';
 
 const connection = createConnection();
-const server = createNodeServer(connection);
+const server = createServer(connection);
 
 connection.listen();
 

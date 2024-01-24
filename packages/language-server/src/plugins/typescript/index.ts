@@ -1,6 +1,6 @@
 import { ServicePlugin, ServicePluginInstance, TextDocumentEdit } from '@volar/language-server';
 import { create as createTypeScriptService } from 'volar-service-typescript';
-import { AstroFile } from '../../core/index.js';
+import { AstroVirtualCode } from '../../core/index.js';
 import {
 	editShouldBeInFrontmatter,
 	ensureProperEditForFrontmatter,
@@ -10,9 +10,7 @@ import { enhancedProvideCompletionItems, enhancedResolveCompletionItem } from '.
 import { enhancedProvideSemanticDiagnostics } from './diagnostics.js';
 
 export const create = (ts: typeof import('typescript')): ServicePlugin => {
-	const tsServicePlugin = createTypeScriptService(
-		ts as typeof import('typescript/lib/tsserverlibrary')
-	);
+	const tsServicePlugin = createTypeScriptService(ts as typeof import('typescript'));
 	return {
 		...tsServicePlugin,
 		create(context): ServicePluginInstance {
@@ -20,12 +18,10 @@ export const create = (ts: typeof import('typescript')): ServicePlugin => {
 			return {
 				...tsService,
 				transformCompletionItem(item) {
-					const [_, source] = context.language.files.getVirtualFile(
-						context.env.uriToFileName(item.data.uri)
-					);
-					const file = source?.virtualFile?.[0];
-					if (!(file instanceof AstroFile) || !context.language.typescript) return undefined;
-					if (file.scriptFiles.includes(item.data.fileName)) return undefined;
+					const [virtualCode, source] = context.documents.getVirtualCodeByUri(item.data.uri);
+					const code = source?.generated?.code;
+					if (!(code instanceof AstroVirtualCode) || !context.language.typescript) return undefined;
+					if (virtualCode && code.scriptCodeIds.includes(virtualCode.id)) return undefined;
 
 					const newLine =
 						context.language.typescript.languageServiceHost
@@ -40,7 +36,7 @@ export const create = (ts: typeof import('typescript')): ServicePlugin => {
 							}
 
 							if (editShouldBeInFrontmatter(edit.range)) {
-								return ensureProperEditForFrontmatter(edit, file.astroMeta.frontmatter, newLine);
+								return ensureProperEditForFrontmatter(edit, code.astroMeta.frontmatter, newLine);
 							}
 
 							return edit;
@@ -51,24 +47,18 @@ export const create = (ts: typeof import('typescript')): ServicePlugin => {
 				},
 				transformCodeAction(item) {
 					if (item.kind !== 'quickfix') return undefined;
-					const originalUri = item.data.uri.replace('.tsx', '');
 
-					const [_, source] = context.language.files.getVirtualFile(
-						context.env.uriToFileName(originalUri)
-					);
-					const file = source?.virtualFile?.[0];
-					if (!(file instanceof AstroFile) || !context.language.typescript) return undefined;
-					if (
-						file.scriptFiles.includes(
-							context.env.uriToFileName(item.diagnostics?.[0].data.documentUri)
-						)
-					)
-						return undefined;
+					const [virtualCode, source] = context.documents.getVirtualCodeByUri(item.data.uri);
+					if (!source) return undefined;
+
+					const code = source?.generated?.code;
+					if (!(code instanceof AstroVirtualCode) || !context.language.typescript) return undefined;
+					if (virtualCode && code.scriptCodeIds.includes(virtualCode.id)) return undefined;
 
 					const document = context.documents.get(
-						context.env.fileNameToUri(file.fileName),
-						file.languageId,
-						file.snapshot
+						context.documents.getVirtualCodeUri(source.id, code.id),
+						code.languageId,
+						code.snapshot
 					);
 					const newLine =
 						context.language.typescript.languageServiceHost
@@ -77,14 +67,14 @@ export const create = (ts: typeof import('typescript')): ServicePlugin => {
 					if (!item.edit?.documentChanges) return undefined;
 					item.edit.documentChanges = item.edit.documentChanges.map((change) => {
 						if (TextDocumentEdit.is(change)) {
-							change.textDocument.uri = originalUri;
+							change.textDocument.uri = source.id;
 							if (change.edits.length === 1) {
 								change.edits = change.edits.map((edit) => {
 									const editInFrontmatter = editShouldBeInFrontmatter(edit.range, document);
 									if (editInFrontmatter.itShould) {
 										return ensureProperEditForFrontmatter(
 											edit,
-											file.astroMeta.frontmatter,
+											code.astroMeta.frontmatter,
 											newLine,
 											editInFrontmatter.position
 										);
@@ -93,13 +83,13 @@ export const create = (ts: typeof import('typescript')): ServicePlugin => {
 									return edit;
 								});
 							} else {
-								if (file.astroMeta.frontmatter.status === 'closed') {
+								if (code.astroMeta.frontmatter.status === 'closed') {
 									change.edits = change.edits.map((edit) => {
 										const editInFrontmatter = editShouldBeInFrontmatter(edit.range, document);
 										if (editInFrontmatter.itShould) {
 											edit.range = ensureRangeIsInFrontmatter(
 												edit.range,
-												file.astroMeta.frontmatter,
+												code.astroMeta.frontmatter,
 												editInFrontmatter.position
 											);
 										}
@@ -143,20 +133,18 @@ export const create = (ts: typeof import('typescript')): ServicePlugin => {
 					return enhancedResolveCompletionItem(resolvedCompletionItem);
 				},
 				async provideSemanticDiagnostics(document, token) {
-					const [_, source] = context.language.files.getVirtualFile(
-						context.env.uriToFileName(document.uri)
-					);
-					const file = source?.virtualFile?.[0];
+					const [_, source] = context.documents.getVirtualCodeByUri(document.uri);
+					const code = source?.generated?.code;
 					let astroDocument = undefined;
 
-					if (file instanceof AstroFile) {
+					if (source && code instanceof AstroVirtualCode) {
 						// If we have compiler errors, our TSX isn't valid so don't bother showing TS errors
-						if (file.hasCompilationErrors) return null;
+						if (code.hasCompilationErrors) return null;
 
 						astroDocument = context.documents.get(
-							context.env.fileNameToUri(file.sourceFileName),
-							file.languageId,
-							file.snapshot
+							context.documents.getVirtualCodeUri(source.id, code.id),
+							code.languageId,
+							code.snapshot
 						);
 					}
 
