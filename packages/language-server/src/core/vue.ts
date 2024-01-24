@@ -8,12 +8,12 @@ import {
 import type ts from 'typescript';
 import { framework2tsx } from './utils.js';
 
-export function getVueLanguageModule(): LanguagePlugin<VueGeneratedCode> {
+export function getVueLanguageModule(): LanguagePlugin<VueVirtualCode> {
 	return {
 		createVirtualCode(fileId, languageId, snapshot) {
 			if (languageId === 'vue') {
 				const fileName = fileId.includes('://') ? fileId.split('://')[1] : fileId;
-				return new VueGeneratedCode(fileName, snapshot);
+				return new VueVirtualCode(fileName, snapshot);
 			}
 		},
 		updateVirtualCode(_fileId, vueCode, snapshot) {
@@ -22,19 +22,22 @@ export function getVueLanguageModule(): LanguagePlugin<VueGeneratedCode> {
 		},
 		typescript: {
 			extraFileExtensions: [{ extension: 'vue', isMixedContent: true, scriptKind: 7 }],
-			getScript(rootVirtualCode) {
-				for (const code of forEachEmbeddedCode(rootVirtualCode)) {
+			getScript(vueCode) {
+				for (const code of forEachEmbeddedCode(vueCode)) {
+					if (code.id === 'tsx') {
+						return {
+							code,
+							extension: '.tsx',
+							scriptKind: 4 satisfies ts.ScriptKind.TSX,
+						};
+					}
+				}
+				for (const code of forEachEmbeddedCode(vueCode)) {
 					if (code.id.endsWith('.mjs')) {
 						return {
 							code,
 							extension: '.mjs',
 							scriptKind: 1 satisfies ts.ScriptKind.JS,
-						};
-					} else if (code.id === 'tsx') {
-						return {
-							code,
-							extension: '.tsx',
-							scriptKind: 4 satisfies ts.ScriptKind.TSX,
 						};
 					}
 				}
@@ -43,7 +46,7 @@ export function getVueLanguageModule(): LanguagePlugin<VueGeneratedCode> {
 	};
 }
 
-class VueGeneratedCode implements VirtualCode {
+class VueVirtualCode implements VirtualCode {
 	id = 'root';
 	languageId = 'vue';
 	mappings!: Mapping<CodeInformation>[];

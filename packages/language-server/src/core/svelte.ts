@@ -22,19 +22,22 @@ export function getSvelteLanguageModule(): LanguagePlugin<SvelteVirtualCode> {
 		},
 		typescript: {
 			extraFileExtensions: [{ extension: 'svelte', isMixedContent: true, scriptKind: 7 }],
-			getScript(rootVirtualCode) {
-				for (const code of forEachEmbeddedCode(rootVirtualCode)) {
+			getScript(svelteCode) {
+				for (const code of forEachEmbeddedCode(svelteCode)) {
+					if (code.id === 'tsx') {
+						return {
+							code,
+							extension: '.tsx',
+							scriptKind: 4 satisfies ts.ScriptKind.TSX,
+						};
+					}
+				}
+				for (const code of forEachEmbeddedCode(svelteCode)) {
 					if (code.id.endsWith('.mjs')) {
 						return {
 							code,
 							extension: '.mjs',
 							scriptKind: 1 satisfies ts.ScriptKind.JS,
-						};
-					} else if (code.id === 'tsx') {
-						return {
-							code,
-							extension: '.tsx',
-							scriptKind: 4 satisfies ts.ScriptKind.TSX,
 						};
 					}
 				}

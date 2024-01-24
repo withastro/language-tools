@@ -64,7 +64,7 @@ export function extractStylesheets(
  * Embedded styles are styles that are defined in `<style>` tags.
  */
 function findEmbeddedStyles(snapshot: ts.IScriptSnapshot, roots: Node[]): VirtualCode[] {
-	const embeddedCSSFiles: VirtualCode[] = [];
+	const embeddedCSSCodes: VirtualCode[] = [];
 	let cssIndex = 0;
 
 	getEmbeddedCSSInNodes(roots);
@@ -77,7 +77,7 @@ function findEmbeddedStyles(snapshot: ts.IScriptSnapshot, roots: Node[]): Virtua
 				node.endTagStart !== undefined
 			) {
 				const styleText = snapshot.getText(node.startTagEnd, node.endTagStart);
-				embeddedCSSFiles.push({
+				embeddedCSSCodes.push({
 					id: `${cssIndex}.css`,
 					languageId: 'css',
 					snapshot: {
@@ -109,7 +109,7 @@ function findEmbeddedStyles(snapshot: ts.IScriptSnapshot, roots: Node[]): Virtua
 		}
 	}
 
-	return embeddedCSSFiles;
+	return embeddedCSSCodes;
 }
 
 /**

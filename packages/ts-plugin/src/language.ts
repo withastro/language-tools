@@ -21,19 +21,22 @@ export function getLanguageModule(ts: typeof import('typescript')): LanguagePlug
 		},
 		typescript: {
 			extraFileExtensions: [{ extension: 'astro', isMixedContent: true, scriptKind: 7 }],
-			getScript(rootVirtualCode) {
-				for (const code of forEachEmbeddedCode(rootVirtualCode)) {
+			getScript(astroCode) {
+				for (const code of forEachEmbeddedCode(astroCode)) {
+					if (code.id === 'tsx') {
+						return {
+							code,
+							extension: '.tsx',
+							scriptKind: 4 satisfies ts.ScriptKind.TSX,
+						};
+					}
+				}
+				for (const code of forEachEmbeddedCode(astroCode)) {
 					if (code.id.endsWith('.mjs')) {
 						return {
 							code,
 							extension: '.mjs',
 							scriptKind: 1 satisfies ts.ScriptKind.JS,
-						};
-					} else if (code.id === 'tsx') {
-						return {
-							code,
-							extension: '.tsx',
-							scriptKind: 4 satisfies ts.ScriptKind.TSX,
 						};
 					}
 				}
