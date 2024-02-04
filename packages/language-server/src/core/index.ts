@@ -4,6 +4,7 @@ import {
 	type CodeMapping,
 	type LanguagePlugin,
 	type VirtualCode,
+	type ExtraServiceScript,
 } from '@volar/language-core';
 import * as path from 'node:path';
 import type ts from 'typescript';
@@ -42,15 +43,21 @@ export function getLanguageModule(
 						};
 					}
 				}
+				return undefined;
+			},
+			getExtraScripts(fileName, astroCode) {
+				const result: ExtraServiceScript[] = [];
 				for (const code of forEachEmbeddedCode(astroCode)) {
 					if (code.id.endsWith('.mjs')) {
-						return {
+						result.push({
+							fileName: fileName + '.' + code.id,
 							code,
 							extension: '.mjs',
 							scriptKind: 1 satisfies ts.ScriptKind.JS,
-						};
+						});
 					}
 				}
+				return result;
 			},
 			resolveLanguageServiceHost(host) {
 				return {
@@ -61,8 +68,8 @@ export function getLanguageModule(
 							...fileNames,
 							...(astroInstall
 								? ['./env.d.ts', './astro-jsx.d.ts'].map((filePath) =>
-										ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
-								  )
+									ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
+								)
 								: []),
 						];
 					},
@@ -80,7 +87,7 @@ export function getLanguageModule(
 							isolatedModules: true,
 							moduleResolution:
 								baseCompilationSettings.moduleResolution === ts.ModuleResolutionKind.Classic ||
-								!baseCompilationSettings.moduleResolution
+									!baseCompilationSettings.moduleResolution
 									? ts.ModuleResolutionKind.Node10
 									: baseCompilationSettings.moduleResolution,
 						};
