@@ -7,12 +7,12 @@ import {
 import type ts from 'typescript';
 import { astro2tsx } from './astro2tsx.js';
 
-export function getLanguageModule(ts: typeof import('typescript')): LanguagePlugin<AstroFile> {
+export function getLanguageModule(ts: typeof import('typescript')): LanguagePlugin<AstroVirtuaoCode> {
 	return {
 		createVirtualCode(fileId, languageId, snapshot) {
 			if (languageId === 'astro') {
 				const fileName = fileId.includes('://') ? fileId.split('://')[1] : fileId;
-				return new AstroFile(fileName, snapshot, ts);
+				return new AstroVirtuaoCode(fileName, snapshot, ts);
 			}
 		},
 		updateVirtualCode(_fileId, astroFile, snapshot) {
@@ -45,7 +45,7 @@ export function getLanguageModule(ts: typeof import('typescript')): LanguagePlug
 	};
 }
 
-export class AstroFile implements VirtualCode {
+export class AstroVirtuaoCode implements VirtualCode {
 	id = 'root';
 	languageId = 'astro';
 	mappings!: CodeMapping[];

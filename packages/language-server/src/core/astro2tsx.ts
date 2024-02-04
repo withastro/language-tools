@@ -1,19 +1,14 @@
 import { convertToTSX } from '@astrojs/compiler/sync';
-import type { ConvertToTSXOptions, DiagnosticMessage, TSXResult } from '@astrojs/compiler/types';
+import type { ConvertToTSXOptions, TSXResult } from '@astrojs/compiler/types';
 import { decode } from '@jridgewell/sourcemap-codec';
-import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
+import type { CodeInformation, CodeMapping, VirtualCode } from '@volar/language-core';
+import { Range } from '@volar/language-server';
 import { HTMLDocument, TextDocument } from 'vscode-html-languageservice';
 import { patchTSX } from './utils.js';
 
 export interface LSPTSXRanges {
 	frontmatter: Range;
 	body: Range;
-}
-
-interface Astro2TSXResult {
-	virtualFile: VirtualFile;
-	diagnostics: DiagnosticMessage[];
-	ranges: LSPTSXRanges;
 }
 
 export function safeConvertToTSX(content: string, options: ConvertToTSXOptions) {
@@ -75,7 +70,6 @@ export function getTSXRangesAsLSPRanges(tsx: TSXResult): LSPTSXRanges {
 export function astro2tsx(
 	input: string,
 	fileName: string,
-	ts: typeof import('typescript/lib/tsserverlibrary.js'),
 	htmlDocument: HTMLDocument
 ) {
 	const tsx = safeConvertToTSX(input, { filename: fileName });
@@ -101,9 +95,9 @@ function getVirtualCodeTSX(
 
 	let current:
 		| {
-				genOffset: number;
-				sourceOffset: number;
-		  }
+			genOffset: number;
+			sourceOffset: number;
+		}
 		| undefined;
 
 	for (let genLine = 0; genLine < v3Mappings.length; genLine++) {
@@ -139,21 +133,21 @@ function getVirtualCodeTSX(
 						const rangeCapabilities: CodeInformation =
 							node.tag !== 'script'
 								? {
-										verification: true,
-										completion: true,
-										semantic: true,
-										navigation: true,
-										structure: true,
-										format: true,
-								  }
+									verification: true,
+									completion: true,
+									semantic: true,
+									navigation: true,
+									structure: true,
+									format: true,
+								}
 								: {
-										verification: false,
-										completion: false,
-										semantic: false,
-										navigation: false,
-										structure: false,
-										format: false,
-								  };
+									verification: false,
+									completion: false,
+									semantic: false,
+									navigation: false,
+									structure: false,
+									format: false,
+								};
 
 						mappings.push({
 							sourceOffsets: [current.sourceOffset],

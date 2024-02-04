@@ -87,7 +87,6 @@ export function getLanguageModule(
 										ts.sys.resolvePath(path.resolve(languageServerTypesDirectory, filePath))
 									)
 								);
-								console.log(addedFileNames);
 							}
 						} else {
 							// If we don't have an Astro installation, add the fallback types from the language server.
