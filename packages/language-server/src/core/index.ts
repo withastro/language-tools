@@ -1,4 +1,4 @@
-import type { DiagnosticMessage, ParseResult } from '@astrojs/compiler/types';
+import type { DiagnosticMessage } from '@astrojs/compiler/types';
 import {
 	forEachEmbeddedCode,
 	type CodeMapping,
@@ -9,9 +9,9 @@ import {
 import * as path from 'node:path';
 import type ts from 'typescript';
 import type { HTMLDocument } from 'vscode-html-languageservice';
-import type { AstroInstall } from '../utils.js';
+import { getLanguageServerTypesDir, type AstroInstall } from '../utils.js';
 import { astro2tsx } from './astro2tsx';
-import { FrontmatterStatus, getAstroMetadata } from './parseAstro';
+import { AstroMetadata, getAstroMetadata } from './parseAstro';
 import { extractStylesheets } from './parseCSS';
 import { parseHTML } from './parseHTML';
 import { extractScriptTags } from './parseJS.js';
@@ -63,15 +63,43 @@ export function getLanguageModule(
 				return {
 					...host,
 					getScriptFileNames() {
+						const languageServerTypesDirectory = getLanguageServerTypesDir(ts);
 						const fileNames = host.getScriptFileNames();
-						return [
-							...fileNames,
-							...(astroInstall
-								? ['./env.d.ts', './astro-jsx.d.ts'].map((filePath) =>
+						const addedFileNames = [];
+
+						if (astroInstall) {
+							addedFileNames.push(
+								...['./env.d.ts', './astro-jsx.d.ts'].map((filePath) =>
 									ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
 								)
-								: []),
-						];
+							);
+
+							// If Astro version is < 4.0.8, add jsx-runtime-augment.d.ts to the files to fake `JSX` being available from "astro/jsx-runtime".
+							// TODO: Remove this once a majority of users are on Astro 4.0.8+, erika - 2023-12-28
+							if (
+								astroInstall.version.major < 4 ||
+								(astroInstall.version.major === 4 &&
+									astroInstall.version.minor === 0 &&
+									astroInstall.version.patch < 8)
+							) {
+								addedFileNames.push(
+									...['./jsx-runtime-augment.d.ts'].map((filePath) =>
+										ts.sys.resolvePath(path.resolve(languageServerTypesDirectory, filePath))
+									)
+								);
+								console.log(addedFileNames);
+							}
+						} else {
+							// If we don't have an Astro installation, add the fallback types from the language server.
+							// See the README in packages/language-server/types for more information.
+							addedFileNames.push(
+								...['./env.d.ts', './astro-jsx.d.ts', './jsx-runtime-fallback.d.ts'].map((f) =>
+									ts.sys.resolvePath(path.resolve(languageServerTypesDirectory, f))
+								)
+							);
+						}
+
+						return [...fileNames, ...addedFileNames];
 					},
 					getCompilationSettings() {
 						const baseCompilationSettings = host.getCompilationSettings();
@@ -80,10 +108,8 @@ export function getLanguageModule(
 							module: ts.ModuleKind.ESNext ?? 99,
 							target: ts.ScriptTarget.ESNext ?? 99,
 							jsx: ts.JsxEmit.Preserve ?? 1,
-							jsxImportSource: undefined,
-							jsxFactory: 'astroHTML',
 							resolveJsonModule: true,
-							allowJs: true,
+							allowJs: true, // Needed for inline scripts, which are virtual .js files
 							isolatedModules: true,
 							moduleResolution:
 								baseCompilationSettings.moduleResolution === ts.ModuleResolutionKind.Classic ||
@@ -103,7 +129,7 @@ export class AstroVirtualCode implements VirtualCode {
 	languageId = 'astro';
 	mappings!: CodeMapping[];
 	embeddedCodes!: VirtualCode[];
-	astroMeta!: ParseResult & { frontmatter: FrontmatterStatus };
+	astroMeta!: AstroMetadata;
 	compilerDiagnostics!: DiagnosticMessage[];
 	htmlDocument!: HTMLDocument;
 	scriptCodeIds!: string[];
@@ -143,29 +169,33 @@ export class AstroVirtualCode implements VirtualCode {
 		];
 		this.compilerDiagnostics = [];
 
-		this.astroMeta = getAstroMetadata(
+		const astroMetadata = getAstroMetadata(
 			this.fileName,
 			this.snapshot.getText(0, this.snapshot.getLength())
 		);
 
-		if (this.astroMeta.diagnostics.length > 0) {
-			this.compilerDiagnostics.push(...this.astroMeta.diagnostics);
+		if (astroMetadata.diagnostics.length > 0) {
+			this.compilerDiagnostics.push(...astroMetadata.diagnostics);
 		}
 
 		const { htmlDocument, virtualCode: htmlVirtualCode } = parseHTML(
 			this.snapshot,
-			this.astroMeta.frontmatter.status === 'closed'
-				? this.astroMeta.frontmatter.position.end.offset
+			astroMetadata.frontmatter.status === 'closed'
+				? astroMetadata.frontmatter.position.end.offset
 				: 0
 		);
 		this.htmlDocument = htmlDocument;
 
-		const scriptTags = extractScriptTags(this.snapshot, htmlDocument, this.astroMeta.ast);
+		const scriptTags = extractScriptTags(
+			this.snapshot,
+			htmlDocument,
+			astroMetadata.ast
+		);
 
 		this.scriptCodeIds = scriptTags.map((scriptTag) => scriptTag.id);
 
 		htmlVirtualCode.embeddedCodes.push(
-			...extractStylesheets(this.snapshot, htmlDocument, this.astroMeta.ast),
+			...extractStylesheets(this.snapshot, htmlDocument, astroMetadata.ast),
 			...scriptTags
 		);
 
@@ -178,6 +208,7 @@ export class AstroVirtualCode implements VirtualCode {
 			htmlDocument
 		);
 
+		this.astroMeta = { ...astroMetadata, tsxRanges: tsx.ranges };
 		this.compilerDiagnostics.push(...tsx.diagnostics);
 		this.embeddedCodes.push(tsx.virtualCode);
 	}

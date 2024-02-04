@@ -1,6 +1,6 @@
 {
   "name": "@astrojs/language-server",
-  "version": "2.5.5",
+  "version": "2.6.2",
   "author": "withastro",
   "license": "MIT",
   "repository": {
@@ -26,7 +26,7 @@
     "test:match": "pnpm run test -g"
   },
   "dependencies": {
-    "@astrojs/compiler": "^2.2.2",
+    "@astrojs/compiler": "^2.4.0",
     "@jridgewell/sourcemap-codec": "^1.4.15",
     "@volar/kit": "~2.0.1",
     "@volar/language-core": "~2.0.1",
@@ -50,13 +50,13 @@
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.17.8",
     "@volar/test-utils": "~2.0.1",
-    "astro": "^3.3.0",
+    "astro": "^4.1.0",
     "chai": "^4.3.7",
     "mocha": "^10.2.0",
     "tsx": "^3.12.7",
+    "typescript": "^5.2.2",
     "vscode-languageserver-protocol": "^3.17.5",
-    "vscode-languageserver-textdocument": "^1.0.11",
-    "typescript": "^5.2.2"
+    "vscode-languageserver-textdocument": "^1.0.11"
   },
   "peerDependencies": {
     "prettier": "^3.0.0",

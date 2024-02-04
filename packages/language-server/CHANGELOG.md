@@ -1,5 +1,27 @@
 # @astrojs/language-server
 
+## 2.6.2
+
+### Patch Changes
+
+- 63e2c81: Fix fallback types not being properly included in some contexts such as inside the VS Code extension
+
+## 2.6.1
+
+### Patch Changes
+
+- 5cd3bae: Fix Astro types not working on version of Astro older than 4.0.8 when React types were installed
+
+## 2.6.0
+
+### Minor Changes
+
+- dab6801: Enables more accurate types when using JSX-based frameworks. This internal refactor to Astro's JSX types will be an invisible change for most users, but fixes a number of type checking problems for users of other JSX frameworks.
+
+### Patch Changes
+
+- a314bcc: Remove temporary workaround `astro check` that disabled checking JSX and TSX files
+
 ## 2.5.5
 
 ### Patch Changes

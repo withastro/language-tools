@@ -1,6 +1,6 @@
-import { ServicePlugin, ServicePluginInstance, TextDocumentEdit } from '@volar/language-server';
-import { create as createTypeScriptService } from 'volar-service-typescript';
-import { AstroVirtualCode } from '../../core/index.js';
+import { Service, TextDocumentEdit } from '@volar/language-server';
+import createTypeScriptService from 'volar-service-typescript';
+import { AstroFile } from '../../core/index.js';
 import {
 	editShouldBeInFrontmatter,
 	ensureProperEditForFrontmatter,
@@ -16,113 +16,114 @@ export const create = (ts: typeof import('typescript')): ServicePlugin => {
 		create(context): ServicePluginInstance {
 			const tsService = tsServicePlugin.create(context);
 			return {
-				...tsService,
-				transformCompletionItem(item) {
-					const [virtualCode, source] = context.documents.getVirtualCodeByUri(item.data.uri);
-					const code = source?.generated?.code;
-					if (!(code instanceof AstroVirtualCode) || !context.language.typescript) return undefined;
-					if (virtualCode && code.scriptCodeIds.includes(virtualCode.id)) return undefined;
+				triggerCharacters: typeScriptPlugin.triggerCharacters,
+				signatureHelpTriggerCharacters: typeScriptPlugin.signatureHelpTriggerCharacters,
+				signatureHelpRetriggerCharacters: typeScriptPlugin.signatureHelpRetriggerCharacters,
+			};
+		}
 
-					const newLine =
-						context.language.typescript.languageServiceHost
-							.getCompilationSettings()
-							.newLine?.toString() ?? '\n';
-					if (item.additionalTextEdits) {
-						item.additionalTextEdits = item.additionalTextEdits.map((edit) => {
-							// HACK: There's a weird situation sometimes where some components (especially Svelte) will get imported as type imports
-							// for some unknown reason. This work around the problem by always ensuring a normal import for components
-							if (item.data.isComponent && edit.newText.includes('import type')) {
-								edit.newText.replace('import type', 'import');
-							}
+		return {
+			...typeScriptPlugin,
+			transformCompletionItem(item) {
+				const [_, source] = context.documents.getVirtualFileByUri(item.data.uri);
+				const file = source?.root;
+				if (!(file instanceof AstroFile) || !context.host) return undefined;
+				if (file.scriptFiles.includes(item.data.fileName)) return undefined;
 
-							if (editShouldBeInFrontmatter(edit.range)) {
-								return ensureProperEditForFrontmatter(edit, code.astroMeta.frontmatter, newLine);
-							}
+				const newLine = context.host.getCompilationSettings().newLine?.toString() ?? '\n';
+				if (item.additionalTextEdits) {
+					item.additionalTextEdits = item.additionalTextEdits.map((edit) => {
+						// HACK: There's a weird situation sometimes where some components (especially Svelte) will get imported as type imports
+						// for some unknown reason. This work around the problem by always ensuring a normal import for components
+						if (item.data.isComponent && edit.newText.includes('import type')) {
+							edit.newText.replace('import type', 'import');
+						}
 
-							return edit;
-						});
-					}
+						if (editShouldBeInFrontmatter(edit.range)) {
+							return ensureProperEditForFrontmatter(edit, file.astroMeta.frontmatter, newLine);
+						}
 
-					return item;
-				},
-				transformCodeAction(item) {
-					if (item.kind !== 'quickfix') return undefined;
+						return edit;
+					});
+				}
 
-					const [virtualCode, source] = context.documents.getVirtualCodeByUri(item.data.uri);
-					if (!source) return undefined;
+				return item;
+			},
+			transformCodeAction(item) {
+				if (item.kind !== 'quickfix') return undefined;
+				const originalFileName = item.data.uri.replace('.tsx', '');
 
-					const code = source?.generated?.code;
-					if (!(code instanceof AstroVirtualCode) || !context.language.typescript) return undefined;
-					if (virtualCode && code.scriptCodeIds.includes(virtualCode.id)) return undefined;
+				const [_, source] = context.documents.getVirtualFileByUri(originalFileName);
+				const file = source?.root;
+				if (!(file instanceof AstroFile) || !context.host) return undefined;
+				if (
+					file.scriptFiles.includes(item.diagnostics?.[0].data.documentUri.replace('file://', ''))
+				)
+					return undefined;
 
-					const document = context.documents.get(
-						context.documents.getVirtualCodeUri(source.id, code.id),
-						code.languageId,
-						code.snapshot
-					);
-					const newLine =
-						context.language.typescript.languageServiceHost
-							.getCompilationSettings()
-							.newLine?.toString() ?? '\n';
-					if (!item.edit?.documentChanges) return undefined;
-					item.edit.documentChanges = item.edit.documentChanges.map((change) => {
-						if (TextDocumentEdit.is(change)) {
-							change.textDocument.uri = source.id;
-							if (change.edits.length === 1) {
+				const document = context.getTextDocument(originalFileName);
+				if (!document) return undefined;
+
+				const newLine = context.host.getCompilationSettings().newLine?.toString() ?? '\n';
+				if (!item.edit?.documentChanges) return undefined;
+				item.edit.documentChanges = item.edit.documentChanges.map((change) => {
+					if (TextDocumentEdit.is(change)) {
+						change.textDocument.uri = originalFileName;
+						if (change.edits.length === 1) {
+							change.edits = change.edits.map((edit) => {
+								const editInFrontmatter = editShouldBeInFrontmatter(edit.range, document);
+								if (editInFrontmatter.itShould) {
+									return ensureProperEditForFrontmatter(
+										edit,
+										file.astroMeta.frontmatter,
+										newLine,
+										editInFrontmatter.position
+									);
+								}
+
+								return edit;
+							});
+						} else {
+							if (file.astroMeta.frontmatter.status === 'closed') {
 								change.edits = change.edits.map((edit) => {
 									const editInFrontmatter = editShouldBeInFrontmatter(edit.range, document);
 									if (editInFrontmatter.itShould) {
-										return ensureProperEditForFrontmatter(
-											edit,
-											code.astroMeta.frontmatter,
-											newLine,
+										edit.range = ensureRangeIsInFrontmatter(
+											edit.range,
+											file.astroMeta.frontmatter,
 											editInFrontmatter.position
 										);
 									}
-
 									return edit;
 								});
 							} else {
-								if (code.astroMeta.frontmatter.status === 'closed') {
-									change.edits = change.edits.map((edit) => {
-										const editInFrontmatter = editShouldBeInFrontmatter(edit.range, document);
-										if (editInFrontmatter.itShould) {
-											edit.range = ensureRangeIsInFrontmatter(
-												edit.range,
-												code.astroMeta.frontmatter,
-												editInFrontmatter.position
-											);
-										}
-										return edit;
-									});
-								} else {
-									// TODO: Handle when there's multiple edits and a new frontmatter is potentially needed
-									if (
-										change.edits.some((edit) => {
-											return editShouldBeInFrontmatter(edit.range, document).itShould;
-										})
-									) {
-										console.error(
-											'Code actions with multiple edits that require potentially creating a frontmatter are currently not implemented. In the meantime, please manually insert a frontmatter in your file before using this code action.'
-										);
-										change.edits = [];
-									}
+								// TODO: Handle when there's multiple edits and a new frontmatter is potentially needed
+								if (
+									change.edits.some((edit) => {
+										return editShouldBeInFrontmatter(edit.range, document).itShould;
+									})
+								) {
+									console.error(
+										'Code actions with multiple edits that require potentially creating a frontmatter are currently not implemented. In the meantime, please manually insert a frontmatter in your file before using this code action.'
+									);
+									change.edits = [];
 								}
 							}
 						}
-						return change;
-					});
+					}
+					return change;
+				});
 
-					return item;
-				},
-				async provideCompletionItems(document, position, completionContext, token) {
-					const originalCompletions = await tsService.provideCompletionItems!(
-						document,
-						position,
-						completionContext,
-						token
-					);
-					if (!originalCompletions) return null;
+				return item;
+			},
+			async provideCompletionItems(document, position, completionContext, token) {
+				const originalCompletions = await typeScriptPlugin.provideCompletionItems!(
+					document,
+					position,
+					completionContext,
+					token
+				);
+				if (!originalCompletions) return null;
 
 					return enhancedProvideCompletionItems(originalCompletions);
 				},
@@ -130,30 +131,27 @@ export const create = (ts: typeof import('typescript')): ServicePlugin => {
 					const resolvedCompletionItem = await tsService.resolveCompletionItem!(item, token);
 					if (!resolvedCompletionItem) return item;
 
-					return enhancedResolveCompletionItem(resolvedCompletionItem);
-				},
-				async provideSemanticDiagnostics(document, token) {
-					const [_, source] = context.documents.getVirtualCodeByUri(document.uri);
-					const code = source?.generated?.code;
-					let astroDocument = undefined;
+				return enhancedResolveCompletionItem(resolvedCompletionItem);
+			},
+			async provideSemanticDiagnostics(document, token) {
+				const [_, source] = context.documents.getVirtualFileByUri(document.uri);
+				const file = source?.root;
+				let astroDocument = undefined;
 
 					if (source && code instanceof AstroVirtualCode) {
 						// If we have compiler errors, our TSX isn't valid so don't bother showing TS errors
 						if (code.hasCompilationErrors) return null;
 
-						astroDocument = context.documents.get(
-							context.documents.getVirtualCodeUri(source.id, code.id),
-							code.languageId,
-							code.snapshot
-						);
-					}
+					astroDocument = context.documents.getDocumentByFileName(
+						file.snapshot,
+						file.sourceFileName
+					);
+				}
 
 					const diagnostics = await tsService.provideSemanticDiagnostics!(document, token);
 					if (!diagnostics) return null;
 
-					return enhancedProvideSemanticDiagnostics(diagnostics, astroDocument?.lineCount);
-				},
-			};
-		},
+				return enhancedProvideSemanticDiagnostics(diagnostics, astroDocument?.lineCount);
+			},
+		};
 	};
-};

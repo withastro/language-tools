@@ -1,11 +1,22 @@
 import { convertToTSX } from '@astrojs/compiler/sync';
-import type { ConvertToTSXOptions, TSXResult } from '@astrojs/compiler/types';
+import type { ConvertToTSXOptions, DiagnosticMessage, TSXResult } from '@astrojs/compiler/types';
 import { decode } from '@jridgewell/sourcemap-codec';
-import type { CodeInformation, CodeMapping, VirtualCode } from '@volar/language-core';
+import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
 import { HTMLDocument, TextDocument } from 'vscode-html-languageservice';
 import { patchTSX } from './utils.js';
 
-function safeConvertToTSX(content: string, options: ConvertToTSXOptions) {
+export interface LSPTSXRanges {
+	frontmatter: Range;
+	body: Range;
+}
+
+interface Astro2TSXResult {
+	virtualFile: VirtualFile;
+	diagnostics: DiagnosticMessage[];
+	ranges: LSPTSXRanges;
+}
+
+export function safeConvertToTSX(content: string, options: ConvertToTSXOptions) {
 	try {
 		const tsx = convertToTSX(content, { filename: options.filename });
 		return tsx;
@@ -32,16 +43,47 @@ function safeConvertToTSX(content: string, options: ConvertToTSXOptions) {
 					text: `The Astro compiler encountered an unknown error while transform this file to TSX. Please create an issue with your code and the error shown in the server's logs: https://github.com/withastro/language-tools/issues`,
 				},
 			],
+			metaRanges: {
+				frontmatter: {
+					start: 0,
+					end: 0,
+				},
+				body: {
+					start: 0,
+					end: 0,
+				},
+			},
 		} satisfies TSXResult;
 	}
 }
 
-export function astro2tsx(input: string, fileName: string, htmlDocument: HTMLDocument) {
+export function getTSXRangesAsLSPRanges(tsx: TSXResult): LSPTSXRanges {
+	const textDocument = TextDocument.create('', 'typescriptreact', 0, tsx.code);
+
+	return {
+		frontmatter: Range.create(
+			textDocument.positionAt(tsx.metaRanges.frontmatter.start),
+			textDocument.positionAt(tsx.metaRanges.frontmatter.end)
+		),
+		body: Range.create(
+			textDocument.positionAt(tsx.metaRanges.body.start),
+			textDocument.positionAt(tsx.metaRanges.body.end)
+		),
+	};
+}
+
+export function astro2tsx(
+	input: string,
+	fileName: string,
+	ts: typeof import('typescript/lib/tsserverlibrary.js'),
+	htmlDocument: HTMLDocument
+) {
 	const tsx = safeConvertToTSX(input, { filename: fileName });
 
 	return {
 		virtualCode: getVirtualCodeTSX(input, tsx, fileName, htmlDocument),
 		diagnostics: tsx.diagnostics,
+		ranges: getTSXRangesAsLSPRanges(tsx),
 	};
 }
 
