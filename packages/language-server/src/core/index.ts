@@ -112,7 +112,7 @@ export function getLanguageModule(
 							isolatedModules: true,
 							moduleResolution:
 								baseCompilationSettings.moduleResolution === ts.ModuleResolutionKind.Classic ||
-									!baseCompilationSettings.moduleResolution
+								!baseCompilationSettings.moduleResolution
 									? ts.ModuleResolutionKind.Node10
 									: baseCompilationSettings.moduleResolution,
 						};
@@ -185,11 +185,7 @@ export class AstroVirtualCode implements VirtualCode {
 		);
 		this.htmlDocument = htmlDocument;
 
-		const scriptTags = extractScriptTags(
-			this.snapshot,
-			htmlDocument,
-			astroMetadata.ast
-		);
+		const scriptTags = extractScriptTags(this.snapshot, htmlDocument, astroMetadata.ast);
 
 		this.scriptCodeIds = scriptTags.map((scriptTag) => scriptTag.id);
 

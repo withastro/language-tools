@@ -7,7 +7,9 @@ import {
 import type ts from 'typescript';
 import { astro2tsx } from './astro2tsx.js';
 
-export function getLanguageModule(ts: typeof import('typescript')): LanguagePlugin<AstroVirtuaoCode> {
+export function getLanguageModule(
+	ts: typeof import('typescript')
+): LanguagePlugin<AstroVirtuaoCode> {
 	return {
 		createVirtualCode(fileId, languageId, snapshot) {
 			if (languageId === 'astro') {

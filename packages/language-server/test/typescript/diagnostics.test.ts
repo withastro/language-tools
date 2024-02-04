@@ -55,7 +55,10 @@ describe('TypeScript - Diagnostics', async () => {
 	});
 
 	it('shows enhanced diagnostics', async () => {
-		const document = await languageServer.handle.openTextDocument(path.resolve(__dirname, '..', 'fixture', 'enhancedDiagnostics.astro'), 'astro');
+		const document = await languageServer.handle.openTextDocument(
+			path.resolve(__dirname, '..', 'fixture', 'enhancedDiagnostics.astro'),
+			'astro'
+		);
 		const diagnostics = (await languageServer.handle.sendDocumentDiagnosticRequest(
 			document.uri
 		)) as FullDocumentDiagnosticReport;
