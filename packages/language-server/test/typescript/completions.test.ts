@@ -41,4 +41,24 @@ describe('TypeScript - Completions', async () => {
 
 		expect(imageCompletion?.sortText).to.equal('\x00￿16');
 	});
+
+	it('Can get completions in all kinds of script tags', async () => {
+		const documents = [
+			'<script>\nconsole.\n</script>',
+			'<script type="module">\nconsole.\n</script>',
+			'<script is:inline>\nconsole.\n</script>',
+		];
+
+		for (const doc of documents) {
+			const document = await languageServer.openFakeDocument(doc, 'astro');
+			const completions = await languageServer.handle.sendCompletionRequest(
+				document.uri,
+				Position.create(1, 8)
+			);
+
+			const allLabels = completions?.items.map((item) => item.label);
+			expect(completions?.items).to.not.be.empty;
+			expect(allLabels).to.include('log');
+		}
+	});
 });
