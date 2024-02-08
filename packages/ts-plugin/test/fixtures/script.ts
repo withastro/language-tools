@@ -1,9 +1,11 @@
 export function sayHello() {
-	console.log('Hello');
+	console.log("Hello")
 }
 
-MyAstroCompon;
+MyAstroCompon
 
-export class Hello {}
+export class Hello {
 
-import {} from './MyAstroComponent.astro';
+}
+
+import { } from './MyAstroComponent.astro'

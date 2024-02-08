@@ -1,6 +1,6 @@
+// @ts-check
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
-// @ts-check
 import esbuild from 'esbuild';
 import { copy } from 'esbuild-plugin-copy';
 import { rebuildPlugin } from './shared.mjs';
