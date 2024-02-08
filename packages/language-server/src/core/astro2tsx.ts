@@ -134,7 +134,7 @@ function getVirtualCodeTSX(
 										semantic: true,
 										navigation: true,
 										structure: true,
-										format: true,
+										format: false,
 								  }
 								: {
 										verification: false,

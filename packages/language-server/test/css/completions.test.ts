@@ -30,4 +30,15 @@ describe('CSS - Completions', () => {
 
 		expect(completions!.items).to.not.be.empty;
 	});
+
+	it('Can provide completions inside inline styles', async () => {
+		const document = await languageServer.openFakeDocument(`<div style="color: ;"></div>`, 'astro');
+		const completions = await languageServer.handle.sendCompletionRequest(
+			document.uri,
+			Position.create(0, 18)
+		);
+
+		expect(completions!.items).to.not.be.empty;
+		expect(completions?.items.map((i) => i.label)).to.include('aliceblue');
+	});
 });

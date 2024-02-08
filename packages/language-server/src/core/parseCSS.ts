@@ -1,8 +1,8 @@
 import type { ParentNode, ParseResult } from '@astrojs/compiler/types';
 import { is } from '@astrojs/compiler/utils';
 import {
-	buildMappings,
 	Segment,
+	buildMappings,
 	toString,
 	type CodeInformation,
 	type VirtualCode,
@@ -27,13 +27,12 @@ export function extractStylesheets(
 				inlineStyle.value,
 				undefined,
 				inlineStyle.position.start.offset + 'style="'.length,
-				// disable all but only keep document colors
 				{
+					completion: true,
 					verification: false,
-					completion: false,
-					semantic: false,
-					navigation: false,
-					structure: true, // keep document colors
+					semantic: true,
+					navigation: true,
+					structure: true,
 					format: false,
 				},
 			]);

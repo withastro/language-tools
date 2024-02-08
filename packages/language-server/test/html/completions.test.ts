@@ -8,7 +8,7 @@ describe('HTML - Completions', () => {
 
 	before(async () => (languageServer = await getLanguageServer()));
 
-	it('Can provide completions for HTML tags zzz', async () => {
+	it('Can provide completions for HTML tags', async () => {
 		const document = await languageServer.openFakeDocument(`<q`, 'astro');
 		const completions = await languageServer.handle.sendCompletionRequest(
 			document.uri,
