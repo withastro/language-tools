@@ -48,7 +48,7 @@ export function getLanguageModule(
 			getExtraScripts(fileName, astroCode) {
 				const result: ExtraServiceScript[] = [];
 				for (const code of forEachEmbeddedCode(astroCode)) {
-					if (code.id.endsWith('.mjs')) {
+					if (code.id.endsWith('.mjs') || code.id.endsWith('.mts')) {
 						result.push({
 							fileName: fileName + '.' + code.id,
 							code,
