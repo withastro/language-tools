@@ -7,7 +7,7 @@ import {
 	type VirtualCode,
 } from '@volar/language-core';
 import * as path from 'node:path';
-import type ts from 'typescript';
+import type ts from 'typescript/lib/tsserverlibrary';
 import type { HTMLDocument } from 'vscode-html-languageservice';
 import { getLanguageServerTypesDir, type AstroInstall } from '../utils.js';
 import { astro2tsx } from './astro2tsx';
@@ -73,6 +73,16 @@ export function getLanguageModule(
 									ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
 								)
 							);
+						}
+					} else {
+						// If we don't have an Astro installation, add the fallback types from the language server.
+						// See the README in packages/language-server/types for more information.
+						addedFileNames.push(
+							...['./env.d.ts', './astro-jsx.d.ts', './jsx-runtime-fallback.d.ts'].map((f) =>
+								ts.sys.resolvePath(path.resolve(languageServerTypesDirectory, f))
+							)
+						);
+					}
 
 							// If Astro version is < 4.0.8, add jsx-runtime-augment.d.ts to the files to fake `JSX` being available from "astro/jsx-runtime".
 							// TODO: Remove this once a majority of users are on Astro 4.0.8+, erika - 2023-12-28

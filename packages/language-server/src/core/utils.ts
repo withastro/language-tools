@@ -1,4 +1,10 @@
-import type { VirtualCode } from '@volar/language-core';
+import * as path from 'node:path';
+import {
+	FileCapabilities,
+	FileKind,
+	FileRangeCapabilities,
+	type VirtualFile,
+} from '@volar/language-core';
 import { URI, Utils } from 'vscode-uri';
 import { importSvelteIntegration, importVueIntegration } from '../importPackage';
 

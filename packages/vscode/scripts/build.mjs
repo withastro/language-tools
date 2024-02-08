@@ -1,8 +1,8 @@
+import fs from 'node:fs';
+import { createRequire } from 'node:module';
 // @ts-check
 import esbuild from 'esbuild';
 import { copy } from 'esbuild-plugin-copy';
-import fs from 'node:fs';
-import { createRequire } from 'node:module';
 import { rebuildPlugin } from './shared.mjs';
 
 const require = createRequire(import.meta.url);
