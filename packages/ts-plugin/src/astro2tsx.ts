@@ -2,7 +2,7 @@ import path from 'node:path';
 import { convertToTSX } from '@astrojs/compiler/sync';
 import type { ConvertToTSXOptions, TSXResult } from '@astrojs/compiler/types';
 import { decode } from '@jridgewell/sourcemap-codec';
-import { FileKind, FileRangeCapabilities, VirtualFile } from '@volar/language-core';
+import type { CodeMapping, VirtualCode } from '@volar/language-core';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
 function safeConvertToTSX(content: string, options: ConvertToTSXOptions) {
