@@ -32,15 +32,6 @@ export function getVueLanguageModule(): LanguagePlugin<VueVirtualCode> {
 						};
 					}
 				}
-				for (const code of forEachEmbeddedCode(vueCode)) {
-					if (code.id.endsWith('.mjs')) {
-						return {
-							code,
-							extension: '.mjs',
-							scriptKind: 1 satisfies ts.ScriptKind.JS,
-						};
-					}
-				}
 			},
 		},
 	};

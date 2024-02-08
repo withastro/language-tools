@@ -33,15 +33,6 @@ export function getLanguageModule(
 						};
 					}
 				}
-				for (const code of forEachEmbeddedCode(astroCode)) {
-					if (code.id.endsWith('.mjs')) {
-						return {
-							code,
-							extension: '.mjs',
-							scriptKind: 1 satisfies ts.ScriptKind.JS,
-						};
-					}
-				}
 			},
 		},
 	};

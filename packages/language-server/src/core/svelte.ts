@@ -32,15 +32,6 @@ export function getSvelteLanguageModule(): LanguagePlugin<SvelteVirtualCode> {
 						};
 					}
 				}
-				for (const code of forEachEmbeddedCode(svelteCode)) {
-					if (code.id.endsWith('.mjs')) {
-						return {
-							code,
-							extension: '.mjs',
-							scriptKind: 1 satisfies ts.ScriptKind.JS,
-						};
-					}
-				}
 			},
 		},
 	};
