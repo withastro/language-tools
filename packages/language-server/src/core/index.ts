@@ -1,15 +1,16 @@
-import * as path from 'node:path';
 import type { DiagnosticMessage } from '@astrojs/compiler/types';
 import {
+	forEachEmbeddedCode,
 	type CodeMapping,
 	type ExtraServiceScript,
 	type LanguagePlugin,
 	type VirtualCode,
-	forEachEmbeddedCode,
 } from '@volar/language-core';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type ts from 'typescript';
 import type { HTMLDocument } from 'vscode-html-languageservice';
-import { type AstroInstall, getLanguageServerTypesDir } from '../utils.js';
+import { getLanguageServerTypesDir, type AstroInstall } from '../utils.js';
 import { astro2tsx } from './astro2tsx';
 import { AstroMetadata, getAstroMetadata } from './parseAstro';
 import { extractStylesheets } from './parseCSS';
@@ -23,7 +24,7 @@ export function getLanguageModule(
 	return {
 		createVirtualCode(fileId, languageId, snapshot) {
 			if (languageId === 'astro') {
-				const fileName = fileId.includes('://') ? fileId.split('://')[1] : fileId;
+				const fileName = fileURLToPath(fileId);
 				return new AstroVirtualCode(fileName, snapshot);
 			}
 		},

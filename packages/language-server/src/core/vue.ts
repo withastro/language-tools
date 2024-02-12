@@ -1,9 +1,9 @@
 import {
+	forEachEmbeddedCode,
 	type CodeInformation,
 	type LanguagePlugin,
 	type Mapping,
 	type VirtualCode,
-	forEachEmbeddedCode,
 } from '@volar/language-core';
 import type ts from 'typescript';
 import { framework2tsx } from './utils.js';
@@ -12,8 +12,7 @@ export function getVueLanguageModule(): LanguagePlugin<VueVirtualCode> {
 	return {
 		createVirtualCode(fileId, languageId, snapshot) {
 			if (languageId === 'vue') {
-				const fileName = fileId.includes('://') ? fileId.split('://')[1] : fileId;
-				return new VueVirtualCode(fileName, snapshot);
+				return new VueVirtualCode(fileId, snapshot);
 			}
 		},
 		updateVirtualCode(_fileId, vueCode, snapshot) {

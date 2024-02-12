@@ -1,9 +1,9 @@
 import {
+	forEachEmbeddedCode,
 	type CodeInformation,
 	type LanguagePlugin,
 	type Mapping,
 	type VirtualCode,
-	forEachEmbeddedCode,
 } from '@volar/language-core';
 import type ts from 'typescript';
 import { framework2tsx } from './utils.js';
@@ -12,8 +12,7 @@ export function getSvelteLanguageModule(): LanguagePlugin<SvelteVirtualCode> {
 	return {
 		createVirtualCode(fileId, languageId, snapshot) {
 			if (languageId === 'svelte') {
-				const fileName = fileId.includes('://') ? fileId.split('://')[1] : fileId;
-				return new SvelteVirtualCode(fileName, snapshot);
+				return new SvelteVirtualCode(fileId, snapshot);
 			}
 		},
 		updateVirtualCode(_fileId, svelteCode, snapshot) {
