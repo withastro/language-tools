@@ -92,7 +92,7 @@ export const astroElements = newHTMLDataProvider('astro-elements', {
 					],
 				},
 				{
-					name: 'data-astro-reload',
+					name: 'data-astro-rerun',
 					description:
 						'Force a script to be reexecuted when using <ViewTransitions/>. This will make your script is:inline as well.',
 					valueSet: 'v',
