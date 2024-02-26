@@ -1,5 +1,40 @@
 # @astrojs/check
 
+## 0.5.6
+
+### Patch Changes
+
+- fe6165b: Makes astro check --tsconfig understand relative file names
+- Updated dependencies [fe6165b]
+  - @astrojs/language-server@2.7.6
+
+## 0.5.5
+
+### Patch Changes
+
+- 1436e6e: Fixes mapping from compiler location to LSP range.
+- Updated dependencies [7c4c1f2]
+- Updated dependencies [1436e6e]
+  - @astrojs/language-server@2.7.5
+
+## 0.5.4
+
+### Patch Changes
+
+- 6924c7e: Fixes semantic highlighting not working inside .ts(x) files in certain cases
+- 310fbfe: Fix Svelte and Vue integrations not working on Windows in certain cases
+- Updated dependencies [6924c7e]
+- Updated dependencies [310fbfe]
+  - @astrojs/language-server@2.7.4
+
+## 0.5.3
+
+### Patch Changes
+
+- de58706: Fix imports from certain packages not working correctly in certain cases
+- Updated dependencies [de58706]
+  - @astrojs/language-server@2.7.3
+
 ## 0.5.2
 
 ### Patch Changes

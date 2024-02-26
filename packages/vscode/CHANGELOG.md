@@ -1,5 +1,25 @@
 # astro-vscode
 
+## 2.7.5
+
+### Patch Changes
+
+- 7c4c1f2: Update Volar services. This update fixes an issue where `typescript.validate` settings wouldn't work in Astro files the same way they would inside TypeScript files
+- 1436e6e: Fixes mapping from compiler location to LSP range.
+
+## 2.7.4
+
+### Patch Changes
+
+- 6924c7e: Fixes semantic highlighting not working inside .ts(x) files in certain cases
+- 310fbfe: Fix Svelte and Vue integrations not working on Windows in certain cases
+
+## 2.7.3
+
+### Patch Changes
+
+- de58706: Fix imports from certain packages not working correctly in certain cases
+
 ## 2.7.1
 
 ### Patch Changes

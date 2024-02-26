@@ -41,7 +41,7 @@ describe('AstroCheck', async () => {
 	});
 
 	it('Can return the total amount of files checked', async () => {
-		assert.equal(result.fileChecked, 5);
+		assert.equal(result.fileChecked, 6);
 	});
 
 	it('Can return the status of the check', async () => {
