@@ -32,7 +32,7 @@
     "volar-service-css": "0.0.31",
     "volar-service-emmet": "0.0.31",
     "volar-service-html": "0.0.31",
-    "volar-service-prettier": "0.0.31-patch.1",
+    "volar-service-prettier": "0.0.31-patch.2",
     "volar-service-typescript": "0.0.31",
     "volar-service-typescript-twoslash-queries": "0.0.31",
     "vscode-html-languageservice": "^5.1.2",
