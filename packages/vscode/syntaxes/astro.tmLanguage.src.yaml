@@ -197,6 +197,12 @@ repository:
       - begin: (?<=>|})
         end: (?=<|{)
         name: text.astro
+      # This matches only constant constant entities within tags.
+        patterns:
+          - { 
+              match: '&(?:#\\d+|[a-zA-Z]+);', 
+              name: constant.entity.astro,
+            }
 
   # ----------
   #  COMMENTS
