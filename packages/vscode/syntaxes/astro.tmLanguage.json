@@ -255,7 +255,7 @@
               "name": "punctuation.section.embedded.end.astro"
             }
           },
-          "contentName": "meta.embedded.expression.astro source.tsx",
+          "contentName": "meta.embedded.expression.astro source.astroJSX",
           "patterns": [
             {
               "begin": "\\G\\s*(?={)",
@@ -267,7 +267,7 @@
               ]
             },
             {
-              "include": "source.tsx"
+              "include": "source.astroJSX"
             }
           ]
         }
