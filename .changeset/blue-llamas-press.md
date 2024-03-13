@@ -1,5 +1,5 @@
 ---
-"astro-vscode": minor
+"astro-vscode": patch
 ---
 
-Adds new rule to highlight constant entities.
+Fixes HTML Entities (ex: `&lt;`) not being highlighted like they would inside HTML files
