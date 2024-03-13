@@ -22,7 +22,7 @@ import type { ServerOptions } from '@volar/language-server/lib/server.js';
 import { create as createAstroService } from './plugins/astro.js';
 import { create as createHtmlService } from './plugins/html.js';
 import { create as createTypescriptAddonsService } from './plugins/typescript-addons/index.js';
-import { create as createTypeScriptService } from './plugins/typescript/index.js';
+import { create as createTypeScriptServices } from './plugins/typescript/index.js';
 
 export function createServerOptions(
 	connection: Connection,
@@ -48,8 +48,8 @@ export function createServerOptions(
 				createHtmlService(),
 				createCssService(),
 				createEmmetService(),
-				createTypeScriptService(ts),
-				createTypeScriptTwoSlashService(),
+				...createTypeScriptServices(ts),
+				createTypeScriptTwoSlashService(ts),
 				createTypescriptAddonsService(),
 				createAstroService(ts),
 				getPrettierService(),

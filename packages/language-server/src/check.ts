@@ -142,7 +142,7 @@ export class AstroCheck {
 			getSvelteLanguageModule(),
 			getVueLanguageModule(),
 		];
-		const services = [createTypeScriptService(this.ts), createAstroService(this.ts)];
+		const services = [...createTypeScriptService(this.ts), createAstroService(this.ts)];
 
 		if (tsconfigPath) {
 			this.linter = kit.createTypeScriptChecker(languages, services, tsconfigPath);
