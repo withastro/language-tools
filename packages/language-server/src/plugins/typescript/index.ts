@@ -1,12 +1,12 @@
 import type { ServicePlugin, ServicePluginInstance } from '@volar/language-server';
-import { create as createTypeScriptService } from 'volar-service-typescript';
+import { create as createTypeScriptServices } from 'volar-service-typescript';
 import { AstroVirtualCode } from '../../core/index.js';
 import { enhancedProvideCodeActions, enhancedResolveCodeAction } from './codeActions.js';
 import { enhancedProvideCompletionItems, enhancedResolveCompletionItem } from './completions.js';
 import { enhancedProvideSemanticDiagnostics } from './diagnostics.js';
 
 export const create = (ts: typeof import('typescript')): ServicePlugin[] => {
-	const tsServicePlugins = createTypeScriptService(ts as typeof import('typescript'), {});
+	const tsServicePlugins = createTypeScriptServices(ts as typeof import('typescript'), {});
 	return tsServicePlugins.map<ServicePlugin>(plugin => {
 		if (plugin.name === 'typescript-semantic') {
 			return {
