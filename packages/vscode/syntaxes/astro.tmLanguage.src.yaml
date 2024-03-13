@@ -195,8 +195,8 @@ repository:
       - include: '#entities'
       # Content text.
       # This matches only in-between all the nodes - nothing inside of them.
-      - begin: (?<=>|})
-        end: (?=<|{)
+      - begin: (?<=^|>|})
+        end: (?=<|{|$)
         name: text.astro
         patterns:
           - include: '#entities'
