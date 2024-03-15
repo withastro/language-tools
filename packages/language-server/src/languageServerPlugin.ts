@@ -109,13 +109,14 @@ export function createServerOptions(
 			},
 			{
 				documentSelector: ['astro'],
-				getFormattingOptions: async (prettier, document, formatOptions, context) => {
+				getFormattingOptions: async (prettierInstance, document, formatOptions, context) => {
 					const filePath = URI.parse(document.uri).fsPath;
-					const configOptions = await prettier.resolveConfig(filePath, {
+					const configOptions = await prettierInstance.resolveConfig(filePath, {
 						// This seems to be broken since Prettier 3, and it'll always use its cumbersome cache. Hopefully it works one day.
 						useCache: false,
+						editorconfig: true,
 					});
-					const editorOptions = await context.env.getConfiguration<{}>?.('prettier', document.uri);
+					const editorOptions = await context.env.getConfiguration<object>?.('prettier', document.uri);
 
 					// Return a config with the following cascade:
 					// - Prettier config file should always win if it exists, if it doesn't:
