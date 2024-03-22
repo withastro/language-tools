@@ -86,7 +86,7 @@ describe('TypeScript - Completions', async () => {
 
 		// Why `import type`? I... don't know. TypeScript return this in some contexts and somehow in the editor it's not a problem.
 		// This issue affects all imports, even outside of Astro.
-		expect(edits?.additionalTextEdits?.[0].newText.trim).to.equal(
+		expect(edits?.additionalTextEdits?.[0].newText).to.equal(
 			`\nimport type { Image } from "astro:assets";${EOL}`
 		);
 		expect(edits?.additionalTextEdits?.[0].range.start.line).to.equal(0);
