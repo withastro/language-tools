@@ -61,10 +61,7 @@ export function getLanguagePlugins(
 	return languagePlugins;
 }
 
-export function getLanguageServicePlugins(
-	connection: Connection,
-	ts: typeof import('typescript')
-) {
+export function getLanguageServicePlugins(connection: Connection, ts: typeof import('typescript')) {
 	return [
 		createHtmlService(),
 		createCssService(),

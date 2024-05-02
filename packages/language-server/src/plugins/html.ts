@@ -1,4 +1,8 @@
-import { CompletionItemKind, LanguageServicePlugin, LanguageServicePluginInstance } from '@volar/language-server';
+import {
+	CompletionItemKind,
+	LanguageServicePlugin,
+	LanguageServicePluginInstance,
+} from '@volar/language-server';
 import { create as createHtmlService } from 'volar-service-html';
 import * as html from 'vscode-html-languageservice';
 import { URI, Utils } from 'vscode-uri';

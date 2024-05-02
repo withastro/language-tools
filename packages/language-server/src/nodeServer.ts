@@ -25,28 +25,28 @@ connection.onInitialize((params) => {
 	return server.initialize(
 		params,
 		getLanguageServicePlugins(connection, typescript),
-		createTypeScriptProjectProvider(
-			typescript,
-			diagnosticMessages,
-			(env, project) => getLanguagePlugins(connection, typescript, env, project.configFileName)
+		createTypeScriptProjectProvider(typescript, diagnosticMessages, (env, project) =>
+			getLanguagePlugins(connection, typescript, env, project.configFileName)
 		)
 	);
 });
 
 connection.onInitialized(() => {
 	server.initialized();
-	server.watchFiles([`**/*.{${[
-		'js',
-		'cjs',
-		'mjs',
-		'ts',
-		'cts',
-		'mts',
-		'jsx',
-		'tsx',
-		'json',
-		'astro',
-		'vue',
-		'svelte',
-	].join(',')}}`])
+	server.watchFiles([
+		`**/*.{${[
+			'js',
+			'cjs',
+			'mjs',
+			'ts',
+			'cts',
+			'mts',
+			'jsx',
+			'tsx',
+			'json',
+			'astro',
+			'vue',
+			'svelte',
+		].join(',')}}`,
+	]);
 });

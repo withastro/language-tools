@@ -57,7 +57,9 @@ export const create = (ts: typeof import('typescript')): LanguageServicePlugin[]
 						},
 						async provideSemanticDiagnostics(document, token) {
 							const decoded = context.decodeEmbeddedDocumentUri(document.uri);
-							const code = decoded && context.language.scripts.get(decoded[0])?.generated?.embeddedCodes.get(decoded[1]);
+							const code =
+								decoded &&
+								context.language.scripts.get(decoded[0])?.generated?.embeddedCodes.get(decoded[1]);
 							let tsxLineCount = undefined;
 
 							if (code instanceof AstroVirtualCode) {

@@ -1,4 +1,8 @@
-import type { CompletionList, LanguageServicePlugin, LanguageServicePluginInstance } from '@volar/language-server';
+import type {
+	CompletionList,
+	LanguageServicePlugin,
+	LanguageServicePluginInstance,
+} from '@volar/language-server';
 import { AstroVirtualCode } from '../../core/index.js';
 import { isInsideFrontmatter, isJSDocument } from '../utils.js';
 import { getSnippetCompletions } from './snippets.js';

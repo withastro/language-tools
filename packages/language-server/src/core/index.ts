@@ -124,7 +124,7 @@ export function getLanguageModule(
 							isolatedModules: true,
 							moduleResolution:
 								baseCompilationSettings.moduleResolution === ts.ModuleResolutionKind.Classic ||
-									!baseCompilationSettings.moduleResolution
+								!baseCompilationSettings.moduleResolution
 									? ts.ModuleResolutionKind.Node10
 									: baseCompilationSettings.moduleResolution,
 						};

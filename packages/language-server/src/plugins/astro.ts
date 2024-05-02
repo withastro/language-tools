@@ -6,10 +6,10 @@ import {
 	CompletionItemKind,
 	Diagnostic,
 	InsertTextFormat,
-	Position,
-	Range,
 	LanguageServicePlugin,
 	LanguageServicePluginInstance,
+	Position,
+	Range,
 	TextEdit,
 } from '@volar/language-server';
 import fg from 'fast-glob';
