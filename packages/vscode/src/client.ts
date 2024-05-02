@@ -1,11 +1,10 @@
 import * as path from 'node:path';
-import { DiagnosticModel, InitializationOptions } from '@volar/language-server';
+import type { InitializationOptions } from '@volar/language-server';
 import * as protocol from '@volar/language-server/protocol';
 import {
 	LabsInfo,
 	activateAutoInsertion,
 	activateFindFileReferences,
-	activateReloadProjects,
 	activateTsConfigStatusItem,
 	activateTsVersionStatusItem,
 	createLabsInfo,
@@ -66,7 +65,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<LabsIn
 		typescript: {
 			tsdk: (await getTsdk(context)).tsdk,
 		},
-		diagnosticModel: DiagnosticModel.Push,
 	} satisfies InitOptions;
 
 	const clientOptions = {
@@ -79,7 +77,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<LabsIn
 	// support for auto close tag
 	activateAutoInsertion('astro', client);
 	activateFindFileReferences('astro.findFileReferences', client);
-	activateReloadProjects('astro.reloadProjects', client);
 	activateTsConfigStatusItem('astro', 'astro.openTsConfig', client);
 	activateTsVersionStatusItem(
 		'astro',

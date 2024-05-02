@@ -1,17 +1,17 @@
-import type { ServicePlugin, ServicePluginInstance } from '@volar/language-server';
+import type { LanguageServicePlugin, LanguageServicePluginInstance } from '@volar/language-server';
 import { create as createTypeScriptServices } from 'volar-service-typescript';
 import { AstroVirtualCode } from '../../core/index.js';
 import { enhancedProvideCodeActions, enhancedResolveCodeAction } from './codeActions.js';
 import { enhancedProvideCompletionItems, enhancedResolveCompletionItem } from './completions.js';
 import { enhancedProvideSemanticDiagnostics } from './diagnostics.js';
 
-export const create = (ts: typeof import('typescript')): ServicePlugin[] => {
+export const create = (ts: typeof import('typescript')): LanguageServicePlugin[] => {
 	const tsServicePlugins = createTypeScriptServices(ts as typeof import('typescript'), {});
-	return tsServicePlugins.map<ServicePlugin>((plugin) => {
+	return tsServicePlugins.map<LanguageServicePlugin>((plugin) => {
 		if (plugin.name === 'typescript-semantic') {
 			return {
 				...plugin,
-				create(context): ServicePluginInstance {
+				create(context): LanguageServicePluginInstance {
 					const typeScriptPlugin = plugin.create(context);
 					return {
 						...typeScriptPlugin,
@@ -56,8 +56,8 @@ export const create = (ts: typeof import('typescript')): ServicePlugin[] => {
 							return enhancedResolveCodeAction(resolvedCodeAction, context);
 						},
 						async provideSemanticDiagnostics(document, token) {
-							const [_, source] = context.documents.getVirtualCodeByUri(document.uri);
-							const code = source?.generated?.code;
+							const decoded = context.decodeEmbeddedDocumentUri(document.uri);
+							const code = decoded && context.language.scripts.get(decoded[0])?.generated?.embeddedCodes.get(decoded[1]);
 							let tsxLineCount = undefined;
 
 							if (code instanceof AstroVirtualCode) {
