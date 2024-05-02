@@ -25,7 +25,7 @@
     "@jridgewell/sourcemap-codec": "^1.4.15",
     "@volar/kit": "~2.2.0",
     "@volar/language-core": "~2.2.0",
-    "@volar/language-server": "~2.2.0",
+    "@volar/language-server": "~2.2.0-patch.1",
     "@volar/language-service": "~2.2.0",
     "@volar/typescript": "~2.2.0",
     "fast-glob": "^3.2.12",

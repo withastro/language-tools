@@ -5,6 +5,7 @@ import {
 	LabsInfo,
 	activateAutoInsertion,
 	activateFindFileReferences,
+	activateReloadProjects,
 	activateTsConfigStatusItem,
 	activateTsVersionStatusItem,
 	createLabsInfo,
@@ -77,6 +78,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<LabsIn
 	// support for auto close tag
 	activateAutoInsertion('astro', client);
 	activateFindFileReferences('astro.findFileReferences', client);
+	activateReloadProjects('astro.reloadProjects', client);
 	activateTsConfigStatusItem('astro', 'astro.openTsConfig', client);
 	activateTsVersionStatusItem(
 		'astro',

@@ -88,8 +88,8 @@ importers:
         specifier: ~2.2.0
         version: 2.2.0
       '@volar/language-server':
-        specifier: ~2.2.0
-        version: 2.2.0
+        specifier: ~2.2.0-patch.1
+        version: 2.2.0-patch.1
       '@volar/language-service':
         specifier: ~2.2.0
         version: 2.2.0
@@ -247,11 +247,11 @@ importers:
         specifier: ^1.82.0
         version: 1.83.0
       '@volar/language-server':
-        specifier: ~2.2.0
-        version: 2.2.0
+        specifier: ~2.2.0-patch.1
+        version: 2.2.0-patch.1
       '@volar/vscode':
-        specifier: ~2.2.0
-        version: 2.2.0
+        specifier: ~2.2.0-patch.1
+        version: 2.2.0-patch.1
       '@vscode/test-electron':
         specifier: ^2.3.2
         version: 2.3.2
@@ -2156,6 +2156,22 @@ packages:
       vscode-languageserver-protocol: 3.17.5
       vscode-languageserver-textdocument: 1.0.11
       vscode-uri: 3.0.8
+    dev: true
+
+  /@volar/language-server@2.2.0-patch.1:
+    resolution: {integrity: sha512-lNfsxeelxuD70ZYJNK/q+dhGsvRfymt2SlMWciZ549+xZwqwpK1tcdCMmLKlFhJNAcpcD3U4kaJeU/LrK6nbTA==}
+    dependencies:
+      '@volar/language-core': 2.2.0
+      '@volar/language-service': 2.2.0
+      '@volar/snapshot-document': 2.2.0
+      '@volar/typescript': 2.2.0
+      '@vscode/l10n': 0.0.16
+      path-browserify: 1.0.1
+      request-light: 0.7.0
+      vscode-languageserver: 9.0.1
+      vscode-languageserver-protocol: 3.17.5
+      vscode-languageserver-textdocument: 1.0.11
+      vscode-uri: 3.0.8
 
   /@volar/language-service@2.2.0:
     resolution: {integrity: sha512-hLtIFpsOcfHJ7kllUDRU2Ap1IBGEnADyE7Ea3kPwvUHM43Qn+7lvpKXxX/UL2zVcQQrvHr0348Tfi9BF1aKD5A==}
@@ -2191,10 +2207,10 @@ packages:
       '@volar/language-core': 2.2.0
       path-browserify: 1.0.1
 
-  /@volar/vscode@2.2.0:
-    resolution: {integrity: sha512-WQEnvv7tDfYN7NrHRPvtnu3fZ+Uc4IVYYt/i728gaql/0StkITMdh7K1i+43MsDlY/gSwh82XrDstaxAloTJ6Q==}
+  /@volar/vscode@2.2.0-patch.1:
+    resolution: {integrity: sha512-wXQMV88srbXajPX0sj4MxsIyit6s23zsojM/wwY8athr94+fgeULwMo/3cEFeZMzA/Z0sYvjdoYjRwaw1CEzDA==}
     dependencies:
-      '@volar/language-server': 2.2.0
+      '@volar/language-server': 2.2.0-patch.1
       path-browserify: 1.0.1
       vscode-languageclient: 9.0.1
       vscode-nls: 5.2.0
