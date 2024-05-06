@@ -95,8 +95,8 @@ export function getLanguageServicePlugins(connection: Connection, ts: typeof imp
 			{
 				documentSelector: ['astro'],
 				getFormattingOptions: async (prettierInstance, document, formatOptions, context) => {
-					const decodedUri = context.decodeEmbeddedDocumentUri(document.uri);
-					const filePath = decodedUri && URI.parse(decodedUri[0]).fsPath;
+					const documentUri = context.decodeEmbeddedDocumentUri(document.uri)?.[0] ?? document.uri;
+					const filePath = URI.parse(documentUri).fsPath;
 
 					if (!filePath) {
 						return {};
