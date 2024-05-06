@@ -57,6 +57,11 @@ export function getLanguagePlugins(
 			getLanguageModule(typeof astroInstall === 'string' ? undefined : astroInstall, ts)
 		);
 	}
+	else {
+		languagePlugins.unshift(
+			getLanguageModule(undefined, ts)
+		);
+	}
 
 	return languagePlugins;
 }
