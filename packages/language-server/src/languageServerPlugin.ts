@@ -70,7 +70,7 @@ export function getLanguageServicePlugins(connection: Connection, ts: typeof imp
 	return [
 		createHtmlService(),
 		createCssService(),
-		createEmmetService({}),
+		createEmmetService(),
 		...createTypeScriptServices(ts),
 		createTypeScriptTwoSlashService(ts),
 		createTypescriptAddonsService(),
