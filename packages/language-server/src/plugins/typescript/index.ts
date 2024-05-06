@@ -57,17 +57,16 @@ export const create = (ts: typeof import('typescript')): LanguageServicePlugin[]
 						},
 						async provideSemanticDiagnostics(document, token) {
 							const decoded = context.decodeEmbeddedDocumentUri(document.uri);
-							const code =
-								decoded &&
-								context.language.scripts.get(decoded[0])?.generated?.embeddedCodes.get(decoded[1]);
-							let tsxLineCount = undefined;
+							const sourceScript = decoded && context.language.scripts.get(decoded[0]);
+							const root = sourceScript?.generated?.root;
 
-							if (code instanceof AstroVirtualCode) {
+							let tsxLineCount = undefined;
+							if (root instanceof AstroVirtualCode) {
 								// If we have compiler errors, our TSX isn't valid so don't bother showing TS errors
-								if (code.hasCompilationErrors) return null;
+								if (root.hasCompilationErrors) return null;
 
 								// We'll use this to filter out diagnostics that are outside the mapped range of the TSX
-								tsxLineCount = code.astroMeta.tsxRanges.body.end.line;
+								tsxLineCount = root.astroMeta.tsxRanges.body.end.line;
 							}
 
 							const diagnostics = await typeScriptPlugin.provideSemanticDiagnostics!(

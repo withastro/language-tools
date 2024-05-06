@@ -96,8 +96,31 @@ export function getLanguageServicePlugins(connection: Connection, ts: typeof imp
 			},
 			{
 				documentSelector: ['astro'],
+				// HACK: Volar's prettier service doesn't check this correctly at the moment in Volar 2.2
+				async isFormattingEnabled(prettierInstance, document, context) {
+					const decodedUri = context.decodeEmbeddedDocumentUri(document.uri);
+					const filePath = decodedUri && URI.parse(decodedUri[0]).fsPath;
+
+					if (!filePath) return false;
+
+					const fileInfo = await prettierInstance.getFileInfo(filePath, {
+						ignorePath: '.prettierignore',
+						resolveConfig: false,
+					});
+
+					if (fileInfo.ignored) {
+						return false;
+					}
+
+					return true;
+				},
 				getFormattingOptions: async (prettierInstance, document, formatOptions, context) => {
-					const filePath = URI.parse(document.uri).fsPath;
+					const decodedUri = context.decodeEmbeddedDocumentUri(document.uri);
+					const filePath = decodedUri && URI.parse(decodedUri[0]).fsPath;
+
+					if (!filePath) {
+						return {};
+					}
 
 					let configOptions = null;
 					try {
