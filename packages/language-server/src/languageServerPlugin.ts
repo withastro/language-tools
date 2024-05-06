@@ -35,33 +35,26 @@ export function getLanguagePlugins(
 		getSvelteLanguageModule(),
 	];
 
-	if (tsconfig) {
-		const rootPath = tsconfig
-			? tsconfig.split('/').slice(0, -1).join('/')
-			: serviceEnv.typescript!.uriToFileName(serviceEnv.workspaceFolder);
-		const nearestPackageJson = ts.findConfigFile(rootPath, ts.sys.fileExists, 'package.json');
+	const rootPath = tsconfig
+		? tsconfig.split('/').slice(0, -1).join('/')
+		: serviceEnv.typescript!.uriToFileName(serviceEnv.workspaceFolder);
+	const nearestPackageJson = ts.findConfigFile(rootPath, ts.sys.fileExists, 'package.json');
 
-		const astroInstall = getAstroInstall([rootPath], {
-			nearestPackageJson: nearestPackageJson,
-			readDirectory: ts.sys.readDirectory,
+	const astroInstall = getAstroInstall([rootPath], {
+		nearestPackageJson: nearestPackageJson,
+		readDirectory: ts.sys.readDirectory,
+	});
+
+	if (astroInstall === 'not-found') {
+		connection.sendNotification(ShowMessageNotification.type, {
+			message: `Couldn't find Astro in workspace "${rootPath}". Experience might be degraded. For the best experience, please make sure Astro is installed into your project and restart the language server.`,
+			type: MessageType.Warning,
 		});
-
-		if (astroInstall === 'not-found') {
-			connection.sendNotification(ShowMessageNotification.type, {
-				message: `Couldn't find Astro in workspace "${rootPath}". Experience might be degraded. For the best experience, please make sure Astro is installed into your project and restart the language server.`,
-				type: MessageType.Warning,
-			});
-		}
-
-		languagePlugins.unshift(
-			getLanguageModule(typeof astroInstall === 'string' ? undefined : astroInstall, ts)
-		);
 	}
-	else {
-		languagePlugins.unshift(
-			getLanguageModule(undefined, ts)
-		);
-	}
+
+	languagePlugins.unshift(
+		getLanguageModule(typeof astroInstall === 'string' ? undefined : astroInstall, ts)
+	);
 
 	return languagePlugins;
 }
