@@ -7,17 +7,15 @@ import {
 import type ts from 'typescript';
 import { astro2tsx } from './astro2tsx.js';
 
-export function getLanguageModule(): LanguagePlugin<AstroVirtualCode> {
+export function getLanguagePlugin(): LanguagePlugin<string, AstroVirtualCode> {
 	return {
-		getLanguageId(scriptId) {
-			if (scriptId.endsWith('.astro')) {
+		getLanguageId(fileName) {
+			if (fileName.endsWith('.astro')) {
 				return 'astro';
 			}
 		},
-		createVirtualCode(scriptId, languageId, snapshot) {
+		createVirtualCode(fileName, languageId, snapshot) {
 			if (languageId === 'astro') {
-				// scriptId will never be a uri in ts plugin
-				const fileName = scriptId;
 				return new AstroVirtualCode(fileName, snapshot);
 			}
 		},

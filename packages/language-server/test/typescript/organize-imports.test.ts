@@ -48,7 +48,7 @@ describe('TypeScript - Organize & Sort Imports', () => {
 							],
 						},
 					},
-					serviceIndex: 3,
+					pluginIndex: 3,
 					uri: document.uri,
 					version: (organizeEdits?.[0] as any).data.version,
 				},

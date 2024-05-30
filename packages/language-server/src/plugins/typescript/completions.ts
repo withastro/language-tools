@@ -2,7 +2,7 @@ import {
 	CompletionItem,
 	CompletionItemKind,
 	CompletionList,
-	ServiceContext,
+	LanguageServiceContext,
 } from '@volar/language-server';
 import { AstroVirtualCode } from '../../core/index.js';
 import { mapEdit } from './utils.js';
@@ -33,7 +33,7 @@ export function enhancedProvideCompletionItems(completions: CompletionList): Com
 
 export function enhancedResolveCompletionItem(
 	resolvedCompletion: CompletionItem,
-	context: ServiceContext
+	context: LanguageServiceContext
 ): CompletionItem {
 	// Make sure we keep our icons even when the completion is resolved
 	if (resolvedCompletion.data.isComponent) {

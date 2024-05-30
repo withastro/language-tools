@@ -2,14 +2,14 @@ import * as path from 'node:path';
 import type { DiagnosticMessage } from '@astrojs/compiler/types';
 import {
 	type CodeMapping,
-	type ExtraServiceScript,
 	type LanguagePlugin,
+	type TypeScriptExtraServiceScript,
 	type VirtualCode,
 	forEachEmbeddedCode,
 } from '@volar/language-core';
 import type ts from 'typescript';
 import type { HTMLDocument } from 'vscode-html-languageservice';
-import { URI } from 'vscode-uri';
+import type { URI } from 'vscode-uri';
 import { type AstroInstall, getLanguageServerTypesDir } from '../utils.js';
 import { astro2tsx } from './astro2tsx';
 import { AstroMetadata, getAstroMetadata } from './parseAstro';
@@ -17,21 +17,19 @@ import { extractStylesheets } from './parseCSS';
 import { parseHTML } from './parseHTML';
 import { extractScriptTags } from './parseJS.js';
 
-export function getLanguageModule(
+export function getAstroLanguagePlugin(
 	astroInstall: AstroInstall | undefined,
 	ts: typeof import('typescript')
-): LanguagePlugin<AstroVirtualCode> {
+): LanguagePlugin<URI, AstroVirtualCode> {
 	return {
-		getLanguageId(scriptId) {
-			if (scriptId.endsWith('.astro')) {
+		getLanguageId(uri) {
+			if (uri.path.endsWith('.astro')) {
 				return 'astro';
 			}
 		},
-		createVirtualCode(scriptId, languageId, snapshot) {
+		createVirtualCode(uri, languageId, snapshot) {
 			if (languageId === 'astro') {
-				const fileName = scriptId.includes('://')
-					? URI.parse(scriptId).fsPath.replace(/\\/g, '/')
-					: scriptId;
+				const fileName = uri.fsPath.replace(/\\/g, '/');
 				return new AstroVirtualCode(fileName, snapshot);
 			}
 		},
@@ -54,7 +52,7 @@ export function getLanguageModule(
 				return undefined;
 			},
 			getExtraServiceScripts(fileName, astroCode) {
-				const result: ExtraServiceScript[] = [];
+				const result: TypeScriptExtraServiceScript[] = [];
 				for (const code of forEachEmbeddedCode(astroCode)) {
 					if (code.id.endsWith('.mjs') || code.id.endsWith('.mts')) {
 						const fileExtension = code.id.endsWith('.mjs') ? '.mjs' : '.mts';

@@ -1,7 +1,7 @@
 import {
 	createConnection,
 	createServer,
-	createTypeScriptProjectProvider,
+	createTypeScriptProject,
 	loadTsdkByPath,
 } from '@volar/language-server/node';
 import { getLanguagePlugins, getLanguageServicePlugins } from './languageServerPlugin.js';
@@ -25,7 +25,7 @@ connection.onInitialize((params) => {
 	return server.initialize(
 		params,
 		getLanguageServicePlugins(connection, typescript),
-		createTypeScriptProjectProvider(typescript, diagnosticMessages, (env, project) =>
+		createTypeScriptProject(typescript, diagnosticMessages, (env, project) =>
 			getLanguagePlugins(connection, typescript, env, project.configFileName)
 		)
 	);
