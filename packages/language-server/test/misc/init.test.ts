@@ -119,6 +119,17 @@ describe('Initialize', async () => {
 				},
 			},
 			codeActionProvider: {
+				codeActionKinds: [
+					'',
+					'quickfix',
+					'refactor',
+					'refactor.extract',
+					'refactor.inline',
+					'refactor.rewrite',
+					'source',
+					'source.fixAll',
+					'source.organizeImports',
+				],
 				resolveProvider: true,
 			},
 			inlayHintProvider: { resolveProvider: false },
