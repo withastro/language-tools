@@ -4,6 +4,7 @@ import {
 	CompletionList,
 	LanguageServiceContext,
 } from '@volar/language-server';
+import { URI } from 'vscode-uri';
 import { AstroVirtualCode } from '../../core/index.js';
 import { mapEdit } from './utils.js';
 
@@ -44,7 +45,7 @@ export function enhancedResolveCompletionItem(
 	}
 
 	if (resolvedCompletion.additionalTextEdits) {
-		const decoded = context.decodeEmbeddedDocumentUri(resolvedCompletion.data.uri);
+		const decoded = context.decodeEmbeddedDocumentUri(URI.parse(resolvedCompletion.data.uri));
 		const sourceScript = decoded && context.language.scripts.get(decoded[0]);
 		const virtualCode = decoded && sourceScript?.generated?.embeddedCodes.get(decoded[1]);
 		const root = sourceScript?.generated?.root;

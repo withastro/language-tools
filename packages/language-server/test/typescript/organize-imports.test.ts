@@ -2,6 +2,7 @@ import { Range } from '@volar/language-server';
 import { expect } from 'chai';
 import { describe } from 'mocha';
 import { type LanguageServer, getLanguageServer } from '../server.js';
+import { URI } from 'vscode-uri';
 
 describe('TypeScript - Organize & Sort Imports', () => {
 	let languageServer: LanguageServer;
@@ -41,7 +42,11 @@ describe('TypeScript - Organize & Sort Imports', () => {
 										},
 									],
 									textDocument: {
-										uri: `volar-embedded-content://tsx/${encodeURIComponent(document.uri)}`,
+										uri: URI.from({
+											scheme: 'volar-embedded-content',
+											authority: 'tsx',
+											path: '/' + encodeURIComponent(document.uri),
+										}).toString(),
 										version: null,
 									},
 								},
