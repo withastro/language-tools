@@ -19,10 +19,6 @@ export function getLanguagePlugin(): LanguagePlugin<string, AstroVirtualCode> {
 				return new AstroVirtualCode(fileName, snapshot);
 			}
 		},
-		updateVirtualCode(_scriptId, astroFile, snapshot) {
-			astroFile.update(snapshot);
-			return astroFile;
-		},
 		typescript: {
 			extraFileExtensions: [{ extension: 'astro', isMixedContent: true, scriptKind: 7 }],
 			getServiceScript(astroCode) {
@@ -51,15 +47,6 @@ export class AstroVirtualCode implements VirtualCode {
 		public fileName: string,
 		public snapshot: ts.IScriptSnapshot
 	) {
-		this.onSnapshotUpdated();
-	}
-
-	public update(newSnapshot: ts.IScriptSnapshot) {
-		this.snapshot = newSnapshot;
-		this.onSnapshotUpdated();
-	}
-
-	onSnapshotUpdated() {
 		this.mappings = [
 			{
 				sourceOffsets: [0],

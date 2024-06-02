@@ -22,10 +22,6 @@ export function getVueLanguageModule(): LanguagePlugin<URI, VueVirtualCode> {
 				return new VueVirtualCode(fileName, snapshot);
 			}
 		},
-		updateVirtualCode(_scriptId, vueCode, snapshot) {
-			vueCode.update(snapshot);
-			return vueCode;
-		},
 		typescript: {
 			extraFileExtensions: [{ extension: 'vue', isMixedContent: true, scriptKind: 7 }],
 			getServiceScript(vueCode) {
@@ -54,15 +50,6 @@ class VueVirtualCode implements VirtualCode {
 		public fileName: string,
 		public snapshot: ts.IScriptSnapshot
 	) {
-		this.onSnapshotUpdated();
-	}
-
-	public update(newSnapshot: ts.IScriptSnapshot) {
-		this.snapshot = newSnapshot;
-		this.onSnapshotUpdated();
-	}
-
-	private onSnapshotUpdated() {
 		this.mappings = [];
 
 		this.embeddedCodes = [];

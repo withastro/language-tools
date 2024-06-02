@@ -22,10 +22,6 @@ export function getSvelteLanguagePlugin(): LanguagePlugin<URI, SvelteVirtualCode
 				return new SvelteVirtualCode(fileName, snapshot);
 			}
 		},
-		updateVirtualCode(_scriptId, svelteCode, snapshot) {
-			svelteCode.update(snapshot);
-			return svelteCode;
-		},
 		typescript: {
 			extraFileExtensions: [{ extension: 'svelte', isMixedContent: true, scriptKind: 7 }],
 			getServiceScript(svelteCode) {
@@ -54,15 +50,6 @@ class SvelteVirtualCode implements VirtualCode {
 		public fileName: string,
 		public snapshot: ts.IScriptSnapshot
 	) {
-		this.onSnapshotUpdated();
-	}
-
-	public update(newSnapshot: ts.IScriptSnapshot) {
-		this.snapshot = newSnapshot;
-		this.onSnapshotUpdated();
-	}
-
-	private onSnapshotUpdated() {
 		this.mappings = [];
 
 		this.embeddedCodes = [];

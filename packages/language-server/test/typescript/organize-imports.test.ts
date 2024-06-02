@@ -1,8 +1,8 @@
 import { Range } from '@volar/language-server';
 import { expect } from 'chai';
 import { describe } from 'mocha';
-import { type LanguageServer, getLanguageServer } from '../server.js';
 import { URI } from 'vscode-uri';
+import { type LanguageServer, getLanguageServer } from '../server.js';
 
 describe('TypeScript - Organize & Sort Imports', () => {
 	let languageServer: LanguageServer;

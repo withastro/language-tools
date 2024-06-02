@@ -33,10 +33,6 @@ export function getAstroLanguagePlugin(
 				return new AstroVirtualCode(fileName, snapshot);
 			}
 		},
-		updateVirtualCode(_scriptId, astroCode, snapshot) {
-			astroCode.update(snapshot);
-			return astroCode;
-		},
 		typescript: {
 			extraFileExtensions: [{ extension: 'astro', isMixedContent: true, scriptKind: 7 }],
 			getServiceScript(astroCode) {
@@ -148,19 +144,6 @@ export class AstroVirtualCode implements VirtualCode {
 		public fileName: string,
 		public snapshot: ts.IScriptSnapshot
 	) {
-		this.onSnapshotUpdated();
-	}
-
-	get hasCompilationErrors(): boolean {
-		return this.compilerDiagnostics.filter((diag) => diag.severity === 1).length > 0;
-	}
-
-	public update(newSnapshot: ts.IScriptSnapshot) {
-		this.snapshot = newSnapshot;
-		this.onSnapshotUpdated();
-	}
-
-	onSnapshotUpdated() {
 		this.mappings = [
 			{
 				sourceOffsets: [0],
@@ -217,5 +200,9 @@ export class AstroVirtualCode implements VirtualCode {
 		this.astroMeta = { ...astroMetadata, tsxRanges: tsx.ranges };
 		this.compilerDiagnostics.push(...tsx.diagnostics);
 		this.embeddedCodes.push(tsx.virtualCode);
+	}
+
+	get hasCompilationErrors(): boolean {
+		return this.compilerDiagnostics.filter((diag) => diag.severity === 1).length > 0;
 	}
 }
