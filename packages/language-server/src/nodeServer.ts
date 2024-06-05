@@ -24,10 +24,10 @@ connection.onInitialize((params) => {
 
 	return server.initialize(
 		params,
-		getLanguageServicePlugins(connection, typescript),
 		createTypeScriptProject(typescript, diagnosticMessages, (env, project) =>
 			getLanguagePlugins(connection, typescript, env, project.configFileName)
-		)
+		),
+		getLanguageServicePlugins(connection, typescript)
 	);
 });
 
