@@ -63,7 +63,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<LabsIn
 
 	const initializationOptions = {
 		typescript: {
-			tsdk: (await getTsdk(context)).tsdk,
+			tsdk: (await getTsdk(context))!.tsdk,
 		},
 	} satisfies InitOptions;
 
