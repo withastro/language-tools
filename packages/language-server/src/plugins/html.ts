@@ -35,8 +35,8 @@ export const create = (): LanguageServicePlugin => {
 	});
 	return {
 		...htmlPlugin,
-		create(context, api): LanguageServicePluginInstance {
-			const htmlPluginInstance = htmlPlugin.create(context, api);
+		create(context): LanguageServicePluginInstance {
+			const htmlPluginInstance = htmlPlugin.create(context);
 
 			return {
 				...htmlPluginInstance,

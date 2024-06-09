@@ -12,8 +12,8 @@ export const create = (ts: typeof import('typescript')): LanguageServicePlugin[]
 		if (plugin.name === 'typescript-semantic') {
 			return {
 				...plugin,
-				create(context, api): LanguageServicePluginInstance {
-					const typeScriptPlugin = plugin.create(context, api);
+				create(context): LanguageServicePluginInstance {
+					const typeScriptPlugin = plugin.create(context);
 					return {
 						...typeScriptPlugin,
 						async provideCompletionItems(document, position, completionContext, token) {

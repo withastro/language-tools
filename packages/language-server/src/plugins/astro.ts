@@ -25,7 +25,7 @@ export const create = (ts: typeof import('typescript')): LanguageServicePlugin =
 			completionProvider: {
 				triggerCharacters: ['-'],
 			},
-			diagnosticProvider: true,
+			diagnosticProvider: {},
 			codeLensProvider: {},
 		},
 		create(context): LanguageServicePluginInstance {
