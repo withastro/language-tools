@@ -73,8 +73,8 @@ describe('Initialize', async () => {
 				resolveProvider: true,
 			},
 			documentHighlightProvider: true,
-			documentLinkProvider: { resolveProvider: false },
-			codeLensProvider: { resolveProvider: false },
+			documentLinkProvider: {},
+			codeLensProvider: {},
 			semanticTokensProvider: {
 				range: true,
 				full: false,
@@ -132,7 +132,7 @@ describe('Initialize', async () => {
 				],
 				resolveProvider: true,
 			},
-			inlayHintProvider: { resolveProvider: false },
+			inlayHintProvider: {},
 			workspaceSymbolProvider: true,
 		};
 
