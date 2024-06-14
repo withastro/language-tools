@@ -35,6 +35,12 @@ export async function getLanguageServer(): Promise<LanguageServer> {
 						'lib'
 					),
 				},
+			},
+			{
+				workspace: {
+					// Needed for tests that use didChangeWatchedFiles
+					didChangeWatchedFiles: {},
+				},
 			}
 		);
 		// Ensure that our first test does not suffer from a TypeScript overhead
