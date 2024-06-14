@@ -12,8 +12,7 @@ import { type LanguageServer, getLanguageServer } from '../server.js';
 
 const fixtureDir = path.join(__dirname, '../fixture');
 
-// TODO: Skipping this suite for now, I can't seems to be able to replicate the notifications being sent correctly, not sure if it's a bug in the test or in Volar
-describe.skip('TypeScript - Cache invalidation', async () => {
+describe('TypeScript - Cache invalidation', async () => {
 	let languageServer: LanguageServer;
 
 	async function createFile(name: string, contents: string) {
@@ -106,7 +105,7 @@ describe.skip('TypeScript - Cache invalidation', async () => {
 		);
 	});
 
-	it('Can get auto-imports for new files', async () => {
+	it.skip('Can get auto-imports for new files', async () => {
 		const fileNames = ['AutoImport.astro', 'AutoImport2.astro'];
 
 		const document = await languageServer.handle.openTextDocument(
@@ -129,7 +128,7 @@ describe.skip('TypeScript - Cache invalidation', async () => {
 		}
 	});
 
-	it('New files have access to context of the project', async () => {
+	it.skip('New files have access to context of the project', async () => {
 		const existingDocument = await languageServer.handle.openTextDocument(
 			path.join(fixtureDir, 'importFromSuperModule.astro'),
 			'astro'
