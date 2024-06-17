@@ -29,6 +29,7 @@
     "@volar/language-service": "~2.3.0",
     "@volar/typescript": "~2.3.0",
     "fast-glob": "^3.2.12",
+    "muggle-string": "^0.4.1",
     "volar-service-css": "0.0.51",
     "volar-service-emmet": "0.0.51",
     "volar-service-html": "0.0.51",
@@ -39,7 +40,6 @@
     "vscode-uri": "^3.0.8"
   },
   "devDependencies": {
-    "svelte": "^4.2.10",
     "@astrojs/svelte": "^5.0.3",
     "@astrojs/vue": "^4.0.8",
     "@types/chai": "^4.3.5",
@@ -49,6 +49,7 @@
     "astro": "^4.3.5",
     "chai": "^4.3.7",
     "mocha": "^10.2.0",
+    "svelte": "^4.2.10",
     "tsx": "^3.12.7",
     "typescript": "^5.2.2",
     "vscode-languageserver-protocol": "^3.17.5",

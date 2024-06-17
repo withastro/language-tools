@@ -2,5 +2,5 @@ import { createLanguageServicePlugin } from '@volar/typescript/lib/quickstart/cr
 import { getLanguagePlugin } from './language.js';
 
 export = createLanguageServicePlugin(() => ({
-	languagePlugins: [getLanguagePlugin()]
+	languagePlugins: [getLanguagePlugin()],
 }));
