@@ -1,6 +1,6 @@
 # @astrojs/check ✅
 
-Type checking and diagnostics for your Astro project.
+Type checking and diagnostics for Astro projects.
 
 ## Documentation
 
