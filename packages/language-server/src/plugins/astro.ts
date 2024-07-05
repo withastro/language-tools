@@ -75,9 +75,9 @@ export const create = (ts: typeof import('typescript')): LanguageServicePlugin =
 					if (token.isCancellationRequested) return;
 					if (!isJSDocument(document.languageId)) return;
 
-					if (!context.language.typescript) return;
+					if (!context.project.typescript) return;
 
-					const { asFileName } = context.language.typescript;
+					const { uriConverter } = context.project.typescript;
 					const languageService = context.inject<Provide, 'typescript/languageService'>(
 						'typescript/languageService'
 					);
@@ -98,7 +98,7 @@ export const create = (ts: typeof import('typescript')): LanguageServicePlugin =
 									globcodeLens.push(
 										getGlobResultAsCodeLens(
 											globArgument.getText().slice(1, -1),
-											dirname(asFileName(URI.parse(document.uri))),
+											dirname(uriConverter.asFileName(URI.parse(document.uri))),
 											document.positionAt(node.arguments.pos)
 										)
 									);

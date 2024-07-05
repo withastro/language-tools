@@ -18,33 +18,25 @@ describe('Initialize', async () => {
 
 	it('Has proper capabilities', async () => {
 		const capabilities: ServerCapabilities = {
-			textDocumentSync: 2,
-			workspace: {
-				workspaceFolders: {
-					changeNotifications: true,
-					supported: true,
-				},
-			},
-			selectionRangeProvider: true,
-			foldingRangeProvider: true,
-			linkedEditingRangeProvider: true,
-			colorProvider: true,
-			documentSymbolProvider: true,
-			documentFormattingProvider: true,
-			documentRangeFormattingProvider: true,
-			documentOnTypeFormattingProvider: {
-				firstTriggerCharacter: ';',
-				moreTriggerCharacter: ['}', '\n'],
-			},
-			referencesProvider: true,
-			implementationProvider: true,
-			definitionProvider: true,
-			typeDefinitionProvider: true,
 			callHierarchyProvider: true,
-			hoverProvider: true,
-			renameProvider: { prepareProvider: true },
-			signatureHelpProvider: { triggerCharacters: ['(', ',', '<'], retriggerCharacters: [')'] },
+			codeActionProvider: {
+				codeActionKinds: [
+					'',
+					'quickfix',
+					'refactor',
+					'refactor.extract',
+					'refactor.inline',
+					'refactor.rewrite',
+					'source',
+					'source.fixAll',
+					'source.organizeImports',
+				],
+				resolveProvider: true,
+			},
+			codeLensProvider: {},
+			colorProvider: true,
 			completionProvider: {
+				resolveProvider: true,
 				triggerCharacters: [
 					'.',
 					':',
@@ -70,15 +62,43 @@ describe('Initialize', async () => {
 					'`',
 					' ',
 				],
-				resolveProvider: true,
 			},
+			definitionProvider: true,
+			documentFormattingProvider: true,
 			documentHighlightProvider: true,
 			documentLinkProvider: {},
-			codeLensProvider: {},
+			documentOnTypeFormattingProvider: {
+				firstTriggerCharacter: ';',
+				moreTriggerCharacter: ['}', '\n'],
+			},
+			documentRangeFormattingProvider: true,
+			documentSymbolProvider: true,
+			experimental: {
+				autoInsertionProvider: {
+					configurationSections: [
+						['html.autoCreateQuotes'],
+						['html.autoClosingTags', 'javascript.autoClosingTags', 'typescript.autoClosingTags'],
+						['html.autoClosingTags'],
+					],
+					triggerCharacters: ['=', '>', '/'],
+				},
+				fileReferencesProvider: true,
+				fileRenameProvider: true,
+			},
+			foldingRangeProvider: true,
+			hoverProvider: true,
+			implementationProvider: true,
+			inlayHintProvider: {},
+			linkedEditingRangeProvider: true,
+			referencesProvider: true,
+			renameProvider: {
+				prepareProvider: true,
+			},
+			selectionRangeProvider: true,
 			semanticTokensProvider: {
-				range: true,
 				full: false,
 				legend: {
+					tokenModifiers: ['declaration', 'readonly', 'static', 'async', 'defaultLibrary', 'local'],
 					tokenTypes: [
 						'namespace',
 						'class',
@@ -93,32 +113,22 @@ describe('Initialize', async () => {
 						'function',
 						'method',
 					],
-					tokenModifiers: [
-						'declaration',
-						'readonly',
-						'static',
-						'async',
-						'defaultLibrary',
-						'local',
-					],
+				},
+				range: true,
+			},
+			signatureHelpProvider: {
+				retriggerCharacters: [')'],
+				triggerCharacters: ['(', ',', '<'],
+			},
+			textDocumentSync: 2,
+			typeDefinitionProvider: true,
+			workspace: {
+				workspaceFolders: {
+					changeNotifications: true,
+					supported: true,
 				},
 			},
-			codeActionProvider: {
-				codeActionKinds: [
-					'',
-					'quickfix',
-					'refactor',
-					'refactor.extract',
-					'refactor.inline',
-					'refactor.rewrite',
-					'source',
-					'source.fixAll',
-					'source.organizeImports',
-				],
-				resolveProvider: true,
-			},
-			inlayHintProvider: {},
-			workspaceSymbolProvider: true,
+			workspaceSymbolProvider: {},
 		};
 
 		expect(initializeResult.capabilities).to.deep.equal(capabilities);

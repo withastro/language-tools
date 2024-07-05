@@ -3,10 +3,10 @@ import type { DiagnosticMessage } from '@astrojs/compiler/types';
 import {
 	type CodeMapping,
 	type LanguagePlugin,
-	type TypeScriptExtraServiceScript,
 	type VirtualCode,
 	forEachEmbeddedCode,
 } from '@volar/language-core';
+import type { TypeScriptExtraServiceScript } from '@volar/typescript';
 import type ts from 'typescript';
 import type { HTMLDocument } from 'vscode-html-languageservice';
 import type { URI } from 'vscode-uri';

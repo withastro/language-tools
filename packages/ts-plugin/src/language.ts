@@ -1,3 +1,5 @@
+/// <reference types="@volar/typescript" />
+
 import {
 	type CodeMapping,
 	type LanguagePlugin,
