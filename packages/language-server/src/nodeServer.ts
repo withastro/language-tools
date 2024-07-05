@@ -30,7 +30,8 @@ connection.onInitialize((params) => {
 				setup() {},
 			};
 		}),
-		getLanguageServicePlugins(connection, typescript)
+		getLanguageServicePlugins(connection, typescript),
+		{ pullModelDiagnostics: params.initializationOptions?.pullModelDiagnostics }
 	);
 });
 
