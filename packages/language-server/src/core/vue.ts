@@ -9,7 +9,7 @@ import type ts from 'typescript';
 import type { URI } from 'vscode-uri';
 import { framework2tsx } from './utils.js';
 
-export function getVueLanguageModule(): LanguagePlugin<URI, VueVirtualCode> {
+export function getVueLanguagePlugin(): LanguagePlugin<URI, VueVirtualCode> {
 	return {
 		getLanguageId(uri) {
 			if (uri.path.endsWith('.vue')) {

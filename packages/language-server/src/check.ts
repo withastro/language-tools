@@ -7,7 +7,7 @@ import { Diagnostic, DiagnosticSeverity } from '@volar/language-server';
 import fg from 'fast-glob';
 import { getAstroLanguagePlugin } from './core/index.js';
 import { getSvelteLanguagePlugin } from './core/svelte.js';
-import { getVueLanguageModule } from './core/vue.js';
+import { getVueLanguagePlugin } from './core/vue.js';
 import { getAstroInstall } from './utils.js';
 
 import { create as createAstroService } from './plugins/astro.js';
@@ -140,7 +140,7 @@ export class AstroCheck {
 		const languagePlugins = [
 			getAstroLanguagePlugin(typeof astroInstall === 'string' ? undefined : astroInstall, this.ts),
 			getSvelteLanguagePlugin(),
-			getVueLanguageModule(),
+			getVueLanguagePlugin(),
 		];
 		const services = [...createTypeScriptServices(this.ts), createAstroService(this.ts)];
 

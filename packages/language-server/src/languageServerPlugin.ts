@@ -8,7 +8,7 @@ import {
 import { URI } from 'vscode-uri';
 import { getAstroLanguagePlugin } from './core';
 import { getSvelteLanguagePlugin } from './core/svelte.js';
-import { getVueLanguageModule } from './core/vue.js';
+import { getVueLanguagePlugin } from './core/vue.js';
 import { getPrettierPluginPath, importPrettier } from './importPackage.js';
 import { getAstroInstall } from './utils.js';
 
@@ -30,7 +30,7 @@ export function getLanguagePlugins(
 	tsconfig: string | undefined
 ) {
 	const languagePlugins: LanguagePlugin<URI>[] = [
-		getVueLanguageModule(),
+		getVueLanguagePlugin(),
 		getSvelteLanguagePlugin(),
 	];
 
