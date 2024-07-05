@@ -64,6 +64,10 @@ describe('Initialize', async () => {
 				],
 			},
 			definitionProvider: true,
+			diagnosticProvider: {
+				interFileDependencies: true,
+				workspaceDiagnostics: false,
+			},
 			documentFormattingProvider: true,
 			documentHighlightProvider: true,
 			documentLinkProvider: {},
