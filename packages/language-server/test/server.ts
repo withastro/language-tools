@@ -35,6 +35,7 @@ export async function getLanguageServer(): Promise<LanguageServer> {
 						'lib'
 					),
 				},
+				pullModelDiagnostics: true,
 			},
 			{
 				workspace: {
