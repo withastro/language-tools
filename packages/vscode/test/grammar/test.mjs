@@ -17,6 +17,7 @@ const allGrammars = [...grammars, ...dummyGrammars];
 
 /**
  * @param  {Parameters<typeof spawn>} arg
+ * @returns {Promise<number | null>}
  */
 function promisifySpawn(...arg) {
 	const childProcess = spawn(...arg);
@@ -45,10 +46,9 @@ async function snapShotTest() {
 
 	const code = await promisifySpawn(process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm', args, {
 		stdio: 'inherit',
-		shell: true,
 	});
 
-	if (code > 0) {
+	if (code && code > 0) {
 		process.exit(code);
 	}
 }
