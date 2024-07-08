@@ -105,6 +105,7 @@ describe('TypeScript - Cache invalidation', async () => {
 		);
 	});
 
+	// TODO: Unskip this once the upstream issue is fixed
 	it.skip('Can get auto-imports for new files', async () => {
 		const fileNames = ['AutoImport.astro', 'AutoImport2.astro'];
 
@@ -113,7 +114,7 @@ describe('TypeScript - Cache invalidation', async () => {
 			'astro'
 		);
 
-		// Try two different files, to make sure the cache capture everything
+		// Try two different files in a row, to make sure the cache updates properly for each file individually
 		for (const fileName of fileNames) {
 			await createFile(fileName, '');
 
@@ -128,7 +129,7 @@ describe('TypeScript - Cache invalidation', async () => {
 		}
 	});
 
-	it.skip('New files have access to context of the project', async () => {
+	it('New files have access to context of the project', async () => {
 		const existingDocument = await languageServer.handle.openTextDocument(
 			path.join(fixtureDir, 'importFromSuperModule.astro'),
 			'astro'
@@ -158,8 +159,8 @@ describe('TypeScript - Cache invalidation', async () => {
 		);
 
 		const hoverSuperModule = await languageServer.handle.sendHoverRequest(document.uri, {
-			line: 1,
-			character: 25,
+			line: 2,
+			character: 22,
 		});
 
 		expect((hoverSuperModule?.contents as MarkupContent).value).to.include(
