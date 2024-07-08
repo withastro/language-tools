@@ -1,6 +1,8 @@
 # @astrojs/check ✅
 
-Type checking and diagnostics for Astro projects.
+This package powers the `astro check` CLI command for running type checking and diagnostics in Astro projects.
+
+This package's internal logic is powered by [the Astro language server](https://github.com/withastro/language-tools/blob/main/packages/language-server/src/check.ts).
 
 ## Documentation
 
