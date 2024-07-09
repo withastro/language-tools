@@ -93,7 +93,7 @@ describe('TypeScript - Completions', async () => {
 	});
 
 	it('Can get completions inside HTML events', async () => {
-		const document = await languageServer.openFakeDocument('<div onload="a"', 'astro');
+		const document = await languageServer.openFakeDocument('<div onload="a"></div>', 'astro');
 		const completions = await languageServer.handle.sendCompletionRequest(
 			document.uri,
 			Position.create(0, 13)
@@ -101,6 +101,7 @@ describe('TypeScript - Completions', async () => {
 
 		expect(completions?.items).to.not.be.empty;
 
+		// Make sure we have the `alert` completion, which is a global function
 		const allLabels = completions?.items.map((item) => item.label);
 		expect(allLabels).to.include('alert');
 	});
