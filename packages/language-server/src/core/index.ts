@@ -9,6 +9,7 @@ import {
 import type { TypeScriptExtraServiceScript } from '@volar/typescript';
 import type ts from 'typescript';
 import type { HTMLDocument } from 'vscode-html-languageservice';
+import { TextDocument } from 'vscode-languageserver-textdocument';
 import type { URI } from 'vscode-uri';
 import { type AstroInstall, getLanguageServerTypesDir } from '../utils.js';
 import { astro2tsx } from './astro2tsx';
@@ -161,6 +162,13 @@ export class AstroVirtualCode implements VirtualCode {
 		];
 		this.compilerDiagnostics = [];
 
+		const astroDocument = TextDocument.create(
+			fileName + '.astro',
+			'astro',
+			0,
+			snapshot.getText(0, snapshot.getLength())
+		);
+
 		const astroMetadata = getAstroMetadata(
 			this.fileName,
 			this.snapshot.getText(0, this.snapshot.getLength())
@@ -178,13 +186,17 @@ export class AstroVirtualCode implements VirtualCode {
 		);
 		this.htmlDocument = htmlDocument;
 
-		const scriptTags = extractScriptTags(this.snapshot, htmlDocument, astroMetadata.ast);
+		const scriptTags = extractScriptTags(
+			this.snapshot,
+			astroDocument,
+			htmlDocument,
+			astroMetadata.ast
+		);
 
 		this.scriptCodeIds = scriptTags.map((scriptTag) => scriptTag.id);
-
 		htmlVirtualCode.embeddedCodes = [];
 		htmlVirtualCode.embeddedCodes.push(
-			...extractStylesheets(this.snapshot, htmlDocument, astroMetadata.ast),
+			...extractStylesheets(this.snapshot, astroDocument, htmlDocument, astroMetadata.ast),
 			...scriptTags
 		);
 

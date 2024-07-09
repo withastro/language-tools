@@ -3,12 +3,13 @@ import { is } from '@astrojs/compiler/utils';
 import type { CodeInformation, VirtualCode } from '@volar/language-core';
 import { Segment, toString } from 'muggle-string';
 import type ts from 'typescript';
-import type { HTMLDocument, Node } from 'vscode-html-languageservice';
+import type { HTMLDocument, Node, TextDocument } from 'vscode-html-languageservice';
 import { buildMappings } from '../buildMappings.js';
-import type { AttributeNodeWithPosition } from './compilerUtils.js';
+import { type AttributeNodeWithPosition, PointToPosition } from './compilerUtils.js';
 
 export function extractStylesheets(
 	snapshot: ts.IScriptSnapshot,
+	astroDocument: TextDocument,
 	htmlDocument: HTMLDocument,
 	ast: ParseResult['ast']
 ): VirtualCode[] {
@@ -22,7 +23,7 @@ export function extractStylesheets(
 			codes.push([
 				inlineStyle.value,
 				undefined,
-				inlineStyle.position.start.offset + 'style="'.length,
+				astroDocument.offsetAt(PointToPosition(inlineStyle.position.start)) + 'style="'.length,
 				{
 					completion: true,
 					verification: false,

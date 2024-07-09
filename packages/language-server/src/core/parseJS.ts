@@ -3,11 +3,13 @@ import { is } from '@astrojs/compiler/utils';
 import type { CodeInformation, VirtualCode } from '@volar/language-core';
 import { Segment, toString } from 'muggle-string';
 import type ts from 'typescript';
-import type { HTMLDocument, Node } from 'vscode-html-languageservice';
+import type { HTMLDocument, Node, TextDocument } from 'vscode-html-languageservice';
 import { buildMappings } from '../buildMappings';
+import { PointToPosition } from './compilerUtils.js';
 
 export function extractScriptTags(
 	snapshot: ts.IScriptSnapshot,
+	astroDocument: TextDocument,
 	htmlDocument: HTMLDocument,
 	ast: ParseResult['ast']
 ): VirtualCode[] {
@@ -15,7 +17,7 @@ export function extractScriptTags(
 
 	const javascriptContexts = [
 		...findClassicScripts(htmlDocument, snapshot),
-		...findEventAttributes(ast),
+		...findEventAttributes(ast, astroDocument),
 	].sort((a, b) => a.startOffset - b.startOffset);
 
 	if (javascriptContexts.length > 0) {
@@ -153,7 +155,10 @@ function isJSON(type: string | null | undefined): boolean {
 	return JSON_TYPES.includes(type.slice(1, -1));
 }
 
-function findEventAttributes(ast: ParseResult['ast']): JavaScriptContext[] {
+function findEventAttributes(
+	ast: ParseResult['ast'],
+	astroDocument: TextDocument
+): JavaScriptContext[] {
 	const eventAttrs: JavaScriptContext[] = [];
 
 	// `@astrojs/compiler`'s `walk` method is async, so we can't use it here. Arf
@@ -172,7 +177,9 @@ function findEventAttributes(ast: ParseResult['ast']): JavaScriptContext[] {
 						// This is not perfect, but it's better than nothing
 						// See: https://github.com/microsoft/vscode/blob/e8e04769ec817a3374c3eaa26a08d3ae491820d5/extensions/html-language-features/server/src/modes/embeddedSupport.ts#L192
 						content: eventAttribute.value + ';',
-						startOffset: eventAttribute.position.start.offset + `${eventAttribute.name}="`.length,
+						startOffset:
+							astroDocument.offsetAt(PointToPosition(eventAttribute.position.start)) +
+							`${eventAttribute.name}="`.length,
 					});
 				}
 			}
