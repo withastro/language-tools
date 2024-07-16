@@ -14,7 +14,11 @@ export function extractScriptTags(scripts: TSXExtractedScript[]): VirtualCode[] 
 		.filter((script) => script.type === 'event-attribute' || script.type === 'inline')
 		.sort((a, b) => a.position.start - b.position.start);
 
-	embeddedJSCodes.push(...moduleScripts, mergeJSContexts(inlineScripts));
+	embeddedJSCodes.push(...moduleScripts);
+	const mergedJSContext = mergeJSContexts(inlineScripts);
+	if (mergedJSContext) {
+		embeddedJSCodes.push(mergedJSContext);
+	}
 
 	return embeddedJSCodes;
 }
@@ -57,7 +61,11 @@ function moduleScriptToVirtualCode(script: TSXExtractedScript, index: number): V
 /**
  * Merge all the inline and non-hoisted scripts into a single `.mjs` file
  */
-function mergeJSContexts(inlineScripts: TSXExtractedScript[]): VirtualCode {
+function mergeJSContexts(inlineScripts: TSXExtractedScript[]): VirtualCode | undefined {
+	if (inlineScripts.length === 0) {
+		return undefined;
+	}
+
 	const codes: Segment<CodeInformation>[] = [];
 
 	for (const javascriptContext of inlineScripts) {
