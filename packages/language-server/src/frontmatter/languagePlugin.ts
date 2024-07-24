@@ -1,4 +1,3 @@
-import * as path from 'node:path';
 import {
 	type CodeMapping,
 	type LanguagePlugin,
@@ -7,8 +6,20 @@ import {
 } from '@volar/language-core';
 import type ts from 'typescript';
 import type { URI } from 'vscode-uri';
-import YAML, { parseDocument, isScalar, LineCounter } from 'yaml';
+import YAML, {
+	parseDocument,
+	isScalar,
+	LineCounter,
+	YAMLError,
+	isPair,
+	CST,
+	isMap,
+	isSeq,
+	isCollection,
+} from 'yaml';
 import type { AstroInstall } from '../utils.js';
+
+const FRONTMATTER_OFFSET = 4;
 
 export function getFrontmatterLanguagePlugin(
 	astroInstall: AstroInstall | undefined,
@@ -25,6 +36,9 @@ export function getFrontmatterLanguagePlugin(
 				const fileName = scriptId.fsPath.replace(/\\/g, '/');
 				return new MarkdownVirtualCode(fileName, snapshot);
 			}
+		},
+		updateVirtualCode(scriptId, virtualCode, newSnapshot, ctx) {
+			return virtualCode.updateSnapshot(newSnapshot);
 		},
 		typescript: {
 			extraFileExtensions: [{ extension: 'md', isMixedContent: true, scriptKind: 7 }],
@@ -60,10 +74,16 @@ export class MarkdownVirtualCode implements VirtualCode {
 		mappings: [],
 	};
 
+	yamlErrors: YAMLError[] = [];
+
 	constructor(
 		public fileName: string,
 		public snapshot: ts.IScriptSnapshot
 	) {
+		this.updateSnapshot(snapshot);
+	}
+
+	updateSnapshot(snapshot: ts.IScriptSnapshot) {
 		this.mappings = [
 			{
 				sourceOffsets: [0],
@@ -81,9 +101,10 @@ export class MarkdownVirtualCode implements VirtualCode {
 		];
 
 		this.embeddedCodes = [];
+		this.snapshot = snapshot;
 
 		const frontmatter = this.snapshot.getText(
-			4,
+			FRONTMATTER_OFFSET,
 			this.snapshot.getText(0, this.snapshot.getLength()).indexOf('---', 3)
 		);
 		const frontmatterMappings: CodeMapping[] = [];
@@ -95,67 +116,18 @@ export class MarkdownVirtualCode implements VirtualCode {
 			logLevel: 'silent',
 		});
 
-		let resultText = 'import type { InferInputSchema } from "astro:content";\n\nconst schema = ({\n';
-		let contentText = '';
+		let hasLeadingWhitespace = frontmatter.startsWith('\n');
+		let hasTrailingWhitespace = frontmatter.endsWith('\n\n');
 
-		if (frontmatterContent.errors.length > 0) {
-			// Add the raw content to the previous valid content
-			contentText = this.lastValidContent.generated;
+		let resultText = 'import type { InferInputSchema } from "astro:content";\n\n({\n';
+		let parsedContent = '';
 
-			frontmatterMappings.push(...this.lastValidContent.mappings);
-		} else {
-			contentText = '';
-
-			// For every parsed node, create a segment mapped to the original content
-			YAML.visit(frontmatterContent, {
-				Collection(key, value) {
-					console.log(key, value);
-				},
-				Pair(key, value) {
-					if (key === null) return;
-
-					if (isScalar(value.key)) {
-						// TODO: Handle more types
-						if (isScalar(value.value)) {
-							const valueKey = JSON.stringify(value.key.toJS(frontmatterContent));
-							const valueValue = JSON.stringify(value.value.toJS(frontmatterContent));
-
-							console.log(lineCounter.lineStarts);
-
-							frontmatterMappings.push({
-								generatedOffsets: [resultText.length, resultText.length + valueKey.length],
-								sourceOffsets: [value.key.range![0] + 4, value.key.range![2] + 4],
-								lengths: [0, 0],
-								data: {
-									verification: true,
-									completion: true,
-									semantic: true,
-									navigation: true,
-									structure: true,
-									format: false,
-								},
-							});
-
-							contentText += `${valueKey}: ${valueValue},\n`;
-						}
-					}
-				},
-			});
-
-			this.lastValidContent.source = frontmatter;
-			this.lastValidContent.generated = contentText;
-			resultText += contentText;
-
+		if (hasLeadingWhitespace) {
+			parsedContent += '\n';
 			frontmatterMappings.push({
-				generatedOffsets: [
-					resultText.length + '}) '.length,
-					resultText.length + '}) '.length + 'satisfies'.length,
-				],
-				sourceOffsets: [
-					0,
-					this.snapshot.getText(0, this.snapshot.getLength()).indexOf('---', 3) + 3,
-				],
-				lengths: [0, 0],
+				sourceOffsets: [FRONTMATTER_OFFSET],
+				generatedOffsets: [resultText.length],
+				lengths: [0],
 				data: {
 					verification: true,
 					completion: true,
@@ -165,11 +137,157 @@ export class MarkdownVirtualCode implements VirtualCode {
 					format: false,
 				},
 			});
-
-			this.lastValidContent.mappings = frontmatterMappings;
 		}
 
-		resultText += '}) satisfies InferInputSchema<"blog">;';
+		YAML.visit(frontmatterContent, function (key, value, path) {
+			if (isCollection(value)) {
+				if (isMap(value)) {
+					// Go through all the items in the map
+					value.items.forEach((item) => {
+						// The items from a map are guaranteed to be pairs
+						if (isScalar(item.key)) {
+							if (item.value === null) {
+								const valueKey = JSON.stringify(item.key.toJS(frontmatterContent));
+
+								frontmatterMappings.push({
+									generatedOffsets: [resultText.length + parsedContent.length],
+									sourceOffsets: [item.key.range![0] + FRONTMATTER_OFFSET],
+									lengths: CST.isScalar(item.key.srcToken)
+										? [item.key.srcToken.source.length]
+										: [0],
+									data: {
+										verification: true,
+										completion: true,
+										semantic: true,
+										navigation: true,
+										structure: true,
+										format: false,
+									},
+								});
+
+								parsedContent += `${valueKey}\n`;
+							}
+
+							// If we have a fully formed pair with a scalar key and a scalar value
+							if (isScalar(item.value)) {
+								const valueKey = JSON.stringify(item.key.toJS(frontmatterContent));
+								const valueValue = JSON.stringify(item.value.toJS(frontmatterContent));
+
+								// Key
+								let generatedOffsets = [resultText.length + parsedContent.length];
+								let generatedLengths = [valueKey.length];
+								let sourceOffsets = [item.key.range![0] + FRONTMATTER_OFFSET];
+								let sourceLengths = CST.isScalar(item.key.srcToken)
+									? [item.key.srcToken.source.length]
+									: [0];
+
+								// Map the value if it's not "null"
+								if (valueValue !== 'null') {
+									generatedOffsets.push(
+										resultText.length + parsedContent.length + valueKey.length + 2
+									);
+									generatedLengths.push(valueValue.length);
+
+									sourceOffsets.push(item.value.range![0] + FRONTMATTER_OFFSET);
+
+									let sourceLength = CST.isScalar(item.value.srcToken)
+										? item.value.srcToken.source.length
+										: 0;
+									sourceLengths.push(sourceLength);
+								}
+
+								frontmatterMappings.push({
+									generatedOffsets,
+									sourceOffsets,
+									lengths: sourceLengths,
+									generatedLengths,
+									data: {
+										verification: true,
+										completion: true,
+										semantic: true,
+										navigation: true,
+										structure: true,
+										format: false,
+									},
+								});
+
+								parsedContent += `${valueKey}: ${valueValue},\n`;
+							}
+
+							return YAML.visit.REMOVE;
+						}
+					});
+
+					return YAML.visit.REMOVE;
+				}
+
+				if (isSeq(value)) {
+					console.log('SEQ', value);
+				}
+			}
+
+			if (isScalar(value)) {
+				const valueValue = JSON.stringify(value.toJS(frontmatterContent));
+
+				frontmatterMappings.push({
+					generatedOffsets: [resultText.length + parsedContent.length],
+					sourceOffsets: [value.range![0] + FRONTMATTER_OFFSET],
+					lengths: [valueValue.length],
+					generatedLengths: [valueValue.length],
+					data: {
+						verification: true,
+						completion: true,
+						semantic: true,
+						navigation: true,
+						structure: true,
+						format: false,
+					},
+				});
+
+				parsedContent += `${valueValue},\n`;
+
+				return YAML.visit.REMOVE;
+			}
+		});
+
+		resultText += parsedContent;
+
+		if (hasTrailingWhitespace) {
+			frontmatterMappings.push({
+				sourceOffsets: [this.snapshot.getText(0, this.snapshot.getLength()).indexOf('---', 3) - 1],
+				generatedOffsets: [resultText.length],
+				lengths: [0],
+				data: {
+					verification: true,
+					completion: true,
+					semantic: false,
+					navigation: true,
+					structure: true,
+					format: false,
+				},
+			});
+
+			resultText += '\n';
+		}
+
+		frontmatterMappings.push({
+			generatedOffsets: [
+				resultText.length + '}) '.length,
+				resultText.length + '}) '.length + 'satisfies'.length,
+			],
+			sourceOffsets: [0, this.snapshot.getText(0, this.snapshot.getLength()).indexOf('---', 3) + 3],
+			lengths: [0, 0], // We only have diagnostics here, so no need to map the length, just the edges are fine
+			data: {
+				verification: true,
+				completion: false,
+				semantic: false,
+				navigation: false,
+				structure: false,
+				format: false,
+			},
+		});
+
+		resultText += '}) satisfies InferInputSchema<"blog">;\n\n';
 
 		this.embeddedCodes.push({
 			id: 'frontmatter',
@@ -181,5 +299,7 @@ export class MarkdownVirtualCode implements VirtualCode {
 			},
 			mappings: frontmatterMappings,
 		});
+
+		return this;
 	}
 }
