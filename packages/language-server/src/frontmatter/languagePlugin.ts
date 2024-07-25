@@ -4,18 +4,20 @@ import {
 	type VirtualCode,
 	forEachEmbeddedCode,
 } from '@volar/language-core';
+import * as devalue from 'devalue';
 import type ts from 'typescript';
 import type { URI } from 'vscode-uri';
 import YAML, {
-	parseDocument,
-	isScalar,
-	LineCounter,
-	YAMLError,
-	isPair,
 	CST,
-	isMap,
-	isSeq,
 	isCollection,
+	isMap,
+	isScalar,
+	isSeq,
+	LineCounter,
+	parseDocument,
+	YAMLError,
+	YAMLMap,
+	YAMLSeq,
 } from 'yaml';
 import type { AstroInstall } from '../utils.js';
 
@@ -114,12 +116,13 @@ export class MarkdownVirtualCode implements VirtualCode {
 			lineCounter: lineCounter,
 			strict: false,
 			logLevel: 'silent',
+			customTags: ['timestamp'],
 		});
 
 		let hasLeadingWhitespace = frontmatter.startsWith('\n');
 		let hasTrailingWhitespace = frontmatter.endsWith('\n\n');
 
-		let resultText = 'import type { InferInputSchema } from "astro:content";\n\n({\n';
+		let resultText = 'import type { InferInputSchema } from "astro:content";\n\n(\n';
 		let parsedContent = '';
 
 		if (hasLeadingWhitespace) {
@@ -139,116 +142,206 @@ export class MarkdownVirtualCode implements VirtualCode {
 			});
 		}
 
-		YAML.visit(frontmatterContent, function (key, value, path) {
-			if (isCollection(value)) {
-				if (isMap(value)) {
-					// Go through all the items in the map
-					value.items.forEach((item) => {
-						// The items from a map are guaranteed to be pairs
-						if (isScalar(item.key)) {
-							if (item.value === null) {
-								const valueKey = JSON.stringify(item.key.toJS(frontmatterContent));
+		YAML.visit(frontmatterContent, {
+			Value(key, value) {
+				if (isCollection(value)) {
+					if (isMap(value)) {
+						mapMap(value, key);
+					}
 
-								frontmatterMappings.push({
-									generatedOffsets: [resultText.length + parsedContent.length],
-									sourceOffsets: [item.key.range![0] + FRONTMATTER_OFFSET],
-									lengths: CST.isScalar(item.key.srcToken)
-										? [item.key.srcToken.source.length]
-										: [0],
-									data: {
-										verification: true,
-										completion: true,
-										semantic: true,
-										navigation: true,
-										structure: true,
-										format: false,
-									},
-								});
+					if (isSeq(value)) {
+						mapSeq(value);
+					}
+				}
 
-								parsedContent += `${valueKey}\n`;
-							}
+				if (isScalar(value)) {
+					let valueValue = stringifyValue(value);
 
-							// If we have a fully formed pair with a scalar key and a scalar value
-							if (isScalar(item.value)) {
-								const valueKey = JSON.stringify(item.key.toJS(frontmatterContent));
-								const valueValue = JSON.stringify(item.value.toJS(frontmatterContent));
-
-								// Key
-								let generatedOffsets = [resultText.length + parsedContent.length];
-								let generatedLengths = [valueKey.length];
-								let sourceOffsets = [item.key.range![0] + FRONTMATTER_OFFSET];
-								let sourceLengths = CST.isScalar(item.key.srcToken)
-									? [item.key.srcToken.source.length]
-									: [0];
-
-								// Map the value if it's not "null"
-								if (valueValue !== 'null') {
-									generatedOffsets.push(
-										resultText.length + parsedContent.length + valueKey.length + 2
-									);
-									generatedLengths.push(valueValue.length);
-
-									sourceOffsets.push(item.value.range![0] + FRONTMATTER_OFFSET);
-
-									let sourceLength = CST.isScalar(item.value.srcToken)
-										? item.value.srcToken.source.length
-										: 0;
-									sourceLengths.push(sourceLength);
-								}
-
-								frontmatterMappings.push({
-									generatedOffsets,
-									sourceOffsets,
-									lengths: sourceLengths,
-									generatedLengths,
-									data: {
-										verification: true,
-										completion: true,
-										semantic: true,
-										navigation: true,
-										structure: true,
-										format: false,
-									},
-								});
-
-								parsedContent += `${valueKey}: ${valueValue},\n`;
-							}
-
-							return YAML.visit.REMOVE;
-						}
+					frontmatterMappings.push({
+						generatedOffsets: [resultText.length + parsedContent.length],
+						sourceOffsets: [value.range![0] + FRONTMATTER_OFFSET],
+						lengths: [valueValue.length],
+						generatedLengths: [valueValue.length],
+						data: {
+							verification: true,
+							completion: true,
+							semantic: true,
+							navigation: true,
+							structure: true,
+							format: false,
+						},
 					});
+
+					parsedContent += `${valueValue},\n`;
+				}
+
+				return YAML.visit.REMOVE;
+			},
+		});
+
+		function mapMap(map: YAMLMap, key?: string | number | null) {
+			parsedContent += '{\n';
+
+			// Go through all the items in the map
+			map.items.forEach((item) => {
+				// The items from a map are guaranteed to be pairs
+				if (isScalar(item.key)) {
+					if (item.value === null) {
+						const valueKey = JSON.stringify(item.key.toJS(frontmatterContent));
+
+						frontmatterMappings.push({
+							generatedOffsets: [resultText.length + parsedContent.length],
+							sourceOffsets: [item.key.range![0] + FRONTMATTER_OFFSET],
+							lengths: CST.isScalar(item.key.srcToken) ? [item.key.srcToken.source.length] : [0],
+							data: {
+								verification: true,
+								completion: true,
+								semantic: true,
+								navigation: true,
+								structure: true,
+								format: false,
+							},
+						});
+
+						parsedContent += `${valueKey}\n`;
+					}
+
+					// If we have a fully formed pair with a scalar key and a scalar value
+					if (isScalar(item.value)) {
+						const valueKey = JSON.stringify(item.key.toJS(frontmatterContent));
+						const valueValue = stringifyValue(item.value);
+
+						// Key
+						let generatedOffsets = [resultText.length + parsedContent.length];
+						let generatedLengths = [valueKey.length];
+						let sourceOffsets = [item.key.range![0] + FRONTMATTER_OFFSET];
+						let sourceLengths = CST.isScalar(item.key.srcToken)
+							? [item.key.srcToken.source.length]
+							: [0];
+
+						// Map the value if it's not "null"
+						if (valueValue !== 'null') {
+							generatedOffsets.push(resultText.length + parsedContent.length + valueKey.length + 2);
+							generatedLengths.push(valueValue.length);
+
+							sourceOffsets.push(item.value.range![0] + FRONTMATTER_OFFSET);
+
+							let sourceLength = CST.isScalar(item.value.srcToken)
+								? item.value.srcToken.source.length
+								: 0;
+							sourceLengths.push(sourceLength);
+						}
+
+						frontmatterMappings.push({
+							generatedOffsets,
+							sourceOffsets,
+							lengths: sourceLengths,
+							generatedLengths,
+							data: {
+								verification: true,
+								completion: true,
+								semantic: true,
+								navigation: true,
+								structure: true,
+								format: false,
+							},
+						});
+
+						parsedContent += `${valueKey}: ${valueValue},\n`;
+					}
+
+					if (isMap(item.value)) {
+						const itemKey = JSON.stringify(item.key.toJS(frontmatterContent));
+
+						frontmatterMappings.push({
+							generatedOffsets: [resultText.length + parsedContent.length],
+							sourceOffsets: [item.key.range![0] + FRONTMATTER_OFFSET],
+							lengths: CST.isScalar(item.key.srcToken) ? [item.key.srcToken.source.length] : [0],
+							generatedLengths: [itemKey.length],
+							data: {
+								verification: true,
+								completion: true,
+								semantic: true,
+								navigation: true,
+								structure: true,
+								format: false,
+							},
+						});
+
+						parsedContent += `${itemKey}: `;
+
+						mapMap(item.value);
+					}
+
+					if (isSeq(item.value)) {
+						const itemKey = JSON.stringify(item.key.toJS(frontmatterContent));
+
+						frontmatterMappings.push({
+							generatedOffsets: [resultText.length + parsedContent.length],
+							sourceOffsets: [item.key.range![0] + FRONTMATTER_OFFSET],
+							lengths: CST.isScalar(item.key.srcToken) ? [item.key.srcToken.source.length] : [0],
+							generatedLengths: [itemKey.length],
+							data: {
+								verification: true,
+								completion: true,
+								semantic: true,
+								navigation: true,
+								structure: true,
+								format: false,
+							},
+						});
+
+						parsedContent += `${itemKey}: `;
+
+						mapSeq(item.value);
+					}
 
 					return YAML.visit.REMOVE;
 				}
+			});
 
-				if (isSeq(value)) {
-					console.log('SEQ', value);
+			parsedContent += '}';
+
+			if (key !== null) {
+				parsedContent += ',';
+			}
+
+			parsedContent += '\n';
+
+			return YAML.visit.REMOVE;
+		}
+
+		function mapSeq(seq: YAMLSeq) {
+			parsedContent += '[';
+
+			seq.items.forEach((item) => {
+				if (isScalar(item)) {
+					const valueValue = stringifyValue(item);
+
+					parsedContent += `${valueValue},`;
 				}
-			}
 
-			if (isScalar(value)) {
-				const valueValue = JSON.stringify(value.toJS(frontmatterContent));
+				if (isMap(item)) {
+					mapMap(item);
+				}
 
-				frontmatterMappings.push({
-					generatedOffsets: [resultText.length + parsedContent.length],
-					sourceOffsets: [value.range![0] + FRONTMATTER_OFFSET],
-					lengths: [valueValue.length],
-					generatedLengths: [valueValue.length],
-					data: {
-						verification: true,
-						completion: true,
-						semantic: true,
-						navigation: true,
-						structure: true,
-						format: false,
-					},
-				});
+				if (isSeq(item)) {
+					mapSeq(item);
+				}
+			});
 
-				parsedContent += `${valueValue},\n`;
+			parsedContent += '],\n';
 
-				return YAML.visit.REMOVE;
-			}
-		});
+			return YAML.visit.REMOVE;
+		}
+
+		function stringifyValue(value: YAML.Scalar) {
+			const jsValue = value.toJS(frontmatterContent);
+
+			// TODO: Some values shouldn't be mapped, for instance, dates. Probably that this method should return if it should
+
+			return devalue.uneval(jsValue);
+		}
 
 		resultText += parsedContent;
 
@@ -272,8 +365,8 @@ export class MarkdownVirtualCode implements VirtualCode {
 
 		frontmatterMappings.push({
 			generatedOffsets: [
-				resultText.length + '}) '.length,
-				resultText.length + '}) '.length + 'satisfies'.length,
+				resultText.length + ') '.length,
+				resultText.length + ') '.length + 'satisfies'.length,
 			],
 			sourceOffsets: [0, this.snapshot.getText(0, this.snapshot.getLength()).indexOf('---', 3) + 3],
 			lengths: [0, 0], // We only have diagnostics here, so no need to map the length, just the edges are fine
@@ -287,7 +380,7 @@ export class MarkdownVirtualCode implements VirtualCode {
 			},
 		});
 
-		resultText += '}) satisfies InferInputSchema<"blog">;\n\n';
+		resultText += ') satisfies InferInputSchema<"blog">;\n\n';
 
 		this.embeddedCodes.push({
 			id: 'frontmatter',

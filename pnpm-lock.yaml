@@ -96,6 +96,9 @@ importers:
       '@volar/typescript':
         specifier: ~2.4.0-alpha.15
         version: 2.4.0-alpha.15
+      devalue:
+        specifier: ^5.0.0
+        version: 5.0.0
       fast-glob:
         specifier: ^3.2.12
         version: 3.2.12
@@ -3524,6 +3527,10 @@ packages:
   /devalue@4.3.2:
     resolution: {integrity: sha512-KqFl6pOgOW+Y6wJgu80rHpo2/3H07vr8ntR9rkkFIRETewbf5GaYYcakYfiKz89K+sLsuPkQIZaXDMjUObZwWg==}
     dev: true
+
+  /devalue@5.0.0:
+    resolution: {integrity: sha512-gO+/OMXF7488D+u3ue+G7Y4AA3ZmUnB3eHJXmBTgNHvr4ZNzl36A0ZtG+XCRNYCkYx/bFmw4qtkoFLa+wSrwAA==}
+    dev: false
 
   /devlop@1.1.0:
     resolution: {integrity: sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA==}
