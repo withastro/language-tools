@@ -1,5 +1,21 @@
 # @astrojs/language-server
 
+## 2.13.0
+
+### Minor Changes
+
+- b65d6b4: Adds support for SCSS and LESS intellisense inside style tags
+
+### Patch Changes
+
+- 3a60f00: Fixes code lens on `Astro.glob` not working as expected
+
+## 2.12.8
+
+### Patch Changes
+
+- 7733a56: Revert changes to Emmet completions, it was generating the wrong completions in certain cases
+
 ## 2.12.7
 
 ### Patch Changes
