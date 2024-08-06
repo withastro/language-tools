@@ -1,5 +1,21 @@
 # @astrojs/check
 
+## 0.9.2
+
+### Patch Changes
+
+- e8e18a8: Fixes an issue where errors inside script and style tags could be offset by a few characters when multi bytes characters were present in the file
+- Updated dependencies [e8e18a8]
+  - @astrojs/language-server@2.13.2
+
+## 0.9.1
+
+### Patch Changes
+
+- cc94bef: Revert a change to top-level returns that could prevent the return types of functions from being correct in certain cases
+- Updated dependencies [cc94bef]
+  - @astrojs/language-server@2.13.1
+
 ## 0.9.0
 
 ### Minor Changes
