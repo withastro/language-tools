@@ -1,6 +1,7 @@
 import {
 	Connection,
 	LanguagePlugin,
+	LanguageServerProject,
 	LanguageServiceEnvironment,
 	MessageType,
 	ShowMessageNotification,

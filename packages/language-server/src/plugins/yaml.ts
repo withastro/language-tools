@@ -1,6 +1,13 @@
 import type { LanguageServicePlugin } from '@volar/language-service';
-import { Range, Diagnostic, DiagnosticSeverity, MarkupContent } from '@volar/language-server';
-import { create as createYAMLService } from 'volar-service-yaml';
+import {
+	Range,
+	Diagnostic,
+	DiagnosticSeverity,
+	MarkupContent,
+	FileChangeType,
+	type LanguageServerProject,
+} from '@volar/language-server';
+import { create as createYAMLService, Provide } from 'volar-service-yaml';
 import { URI, Utils } from 'vscode-uri';
 import { CollectionConfig, FrontmatterHolder } from '../core/frontmatterHolders.js';
 
@@ -42,12 +49,32 @@ export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePl
 				schemas: schemas,
 			};
 		},
-	});
+	}) as LanguageServicePlugin<Provide>;
 
 	return {
 		...yamlPlugin,
 		create(context) {
 			const yamlPluginInstance = yamlPlugin.create(context);
+
+			const languageService = yamlPluginInstance.provide!['yaml/languageService']();
+
+			if (context.env.onDidChangeWatchedFiles) {
+				context.env.onDidChangeWatchedFiles(async (events) => {
+					let hasChanges = false;
+
+					for (const change of events.changes) {
+						if (!change.uri.endsWith('.schema.json')) return;
+
+						if (languageService.resetSchema(change.uri)) {
+							hasChanges = true;
+						}
+					}
+
+					if (hasChanges) {
+						// TODO: Figure out how to refresh the diagnostics
+					}
+				});
+			}
 
 			return {
 				...yamlPluginInstance,

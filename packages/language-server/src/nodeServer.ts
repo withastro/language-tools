@@ -11,10 +11,14 @@ import { URI, Utils } from 'vscode-uri';
 const connection = createConnection();
 const server = createServer(connection);
 
+let contentIntellisenseEnabled = false;
+
 connection.listen();
 
 connection.onInitialize((params) => {
 	const tsdk = params.initializationOptions?.typescript?.tsdk;
+
+	contentIntellisenseEnabled = params.initializationOptions?.contentIntellisense ?? false;
 
 	if (!tsdk) {
 		throw new Error(
@@ -24,7 +28,7 @@ connection.onInitialize((params) => {
 
 	const { typescript, diagnosticMessages } = loadTsdkByPath(tsdk, params.locale);
 
-	const collectionConfigs = params.initializationOptions.contentIntellisense
+	const collectionConfigs = contentIntellisenseEnabled
 		? (params.workspaceFolders ?? []).flatMap((folder) => {
 				const folderUri = URI.parse(folder.uri);
 				const collections = JSON.parse(
@@ -58,23 +62,25 @@ connection.onInitialize((params) => {
 
 connection.onInitialized(() => {
 	server.initialized();
-	server.watchFiles([
-		`**/*.{${[
-			'js',
-			'cjs',
-			'mjs',
-			'ts',
-			'cts',
-			'mts',
-			'jsx',
-			'tsx',
-			'json',
-			'astro',
-			'vue',
-			'svelte',
-			'md',
-			'mdx',
-			'mdoc',
-		].join(',')}}`,
-	]);
+
+	const extensions = [
+		'js',
+		'cjs',
+		'mjs',
+		'ts',
+		'cts',
+		'mts',
+		'jsx',
+		'tsx',
+		'json',
+		'astro',
+		'vue',
+		'svelte',
+	];
+
+	if (contentIntellisenseEnabled) {
+		extensions.push('md', 'mdx', 'mdoc');
+	}
+
+	server.watchFiles([`**/*.{${extensions.join(',')}}`]);
 });

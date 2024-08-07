@@ -14,7 +14,7 @@ import * as devalue from 'devalue';
 import type { CodeMapping, VirtualCode } from '@volar/language-core';
 import type * as ts from 'typescript';
 
-const FRONTMATTER_OFFSET = 4;
+const FRONTMATTER_OFFSET = 0;
 
 export type YAML2TSResult = {
 	errors: YAMLError[];
