@@ -6,20 +6,48 @@ import {
 } from '@volar/language-core';
 import type ts from 'typescript';
 import type { URI } from 'vscode-uri';
-import { FRONTMATTER_OFFSET } from './utils.js';
 import { yaml2ts } from '@astrojs/yaml2ts';
 
-export function getFrontmatterLanguagePlugin(): LanguagePlugin<URI, FrontmatterHolder> {
+export type CollectionConfig = {
+	folder: URI;
+	config: {
+		collections: {
+			hasSchema: boolean;
+			name: string;
+		}[];
+		entries: Record<string, string>;
+	};
+};
+
+function getCollectionName(collectionConfigs: CollectionConfig[], fsPath: string) {
+	for (const collection of collectionConfigs) {
+		if (collection.config.entries[fsPath]) {
+			return collection.config.entries[fsPath];
+		}
+	}
+}
+
+export function getFrontmatterLanguagePlugin(
+	collectionConfigs: CollectionConfig[]
+): LanguagePlugin<URI, FrontmatterHolder> {
 	return {
 		getLanguageId(scriptId) {
-			if (scriptId.path.endsWith('.md')) {
+			if (
+				scriptId.path.endsWith('.md') ||
+				scriptId.path.endsWith('.mdx') ||
+				scriptId.path.endsWith('.mdoc')
+			) {
 				return 'frontmatter-ts';
 			}
 		},
 		createVirtualCode(scriptId, languageId, snapshot) {
-			if (languageId === 'markdown') {
+			if (languageId === 'markdown' || languageId === 'mdx' || languageId === 'mdoc') {
 				const fileName = scriptId.fsPath.replace(/\\/g, '/');
-				return new FrontmatterHolder(fileName, snapshot, 'blog');
+				return new FrontmatterHolder(
+					fileName,
+					snapshot,
+					getCollectionName(collectionConfigs, scriptId.fsPath)
+				);
 			}
 		},
 		updateVirtualCode(scriptId, virtualCode, newSnapshot, ctx) {
@@ -29,6 +57,7 @@ export function getFrontmatterLanguagePlugin(): LanguagePlugin<URI, FrontmatterH
 			extraFileExtensions: [
 				{ extension: 'md', isMixedContent: true, scriptKind: 7 },
 				{ extension: 'mdx', isMixedContent: true, scriptKind: 7 },
+				{ extension: 'mdoc', isMixedContent: true, scriptKind: 7 },
 			],
 			getServiceScript(astroCode) {
 				for (const code of forEachEmbeddedCode(astroCode)) {
@@ -66,7 +95,7 @@ export class FrontmatterHolder implements VirtualCode {
 	constructor(
 		public fileName: string,
 		public snapshot: ts.IScriptSnapshot,
-		public collection: string
+		public collection: string | undefined
 	) {
 		this.updateSnapshot(snapshot);
 	}
@@ -90,6 +119,10 @@ export class FrontmatterHolder implements VirtualCode {
 
 		this.embeddedCodes = [];
 		this.snapshot = snapshot;
+
+		if (!this.collection) {
+			return this;
+		}
 
 		// TODO: More robust frontmatter detection
 		this.hasFrontmatter = this.snapshot.getText(0, 10).startsWith('---');

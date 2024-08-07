@@ -5,6 +5,8 @@ import {
 	loadTsdkByPath,
 } from '@volar/language-server/node';
 import { getLanguagePlugins, getLanguageServicePlugins } from './languageServerPlugin.js';
+import type { CollectionConfig } from './core/frontmatterHolders.js';
+import { URI, Utils } from 'vscode-uri';
 
 const connection = createConnection();
 const server = createServer(connection);
@@ -22,15 +24,34 @@ connection.onInitialize((params) => {
 
 	const { typescript, diagnosticMessages } = loadTsdkByPath(tsdk, params.locale);
 
+	const collectionConfigs = params.initializationOptions.contentIntellisense
+		? (params.workspaceFolders ?? []).flatMap((folder) => {
+				const folderUri = URI.parse(folder.uri);
+				const collections = JSON.parse(
+					server.fs.readFile(
+						Utils.joinPath(folderUri, '.astro/collections/collections.json')
+					) as string
+				) as CollectionConfig['config'];
+
+				return { folder: folderUri, config: collections };
+		  })
+		: [];
+
 	return server.initialize(
 		params,
 		createTypeScriptProject(typescript, diagnosticMessages, ({ env, configFileName }) => {
 			return {
-				languagePlugins: getLanguagePlugins(connection, typescript, env, configFileName),
+				languagePlugins: getLanguagePlugins(
+					connection,
+					typescript,
+					env,
+					configFileName,
+					collectionConfigs
+				),
 				setup() {},
 			};
 		}),
-		getLanguageServicePlugins(connection, typescript),
+		getLanguageServicePlugins(connection, typescript, collectionConfigs),
 		{ pullModelDiagnostics: params.initializationOptions?.pullModelDiagnostics }
 	);
 });

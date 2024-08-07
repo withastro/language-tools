@@ -65,10 +65,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<LabsIn
 		typescript: {
 			tsdk: (await getTsdk(context))!.tsdk,
 		},
+		contentIntellisense: vscode.workspace.getConfiguration('astro').get('content-intellisense'),
 	} satisfies InitOptions;
 
 	const clientOptions = {
-		documentSelector: [{ language: 'astro' }, { language: 'markdown' }],
+		documentSelector: [
+			{ language: 'astro' },
+			{ language: 'markdown' },
+			{ language: 'mdx' },
+			{ language: 'mdoc' },
+		],
 		initializationOptions,
 	} satisfies lsp.LanguageClientOptions;
 	client = new lsp.LanguageClient('astro', 'Astro Language Server', serverOptions, clientOptions);

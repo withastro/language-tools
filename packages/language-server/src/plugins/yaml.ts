@@ -1,13 +1,34 @@
-import { type LanguageServicePlugin } from '@volar/language-service';
+import type { LanguageServicePlugin } from '@volar/language-service';
 import { Range, Diagnostic, DiagnosticSeverity, MarkupContent } from '@volar/language-server';
 import { create as createYAMLService } from 'volar-service-yaml';
 import { URI, Utils } from 'vscode-uri';
-import { FrontmatterHolder } from '../core/frontmatterHolders.js';
-import { doc } from 'prettier';
+import { CollectionConfig, FrontmatterHolder } from '../core/frontmatterHolders.js';
 
-export const create = (): LanguageServicePlugin => {
+export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePlugin => {
 	const yamlPlugin = createYAMLService({
 		getLanguageSettings(context) {
+			if (!context.env.fs) {
+				return {};
+			}
+
+			const schemas = collectionConfigs.flatMap((workspaceCollectionConfig) => {
+				return workspaceCollectionConfig.config.collections.flatMap((collection) => {
+					return {
+						priority: 3,
+						fileMatch: [
+							`volar-embedded-content://yaml_frontmatter_${collection.name}/**/*.md`,
+							`volar-embedded-content://yaml_frontmatter_${collection.name}/**/*.mdx`,
+							`volar-embedded-content://yaml_frontmatter_${collection.name}/**/*.mdoc`,
+						],
+						uri: Utils.joinPath(
+							workspaceCollectionConfig.folder,
+							'.astro/collections',
+							`${collection.name}.schema.json`
+						).toString(),
+					};
+				});
+			});
+
 			return {
 				completion: true,
 				format: false,
@@ -18,16 +39,7 @@ export const create = (): LanguageServicePlugin => {
 				isKubernetes: false,
 				parentSkeletonSelectedFirst: false,
 				disableDefaultProperties: false,
-				schemas: [
-					{
-						priority: 3,
-						fileMatch: ['volar-embedded-content://yaml_frontmatter_blog/**/*.md'],
-						uri: Utils.joinPath(
-							context.env.workspaceFolders[0],
-							'.astro/collections/blog.schema.json'
-						).toString(),
-					},
-				],
+				schemas: schemas,
 			};
 		},
 	});
