@@ -45,6 +45,9 @@ connection.onInitialize((params) => {
 					Utils.joinPath(folderUri, '.astro/collections/collections.json'),
 				);
 
+				console.log(folderUri);
+				console.log('config', config);
+
 				if (!config) {
 					return [];
 				}
@@ -52,8 +55,11 @@ connection.onInitialize((params) => {
 				// `server.fs.readFile` can theoretically be async, but in practice it's always sync
 				const collections = JSON.parse(config as string) as CollectionConfig['config'];
 
+				console.dir(collections, { depth: null });
+
 				return { folder: folderUri, config: collections };
 			} catch (err) {
+				console.error(err);
 				// If the file doesn't exist, we don't really care, but if it's something else, we want to know
 				if (err && (err as any).code !== 'ENOENT') console.error(err);
 				return [];
