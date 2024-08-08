@@ -1,6 +1,7 @@
 import type { TSXExtractedScript } from '@astrojs/compiler/types';
 import type { CodeInformation, VirtualCode } from '@volar/language-core';
-import { Segment, toString } from 'muggle-string';
+import type { Segment } from 'muggle-string';
+import { toString } from 'muggle-string';
 import { buildMappings } from '../buildMappings';
 
 export function extractScriptTags(scripts: TSXExtractedScript[]): VirtualCode[] {
@@ -16,7 +17,7 @@ export function extractScriptTags(scripts: TSXExtractedScript[]): VirtualCode[] 
 				// TODO: Change this at some point so that unknown scripts are not included
 				// We can't guarantee that they are JavaScript, so we shouldn't treat them as such, even if it might work in some cases
 				// Perhaps we should make it so that the user has to specify the language of the script if it's not a known type (ex: lang="js"), not sure.
-				script.type === 'event-attribute' || script.type === 'inline' || script.type === 'unknown'
+				script.type === 'event-attribute' || script.type === 'inline' || script.type === 'unknown',
 		)
 		.sort((a, b) => a.position.start - b.position.start);
 

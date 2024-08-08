@@ -1,9 +1,9 @@
-import {
+import type {
 	CompletionItem,
-	CompletionItemKind,
 	CompletionList,
 	LanguageServiceContext,
 } from '@volar/language-server';
+import { CompletionItemKind } from '@volar/language-server';
 import { URI } from 'vscode-uri';
 import { AstroVirtualCode } from '../../core/index.js';
 import { mapEdit } from './utils.js';
@@ -34,13 +34,13 @@ export function enhancedProvideCompletionItems(completions: CompletionList): Com
 
 export function enhancedResolveCompletionItem(
 	resolvedCompletion: CompletionItem,
-	context: LanguageServiceContext
+	context: LanguageServiceContext,
 ): CompletionItem {
 	// Make sure we keep our icons even when the completion is resolved
 	if (resolvedCompletion.data.isComponent) {
 		resolvedCompletion.detail = getDetailForFileCompletion(
 			resolvedCompletion.detail ?? '',
-			resolvedCompletion.data.originalItem.source
+			resolvedCompletion.data.originalItem.source,
 		);
 	}
 
@@ -52,7 +52,7 @@ export function enhancedResolveCompletionItem(
 		if (!virtualCode || !(root instanceof AstroVirtualCode)) return resolvedCompletion;
 
 		resolvedCompletion.additionalTextEdits = resolvedCompletion.additionalTextEdits.map((edit) =>
-			mapEdit(edit, root, virtualCode.languageId)
+			mapEdit(edit, root, virtualCode.languageId),
 		);
 	}
 

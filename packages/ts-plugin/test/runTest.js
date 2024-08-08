@@ -26,7 +26,7 @@ async function main() {
 			files.forEach((file) => {
 				if (file.startsWith('vscode-')) {
 					vsPath = downloadDirToExecutablePath(
-						path.resolve(__dirname, '../../vscode/.vscode-test/', file)
+						path.resolve(__dirname, '../../vscode/.vscode-test/', file),
 					);
 					return;
 				}
@@ -39,7 +39,7 @@ async function main() {
 			vscodeExecutablePath: vsPath,
 			launchArgs: ['./fixtures/fixtures.code-workspace'],
 		});
-	} catch (err) {
+	} catch {
 		console.error('Failed to run tests');
 		process.exit(1);
 	}

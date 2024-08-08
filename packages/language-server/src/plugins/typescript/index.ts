@@ -32,7 +32,7 @@ export const create = (ts: typeof import('typescript')): LanguageServicePlugin[]
 								document,
 								position,
 								completionContext,
-								token
+								token,
 							);
 							if (!originalCompletions) return null;
 
@@ -41,7 +41,7 @@ export const create = (ts: typeof import('typescript')): LanguageServicePlugin[]
 						async resolveCompletionItem(item, token) {
 							const resolvedCompletionItem = await typeScriptPlugin.resolveCompletionItem!(
 								item,
-								token
+								token,
 							);
 							if (!resolvedCompletionItem) return item;
 
@@ -52,7 +52,7 @@ export const create = (ts: typeof import('typescript')): LanguageServicePlugin[]
 								document,
 								range,
 								codeActionContext,
-								token
+								token,
 							);
 							if (!originalCodeActions) return null;
 
@@ -61,7 +61,7 @@ export const create = (ts: typeof import('typescript')): LanguageServicePlugin[]
 						async resolveCodeAction(codeAction, token) {
 							const resolvedCodeAction = await typeScriptPlugin.resolveCodeAction!(
 								codeAction,
-								token
+								token,
 							);
 							if (!resolvedCodeAction) return codeAction;
 
@@ -83,7 +83,7 @@ export const create = (ts: typeof import('typescript')): LanguageServicePlugin[]
 
 							const diagnostics = await typeScriptPlugin.provideSemanticDiagnostics!(
 								document,
-								token
+								token,
 							);
 							if (!diagnostics) return null;
 

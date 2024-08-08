@@ -11,7 +11,7 @@ function safeConvertToTSX(content: string, options: ConvertToTSXOptions) {
 		return tsx;
 	} catch (e) {
 		console.error(
-			`There was an error transforming ${options.filename} to TSX. An empty file will be returned instead. Please create an issue: https://github.com/withastro/language-tools/issues\nError: ${e}.`
+			`There was an error transforming ${options.filename} to TSX. An empty file will be returned instead. Please create an issue: https://github.com/withastro/language-tools/issues\nError: ${e}.`,
 		);
 
 		return {
@@ -140,7 +140,7 @@ function patchTSX(code: string, fileName: string) {
 	const basename = path.basename(fileName, path.extname(fileName));
 	const isDynamic = basename.startsWith('[') && basename.endsWith(']');
 
-	return code.replace(/\b(\S*)__AstroComponent_/gm, (fullMatch, m1: string) => {
+	return code.replace(/\b(\S*)__AstroComponent_/g, (fullMatch, m1: string) => {
 		// If we don't have a match here, it usually means the file has a weird name that couldn't be expressed with valid identifier characters
 		if (!m1) {
 			if (basename === '404') return 'FourOhFour';

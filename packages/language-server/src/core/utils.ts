@@ -7,7 +7,7 @@ export const FRONTMATTER_OFFSET = 4;
 export function framework2tsx(
 	filePath: string,
 	sourceCode: string,
-	framework: 'vue' | 'svelte'
+	framework: 'vue' | 'svelte',
 ): VirtualCode {
 	const integrationEditorEntrypoint =
 		framework === 'vue' ? importVueIntegration(filePath) : importSvelteIntegration(filePath);
@@ -46,7 +46,7 @@ function toPascalCase(string: string) {
 		.replace(new RegExp(/[^\w\s]/, 'g'), '')
 		.replace(
 			new RegExp(/\s+(.)(\w*)/, 'g'),
-			($1, $2, $3) => `${$2.toUpperCase() + $3.toLowerCase()}`
+			($1, $2, $3) => `${$2.toUpperCase() + $3.toLowerCase()}`,
 		)
 		.replace(new RegExp(/\w/), (s) => s.toUpperCase());
 }
@@ -58,7 +58,7 @@ export function classNameFromFilename(filename: string): string {
 	const withoutInvalidCharacters = withoutExtensions
 		.split('')
 		// Although "-" is invalid, we leave it in, pascal-case-handling will throw it out later
-		.filter((char) => /[A-Za-z$_\d-]/.test(char))
+		.filter((char) => /[\w$-]/.test(char))
 		.join('');
 	const firstValidCharIdx = withoutInvalidCharacters
 		.split('')
@@ -78,7 +78,7 @@ export function patchTSX(code: string, filePath: string) {
 	const basename = filePath.split('/').pop()!;
 	const isDynamic = basename.startsWith('[') && basename.endsWith(']');
 
-	return code.replace(/\b(\S*)__AstroComponent_/gm, (fullMatch, m1: string) => {
+	return code.replace(/\b(\S*)__AstroComponent_/g, (fullMatch, m1: string) => {
 		// If we don't have a match here, it usually means the file has a weird name that couldn't be expressed with valid identifier characters
 		if (!m1) {
 			if (basename === '404') return 'FourOhFour';

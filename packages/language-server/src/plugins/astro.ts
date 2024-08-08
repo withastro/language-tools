@@ -1,13 +1,15 @@
 import { dirname } from 'node:path';
 import type { DiagnosticMessage } from '@astrojs/compiler/types';
-import {
+import type {
 	CodeLens,
 	CompletionItem,
-	CompletionItemKind,
 	Diagnostic,
-	InsertTextFormat,
 	LanguageServicePlugin,
 	LanguageServicePluginInstance,
+} from '@volar/language-server';
+import {
+	CompletionItemKind,
+	InsertTextFormat,
 	Position,
 	Range,
 	TextEdit,
@@ -79,7 +81,7 @@ export const create = (ts: typeof import('typescript')): LanguageServicePlugin =
 
 					const { uriConverter } = context.project.typescript;
 					const languageService = context.inject<Provide, 'typescript/languageService'>(
-						'typescript/languageService'
+						'typescript/languageService',
 					);
 					if (!languageService) return;
 
@@ -102,8 +104,8 @@ export const create = (ts: typeof import('typescript')): LanguageServicePlugin =
 										getGlobResultAsCodeLens(
 											globArgument.getText().slice(1, -1),
 											dirname(uriConverter.asFileName(decoded[0])),
-											document.positionAt(node.arguments.pos)
-										)
+											document.positionAt(node.arguments.pos),
+										),
 									);
 								}
 							}
@@ -135,7 +137,7 @@ function getGlobResultAsCodeLens(globText: string, dir: string, position: Positi
 function getFrontmatterCompletion(
 	file: AstroVirtualCode,
 	document: TextDocument,
-	position: Position
+	position: Position,
 ) {
 	const base: CompletionItem = {
 		kind: CompletionItemKind.Snippet,
@@ -155,7 +157,7 @@ function getFrontmatterCompletion(
 		return {
 			...base,
 			insertText: '---\n$0\n---',
-			textEdit: prefix.match(/^\s*\-+/)
+			textEdit: /^\s*-+/.test(prefix)
 				? TextEdit.replace({ start: { ...position, character: 0 }, end: position }, '---\n$0\n---')
 				: undefined,
 		};
@@ -175,7 +177,7 @@ function getFrontmatterCompletion(
 			insertText,
 			detail:
 				insertText === '---' ? 'Close component script block' : 'Create component script block',
-			textEdit: prefix.match(/^\s*\-+/)
+			textEdit: /^\s*-+/.test(prefix)
 				? TextEdit.replace({ start: { ...position, character: 0 }, end: position }, insertText)
 				: undefined,
 		};

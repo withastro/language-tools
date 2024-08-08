@@ -1,4 +1,3 @@
-import { EOL } from 'node:os';
 import path from 'node:path';
 import { Position } from '@volar/language-server';
 import { expect } from 'chai';
@@ -16,7 +15,7 @@ describe('TypeScript - Completions', async () => {
 		const document = await languageServer.openFakeDocument('---\nc\n---', 'astro');
 		const completions = await languageServer.handle.sendCompletionRequest(
 			document.uri,
-			Position.create(1, 1)
+			Position.create(1, 1),
 		);
 
 		expect(completions?.items).to.not.be.empty;
@@ -26,7 +25,7 @@ describe('TypeScript - Completions', async () => {
 		const document = await languageServer.openFakeDocument('{c}', 'astro');
 		const completions = await languageServer.handle.sendCompletionRequest(
 			document.uri,
-			Position.create(0, 1)
+			Position.create(0, 1),
 		);
 
 		expect(completions?.items).to.not.be.empty;
@@ -36,11 +35,11 @@ describe('TypeScript - Completions', async () => {
 		const document = await languageServer.openFakeDocument('<Image', 'astro');
 		const completions = await languageServer.handle.sendCompletionRequest(
 			document.uri,
-			Position.create(0, 6)
+			Position.create(0, 6),
 		);
 
 		const imageCompletion = completions?.items.find(
-			(item) => item.labelDetails?.description === 'astro:assets'
+			(item) => item.labelDetails?.description === 'astro:assets',
 		);
 
 		expect(imageCompletion?.sortText).to.equal('\x00￿16');
@@ -57,7 +56,7 @@ describe('TypeScript - Completions', async () => {
 			const document = await languageServer.openFakeDocument(doc, 'astro');
 			const completions = await languageServer.handle.sendCompletionRequest(
 				document.uri,
-				Position.create(1, 8)
+				Position.create(1, 8),
 			);
 
 			const allLabels = completions?.items.map((item) => item.label);
@@ -69,15 +68,15 @@ describe('TypeScript - Completions', async () => {
 	it('properly maps edits for completions in script tags', async () => {
 		const document = await languageServer.handle.openTextDocument(
 			path.join(fixtureDir, 'scriptImport.astro'),
-			'astro'
+			'astro',
 		);
 		const completions = await languageServer.handle.sendCompletionRequest(
 			document.uri,
-			Position.create(1, 0)
+			Position.create(1, 0),
 		);
 
 		const imageConfigCompletion = completions?.items.find(
-			(item) => item.label === 'Image' && item.labelDetails?.description === 'astro:assets'
+			(item) => item.label === 'Image' && item.labelDetails?.description === 'astro:assets',
 		);
 		expect(imageConfigCompletion).to.not.be.undefined;
 
@@ -87,7 +86,7 @@ describe('TypeScript - Completions', async () => {
 		// Why `import type`? I... don't know. TypeScript return this in some contexts and somehow in the editor it's not a problem.
 		// This issue affects all imports, even outside of Astro.
 		expect(edits?.additionalTextEdits?.[0].newText).to.equal(
-			`\nimport type { Image } from "astro:assets";\n`
+			`\nimport type { Image } from "astro:assets";\n`,
 		);
 		expect(edits?.additionalTextEdits?.[0].range.start.line).to.equal(0);
 	});
@@ -96,7 +95,7 @@ describe('TypeScript - Completions', async () => {
 		const document = await languageServer.openFakeDocument('<div onload="a"></div>', 'astro');
 		const completions = await languageServer.handle.sendCompletionRequest(
 			document.uri,
-			Position.create(0, 13)
+			Position.create(0, 13),
 		);
 
 		expect(completions?.items).to.not.be.empty;
@@ -109,11 +108,11 @@ describe('TypeScript - Completions', async () => {
 	it('Can get completions inside HTML events with multi-bytes characters in the file', async () => {
 		const document = await languageServer.openFakeDocument(
 			'<div>あ</div><div onload="a"></div>',
-			'astro'
+			'astro',
 		);
 		const completions = await languageServer.handle.sendCompletionRequest(
 			document.uri,
-			Position.create(0, 24)
+			Position.create(0, 24),
 		);
 
 		expect(completions?.items).to.not.be.empty;

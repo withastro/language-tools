@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import type { DiagnosticMessage } from '@astrojs/compiler/types';
+import type { DiagnosticMessage, DiagnosticSeverity } from '@astrojs/compiler/types';
 import {
 	type CodeMapping,
 	type LanguagePlugin,
@@ -12,14 +12,15 @@ import type { HTMLDocument } from 'vscode-html-languageservice';
 import type { URI } from 'vscode-uri';
 import { type AstroInstall, getLanguageServerTypesDir } from '../utils.js';
 import { astro2tsx } from './astro2tsx';
-import { AstroMetadata, getAstroMetadata } from './parseAstro';
+import type { AstroMetadata } from './parseAstro';
+import { getAstroMetadata } from './parseAstro';
 import { extractStylesheets } from './parseCSS';
 import { parseHTML } from './parseHTML';
 import { extractScriptTags } from './parseJS.js';
 
 export function getAstroLanguagePlugin(
 	astroInstall: AstroInstall | undefined,
-	ts: typeof import('typescript')
+	ts: typeof import('typescript'),
 ): LanguagePlugin<URI, AstroVirtualCode> {
 	return {
 		getLanguageId(uri) {
@@ -76,8 +77,8 @@ export function getAstroLanguagePlugin(
 						if (astroInstall) {
 							addedFileNames.push(
 								...['./env.d.ts', './astro-jsx.d.ts'].map((filePath) =>
-									ts.sys.resolvePath(path.resolve(astroInstall.path, filePath))
-								)
+									ts.sys.resolvePath(path.resolve(astroInstall.path, filePath)),
+								),
 							);
 
 							// If Astro version is < 4.0.8, add jsx-runtime-augment.d.ts to the files to fake `JSX` being available from "astro/jsx-runtime".
@@ -90,8 +91,8 @@ export function getAstroLanguagePlugin(
 							) {
 								addedFileNames.push(
 									...['./jsx-runtime-augment.d.ts'].map((filePath) =>
-										ts.sys.resolvePath(path.resolve(languageServerTypesDirectory, filePath))
-									)
+										ts.sys.resolvePath(path.resolve(languageServerTypesDirectory, filePath)),
+									),
 								);
 							}
 						} else {
@@ -99,8 +100,8 @@ export function getAstroLanguagePlugin(
 							// See the README in packages/language-server/types for more information.
 							addedFileNames.push(
 								...['./env.d.ts', './astro-jsx.d.ts', './jsx-runtime-fallback.d.ts'].map((f) =>
-									ts.sys.resolvePath(path.resolve(languageServerTypesDirectory, f))
-								)
+									ts.sys.resolvePath(path.resolve(languageServerTypesDirectory, f)),
+								),
 							);
 						}
 
@@ -141,7 +142,7 @@ export class AstroVirtualCode implements VirtualCode {
 
 	constructor(
 		public fileName: string,
-		public snapshot: ts.IScriptSnapshot
+		public snapshot: ts.IScriptSnapshot,
 	) {
 		this.mappings = [
 			{
@@ -162,14 +163,14 @@ export class AstroVirtualCode implements VirtualCode {
 		const tsx = astro2tsx(this.snapshot.getText(0, this.snapshot.getLength()), this.fileName);
 		const astroMetadata = getAstroMetadata(
 			this.fileName,
-			this.snapshot.getText(0, this.snapshot.getLength())
+			this.snapshot.getText(0, this.snapshot.getLength()),
 		);
 
 		const { htmlDocument, virtualCode: htmlVirtualCode } = parseHTML(
 			this.snapshot,
 			astroMetadata.frontmatter.status === 'closed'
 				? astroMetadata.frontmatter.position.end.offset
-				: 0
+				: 0,
 		);
 
 		this.htmlDocument = htmlDocument;
@@ -184,6 +185,10 @@ export class AstroVirtualCode implements VirtualCode {
 	}
 
 	get hasCompilationErrors(): boolean {
-		return this.compilerDiagnostics.filter((diag) => diag.severity === 1).length > 0;
+		return (
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+			this.compilerDiagnostics.filter((diag) => diag.severity === (1 satisfies DiagnosticSeverity))
+				.length > 0
+		);
 	}
 }

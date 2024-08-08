@@ -2,7 +2,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { expect } from 'chai';
 import { before, describe, it } from 'mocha';
-import { AstroCheck, CheckResult } from '../../dist/check.js';
+import type { CheckResult } from '../../dist/check.js';
+import { AstroCheck } from '../../dist/check.js';
 
 describe('AstroCheck', async () => {
 	let checker: AstroCheck;
@@ -14,7 +15,7 @@ describe('AstroCheck', async () => {
 		checker = new AstroCheck(
 			path.resolve(__dirname, 'fixture'),
 			require.resolve('typescript/lib/typescript.js'),
-			undefined
+			undefined,
 		);
 		result = await checker.lint({});
 	});
@@ -32,7 +33,7 @@ describe('AstroCheck', async () => {
 	it("Returns the file's content", async () => {
 		expect(result.fileResult[0].fileContent).to.not.be.undefined;
 		expect(result.fileResult[0].fileContent).to.deep.equal(
-			`---${os.EOL}console.log(doesntExist);${os.EOL}---${os.EOL}`
+			`---${os.EOL}console.log(doesntExist);${os.EOL}---${os.EOL}`,
 		);
 	});
 

@@ -1,10 +1,8 @@
-import {
+import type {
 	Connection,
 	LanguagePlugin,
 	LanguageServerProject,
 	LanguageServiceEnvironment,
-	MessageType,
-	ShowMessageNotification,
 } from '@volar/language-server/node';
 import { URI, Utils } from 'vscode-uri';
 import { getAstroLanguagePlugin } from './core';
@@ -32,7 +30,7 @@ export function getLanguagePlugins(
 	ts: typeof import('typescript'),
 	serviceEnv: LanguageServiceEnvironment,
 	tsconfig: string | undefined,
-	collectionConfigs: CollectionConfig[]
+	collectionConfigs: CollectionConfig[],
 ) {
 	const languagePlugins: LanguagePlugin<URI>[] = [
 		getVueLanguagePlugin(),
@@ -61,7 +59,7 @@ export function getLanguagePlugins(
 	}
 
 	languagePlugins.unshift(
-		getAstroLanguagePlugin(typeof astroInstall === 'string' ? undefined : astroInstall, ts)
+		getAstroLanguagePlugin(typeof astroInstall === 'string' ? undefined : astroInstall, ts),
 	);
 
 	return languagePlugins;
@@ -141,7 +139,7 @@ export function getLanguageServicePlugins(
 
 					const editorOptions = await context.env.getConfiguration<object>?.(
 						'prettier',
-						document.uri
+						document.uri,
 					);
 
 					// Return a config with the following cascade:
@@ -174,7 +172,7 @@ export function getLanguageServicePlugins(
 						return hasPluginLoadedAlready ? [] : [prettierPluginPath];
 					}
 				},
-			}
+			},
 		);
 	}
 }

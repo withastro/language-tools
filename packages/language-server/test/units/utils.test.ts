@@ -4,10 +4,10 @@ import { expect } from 'chai';
 import { describe, it } from 'mocha';
 import type { Node } from 'vscode-html-languageservice';
 import * as html from 'vscode-html-languageservice';
-import { getTSXRangesAsLSPRanges, safeConvertToTSX } from '../../src/core/astro2tsx.js';
-import * as compilerUtils from '../../src/core/compilerUtils.js';
-import { getAstroMetadata } from '../../src/core/parseAstro.js';
-import * as utils from '../../src/plugins/utils.js';
+import { getTSXRangesAsLSPRanges, safeConvertToTSX } from '../../dist/core/astro2tsx.js';
+import * as compilerUtils from '../../dist/core/compilerUtils.js';
+import { getAstroMetadata } from '../../dist/core/parseAstro.js';
+import * as utils from '../../dist/plugins/utils.js';
 
 describe('Utilities', async () => {
 	it('isTsDocument - properly return if a document is JavaScript', () => {
@@ -84,17 +84,17 @@ describe('Utilities', async () => {
 		const astroMetadata = { tsxRanges, ...getAstroMetadata('file.astro', input) };
 
 		expect(utils.ensureRangeIsInFrontmatter(beforeFrontmatterRange, astroMetadata)).to.deep.equal(
-			Range.create(2, 0, 2, 0)
+			Range.create(2, 0, 2, 0),
 		);
 
 		const insideFrontmatterRange = html.Range.create(1, 0, 1, 0);
 		expect(utils.ensureRangeIsInFrontmatter(insideFrontmatterRange, astroMetadata)).to.deep.equal(
-			Range.create(2, 0, 2, 0)
+			Range.create(2, 0, 2, 0),
 		);
 
 		const outsideFrontmatterRange = html.Range.create(6, 0, 6, 0);
 		expect(utils.ensureRangeIsInFrontmatter(outsideFrontmatterRange, astroMetadata)).to.deep.equal(
-			Range.create(2, 0, 2, 0)
+			Range.create(2, 0, 2, 0),
 		);
 	});
 
@@ -106,7 +106,7 @@ describe('Utilities', async () => {
 		const edit = utils.getNewFrontmatterEdit(
 			{ range: Range.create(43, 0, 44, 0), newText: 'foo' },
 			astroMetadata,
-			'\n'
+			'\n',
 		);
 		expect(edit).to.deep.equal({
 			range: Range.create(2, 0, 2, 0),
@@ -122,7 +122,7 @@ describe('Utilities', async () => {
 		const edit = utils.getOpenFrontmatterEdit(
 			{ range: Range.create(2, 0, 2, 0), newText: 'foo' },
 			astroMetadata,
-			'\n'
+			'\n',
 		);
 
 		expect(edit).to.deep.equal({

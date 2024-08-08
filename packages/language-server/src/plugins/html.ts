@@ -1,8 +1,5 @@
-import {
-	CompletionItemKind,
-	LanguageServicePlugin,
-	LanguageServicePluginInstance,
-} from '@volar/language-server';
+import type { LanguageServicePlugin, LanguageServicePluginInstance } from '@volar/language-server';
+import { CompletionItemKind } from '@volar/language-server';
 import { create as createHtmlService } from 'volar-service-html';
 import * as html from 'vscode-html-languageservice';
 import { URI, Utils } from 'vscode-uri';
@@ -57,7 +54,7 @@ export const create = (): LanguageServicePlugin => {
 						document,
 						position,
 						completionContext,
-						token
+						token,
 					);
 
 					if (!completions) {
@@ -66,7 +63,7 @@ export const create = (): LanguageServicePlugin => {
 
 					// We don't want completions for file references, as they're mostly invalid for Astro
 					completions.items = completions.items.filter(
-						(completion) => completion.kind !== CompletionItemKind.File
+						(completion) => completion.kind !== CompletionItemKind.File,
 					);
 
 					return completions;

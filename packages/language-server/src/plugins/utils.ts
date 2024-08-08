@@ -1,4 +1,5 @@
-import { HTMLDocument, Node, Range, TextEdit } from 'vscode-html-languageservice';
+import type { HTMLDocument, Node, TextEdit } from 'vscode-html-languageservice';
+import { Range } from 'vscode-html-languageservice';
 import type { AstroMetadata, FrontmatterStatus } from '../core/parseAstro.js';
 
 export function isJSDocument(languageId: string) {
@@ -19,7 +20,8 @@ export function isFrontmatterHolderDocument(languageId: string) {
  * This is not a 100% sure test as it'll return false for any component that does not match the standard format for a component
  */
 export function isPossibleComponent(node: Node): boolean {
-	return !!node.tag?.[0].match(/[A-Z]/) || !!node.tag?.match(/.+[.][A-Z]?/);
+	if (!node.tag) return false;
+	return !!/[A-Z]/.test(node.tag?.[0]) || !!/.+\.[A-Z]?/.test(node.tag);
 }
 
 /**
@@ -58,7 +60,7 @@ export function ensureProperEditForFrontmatter(
 	edit: TextEdit,
 	metadata: AstroMetadata,
 	newLine: string,
-	position: FrontmatterEditPosition = 'top'
+	position: FrontmatterEditPosition = 'top',
 ): TextEdit {
 	switch (metadata.frontmatter.status) {
 		case 'open':
@@ -84,7 +86,7 @@ export function ensureProperEditForFrontmatter(
 export function ensureRangeIsInFrontmatter(
 	range: Range,
 	metadata: AstroMetadata,
-	position: FrontmatterEditPosition = 'top'
+	position: FrontmatterEditPosition = 'top',
 ): Range {
 	if (metadata.frontmatter.status === 'open' || metadata.frontmatter.status === 'closed') {
 		const frontmatterEndPosition = metadata.frontmatter.position.end
@@ -102,7 +104,7 @@ export function ensureRangeIsInFrontmatter(
 
 			return Range.create(
 				metadata.tsxRanges.frontmatter.start,
-				metadata.tsxRanges.frontmatter.start
+				metadata.tsxRanges.frontmatter.start,
 			);
 		}
 
@@ -115,14 +117,14 @@ export function ensureRangeIsInFrontmatter(
 export function getNewFrontmatterEdit(
 	edit: TextEdit,
 	astroMetadata: AstroMetadata,
-	newLine: string
+	newLine: string,
 ) {
 	edit.newText = `---${edit.newText.startsWith(newLine) ? '' : newLine}${
 		edit.newText
 	}---${newLine}${newLine}`;
 	edit.range = Range.create(
 		astroMetadata.tsxRanges.frontmatter.start,
-		astroMetadata.tsxRanges.frontmatter.start
+		astroMetadata.tsxRanges.frontmatter.start,
 	);
 
 	return edit;
@@ -131,14 +133,14 @@ export function getNewFrontmatterEdit(
 export function getOpenFrontmatterEdit(
 	edit: TextEdit,
 	astroMetadata: AstroMetadata,
-	newLine: string
+	newLine: string,
 ) {
 	edit.newText = edit.newText.startsWith(newLine)
 		? `${edit.newText}---`
 		: `${newLine}${edit.newText}---`;
 	edit.range = Range.create(
 		astroMetadata.tsxRanges.frontmatter.start,
-		astroMetadata.tsxRanges.frontmatter.start
+		astroMetadata.tsxRanges.frontmatter.start,
 	);
 	return edit;
 }
@@ -150,7 +152,7 @@ type FrontmatterEditValidity =
 // Most edits that are at the beginning of the TSX, or outside the document are intended for the frontmatter
 export function editShouldBeInFrontmatter(
 	range: Range,
-	astroMetadata: AstroMetadata
+	astroMetadata: AstroMetadata,
 ): FrontmatterEditValidity {
 	const isAtTSXStart = range.start.line < astroMetadata.tsxRanges.frontmatter.start.line;
 
