@@ -1,18 +1,8 @@
-import YAML, {
-	CST,
-	isCollection,
-	isMap,
-	isScalar,
-	isSeq,
-	LineCounter,
-	parseDocument,
-	YAMLError,
-	YAMLMap,
-	YAMLSeq,
-} from 'yaml';
-import * as devalue from 'devalue';
 import type { CodeMapping, VirtualCode } from '@volar/language-core';
+import * as devalue from 'devalue';
 import type * as ts from 'typescript';
+import type { YAMLError, YAMLMap, YAMLSeq } from 'yaml';
+import YAML, { CST, isCollection, isMap, isScalar, isSeq, LineCounter, parseDocument } from 'yaml';
 
 const FRONTMATTER_OFFSET = 0;
 
@@ -24,7 +14,7 @@ export type YAML2TSResult = {
 export function yaml2ts(
 	frontmatter: string,
 	snapshot: ts.IScriptSnapshot,
-	collection: string = 'blog'
+	collection = 'blog',
 ): YAML2TSResult {
 	const frontmatterMappings: CodeMapping[] = [];
 	const lineCounter = new LineCounter();

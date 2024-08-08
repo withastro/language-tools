@@ -1,11 +1,11 @@
+import { yaml2ts } from '@astrojs/yaml2ts';
 import {
-	forEachEmbeddedCode,
 	type CodeMapping,
 	type LanguagePlugin,
 	type VirtualCode,
+	forEachEmbeddedCode,
 } from '@volar/language-core';
 import type ts from 'typescript';
-import { yaml2ts } from '@astrojs/yaml2ts';
 
 export type CollectionConfig = {
 	folder: string;
@@ -28,7 +28,7 @@ function getCollectionName(collectionConfigs: CollectionConfig[], fsPath: string
 }
 
 export function getFrontmatterLanguagePlugin(
-	collectionConfigs: CollectionConfig[]
+	collectionConfigs: CollectionConfig[],
 ): LanguagePlugin<string, FrontmatterHolder> {
 	return {
 		getLanguageId(scriptId) {
@@ -42,11 +42,11 @@ export function getFrontmatterLanguagePlugin(
 				return new FrontmatterHolder(
 					fileName,
 					snapshot,
-					getCollectionName(collectionConfigs, fileName)
+					getCollectionName(collectionConfigs, fileName),
 				);
 			}
 		},
-		updateVirtualCode(scriptId, virtualCode, newSnapshot, ctx) {
+		updateVirtualCode(scriptId, virtualCode, newSnapshot) {
 			return virtualCode.updateSnapshot(newSnapshot);
 		},
 		typescript: {
@@ -72,11 +72,11 @@ export function getFrontmatterLanguagePlugin(
 }
 
 export class FrontmatterHolder implements VirtualCode {
-	id: string = 'frontmatter-holder';
-	languageId: string = 'frontmatter';
+	id = 'frontmatter-holder';
+	languageId = 'frontmatter';
 	mappings!: CodeMapping[];
 	embeddedCodes!: VirtualCode[];
-	public hasFrontmatter: boolean = false;
+	public hasFrontmatter = false;
 
 	lastValidContent: {
 		source: string;
@@ -91,7 +91,7 @@ export class FrontmatterHolder implements VirtualCode {
 	constructor(
 		public fileName: string,
 		public snapshot: ts.IScriptSnapshot,
-		public collection: string | undefined
+		public collection: string | undefined,
 	) {
 		this.updateSnapshot(snapshot);
 	}

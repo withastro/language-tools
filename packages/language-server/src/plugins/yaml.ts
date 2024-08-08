@@ -1,15 +1,10 @@
+import { Diagnostic, DiagnosticSeverity, MarkupContent, Range } from '@volar/language-server';
 import type { LanguageServicePlugin } from '@volar/language-service';
-import {
-	Range,
-	Diagnostic,
-	DiagnosticSeverity,
-	MarkupContent,
-	FileChangeType,
-	type LanguageServerProject,
-} from '@volar/language-server';
-import { create as createYAMLService, Provide } from 'volar-service-yaml';
+import type { Provide } from 'volar-service-yaml';
+import { create as createYAMLService } from 'volar-service-yaml';
 import { URI, Utils } from 'vscode-uri';
-import { CollectionConfig, FrontmatterHolder } from '../core/frontmatterHolders.js';
+import type { CollectionConfig } from '../core/frontmatterHolders.js';
+import { FrontmatterHolder } from '../core/frontmatterHolders.js';
 
 export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePlugin => {
 	const yamlPlugin = createYAMLService({
@@ -30,7 +25,7 @@ export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePl
 						uri: Utils.joinPath(
 							workspaceCollectionConfig.folder,
 							'.astro/collections',
-							`${collection.name}.schema.json`
+							`${collection.name}.schema.json`,
 						).toString(),
 					};
 				});
@@ -79,7 +74,7 @@ export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePl
 			return {
 				...yamlPluginInstance,
 				// Disable codelenses, we'll provide our own
-				async provideCodeLenses(document, token) {
+				async provideCodeLenses() {
 					return null;
 				},
 				async provideDiagnostics(document, token) {
@@ -99,7 +94,7 @@ export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePl
 							Diagnostic.create(
 								Range.create(0, 0, 0, 0),
 								'Frontmatter is required for this file.',
-								DiagnosticSeverity.Error
+								DiagnosticSeverity.Error,
 							),
 						];
 					}
@@ -116,7 +111,7 @@ export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePl
 							if (diagnostic.message.startsWith('Missing property')) {
 								diagnostic.range = Range.create(
 									{ line: 0, character: 0 },
-									document.positionAt(document.getText().length)
+									document.positionAt(document.getText().length),
 								);
 							}
 						}

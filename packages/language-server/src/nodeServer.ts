@@ -4,9 +4,9 @@ import {
 	createTypeScriptProject,
 	loadTsdkByPath,
 } from '@volar/language-server/node';
-import { getLanguagePlugins, getLanguageServicePlugins } from './languageServerPlugin.js';
-import type { CollectionConfig } from './core/frontmatterHolders.js';
 import { URI, Utils } from 'vscode-uri';
+import type { CollectionConfig } from './core/frontmatterHolders.js';
+import { getLanguagePlugins, getLanguageServicePlugins } from './languageServerPlugin.js';
 
 const connection = createConnection();
 const server = createServer(connection);
@@ -33,12 +33,12 @@ connection.onInitialize((params) => {
 				const folderUri = URI.parse(folder.uri);
 				const collections = JSON.parse(
 					server.fs.readFile(
-						Utils.joinPath(folderUri, '.astro/collections/collections.json')
-					) as string
+						Utils.joinPath(folderUri, '.astro/collections/collections.json'),
+					) as string,
 				) as CollectionConfig['config'];
 
 				return { folder: folderUri, config: collections };
-		  })
+			})
 		: [];
 
 	return server.initialize(
@@ -50,7 +50,7 @@ connection.onInitialize((params) => {
 					typescript,
 					env,
 					configFileName,
-					collectionConfigs
+					collectionConfigs,
 				),
 				setup() {},
 			};

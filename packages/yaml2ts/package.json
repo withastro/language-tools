@@ -8,7 +8,10 @@
   },
   "type": "commonjs",
   "main": "dist/index.js",
-  "files": ["dist/**/*.js", "dist/**/*.d.ts"],
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts"
+  ],
   "keywords": [],
   "author": "",
   "license": "MIT",

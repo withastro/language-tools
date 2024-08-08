@@ -1,10 +1,11 @@
-import type {
-	Connection,
-	LanguagePlugin,
-	LanguageServerProject,
-	LanguageServiceEnvironment,
+import {
+	MessageType,
+	ShowMessageNotification,
+	type Connection,
+	type LanguagePlugin,
+	type LanguageServiceEnvironment,
 } from '@volar/language-server/node';
-import { URI, Utils } from 'vscode-uri';
+import { URI } from 'vscode-uri';
 import { getAstroLanguagePlugin } from './core';
 import { getSvelteLanguagePlugin } from './core/svelte.js';
 import { getVueLanguagePlugin } from './core/vue.js';
@@ -20,7 +21,6 @@ import { create as createTypeScriptTwoSlashService } from 'volar-service-typescr
 import { type CollectionConfig, getFrontmatterLanguagePlugin } from './core/frontmatterHolders.js';
 import { create as createAstroService } from './plugins/astro.js';
 import { create as createHtmlService } from './plugins/html.js';
-import { create as createMarkdownService } from './plugins/markdown.js';
 import { create as createTypescriptAddonsService } from './plugins/typescript-addons/index.js';
 import { create as createTypeScriptServices } from './plugins/typescript/index.js';
 import { create as createYAMLService } from './plugins/yaml.js';
@@ -68,7 +68,7 @@ export function getLanguagePlugins(
 export function getLanguageServicePlugins(
 	connection: Connection,
 	ts: typeof import('typescript'),
-	collectionConfigs: CollectionConfig[]
+	collectionConfigs: CollectionConfig[],
 ) {
 	const LanguageServicePlugins = [
 		createHtmlService(),
@@ -79,7 +79,6 @@ export function getLanguageServicePlugins(
 		createTypescriptAddonsService(),
 		createAstroService(ts),
 		getPrettierService(),
-		createMarkdownService(),
 	];
 
 	if (collectionConfigs.length) {

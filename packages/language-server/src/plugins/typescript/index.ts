@@ -20,7 +20,7 @@ export const create = (ts: typeof import('typescript')): LanguageServicePlugin[]
 							const originalDefinition = await typeScriptPlugin.provideDefinition!(
 								document,
 								position,
-								token
+								token,
 							);
 
 							if (!originalDefinition) return null;
