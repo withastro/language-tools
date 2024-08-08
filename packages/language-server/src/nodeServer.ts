@@ -18,8 +18,6 @@ connection.listen();
 connection.onInitialize((params) => {
 	const tsdk = params.initializationOptions?.typescript?.tsdk;
 
-	contentIntellisenseEnabled = params.initializationOptions?.contentIntellisense ?? false;
-
 	if (!tsdk) {
 		throw new Error(
 			'The `typescript.tsdk` init option is required. It should point to a directory containing a `typescript.js` or `tsserverlibrary.js` file, such as `node_modules/typescript/lib`.',
@@ -28,18 +26,32 @@ connection.onInitialize((params) => {
 
 	const { typescript, diagnosticMessages } = loadTsdkByPath(tsdk, params.locale);
 
-	const collectionConfigs = contentIntellisenseEnabled
-		? (params.workspaceFolders ?? []).flatMap((folder) => {
+	contentIntellisenseEnabled = params.initializationOptions?.contentIntellisense ?? false;
+	let collectionConfigs: { folder: URI; config: CollectionConfig['config'] }[] = [];
+
+	if (contentIntellisenseEnabled) {
+		collectionConfigs = (params.workspaceFolders ?? []).flatMap((folder) => {
+			try {
 				const folderUri = URI.parse(folder.uri);
-				const collections = JSON.parse(
-					server.fs.readFile(
-						Utils.joinPath(folderUri, '.astro/collections/collections.json'),
-					) as string,
-				) as CollectionConfig['config'];
+				let config = server.fs.readFile(
+					Utils.joinPath(folderUri, '.astro/collections/collections.json'),
+				);
+
+				if (!config) {
+					return [];
+				}
+
+				// `server.fs.readFile` can theoretically be async, but in practice it's always sync
+				const collections = JSON.parse(config as string) as CollectionConfig['config'];
 
 				return { folder: folderUri, config: collections };
-			})
-		: [];
+			} catch (err) {
+				// If the file doesn't exist, we don't really care, but if it's something else, we want to know
+				if (err && (err as any).code !== 'ENOENT') console.error(err);
+				return [];
+			}
+		});
+	}
 
 	return server.initialize(
 		params,
