@@ -1,1 +1,1 @@
-export { yaml2ts } from './yaml2ts';
+export { yaml2ts, type YAML2TSResult } from './yaml2ts';

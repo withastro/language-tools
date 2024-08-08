@@ -159,7 +159,7 @@ export class FrontmatterHolder implements VirtualCode {
 		});
 
 		if (this.hasFrontmatter) {
-			const yaml2tsResult = yaml2ts(frontmatter, this.snapshot, this.collection);
+			const yaml2tsResult = yaml2ts(frontmatter, this.collection);
 			this.embeddedCodes.push(yaml2tsResult.virtualCode);
 		}
 
