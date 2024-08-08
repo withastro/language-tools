@@ -49,6 +49,10 @@ export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePl
 
 	return {
 		...yamlPlugin,
+		capabilities: {
+			...yamlPlugin.capabilities,
+			codeLensProvider: undefined,
+		},
 		create(context) {
 			const yamlPluginInstance = yamlPlugin.create(context);
 
@@ -75,9 +79,8 @@ export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePl
 			return {
 				...yamlPluginInstance,
 				// Disable codelenses, we'll provide our own
-				async provideCodeLenses() {
-					return null;
-				},
+				provideCodeLenses: undefined,
+				resolveCodeLens: undefined,
 				async provideDiagnostics(document, token) {
 					const originalDiagnostics = await yamlPluginInstance.provideDiagnostics!(document, token);
 					if (!originalDiagnostics) {
