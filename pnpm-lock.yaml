@@ -179,8 +179,8 @@ importers:
   packages/language-server/test/fixture:
     devDependencies:
       astro:
-        specifier: 0.0.0-content-collections-intellisense-20240808220438
-        version: 0.0.0-content-collections-intellisense-20240808220438(typescript@5.5.4)
+        specifier: 0.0.0-content-collections-intellisense-20240808223933
+        version: 0.0.0-content-collections-intellisense-20240808223933(typescript@5.5.4)
 
   packages/ts-plugin:
     dependencies:
@@ -3542,8 +3542,8 @@ packages:
     resolution: {integrity: sha512-jgsaNduz+ndvGyFt3uSuWqvy4lCnIJiovtouQN5JZHOKCS2QuhEdbcQHFhVksz2N2U9hXJo8odG7ETyWlEeuDw==}
     dev: true
 
-  /astro@0.0.0-content-collections-intellisense-20240808220438(typescript@5.5.4):
-    resolution: {integrity: sha512-Gh+BaMzhzBUbNs42imCqBJdfvlGfrQ8cdaxoHMKzy+ikG4fy9VHAgNpLbF2rc6D0hcYfAQeMUEUV2qysKiB0Mw==}
+  /astro@0.0.0-content-collections-intellisense-20240808223933(typescript@5.5.4):
+    resolution: {integrity: sha512-cyDyiGCLgKfTgZLG23XPGpgzkJowhlpXWFOkTkc+cKSWMNZJbfOOtT6LreGNP3Z2idUwooKNTZ++kJL2X1RjoQ==}
     engines: {node: ^18.17.1 || ^20.3.0 || >=21.0.0, npm: '>=9.6.5', pnpm: '>=7.1.0'}
     hasBin: true
     dependencies:

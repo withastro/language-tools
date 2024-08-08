@@ -2,7 +2,7 @@
   "name": "astro-language-server-test",
   "private": true,
   "devDependencies": {
-    "astro": "0.0.0-content-collections-intellisense-20240808220438"
+    "astro": "0.0.0-content-collections-intellisense-20240808223933"
   },
   "scripts": {
     "sync": "astro sync"

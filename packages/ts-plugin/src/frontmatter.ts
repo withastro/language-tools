@@ -53,7 +53,7 @@ export function getFrontmatterLanguagePlugin(
 					fileName,
 					languageId,
 					snapshot,
-					getCollectionName(collectionConfigs, pathToFileURL(fileName).toString()),
+					getCollectionName(collectionConfigs, pathToFileURL(fileName).toString().toLowerCase()),
 				);
 			}
 		},
