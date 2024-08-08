@@ -4,7 +4,7 @@ import type { Provide } from 'volar-service-yaml';
 import { create as createYAMLService } from 'volar-service-yaml';
 import { URI, Utils } from 'vscode-uri';
 import type { CollectionConfig } from '../core/frontmatterHolders.js';
-import { FrontmatterHolder } from '../core/frontmatterHolders.js';
+import { FrontmatterHolder, SUPPORTED_FRONTMATTER_EXTENSIONS } from '../core/frontmatterHolders.js';
 
 export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePlugin => {
 	const yamlPlugin = createYAMLService({
@@ -17,11 +17,9 @@ export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePl
 				return workspaceCollectionConfig.config.collections.flatMap((collection) => {
 					return {
 						priority: 3,
-						fileMatch: [
-							`volar-embedded-content://yaml_frontmatter_${collection.name}/**/*.md`,
-							`volar-embedded-content://yaml_frontmatter_${collection.name}/**/*.mdx`,
-							`volar-embedded-content://yaml_frontmatter_${collection.name}/**/*.mdoc`,
-						],
+						fileMatch: SUPPORTED_FRONTMATTER_EXTENSIONS.map(
+							(ext) => `volar-embedded-content://yaml_frontmatter_${collection.name}/**/*${ext}`,
+						),
 						uri: Utils.joinPath(
 							workspaceCollectionConfig.folder,
 							'.astro/collections',

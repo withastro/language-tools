@@ -7,6 +7,8 @@ import {
 } from '@volar/language-core';
 import type ts from 'typescript';
 
+export const SUPPORTED_FRONTMATTER_EXTENSIONS = ['md', 'mdx', 'mdoc'];
+
 export type CollectionConfig = {
 	folder: string;
 	config: {
@@ -19,7 +21,6 @@ export type CollectionConfig = {
 };
 
 function getCollectionName(collectionConfigs: CollectionConfig[], fsPath: string) {
-	// console.log('===== ASTRO TS PLUGIN =====', fsPath);
 	for (const collection of collectionConfigs) {
 		if (collection.config.entries[fsPath]) {
 			return collection.config.entries[fsPath];
@@ -32,7 +33,7 @@ export function getFrontmatterLanguagePlugin(
 ): LanguagePlugin<string, FrontmatterHolder> {
 	return {
 		getLanguageId(scriptId) {
-			if (scriptId.endsWith('.md') || scriptId.endsWith('.mdx') || scriptId.endsWith('.mdoc')) {
+			if (SUPPORTED_FRONTMATTER_EXTENSIONS.some((ext) => scriptId.endsWith(`.${ext}`))) {
 				return 'frontmatter';
 			}
 		},
@@ -46,15 +47,15 @@ export function getFrontmatterLanguagePlugin(
 				);
 			}
 		},
-		updateVirtualCode(scriptId, virtualCode, newSnapshot) {
+		updateVirtualCode(_, virtualCode, newSnapshot) {
 			return virtualCode.updateSnapshot(newSnapshot);
 		},
 		typescript: {
-			extraFileExtensions: [
-				{ extension: 'md', isMixedContent: true, scriptKind: 7 },
-				{ extension: 'mdx', isMixedContent: true, scriptKind: 7 },
-				{ extension: 'mdoc', isMixedContent: true, scriptKind: 7 },
-			],
+			extraFileExtensions: SUPPORTED_FRONTMATTER_EXTENSIONS.map((ext) => ({
+				extension: ext,
+				isMixedContent: true,
+				scriptKind: 7,
+			})),
 			getServiceScript(astroCode) {
 				for (const code of forEachEmbeddedCode(astroCode)) {
 					if (code.id === 'frontmatter-ts') {

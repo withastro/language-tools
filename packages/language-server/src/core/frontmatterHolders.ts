@@ -8,6 +8,8 @@ import {
 import type ts from 'typescript';
 import type { URI } from 'vscode-uri';
 
+export const SUPPORTED_FRONTMATTER_EXTENSIONS = ['md', 'mdx', 'mdoc'];
+
 export type CollectionConfig = {
 	folder: URI;
 	config: {
@@ -32,16 +34,12 @@ export function getFrontmatterLanguagePlugin(
 ): LanguagePlugin<URI, FrontmatterHolder> {
 	return {
 		getLanguageId(scriptId) {
-			if (
-				scriptId.path.endsWith('.md') ||
-				scriptId.path.endsWith('.mdx') ||
-				scriptId.path.endsWith('.mdoc')
-			) {
+			if (SUPPORTED_FRONTMATTER_EXTENSIONS.some((ext) => scriptId.path.endsWith(`.${ext}`))) {
 				return 'frontmatter-ts';
 			}
 		},
 		createVirtualCode(scriptId, languageId, snapshot) {
-			if (languageId === 'markdown' || languageId === 'mdx' || languageId === 'mdoc') {
+			if (SUPPORTED_FRONTMATTER_EXTENSIONS.includes(languageId)) {
 				const fileName = scriptId.fsPath.replace(/\\/g, '/');
 				return new FrontmatterHolder(
 					fileName,
@@ -50,15 +48,15 @@ export function getFrontmatterLanguagePlugin(
 				);
 			}
 		},
-		updateVirtualCode(scriptId, virtualCode, newSnapshot) {
+		updateVirtualCode(_, virtualCode, newSnapshot) {
 			return virtualCode.updateSnapshot(newSnapshot);
 		},
 		typescript: {
-			extraFileExtensions: [
-				{ extension: 'md', isMixedContent: true, scriptKind: 7 },
-				{ extension: 'mdx', isMixedContent: true, scriptKind: 7 },
-				{ extension: 'mdoc', isMixedContent: true, scriptKind: 7 },
-			],
+			extraFileExtensions: SUPPORTED_FRONTMATTER_EXTENSIONS.map((ext) => ({
+				extension: ext,
+				isMixedContent: true,
+				scriptKind: 7,
+			})),
 			getServiceScript(astroCode) {
 				for (const code of forEachEmbeddedCode(astroCode)) {
 					if (code.id === 'frontmatter-ts') {

@@ -5,7 +5,10 @@ import {
 	loadTsdkByPath,
 } from '@volar/language-server/node';
 import { URI, Utils } from 'vscode-uri';
-import type { CollectionConfig } from './core/frontmatterHolders.js';
+import {
+	SUPPORTED_FRONTMATTER_EXTENSIONS,
+	type CollectionConfig,
+} from './core/frontmatterHolders.js';
 import { getLanguagePlugins, getLanguageServicePlugins } from './languageServerPlugin.js';
 
 const connection = createConnection();
@@ -91,7 +94,7 @@ connection.onInitialized(() => {
 	];
 
 	if (contentIntellisenseEnabled) {
-		extensions.push('md', 'mdx', 'mdoc');
+		extensions.push(...SUPPORTED_FRONTMATTER_EXTENSIONS);
 	}
 
 	server.watchFiles([`**/*.{${extensions.join(',')}}`]);

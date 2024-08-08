@@ -61,19 +61,22 @@ export async function activate(context: vscode.ExtensionContext): Promise<LabsIn
 		console.info(`Using ${serverRuntime} as runtime`);
 	}
 
+	const hasContentIntellisense = vscode.workspace
+		.getConfiguration('astro')
+		.get('content-intellisense');
 	const initializationOptions = {
 		typescript: {
 			tsdk: (await getTsdk(context))!.tsdk,
 		},
-		contentIntellisense: vscode.workspace.getConfiguration('astro').get('content-intellisense'),
+		contentIntellisense: hasContentIntellisense,
 	} satisfies InitOptions;
 
 	const clientOptions = {
 		documentSelector: [
 			{ language: 'astro' },
-			{ language: 'markdown' },
-			{ language: 'mdx' },
-			{ language: 'mdoc' },
+			...(hasContentIntellisense
+				? [{ language: 'markdown' }, { language: 'mdx' }, { language: 'mdoc' }]
+				: []),
 		],
 		initializationOptions,
 	} satisfies lsp.LanguageClientOptions;
