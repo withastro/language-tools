@@ -23,10 +23,10 @@ export type CollectionConfig = {
 	};
 };
 
-function getCollectionName(collectionConfigs: CollectionConfig[], fsPath: string) {
+function getCollectionName(collectionConfigs: CollectionConfig[], fileURI: string) {
 	for (const collection of collectionConfigs) {
-		if (collection.config.entries[fsPath]) {
-			return collection.config.entries[fsPath];
+		if (collection.config.entries[fileURI]) {
+			return collection.config.entries[fileURI];
 		}
 	}
 }
@@ -48,12 +48,11 @@ export function getFrontmatterLanguagePlugin(
 		},
 		createVirtualCode(scriptId, languageId, snapshot) {
 			if (SUPPORTED_FRONTMATTER_EXTENSIONS_VALUES.includes(languageId)) {
-				const fileName = scriptId.fsPath.replace(/\\/g, '/');
 				return new FrontmatterHolder(
-					fileName,
+					scriptId.fsPath.replace(/\\/g, '/'),
 					languageId,
 					snapshot,
-					getCollectionName(collectionConfigs, scriptId.fsPath),
+					getCollectionName(collectionConfigs, scriptId.toString()),
 				);
 			}
 		},

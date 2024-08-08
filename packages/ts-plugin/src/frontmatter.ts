@@ -5,6 +5,7 @@ import {
 	type VirtualCode,
 	forEachEmbeddedCode,
 } from '@volar/language-core';
+import { pathToFileURL } from 'node:url';
 import type ts from 'typescript';
 
 const SUPPORTED_FRONTMATTER_EXTENSIONS = { md: 'markdown', mdx: 'mdx', mdoc: 'mdoc' };
@@ -52,7 +53,7 @@ export function getFrontmatterLanguagePlugin(
 					fileName,
 					languageId,
 					snapshot,
-					getCollectionName(collectionConfigs, fileName),
+					getCollectionName(collectionConfigs, pathToFileURL(fileName).toString()),
 				);
 			}
 		},
