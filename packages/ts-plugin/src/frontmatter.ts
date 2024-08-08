@@ -7,7 +7,9 @@ import {
 } from '@volar/language-core';
 import type ts from 'typescript';
 
-export const SUPPORTED_FRONTMATTER_EXTENSIONS = ['md', 'mdx', 'mdoc'];
+const SUPPORTED_FRONTMATTER_EXTENSIONS = { md: 'markdown', mdx: 'mdx', mdoc: 'mdoc' };
+const SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS = Object.keys(SUPPORTED_FRONTMATTER_EXTENSIONS);
+const SUPPORTED_FRONTMATTER_EXTENSIONS_VALUES = Object.values(SUPPORTED_FRONTMATTER_EXTENSIONS);
 
 export type CollectionConfig = {
 	folder: string;
@@ -33,15 +35,22 @@ export function getFrontmatterLanguagePlugin(
 ): LanguagePlugin<string, FrontmatterHolder> {
 	return {
 		getLanguageId(scriptId) {
-			if (SUPPORTED_FRONTMATTER_EXTENSIONS.some((ext) => scriptId.endsWith(`.${ext}`))) {
-				return 'frontmatter';
+			const fileType = SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS.find((ext) =>
+				scriptId.endsWith(`.${ext}`),
+			);
+
+			if (fileType) {
+				return SUPPORTED_FRONTMATTER_EXTENSIONS[
+					fileType as keyof typeof SUPPORTED_FRONTMATTER_EXTENSIONS
+				];
 			}
 		},
 		createVirtualCode(scriptId, languageId, snapshot) {
-			if (languageId === 'frontmatter') {
+			if (SUPPORTED_FRONTMATTER_EXTENSIONS_VALUES.includes(languageId)) {
 				const fileName = scriptId.replace(/\\/g, '/');
 				return new FrontmatterHolder(
 					fileName,
+					languageId,
 					snapshot,
 					getCollectionName(collectionConfigs, fileName),
 				);
@@ -51,7 +60,7 @@ export function getFrontmatterLanguagePlugin(
 			return virtualCode.updateSnapshot(newSnapshot);
 		},
 		typescript: {
-			extraFileExtensions: SUPPORTED_FRONTMATTER_EXTENSIONS.map((ext) => ({
+			extraFileExtensions: SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS.map((ext) => ({
 				extension: ext,
 				isMixedContent: true,
 				scriptKind: 7,
@@ -74,7 +83,6 @@ export function getFrontmatterLanguagePlugin(
 
 export class FrontmatterHolder implements VirtualCode {
 	id = 'frontmatter-holder';
-	languageId = 'frontmatter';
 	mappings!: CodeMapping[];
 	embeddedCodes!: VirtualCode[];
 	public hasFrontmatter = false;
@@ -91,6 +99,7 @@ export class FrontmatterHolder implements VirtualCode {
 
 	constructor(
 		public fileName: string,
+		public languageId: string,
 		public snapshot: ts.IScriptSnapshot,
 		public collection: string | undefined,
 	) {

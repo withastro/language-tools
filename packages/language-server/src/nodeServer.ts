@@ -6,7 +6,7 @@ import {
 } from '@volar/language-server/node';
 import { URI, Utils } from 'vscode-uri';
 import {
-	SUPPORTED_FRONTMATTER_EXTENSIONS,
+	SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS,
 	type CollectionConfig,
 } from './core/frontmatterHolders.js';
 import { getLanguagePlugins, getLanguageServicePlugins } from './languageServerPlugin.js';
@@ -94,7 +94,7 @@ connection.onInitialized(() => {
 	];
 
 	if (contentIntellisenseEnabled) {
-		extensions.push(...SUPPORTED_FRONTMATTER_EXTENSIONS);
+		extensions.push(...SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS);
 	}
 
 	server.watchFiles([`**/*.{${extensions.join(',')}}`]);
