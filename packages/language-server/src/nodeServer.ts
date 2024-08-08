@@ -33,7 +33,12 @@ connection.onInitialize((params) => {
 	let collectionConfigs: { folder: URI; config: CollectionConfig['config'] }[] = [];
 
 	if (contentIntellisenseEnabled) {
-		collectionConfigs = (params.workspaceFolders ?? []).flatMap((folder) => {
+		// The vast majority of clients support workspaceFolders, but notably our tests currently don't
+		// Ref: https://github.com/volarjs/volar.js/issues/229
+		const folders =
+			params.workspaceFolders ?? (params.rootUri ? [{ uri: params.rootUri }] : []) ?? [];
+
+		collectionConfigs = folders.flatMap((folder) => {
 			try {
 				const folderUri = URI.parse(folder.uri);
 				let config = server.fs.readFile(

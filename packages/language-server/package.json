@@ -22,7 +22,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "mocha --timeout 10000 --require tsx --require test/takedown.ts test/misc/init.test.ts test/**/*.test.ts",
+    "sync-fixture": "pnpm --dir ./test/fixture sync",
+    "test": "pnpm run sync-fixture && mocha --timeout 10000 --require tsx --require test/takedown.ts test/misc/init.test.ts test/**/*.test.ts",
     "test:match": "pnpm run test -g"
   },
   "dependencies": {
