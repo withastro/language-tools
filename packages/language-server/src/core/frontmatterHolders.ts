@@ -24,7 +24,6 @@ export type CollectionConfig = {
 };
 
 function getCollectionName(collectionConfigs: CollectionConfig[], fileURI: string) {
-	console.log('fileURI', fileURI);
 	for (const collection of collectionConfigs) {
 		if (collection.config.entries[fileURI]) {
 			return collection.config.entries[fileURI];
