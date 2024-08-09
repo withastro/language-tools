@@ -56,6 +56,8 @@ export function getFrontmatterLanguagePlugin(
 					snapshot,
 					getCollectionName(
 						collectionConfigs,
+						// The scriptId here is encoded and somewhat normalized, as such we can't use it directly to compare with
+						// the file URLs in the collection config entries that Astro generates.
 						decodeURIComponent(scriptId.toString()).toLowerCase(),
 					),
 				);

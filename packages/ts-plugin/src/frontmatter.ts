@@ -55,6 +55,8 @@ export function getFrontmatterLanguagePlugin(
 					fileName,
 					languageId,
 					snapshot,
+					// In TypeScript plugins, unlike in the language server, the scriptId is just a string file path
+					// so we'll have to convert it to a URL to match the collection config entries
 					getCollectionName(collectionConfigs, pathToFileURL(fileName).toString().toLowerCase()),
 				);
 			}
