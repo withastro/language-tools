@@ -1,4 +1,4 @@
-import { yaml2ts } from '@astrojs/yaml2ts';
+import { yaml2ts, VIRTUAL_CODE_ID } from '@astrojs/yaml2ts';
 import {
 	type CodeMapping,
 	type LanguagePlugin,
@@ -67,11 +67,11 @@ export function getFrontmatterLanguagePlugin(
 			extraFileExtensions: SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS.map((ext) => ({
 				extension: ext,
 				isMixedContent: true,
-				scriptKind: 7,
+				scriptKind: 7 satisfies ts.ScriptKind.Deferred,
 			})),
 			getServiceScript(astroCode) {
 				for (const code of forEachEmbeddedCode(astroCode)) {
-					if (code.id === 'frontmatter-ts') {
+					if (code.id === VIRTUAL_CODE_ID) {
 						return {
 							code,
 							extension: '.ts',
@@ -87,8 +87,8 @@ export function getFrontmatterLanguagePlugin(
 
 export class FrontmatterHolder implements VirtualCode {
 	id = 'frontmatter-holder';
-	mappings!: CodeMapping[];
-	embeddedCodes!: VirtualCode[];
+	mappings: CodeMapping[];
+	embeddedCodes: VirtualCode[];
 	public hasFrontmatter = false;
 
 	constructor(

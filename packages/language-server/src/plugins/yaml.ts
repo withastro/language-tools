@@ -11,15 +11,10 @@ import {
 
 export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePlugin => {
 	const yamlPlugin = createYAMLService({
-		getLanguageSettings(context) {
-			if (!context.env.fs) {
-				return {};
-			}
-
+		getLanguageSettings() {
 			const schemas = collectionConfigs.flatMap((workspaceCollectionConfig) => {
 				return workspaceCollectionConfig.config.collections.flatMap((collection) => {
 					return {
-						priority: 3,
 						fileMatch: SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS.map(
 							(ext) => `volar-embedded-content://yaml_frontmatter_${collection.name}/**/*${ext}`,
 						),
@@ -56,9 +51,8 @@ export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePl
 		create(context) {
 			const yamlPluginInstance = yamlPlugin.create(context);
 
-			const languageService = yamlPluginInstance.provide!['yaml/languageService']();
-
-			if (context.env.onDidChangeWatchedFiles) {
+			const languageService = yamlPluginInstance.provide?.['yaml/languageService']();
+			if (languageService && context.env.onDidChangeWatchedFiles) {
 				context.env.onDidChangeWatchedFiles(async (events) => {
 					let hasChanges = false;
 

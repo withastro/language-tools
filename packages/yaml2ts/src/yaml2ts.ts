@@ -2,6 +2,8 @@ import type { CodeMapping, VirtualCode } from '@volar/language-core';
 import type { YAMLError, YAMLMap, YAMLSeq } from 'yaml';
 import YAML, { CST, isCollection, isMap, isScalar, isSeq, parseDocument } from 'yaml';
 
+export const VIRTUAL_CODE_ID = 'frontmatter-ts';
+
 export type YAML2TSResult = {
 	errors: YAMLError[];
 	virtualCode: VirtualCode;
@@ -16,7 +18,7 @@ const ONLY_NAV_CODE_INFO: CodeMapping['data'] = {
 	format: false,
 };
 
-export function yaml2ts(frontmatter: string, collection = 'blog'): YAML2TSResult {
+export function yaml2ts(frontmatter: string, collection: string): YAML2TSResult {
 	const frontmatterMappings: CodeMapping[] = [];
 	const frontmatterContent = parseDocument(frontmatter, {
 		keepSourceTokens: true,
@@ -43,17 +45,9 @@ export function yaml2ts(frontmatter: string, collection = 'blog'): YAML2TSResult
 
 			// If we didn't hit any of the above, we have a scalar value which in almost all cases is a Pair that's just not fully written yet
 			if (isScalar(value)) {
-				let valueContent = JSON.stringify(value.toJS(frontmatterContent));
-
-				frontmatterMappings.push({
-					generatedOffsets: [fullResult.length + objectContent.length],
-					sourceOffsets: [value.range![0]],
-					lengths: [valueContent.length],
-					generatedLengths: [valueContent.length],
-					data: ONLY_NAV_CODE_INFO,
-				});
-
-				objectContent += `${valueContent}: null\n`;
+				const itemKey = mapScalarKey(value);
+				// We don't care about values, just keys, since we're only interested in the structure
+				objectContent += `${itemKey}: null\n`;
 			}
 
 			return YAML.visit.REMOVE;
@@ -66,51 +60,21 @@ export function yaml2ts(frontmatter: string, collection = 'blog'): YAML2TSResult
 		// Go through all the items in the map
 		map.items.forEach((item) => {
 			// Pairs keys are not always scalars (they can even be totally arbitrary nodes), but in practice, it's really rare for them to be anything other than scalars
-			// Anyway, Zod does not support non-scalar keys, so it's fine to just ignore them
+			// Anyway, Zod does not support non-scalar keys, so it's fine to just not handle anything other than scalars
 			if (isScalar(item.key)) {
+				const itemKey = mapScalarKey(item.key);
+
 				if (isScalar(item.value) || item.value === null) {
-					const valueKey = JSON.stringify(item.key.toJS(frontmatterContent));
-
-					frontmatterMappings.push({
-						generatedOffsets: [fullResult.length + objectContent.length],
-						sourceOffsets: [item.key.range![0]],
-						lengths: CST.isScalar(item.key.srcToken) ? [item.key.srcToken.source.length] : [0],
-						generatedLengths: [valueKey.length],
-						data: ONLY_NAV_CODE_INFO,
-					});
-
-					objectContent += `${valueKey}: null,\n`;
+					objectContent += `${itemKey}: null,\n`; // Don't care about value, just key
 				}
 
 				if (isMap(item.value)) {
-					const itemKey = JSON.stringify(item.key.toJS(frontmatterContent));
-
-					frontmatterMappings.push({
-						generatedOffsets: [fullResult.length + objectContent.length],
-						sourceOffsets: [item.key.range![0]],
-						lengths: CST.isScalar(item.key.srcToken) ? [item.key.srcToken.source.length] : [0],
-						generatedLengths: [itemKey.length],
-						data: ONLY_NAV_CODE_INFO,
-					});
-
 					objectContent += `${itemKey}: `;
-
 					mapMap(item.value);
 				}
 
 				if (isSeq(item.value)) {
-					const itemKey = JSON.stringify(item.key.toJS(frontmatterContent));
-
-					frontmatterMappings.push({
-						generatedOffsets: [fullResult.length + objectContent.length],
-						sourceOffsets: [item.key.range![0]],
-						lengths: CST.isScalar(item.key.srcToken) ? [item.key.srcToken.source.length] : [0],
-						generatedLengths: [itemKey.length],
-						data: ONLY_NAV_CODE_INFO,
-					});
-
 					objectContent += `${itemKey}: `;
-
 					mapSeq(item.value);
 				}
 			}
@@ -144,6 +108,8 @@ export function yaml2ts(frontmatter: string, collection = 'blog'): YAML2TSResult
 			if (isSeq(item)) {
 				mapSeq(item);
 			}
+
+			return YAML.visit.REMOVE;
 		});
 
 		objectContent += '],\n';
@@ -151,12 +117,31 @@ export function yaml2ts(frontmatter: string, collection = 'blog'): YAML2TSResult
 		return YAML.visit.REMOVE;
 	}
 
+	function mapScalarKey(scalar: YAML.Scalar) {
+		// Stringify a YAML scalar key, handling invalid JS identifiers, escaping quotes etc. correctly.
+		const itemKey = JSON.stringify(scalar.toJS(frontmatterContent));
+
+		// Get the length of the original written key
+		// This condition will always be true because we're only handling scalar keys
+		const sourceTokenLength = CST.isScalar(scalar.srcToken) ? scalar.srcToken.source.length : 0;
+
+		frontmatterMappings.push({
+			generatedOffsets: [fullResult.length + objectContent.length],
+			sourceOffsets: [scalar.range![0]], // For scalar keys, the range is always defined
+			lengths: [sourceTokenLength],
+			generatedLengths: [itemKey.length],
+			data: ONLY_NAV_CODE_INFO,
+		});
+
+		return itemKey;
+	}
+
 	fullResult += `${objectContent}) satisfies InferEntrySchema<"${collection}">;\n\n`;
 
 	return {
 		errors: frontmatterContent.errors,
 		virtualCode: {
-			id: 'frontmatter-ts',
+			id: VIRTUAL_CODE_ID,
 			languageId: 'typescript',
 			snapshot: {
 				getText: (start, end) => fullResult.substring(start, end),
