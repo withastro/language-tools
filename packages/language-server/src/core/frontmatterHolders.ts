@@ -12,6 +12,8 @@ export const SUPPORTED_FRONTMATTER_EXTENSIONS = { md: 'markdown', mdx: 'mdx', md
 export const SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS = Object.keys(SUPPORTED_FRONTMATTER_EXTENSIONS);
 const SUPPORTED_FRONTMATTER_EXTENSIONS_VALUES = Object.values(SUPPORTED_FRONTMATTER_EXTENSIONS);
 
+export const frontmatterRE = /^---(.*?)^---/ms;
+
 export type CollectionConfig = {
 	folder: URI;
 	config: {
@@ -117,28 +119,26 @@ export class FrontmatterHolder implements VirtualCode {
 			return;
 		}
 
-		// TODO: More robust frontmatter detection
-		this.hasFrontmatter = this.snapshot.getText(0, 10).startsWith('---');
+		const frontmatterContent =
+			frontmatterRE
+				.exec(this.snapshot.getText(0, this.snapshot.getLength()))?.[0]
+				.replaceAll('---', '   ') ?? '';
 
-		const frontmatter = this.hasFrontmatter
-			? this.snapshot
-					.getText(0, this.snapshot.getText(0, this.snapshot.getLength()).indexOf('---', 3) + 3)
-					.replaceAll('---', '   ')
-			: ''; // Generate an empty frontmatter so that we can map an error for a missing frontmatter
+		this.hasFrontmatter = frontmatterContent.length > 0;
 
 		this.embeddedCodes.push({
 			id: `yaml_frontmatter_${this.collection}`,
 			languageId: 'yaml',
 			snapshot: {
-				getText: (start, end) => frontmatter.substring(start, end),
-				getLength: () => frontmatter.length,
+				getText: (start, end) => frontmatterContent.substring(start, end),
+				getLength: () => frontmatterContent.length,
 				getChangeRange: () => undefined,
 			},
 			mappings: [
 				{
 					sourceOffsets: [0],
 					generatedOffsets: [0],
-					lengths: [frontmatter.length],
+					lengths: [frontmatterContent.length],
 					data: {
 						verification: true,
 						completion: true,
@@ -152,7 +152,7 @@ export class FrontmatterHolder implements VirtualCode {
 		});
 
 		if (this.hasFrontmatter) {
-			const yaml2tsResult = yaml2ts(frontmatter, this.collection);
+			const yaml2tsResult = yaml2ts(frontmatterContent, this.collection);
 			this.embeddedCodes.push(yaml2tsResult.virtualCode);
 		}
 	}

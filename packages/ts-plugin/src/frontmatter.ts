@@ -12,6 +12,8 @@ const SUPPORTED_FRONTMATTER_EXTENSIONS = { md: 'markdown', mdx: 'mdx', mdoc: 'md
 const SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS = Object.keys(SUPPORTED_FRONTMATTER_EXTENSIONS);
 const SUPPORTED_FRONTMATTER_EXTENSIONS_VALUES = Object.values(SUPPORTED_FRONTMATTER_EXTENSIONS);
 
+export const frontmatterRE = /^---(.*?)^---/ms;
+
 export type CollectionConfig = {
 	folder: string;
 	config: {
@@ -83,7 +85,6 @@ export class FrontmatterHolder implements VirtualCode {
 	id = 'frontmatter-holder';
 	mappings!: CodeMapping[];
 	embeddedCodes!: VirtualCode[];
-	public hasFrontmatter = false;
 
 	constructor(
 		public fileName: string,
@@ -110,24 +111,15 @@ export class FrontmatterHolder implements VirtualCode {
 		this.embeddedCodes = [];
 		this.snapshot = snapshot;
 
-		if (!this.collection) {
-			return;
-		}
+		if (!this.collection) return;
 
-		// TODO: More robust frontmatter detection
-		this.hasFrontmatter = this.snapshot.getText(0, 10).startsWith('---');
+		const frontmatterContent = frontmatterRE.exec(
+			this.snapshot.getText(0, this.snapshot.getLength()),
+		)?.[0];
 
-		const frontmatter = this.hasFrontmatter
-			? this.snapshot
-					.getText(0, this.snapshot.getText(0, this.snapshot.getLength()).indexOf('---', 3) + 3)
-					.replaceAll('---', '   ')
-			: '';
+		if (!frontmatterContent) return;
 
-		if (this.hasFrontmatter) {
-			// Generate an empty frontmatter so that we can map an error for a missing frontmatter
-
-			const yaml2tsResult = yaml2ts(frontmatter, this.collection);
-			this.embeddedCodes.push(yaml2tsResult.virtualCode);
-		}
+		const yaml2tsResult = yaml2ts(frontmatterContent, this.collection);
+		this.embeddedCodes.push(yaml2tsResult.virtualCode);
 	}
 }
