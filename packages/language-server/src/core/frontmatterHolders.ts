@@ -90,16 +90,6 @@ export class FrontmatterHolder implements VirtualCode {
 	embeddedCodes!: VirtualCode[];
 	public hasFrontmatter = false;
 
-	lastValidContent: {
-		source: string;
-		generated: string;
-		mappings: CodeMapping[];
-	} = {
-		source: '',
-		generated: '',
-		mappings: [],
-	};
-
 	constructor(
 		public fileName: string,
 		public languageId: string,

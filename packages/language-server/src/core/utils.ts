@@ -2,8 +2,6 @@ import type { VirtualCode } from '@volar/language-core';
 import { URI, Utils } from 'vscode-uri';
 import { importSvelteIntegration, importVueIntegration } from '../importPackage';
 
-export const FRONTMATTER_OFFSET = 4;
-
 export function framework2tsx(
 	filePath: string,
 	sourceCode: string,
