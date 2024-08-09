@@ -57,9 +57,6 @@ export function getFrontmatterLanguagePlugin(
 				);
 			}
 		},
-		updateVirtualCode(_, virtualCode, newSnapshot) {
-			return virtualCode.updateSnapshot(newSnapshot);
-		},
 		typescript: {
 			extraFileExtensions: SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS.map((ext) => ({
 				extension: ext,
@@ -94,10 +91,6 @@ export class FrontmatterHolder implements VirtualCode {
 		public snapshot: ts.IScriptSnapshot,
 		public collection: string | undefined,
 	) {
-		this.updateSnapshot(snapshot);
-	}
-
-	updateSnapshot(snapshot: ts.IScriptSnapshot) {
 		this.mappings = [
 			{
 				sourceOffsets: [0],
@@ -118,7 +111,7 @@ export class FrontmatterHolder implements VirtualCode {
 		this.snapshot = snapshot;
 
 		if (!this.collection) {
-			return this;
+			return;
 		}
 
 		// TODO: More robust frontmatter detection
@@ -128,13 +121,13 @@ export class FrontmatterHolder implements VirtualCode {
 			? this.snapshot
 					.getText(0, this.snapshot.getText(0, this.snapshot.getLength()).indexOf('---', 3) + 3)
 					.replaceAll('---', '   ')
-			: ''; // Generate an empty frontmatter so that we can map an error for a missing frontmatter
+			: '';
 
 		if (this.hasFrontmatter) {
+			// Generate an empty frontmatter so that we can map an error for a missing frontmatter
+
 			const yaml2tsResult = yaml2ts(frontmatter, this.collection);
 			this.embeddedCodes.push(yaml2tsResult.virtualCode);
 		}
-
-		return this;
 	}
 }
