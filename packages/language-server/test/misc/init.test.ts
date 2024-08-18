@@ -65,7 +65,7 @@ describe('Initialize', async () => {
 			},
 			definitionProvider: true,
 			diagnosticProvider: {
-				interFileDependencies: true,
+				interFileDependencies: false,
 				workspaceDiagnostics: false,
 			},
 			documentFormattingProvider: true,
@@ -87,7 +87,7 @@ describe('Initialize', async () => {
 					triggerCharacters: ['=', '>', '/'],
 				},
 				fileReferencesProvider: true,
-				fileRenameProvider: true,
+				fileRenameEditsProvider: true,
 			},
 			foldingRangeProvider: true,
 			hoverProvider: true,
