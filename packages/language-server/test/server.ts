@@ -38,6 +38,11 @@ export async function getLanguageServer(): Promise<LanguageServer> {
 				contentIntellisense: true,
 			},
 			{
+				textDocument: {
+					definition: {
+						linkSupport: true,
+					},
+				},
 				workspace: {
 					// Needed for tests that use didChangeWatchedFiles
 					didChangeWatchedFiles: {},
