@@ -42,9 +42,13 @@ connection.onInitialize((params) => {
 			try {
 				const folderUri = URI.parse(folder.uri);
 				let config = server.fileSystem.readFile(
-					Utils.joinPath(folderUri, '.astro/collections/collections.json'),
+					Utils.joinPath(folderUri, '.astro/astro/collections/collections.json'),
 				);
-
+				if (!config) {
+					config = server.fileSystem.readFile(
+						Utils.joinPath(folderUri, '.astro/collections/collections.json'),
+					);
+				}
 				if (!config) {
 					return [];
 				}

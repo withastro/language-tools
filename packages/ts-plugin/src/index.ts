@@ -4,27 +4,40 @@ import type { CollectionConfig } from './frontmatter.js';
 import { getFrontmatterLanguagePlugin } from './frontmatter.js';
 import { getLanguagePlugin } from './language.js';
 
-export = createLanguageServicePlugin((ts, info) => {
-	let collectionConfig = undefined;
-
+function getCollectionConfig(
+	readFile: (path: string) => string | undefined,
+): CollectionConfig['config'] | undefined {
 	try {
-		const currentDir = info.project.getCurrentDirectory();
-		const fileContent = ts.sys.readFile(currentDir + '/.astro/collections/collections.json');
+		let fileContent = readFile('/.astro/astro/collections/collections.json');
 		if (fileContent) {
-			collectionConfig = {
-				folder: currentDir,
-				config: JSON.parse(fileContent) as CollectionConfig['config'],
-			};
+			return JSON.parse(fileContent);
+		}
+		fileContent = readFile('/.astro/collections/collections.json');
+		if (fileContent) {
+			return JSON.parse(fileContent);
 		}
 	} catch (err) {
 		// If the file doesn't exist, we don't really care, but if it's something else, we want to know
 		if (err && (err as any).code !== 'ENOENT') console.error(err);
 	}
+}
+
+export = createLanguageServicePlugin((ts, info) => {
+	const currentDir = info.project.getCurrentDirectory();
+
+	const collectionConfig = getCollectionConfig((path) => ts.sys.readFile(currentDir + path));
 
 	let languagePlugins: LanguagePlugin<string>[] = [getLanguagePlugin()];
 
 	if (collectionConfig) {
-		languagePlugins.push(getFrontmatterLanguagePlugin([collectionConfig]));
+		languagePlugins.push(
+			getFrontmatterLanguagePlugin([
+				{
+					folder: currentDir,
+					config: collectionConfig,
+				},
+			]),
+		);
 	}
 
 	return {
