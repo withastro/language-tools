@@ -12,6 +12,7 @@ function getCollectionConfig(
 		if (fileContent) {
 			return JSON.parse(fileContent);
 		}
+		// If we couldn't find a config there, the project might be an Astro 4 project
 		fileContent = readFile('/.astro/collections/collections.json');
 		if (fileContent) {
 			return JSON.parse(fileContent);
