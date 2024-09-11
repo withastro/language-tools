@@ -44,6 +44,7 @@ connection.onInitialize((params) => {
 				let config = server.fileSystem.readFile(
 					Utils.joinPath(folderUri, '.astro/astro/collections/collections.json'),
 				);
+				// If we couldn't find a config there, the project might be an Astro 4 project
 				if (!config) {
 					config = server.fileSystem.readFile(
 						Utils.joinPath(folderUri, '.astro/collections/collections.json'),
