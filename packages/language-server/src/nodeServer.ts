@@ -3,6 +3,8 @@ import {
 	createServer,
 	createTypeScriptProject,
 	loadTsdkByPath,
+	MessageType,
+	ShowMessageNotification,
 } from '@volar/language-server/node';
 import { URI, Utils } from 'vscode-uri';
 import {
@@ -10,6 +12,8 @@ import {
 	SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS,
 } from './core/frontmatterHolders.js';
 import { getLanguagePlugins, getLanguageServicePlugins } from './languageServerPlugin.js';
+import { addAstroTypes } from './core/index.js';
+import { getAstroInstall } from './utils.js';
 
 const connection = createConnection();
 const server = createServer(connection);
@@ -63,16 +67,31 @@ connection.onInitialize((params) => {
 
 	return server.initialize(
 		params,
-		createTypeScriptProject(typescript, diagnosticMessages, ({ env, configFileName }) => {
+		createTypeScriptProject(typescript, diagnosticMessages, ({ env }) => {
 			return {
-				languagePlugins: getLanguagePlugins(
-					connection,
-					typescript,
-					env,
-					configFileName,
-					collectionConfigs,
-				),
-				setup() {},
+				languagePlugins: getLanguagePlugins(collectionConfigs),
+				setup({ project }) {
+					const { languageServiceHost, configFileName } = project.typescript!;
+
+					const rootPath = configFileName
+						? configFileName.split('/').slice(0, -1).join('/')
+						: env.workspaceFolders[0]!.fsPath;
+					const nearestPackageJson = typescript.findConfigFile(rootPath, typescript.sys.fileExists, 'package.json');
+
+					const astroInstall = getAstroInstall([rootPath], {
+						nearestPackageJson: nearestPackageJson,
+						readDirectory: typescript.sys.readDirectory,
+					});
+
+					if (astroInstall === 'not-found') {
+						connection.sendNotification(ShowMessageNotification.type, {
+							message: `Couldn't find Astro in workspace "${rootPath}". Experience might be degraded. For the best experience, please make sure Astro is installed into your project and restart the language server.`,
+							type: MessageType.Warning,
+						});
+					}
+
+					addAstroTypes(typeof astroInstall === 'string' ? undefined : astroInstall, typescript, languageServiceHost, false);
+				},
 			};
 		}),
 		getLanguageServicePlugins(connection, typescript, collectionConfigs),
