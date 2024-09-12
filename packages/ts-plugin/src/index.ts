@@ -8,12 +8,8 @@ function getCollectionConfig(
 	readFile: (path: string) => string | undefined,
 ): CollectionConfig['config'] | undefined {
 	try {
-		let fileContent = readFile('/.astro/astro/collections/collections.json');
-		if (fileContent) {
-			return JSON.parse(fileContent);
-		}
 		// If we couldn't find a config there, the project might be an Astro 4 project
-		fileContent = readFile('/.astro/collections/collections.json');
+		const fileContent = readFile('/.astro/astro/collections/collections.json') ?? readFile('/.astro/collections/collections.json');
 		if (fileContent) {
 			return JSON.parse(fileContent);
 		}
