@@ -33,19 +33,6 @@
   },
   "packageManager": "pnpm@8.6.2",
   "pnpm": {
-    "overrides": {
-      "@volar/eslint": "https://pkg.pr.new/volarjs/volar.js/@volar/eslint@6256f04",
-      "@volar/jsdelivr": "https://pkg.pr.new/volarjs/volar.js/@volar/jsdelivr@6256f04",
-      "@volar/language-core": "https://pkg.pr.new/volarjs/volar.js/@volar/language-core@6256f04",
-      "@volar/kit": "https://pkg.pr.new/volarjs/volar.js/@volar/kit@6256f04",
-      "@volar/language-service": "https://pkg.pr.new/volarjs/volar.js/@volar/language-service@6256f04",
-      "@volar/language-server": "https://pkg.pr.new/volarjs/volar.js/@volar/language-server@6256f04",
-      "@volar/source-map": "https://pkg.pr.new/volarjs/volar.js/@volar/source-map@6256f04",
-      "@volar/monaco": "https://pkg.pr.new/volarjs/volar.js/@volar/monaco@6256f04",
-      "@volar/test-utils": "https://pkg.pr.new/volarjs/volar.js/@volar/test-utils@6256f04",
-      "@volar/typescript": "https://pkg.pr.new/volarjs/volar.js/@volar/typescript@6256f04",
-      "@volar/vscode": "https://pkg.pr.new/volarjs/volar.js/@volar/vscode@6256f04"
-    },
     "peerDependencyRules": {
       "ignoreMissing": [
         "vue",
