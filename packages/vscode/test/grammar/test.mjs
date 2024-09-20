@@ -46,7 +46,7 @@ async function snapShotTest() {
 		...extraArgs,
 	].map((arg) => (isWindows && arg.includes(' ') ? `"${arg}"` : arg))
 
-	const code = await promisifySpawn(process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm', args, {
+	const code = await promisifySpawn(isWindows ? 'pnpm.cmd' : 'pnpm', args, {
 		stdio: 'inherit',
 		shell: isWindows,
 	});
