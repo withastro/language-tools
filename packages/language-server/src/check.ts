@@ -6,7 +6,7 @@ import * as kit from '@volar/kit';
 import { Diagnostic, DiagnosticSeverity } from '@volar/language-server';
 import fg from 'fast-glob';
 import { URI } from 'vscode-uri';
-import { getAstroLanguagePlugin } from './core/index.js';
+import { addAstroTypes, getAstroLanguagePlugin } from './core/index.js';
 import { getSvelteLanguagePlugin } from './core/svelte.js';
 import { getVueLanguagePlugin } from './core/vue.js';
 import { getAstroInstall } from './utils.js';
@@ -137,9 +137,8 @@ export class AstroCheck {
 		this.ts = this.typescriptPath ? require(this.typescriptPath) : require('typescript');
 		const tsconfigPath = this.getTsconfig();
 
-		const astroInstall = getAstroInstall([this.workspacePath]);
 		const languagePlugins = [
-			getAstroLanguagePlugin(typeof astroInstall === 'string' ? undefined : astroInstall, this.ts),
+			getAstroLanguagePlugin(),
 			getSvelteLanguagePlugin(),
 			getVueLanguagePlugin(),
 		];
@@ -152,15 +151,40 @@ export class AstroCheck {
 				services,
 				tsconfigPath,
 				includeProjectReference,
+				({ project }) => {
+					const { languageServiceHost } = project.typescript!;
+					const astroInstall = getAstroInstall([this.workspacePath]);
+
+					addAstroTypes(
+						typeof astroInstall === 'string' ? undefined : astroInstall,
+						this.ts,
+						languageServiceHost,
+					);
+				},
 			);
 		} else {
-			this.linter = kit.createTypeScriptInferredChecker(languagePlugins, services, () => {
-				return fg.sync('**/*.astro', {
-					cwd: this.workspacePath,
-					ignore: ['node_modules'],
-					absolute: true,
-				});
-			});
+			this.linter = kit.createTypeScriptInferredChecker(
+				languagePlugins,
+				services,
+				() => {
+					return fg.sync('**/*.astro', {
+						cwd: this.workspacePath,
+						ignore: ['node_modules'],
+						absolute: true,
+					});
+				},
+				undefined,
+				({ project }) => {
+					const { languageServiceHost } = project.typescript!;
+					const astroInstall = getAstroInstall([this.workspacePath]);
+
+					addAstroTypes(
+						typeof astroInstall === 'string' ? undefined : astroInstall,
+						this.ts,
+						languageServiceHost,
+					);
+				},
+			);
 		}
 	}
 
