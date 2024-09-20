@@ -143,10 +143,10 @@ importers:
         specifier: ^18.17.8
         version: 18.17.8
       '@volar/test-utils':
-        specifier: ~2.4.0
+        specifier: ~2.4.5
         version: 2.4.5
       '@volar/typescript':
-        specifier: ~2.4.0
+        specifier: ~2.4.5
         version: 2.4.5
       astro:
         specifier: ^4.14.0
