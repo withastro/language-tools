@@ -35,6 +35,7 @@ function promisifySpawn(...arg) {
 
 async function snapShotTest() {
 	const extraArgs = process.argv.slice(2);
+	const isWindows = process.platform === 'win32';
 
 	const args = [
 		'vscode-tmgrammar-snap',
@@ -43,11 +44,11 @@ async function snapShotTest() {
 		'./test/grammar/fixtures/**/*.astro',
 		...allGrammars.reduce((/** @type string[] */ previous, path) => [...previous, '-g', path], []),
 		...extraArgs,
-	].map((arg) => (arg.includes(' ') ? `"${arg}"` : arg))
+	].map((arg) => (isWindows && arg.includes(' ') ? `"${arg}"` : arg))
 
 	const code = await promisifySpawn(process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm', args, {
 		stdio: 'inherit',
-		shell: true,
+		shell: isWindows,
 	});
 
 	if (code && code > 0) {
