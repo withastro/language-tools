@@ -1,18 +1,18 @@
 import {
+	MessageType,
+	ShowMessageNotification,
 	createConnection,
 	createServer,
 	createTypeScriptProject,
 	loadTsdkByPath,
-	MessageType,
-	ShowMessageNotification,
 } from '@volar/language-server/node';
 import { URI, Utils } from 'vscode-uri';
 import {
 	type CollectionConfig,
 	SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS,
 } from './core/frontmatterHolders.js';
-import { getLanguagePlugins, getLanguageServicePlugins } from './languageServerPlugin.js';
 import { addAstroTypes } from './core/index.js';
+import { getLanguagePlugins, getLanguageServicePlugins } from './languageServerPlugin.js';
 import { getAstroInstall } from './utils.js';
 
 const connection = createConnection();
@@ -76,7 +76,11 @@ connection.onInitialize((params) => {
 					const rootPath = configFileName
 						? configFileName.split('/').slice(0, -1).join('/')
 						: env.workspaceFolders[0]!.fsPath;
-					const nearestPackageJson = typescript.findConfigFile(rootPath, typescript.sys.fileExists, 'package.json');
+					const nearestPackageJson = typescript.findConfigFile(
+						rootPath,
+						typescript.sys.fileExists,
+						'package.json',
+					);
 
 					const astroInstall = getAstroInstall([rootPath], {
 						nearestPackageJson: nearestPackageJson,
@@ -90,7 +94,11 @@ connection.onInitialize((params) => {
 						});
 					}
 
-					addAstroTypes(typeof astroInstall === 'string' ? undefined : astroInstall, typescript, languageServiceHost, false);
+					addAstroTypes(
+						typeof astroInstall === 'string' ? undefined : astroInstall,
+						typescript,
+						languageServiceHost,
+					);
 				},
 			};
 		}),
