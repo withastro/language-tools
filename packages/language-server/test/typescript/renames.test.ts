@@ -6,7 +6,7 @@ import { type LanguageServer, getLanguageServer } from '../server.js';
 
 const fixtureDir = path.join(__dirname, '../fixture');
 
-describe('TypeScript - Renaming zzz', async () => {
+describe('TypeScript - Renaming', async () => {
 	let languageServer: LanguageServer;
 
 	before(async () => (languageServer = await getLanguageServer()));
