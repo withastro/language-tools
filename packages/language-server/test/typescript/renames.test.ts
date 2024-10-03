@@ -11,6 +11,26 @@ describe('TypeScript - Renaming', async () => {
 
 	before(async () => (languageServer = await getLanguageServer()));
 
+	it('Renames imports for files when setting is not set', async () => {
+		const documentToBeRenamed = await languageServer.handle.openTextDocument(
+			path.resolve(fixtureDir, 'renameThis.ts'),
+			'typescript',
+		);
+
+		const newUri = documentToBeRenamed.uri.replace('renameThis.ts', 'renamed.ts');
+
+		const edits = await languageServer.handle.connection.sendRequest(WillRenameFilesRequest.type, {
+			files: [
+				{
+					oldUri: documentToBeRenamed.uri,
+					newUri: newUri,
+				},
+			],
+		});
+
+		expect(edits).to.not.be.null;
+	});
+
 	it('Does not rename imports for files when setting is disabled', async () => {
 		await languageServer.handle.updateConfiguration({
 			astro: {
