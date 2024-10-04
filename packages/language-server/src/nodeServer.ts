@@ -5,7 +5,7 @@ import {
 	createServer,
 	createTypeScriptProject,
 	loadTsdkByPath,
-} from '@volar/language-server/node';
+} from '@volar/language-server/node.js';
 import { URI, Utils } from 'vscode-uri';
 import {
 	type CollectionConfig,

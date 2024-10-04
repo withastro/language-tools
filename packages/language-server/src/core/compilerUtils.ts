@@ -1,4 +1,4 @@
-import type { AttributeNode, Point } from '@astrojs/compiler';
+import type { AttributeNode, Point } from '@astrojs/compiler/types';
 import { Position as LSPPosition } from '@volar/language-server';
 
 /**

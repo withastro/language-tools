@@ -3,9 +3,9 @@ import {
 	type LanguagePlugin,
 	MessageType,
 	ShowMessageNotification,
-} from '@volar/language-server/node';
+} from '@volar/language-server/node.js';
 import { URI } from 'vscode-uri';
-import { getAstroLanguagePlugin } from './core';
+import { getAstroLanguagePlugin } from './core/index.js';
 import { getSvelteLanguagePlugin } from './core/svelte.js';
 import { getVueLanguagePlugin } from './core/vue.js';
 import { getPrettierPluginPath, importPrettier } from './importPackage.js';

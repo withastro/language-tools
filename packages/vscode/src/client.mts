@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import * as protocol from '@volar/language-server/protocol';
+import * as protocol from '@volar/language-server/protocol.js';
 import type { LabsInfo } from '@volar/vscode';
 import {
 	activateAutoInsertion,
@@ -11,7 +11,7 @@ import {
 	getTsdk,
 } from '@volar/vscode';
 import * as vscode from 'vscode';
-import * as lsp from 'vscode-languageclient/node';
+import * as lsp from 'vscode-languageclient/node.js';
 
 let client: lsp.BaseLanguageClient;
 

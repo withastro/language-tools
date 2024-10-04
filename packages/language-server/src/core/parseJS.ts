@@ -2,7 +2,7 @@ import type { TSXExtractedScript } from '@astrojs/compiler/types';
 import type { CodeInformation, VirtualCode } from '@volar/language-core';
 import type { Segment } from 'muggle-string';
 import { toString } from 'muggle-string';
-import { buildMappings } from '../buildMappings';
+import { buildMappings } from '../buildMappings.js';
 
 export function extractScriptTags(scripts: TSXExtractedScript[]): VirtualCode[] {
 	const embeddedJSCodes: VirtualCode[] = [];

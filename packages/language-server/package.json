@@ -8,7 +8,7 @@
     "url": "https://github.com/withastro/language-tools",
     "directory": "packages/language-server"
   },
-  "type": "commonjs",
+  "type": "module",
   "main": "dist/index.js",
   "files": [
     "bin",

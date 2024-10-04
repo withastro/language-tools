@@ -1,7 +1,7 @@
 import type { VirtualCode } from '@volar/language-core';
 import type ts from 'typescript';
 import * as html from 'vscode-html-languageservice';
-import { isInsideExpression } from '../plugins/utils';
+import { isInsideExpression } from '../plugins/utils.js';
 
 const htmlLs = html.getLanguageService();
 
