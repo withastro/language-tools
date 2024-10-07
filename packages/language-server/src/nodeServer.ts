@@ -34,7 +34,7 @@ connection.onInitialize((params) => {
 	const { typescript, diagnosticMessages } = loadTsdkByPath(tsdk, params.locale);
 
 	contentIntellisenseEnabled = params.initializationOptions?.contentIntellisense ?? false;
-	let collectionConfigs: { folder: URI; config: CollectionConfig['config'] }[] = [];
+	let collectionConfig: { folder: URI; config: CollectionConfig['config'] }[] = [];
 
 	if (contentIntellisenseEnabled) {
 		// The vast majority of clients support workspaceFolders, but notably our tests currently don't
@@ -42,7 +42,7 @@ connection.onInitialize((params) => {
 		const folders =
 			params.workspaceFolders ?? (params.rootUri ? [{ uri: params.rootUri }] : []) ?? [];
 
-		collectionConfigs = folders.flatMap((folder) => {
+		collectionConfig = folders.flatMap((folder) => {
 			try {
 				const folderUri = URI.parse(folder.uri);
 				let config = server.fileSystem.readFile(
@@ -69,7 +69,7 @@ connection.onInitialize((params) => {
 		params,
 		createTypeScriptProject(typescript, diagnosticMessages, ({ env }) => {
 			return {
-				languagePlugins: getLanguagePlugins(collectionConfigs),
+				languagePlugins: getLanguagePlugins(collectionConfig),
 				setup({ project }) {
 					const { languageServiceHost, configFileName } = project.typescript!;
 
@@ -102,7 +102,7 @@ connection.onInitialize((params) => {
 				},
 			};
 		}),
-		getLanguageServicePlugins(connection, typescript, collectionConfigs),
+		getLanguageServicePlugins(connection, typescript, collectionConfig),
 	);
 });
 
@@ -126,6 +126,12 @@ connection.onInitialized(() => {
 
 	if (contentIntellisenseEnabled) {
 		extensions.push(...SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS);
+		server.fileWatcher.watchFiles(['**/*.schema.json']);
+		server.fileWatcher.onDidChangeWatchedFiles(({ changes }) => {
+			if (changes.some((change) => change.uri.endsWith('.schema.json'))) {
+				server.project.reload();
+			}
+		});
 	}
 
 	server.fileWatcher.watchFiles([`**/*.{${extensions.join(',')}}`]);

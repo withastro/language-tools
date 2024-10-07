@@ -9,37 +9,41 @@ import {
 	SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS,
 } from '../core/frontmatterHolders.js';
 
+type LanguageSettings = Parameters<ReturnType<Provide['yaml/languageService']>['configure']>['0'];
+
+export function getSettings(collectionConfigs: CollectionConfig[]): LanguageSettings {
+	const schemas = collectionConfigs.flatMap((workspaceCollectionConfig) => {
+		return workspaceCollectionConfig.config.collections.flatMap((collection) => {
+			return {
+				fileMatch: SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS.map(
+					(ext) => `volar-embedded-content://yaml_frontmatter_${collection.name}/**/*${ext}`,
+				),
+				uri: Utils.joinPath(
+					workspaceCollectionConfig.folder,
+					'.astro/collections',
+					`${collection.name}.schema.json`,
+				).toString(),
+			};
+		});
+	});
+
+	return {
+		completion: true,
+		format: false,
+		hover: true,
+		validate: true,
+		customTags: [],
+		yamlVersion: '1.2',
+		isKubernetes: false,
+		parentSkeletonSelectedFirst: false,
+		disableDefaultProperties: false,
+		schemas: schemas,
+	};
+}
+
 export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePlugin => {
 	const yamlPlugin = createYAMLService({
-		getLanguageSettings() {
-			const schemas = collectionConfigs.flatMap((workspaceCollectionConfig) => {
-				return workspaceCollectionConfig.config.collections.flatMap((collection) => {
-					return {
-						fileMatch: SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS.map(
-							(ext) => `volar-embedded-content://yaml_frontmatter_${collection.name}/**/*${ext}`,
-						),
-						uri: Utils.joinPath(
-							workspaceCollectionConfig.folder,
-							'.astro/collections',
-							`${collection.name}.schema.json`,
-						).toString(),
-					};
-				});
-			});
-
-			return {
-				completion: true,
-				format: false,
-				hover: true,
-				validate: true,
-				customTags: [],
-				yamlVersion: '1.2',
-				isKubernetes: false,
-				parentSkeletonSelectedFirst: false,
-				disableDefaultProperties: false,
-				schemas: schemas,
-			};
-		},
+		getLanguageSettings: () => getSettings(collectionConfigs),
 	}) as LanguageServicePlugin<Provide>;
 
 	return {
@@ -54,18 +58,14 @@ export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePl
 			const languageService = yamlPluginInstance.provide?.['yaml/languageService']();
 			if (languageService && context.env.onDidChangeWatchedFiles) {
 				context.env.onDidChangeWatchedFiles(async (events) => {
-					let hasChanges = false;
-
 					for (const change of events.changes) {
-						if (!change.uri.endsWith('.schema.json')) return;
-
-						if (languageService.resetSchema(change.uri)) {
-							hasChanges = true;
+						if (change.uri.endsWith('collections.json')) {
+							languageService.configure(getSettings(collectionConfigs));
 						}
-					}
 
-					if (hasChanges) {
-						// TODO: Figure out how to refresh the diagnostics
+						if (change.uri.endsWith('.schema.json')) {
+							languageService.resetSchema(change.uri);
+						}
 					}
 				});
 			}
