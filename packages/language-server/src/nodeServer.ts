@@ -1,6 +1,7 @@
 import {
 	MessageType,
 	ShowMessageNotification,
+	type WorkspaceFolder,
 	createConnection,
 	createServer,
 	createTypeScriptProject,
@@ -9,6 +10,7 @@ import {
 import { URI, Utils } from 'vscode-uri';
 import {
 	type CollectionConfig,
+	type CollectionConfigInstance,
 	SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS,
 } from './core/frontmatterHolders.js';
 import { addAstroTypes } from './core/index.js';
@@ -34,15 +36,20 @@ connection.onInitialize((params) => {
 	const { typescript, diagnosticMessages } = loadTsdkByPath(tsdk, params.locale);
 
 	contentIntellisenseEnabled = params.initializationOptions?.contentIntellisense ?? false;
-	let collectionConfig: { folder: URI; config: CollectionConfig['config'] }[] = [];
+	const collectionConfig = {
+		reload(folders) {
+			this.configs = loadCollectionConfig(folders);
+		},
+		configs: contentIntellisenseEnabled
+			? loadCollectionConfig(
+					// The vast majority of clients support workspaceFolders, but sometimes some unusual environments like tests don't
+					params.workspaceFolders ?? (params.rootUri ? [{ uri: params.rootUri }] : []) ?? [],
+				)
+			: [],
+	} satisfies CollectionConfig;
 
-	if (contentIntellisenseEnabled) {
-		// The vast majority of clients support workspaceFolders, but notably our tests currently don't
-		// Ref: https://github.com/volarjs/volar.js/issues/229
-		const folders =
-			params.workspaceFolders ?? (params.rootUri ? [{ uri: params.rootUri }] : []) ?? [];
-
-		collectionConfig = folders.flatMap((folder) => {
+	function loadCollectionConfig(folders: WorkspaceFolder[] | { uri: string }[]) {
+		return folders.flatMap((folder) => {
 			try {
 				const folderUri = URI.parse(folder.uri);
 				let config = server.fileSystem.readFile(
@@ -54,7 +61,7 @@ connection.onInitialize((params) => {
 				}
 
 				// `server.fs.readFile` can theoretically be async, but in practice it's always sync
-				const collections = JSON.parse(config as string) as CollectionConfig['config'];
+				const collections = JSON.parse(config as string) as CollectionConfigInstance;
 
 				return { folder: folderUri, config: collections };
 			} catch (err) {
@@ -126,9 +133,14 @@ connection.onInitialized(() => {
 
 	if (contentIntellisenseEnabled) {
 		extensions.push(...SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS);
-		server.fileWatcher.watchFiles(['**/*.schema.json']);
+		server.fileWatcher.watchFiles(['**/*.schema.json', '**/collections.json']);
 		server.fileWatcher.onDidChangeWatchedFiles(({ changes }) => {
-			if (changes.some((change) => change.uri.endsWith('.schema.json'))) {
+			const shouldReload = changes.some(
+				(change) => change.uri.endsWith('.schema.json') || change.uri.endsWith('collections.json'),
+			);
+
+			if (shouldReload) {
+				console.log('changes detected, reloading project');
 				server.project.reload();
 			}
 		});

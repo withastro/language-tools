@@ -11,8 +11,8 @@ import {
 
 type LanguageSettings = Parameters<ReturnType<Provide['yaml/languageService']>['configure']>['0'];
 
-export function getSettings(collectionConfigs: CollectionConfig[]): LanguageSettings {
-	const schemas = collectionConfigs.flatMap((workspaceCollectionConfig) => {
+export function getSettings(collectionConfig: CollectionConfig): LanguageSettings {
+	const schemas = collectionConfig.configs.flatMap((workspaceCollectionConfig) => {
 		return workspaceCollectionConfig.config.collections.flatMap((collection) => {
 			return {
 				fileMatch: SUPPORTED_FRONTMATTER_EXTENSIONS_KEYS.map(
@@ -41,9 +41,9 @@ export function getSettings(collectionConfigs: CollectionConfig[]): LanguageSett
 	};
 }
 
-export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePlugin => {
+export const create = (collectionConfig: CollectionConfig): LanguageServicePlugin => {
 	const yamlPlugin = createYAMLService({
-		getLanguageSettings: () => getSettings(collectionConfigs),
+		getLanguageSettings: () => getSettings(collectionConfig),
 	}) as LanguageServicePlugin<Provide>;
 
 	return {
@@ -58,14 +58,23 @@ export const create = (collectionConfigs: CollectionConfig[]): LanguageServicePl
 			const languageService = yamlPluginInstance.provide?.['yaml/languageService']();
 			if (languageService && context.env.onDidChangeWatchedFiles) {
 				context.env.onDidChangeWatchedFiles(async (events) => {
-					for (const change of events.changes) {
-						if (change.uri.endsWith('collections.json')) {
-							languageService.configure(getSettings(collectionConfigs));
-						}
+					const changedSchemas = events.changes.filter((change) =>
+						change.uri.endsWith('.schema.json'),
+					);
+					const changedConfig = events.changes.some((change) =>
+						change.uri.endsWith('collections.json'),
+					);
 
-						if (change.uri.endsWith('.schema.json')) {
-							languageService.resetSchema(change.uri);
-						}
+					if (changedConfig) {
+						collectionConfig.reload(
+							// For some reason, context.env.workspaceFolders is not an array of WorkspaceFolders nor the older format, strange
+							context.env.workspaceFolders.map((folder) => ({ uri: folder.toString() })),
+						);
+						languageService.configure(getSettings(collectionConfig));
+					}
+
+					for (const change of changedSchemas) {
+						languageService.resetSchema(change.uri);
 					}
 				});
 			}
