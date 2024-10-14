@@ -24,7 +24,7 @@
     "color": "#17191E",
     "theme": "dark"
   },
-  "version": "2.14.2",
+  "version": "2.15.2",
   "author": "withastro",
   "license": "MIT",
   "publisher": "astro-build",
@@ -36,12 +36,6 @@
     "workspaceContains:astro.config.*"
   ],
   "main": "./dist/node/client.js",
-  "files": [
-    "dist/",
-    "languages/",
-    "syntaxes/",
-    "assets/"
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/withastro/language-tools.git",
@@ -154,6 +148,12 @@
           "type": "boolean",
           "default": false,
           "description": "Enable experimental support for content collection intellisense inside Markdown, MDX and Markdoc. Note that this require also enabling the feature in your Astro config (experimental.contentCollectionIntellisense) (Astro 4.14+)"
+        },
+        "astro.updateImportsOnFileMove.enabled": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": false,
+          "description": "Controls whether the extension updates imports when a file is moved to a new location. In most cases, you'll want to keep this disabled as TypeScript and the Astro TypeScript plugin already handles this for you. Having multiple tools updating imports at the same time can lead to corrupted files."
         }
       }
     },
@@ -241,7 +241,7 @@
     "update-grammar-snapshots": "node ./test/grammar/test.mjs --updateSnapshot"
   },
   "devDependencies": {
-    "@astrojs/language-server": "^2.14.2",
+    "@astrojs/language-server": "^2.15.0",
     "@astrojs/ts-plugin": "^1.10.2",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.1",

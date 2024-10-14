@@ -1,5 +1,27 @@
 # astro-vscode
 
+## 2.15.2
+
+### Patch Changes
+
+- 43f66cd: Fixes publishing on OpenVSX. For full changelogs between 2.11.0 and this version, please see [CHANGELOG.md](https://github.com/withastro/language-tools/blob/main/packages/vscode/CHANGELOG.md) in the repository.
+
+## 2.15.1
+
+### Patch Changes
+
+- 40ebf98: Fixes publish
+
+## 2.15.0
+
+### Minor Changes
+
+- 3a836de: Allow disabling the handling of updating imports when files are renamed. This is now disabled by default in VS Code, as the Astro TypeScript plugin will handle it correctly.
+
+### Patch Changes
+
+- 5a44072: Fixes formatting not working by default in certain circumstances
+
 ## 2.14.2
 
 ### Patch Changes
