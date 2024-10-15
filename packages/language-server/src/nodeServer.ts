@@ -140,7 +140,6 @@ connection.onInitialized(() => {
 			);
 
 			if (shouldReload) {
-				console.log('changes detected, reloading project');
 				server.project.reload();
 			}
 		});
