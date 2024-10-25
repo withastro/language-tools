@@ -82,16 +82,16 @@ importers:
         specifier: ^1.4.15
         version: 1.5.0
       '@volar/kit':
-        specifier: ^2.4.7
+        specifier: ~2.4.7
         version: 2.4.7(typescript@5.6.2)
       '@volar/language-core':
-        specifier: ^2.4.7
+        specifier: ~2.4.7
         version: 2.4.7
       '@volar/language-server':
-        specifier: ^2.4.7
+        specifier: ~2.4.7
         version: 2.4.7
       '@volar/language-service':
-        specifier: ^2.4.7
+        specifier: ~2.4.7
         version: 2.4.7
       fast-glob:
         specifier: ^3.2.12
@@ -146,7 +146,7 @@ importers:
         specifier: ~2.4.7
         version: 2.4.7
       '@volar/typescript':
-        specifier: ^2.4.7
+        specifier: ~2.4.7
         version: 2.4.7
       astro:
         specifier: ^4.14.0
