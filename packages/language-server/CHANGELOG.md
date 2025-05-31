@@ -1,5 +1,11 @@
 # @astrojs/language-server
 
+## 2.15.5
+
+### Patch Changes
+
+- 2cbd3f6: Updates the autocomplete options for `export const prerender=` to remove `import.meta.env`, as this option was removed in Astro 4.14
+
 ## 2.15.4
 
 ### Patch Changes
