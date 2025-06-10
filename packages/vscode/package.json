@@ -29,7 +29,7 @@
   "license": "MIT",
   "publisher": "astro-build",
   "engines": {
-    "vscode": "^1.82.0"
+    "vscode": "^1.87.0"
   },
   "activationEvents": [
     "onLanguage:astro",
@@ -51,67 +51,45 @@
     "typescriptServerPlugins": [
       {
         "name": "astro-ts-plugin-bundle",
-        "enableForWorkspaceTypeScriptVersions": true
+        "enableForWorkspaceTypeScriptVersions": true,
+        "configNamespace": "typescript",
+        "languages": [
+          "astro"
+        ]
       }
     ],
-    "commands": [
-      {
-        "command": "astro.reloadProjects",
-        "title": "Astro: Reload Projects"
-      },
-      {
-        "command": "astro.findFileReferences",
-        "title": "Astro: Find File References"
-      },
-      {
-        "command": "astro.selectTypescriptVersion",
-        "title": "Astro: Select Typescript Version..."
-      },
-      {
-        "command": "astro.openTsConfig",
-        "title": "Astro: Open TypeScript config"
-      }
-    ],
-    "menus": {
-      "commandPalette": [
-        {
-          "command": "astro.reloadProjects",
-          "when": "editorLangId == astro"
-        },
-        {
-          "command": "astro.findFileReferences",
-          "when": "editorLangId == astro"
-        },
-        {
-          "command": "astro.selectTypescriptVersion",
-          "when": "editorLangId == astro"
-        },
-        {
-          "command": "astro.openTsConfig",
-          "when": "editorLangId == astro"
-        }
-      ],
-      "editor/context": [
-        {
-          "command": "astro.findFileReferences",
-          "when": "editorLangId == astro",
-          "group": "4_search"
-        }
-      ],
-      "editor/title/context": [
-        {
-          "command": "astro.findFileReferences",
-          "when": "resourceLangId == astro && resourceScheme == file"
-        }
-      ],
-      "explorer/context": [
-        {
-          "command": "astro.findFileReferences",
-          "when": "resourceLangId == astro",
-          "group": "4_search"
-        }
-      ]
-    },
+		"menus": {
+			"editor/context": [
+				{
+					"command": "typescript.goToSourceDefinition",
+					"when": "tsSupportsSourceDefinition && resourceLangId == astro",
+					"group": "navigation@9"
+				}
+			],
+			"explorer/context": [
+				{
+					"command": "typescript.findAllFileReferences",
+					"when": "tsSupportsFileReferences && resourceLangId == astro",
+					"group": "4_search"
+				}
+			],
+			"editor/title/context": [
+				{
+					"command": "typescript.findAllFileReferences",
+					"when": "tsSupportsFileReferences && resourceLangId == astro"
+				}
+			],
+			"commandPalette": [
+				{
+					"command": "typescript.reloadProjects",
+					"when": "editorLangId == astro && typescript.isManagedFile"
+				},
+				{
+					"command": "typescript.goToProjectConfig",
+					"when": "editorLangId == astro"
+				}
+			]
+		},
     "breakpoints": [
       {
         "language": "astro"
@@ -148,12 +126,6 @@
           "type": "boolean",
           "default": false,
           "description": "Enable experimental support for content collection intellisense inside Markdown, MDX and Markdoc. Note that this require also enabling the feature in your Astro config (experimental.contentCollectionIntellisense) (Astro 4.14+)"
-        },
-        "astro.updateImportsOnFileMove.enabled": {
-          "scope": "resource",
-          "type": "boolean",
-          "default": false,
-          "description": "Controls whether the extension updates imports when a file is moved to a new location. In most cases, you'll want to keep this disabled as TypeScript and the Astro TypeScript plugin already handles this for you. Having multiple tools updating imports at the same time can lead to corrupted files."
         }
       }
     },
