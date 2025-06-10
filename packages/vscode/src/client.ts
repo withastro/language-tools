@@ -3,10 +3,6 @@ import * as protocol from '@volar/language-server/protocol';
 import type { LabsInfo } from '@volar/vscode';
 import {
 	activateAutoInsertion,
-	activateFindFileReferences,
-	activateReloadProjects,
-	activateTsConfigStatusItem,
-	activateTsVersionStatusItem,
 	createLabsInfo,
 	getTsdk,
 } from '@volar/vscode';
@@ -87,10 +83,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<LabsIn
 
 	// support for auto close tag
 	activateAutoInsertion('astro', client);
-	activateFindFileReferences('astro.findFileReferences', client);
-	activateReloadProjects('astro.reloadProjects', client);
-	activateTsConfigStatusItem('astro', 'astro.openTsConfig', client);
-	activateTsVersionStatusItem('astro', 'astro.selectTypescriptVersion', context, (text) => text);
 
 	const volarLabs = createLabsInfo(protocol);
 	volarLabs.addLanguageClient(client);
@@ -149,3 +141,45 @@ async function getConfiguredServerPath(workspaceState: vscode.Memento) {
 		return lsPath;
 	}
 }
+
+// Track https://github.com/microsoft/vscode/issues/200511
+try {
+	const fs = require('node:fs');
+	const tsExtension = vscode.extensions.getExtension('vscode.typescript-language-features')!;
+	const readFileSync = fs.readFileSync;
+	const extensionJsPath = require.resolve('./dist/extension.js', {
+		paths: [tsExtension.extensionPath],
+	});
+
+	// @ts-expect-error
+	fs.readFileSync = (...args) => {
+		if (args[0] === extensionJsPath) {
+			let text = readFileSync(...args) as string;
+
+			// patch jsTsLanguageModes
+			text = text.replace(
+				't.jsTsLanguageModes=[t.javascript,t.javascriptreact,t.typescript,t.typescriptreact]',
+				s => s + '.concat("astro")'
+			);
+			// patch isSupportedLanguageMode
+			text = text.replace(
+				'.languages.match([t.typescript,t.typescriptreact,t.javascript,t.javascriptreact]',
+				s => s + '.concat("astro")'
+			);
+
+			return text;
+		}
+		return readFileSync(...args);
+	};
+
+	const loadedModule = require.cache[extensionJsPath];
+	if (loadedModule) {
+		delete require.cache[extensionJsPath];
+		const patchedModule = require(extensionJsPath);
+		Object.assign(loadedModule.exports, patchedModule);
+	}
+
+	if (tsExtension.isActive) {
+		vscode.commands.executeCommand('workbench.action.restartExtensionHost');
+	}
+} catch { }

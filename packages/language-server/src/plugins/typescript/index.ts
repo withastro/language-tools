@@ -1,5 +1,6 @@
 import type { LanguageServicePlugin, LanguageServicePluginInstance } from '@volar/language-server';
-import { create as createTypeScriptServices } from 'volar-service-typescript';
+import { create as createTypeScriptDocCommentTemplatePlugin } from 'volar-service-typescript/lib/plugins/docCommentTemplate';
+import { create as createTypeScriptSyntacticPlugin } from 'volar-service-typescript/lib/plugins/syntactic';
 import { URI } from 'vscode-uri';
 import { AstroVirtualCode } from '../../core/index.js';
 import { enhancedProvideCodeActions, enhancedResolveCodeAction } from './codeActions.js';
@@ -7,90 +8,81 @@ import { enhancedProvideCompletionItems, enhancedResolveCompletionItem } from '.
 import { enhancedProvideSemanticDiagnostics } from './diagnostics.js';
 
 export const create = (ts: typeof import('typescript')): LanguageServicePlugin[] => {
-	const tsServicePlugins = createTypeScriptServices(ts as typeof import('typescript'), {});
-	return tsServicePlugins.map<LanguageServicePlugin>((plugin) => {
-		if (plugin.name === 'typescript-semantic') {
-			return {
-				...plugin,
-				create(context): LanguageServicePluginInstance {
-					const typeScriptPlugin = plugin.create(context);
-					return {
-						...typeScriptPlugin,
-						async provideFileRenameEdits(oldUri, newUri, token) {
-							const astroConfig = await context.env.getConfiguration?.<{
-								updateImportsOnFileMove: { enabled: boolean };
-							}>('astro');
+	return [
+		createTypeScriptDocCommentTemplatePlugin(ts),
+		createTypeScriptSyntacticPlugin(ts),
+	];
+	// return tsServicePlugins.map<LanguageServicePlugin>((plugin) => {
+	// 	if (plugin.name === 'typescript-semantic') {
+	// 		return {
+	// 			...plugin,
+	// 			create(context): LanguageServicePluginInstance {
+	// 				const typeScriptPlugin = plugin.create(context);
+	// 				return {
+	// 					...typeScriptPlugin,
+	// 					async provideCompletionItems(document, position, completionContext, token) {
+	// 						const originalCompletions = await typeScriptPlugin.provideCompletionItems!(
+	// 							document,
+	// 							position,
+	// 							completionContext,
+	// 							token,
+	// 						);
+	// 						if (!originalCompletions) return null;
 
-							// Check for `false` explicitly, as the default value is `true`, but it might not be set explicitly depending on the editor
-							if (astroConfig?.updateImportsOnFileMove.enabled === false) {
-								return null;
-							}
+	// 						return enhancedProvideCompletionItems(originalCompletions);
+	// 					},
+	// 					async resolveCompletionItem(item, token) {
+	// 						const resolvedCompletionItem = await typeScriptPlugin.resolveCompletionItem!(
+	// 							item,
+	// 							token,
+	// 						);
+	// 						if (!resolvedCompletionItem) return item;
 
-							return typeScriptPlugin.provideFileRenameEdits!(oldUri, newUri, token);
-						},
-						async provideCompletionItems(document, position, completionContext, token) {
-							const originalCompletions = await typeScriptPlugin.provideCompletionItems!(
-								document,
-								position,
-								completionContext,
-								token,
-							);
-							if (!originalCompletions) return null;
+	// 						return enhancedResolveCompletionItem(resolvedCompletionItem, context);
+	// 					},
+	// 					async provideCodeActions(document, range, codeActionContext, token) {
+	// 						const originalCodeActions = await typeScriptPlugin.provideCodeActions!(
+	// 							document,
+	// 							range,
+	// 							codeActionContext,
+	// 							token,
+	// 						);
+	// 						if (!originalCodeActions) return null;
 
-							return enhancedProvideCompletionItems(originalCompletions);
-						},
-						async resolveCompletionItem(item, token) {
-							const resolvedCompletionItem = await typeScriptPlugin.resolveCompletionItem!(
-								item,
-								token,
-							);
-							if (!resolvedCompletionItem) return item;
+	// 						return enhancedProvideCodeActions(originalCodeActions, context);
+	// 					},
+	// 					async resolveCodeAction(codeAction, token) {
+	// 						const resolvedCodeAction = await typeScriptPlugin.resolveCodeAction!(
+	// 							codeAction,
+	// 							token,
+	// 						);
+	// 						if (!resolvedCodeAction) return codeAction;
 
-							return enhancedResolveCompletionItem(resolvedCompletionItem, context);
-						},
-						async provideCodeActions(document, range, codeActionContext, token) {
-							const originalCodeActions = await typeScriptPlugin.provideCodeActions!(
-								document,
-								range,
-								codeActionContext,
-								token,
-							);
-							if (!originalCodeActions) return null;
+	// 						return enhancedResolveCodeAction(resolvedCodeAction, context);
+	// 					},
+	// 					async provideDiagnostics(document, token) {
+	// 						const decoded = context.decodeEmbeddedDocumentUri(URI.parse(document.uri));
+	// 						const sourceScript = decoded && context.language.scripts.get(decoded[0]);
+	// 						const root = sourceScript?.generated?.root;
 
-							return enhancedProvideCodeActions(originalCodeActions, context);
-						},
-						async resolveCodeAction(codeAction, token) {
-							const resolvedCodeAction = await typeScriptPlugin.resolveCodeAction!(
-								codeAction,
-								token,
-							);
-							if (!resolvedCodeAction) return codeAction;
+	// 						let tsxLineCount = undefined;
+	// 						if (root instanceof AstroVirtualCode && decoded?.[1] === 'tsx') {
+	// 							// If we have compiler errors, our TSX isn't valid so don't bother showing TS errors
+	// 							if (root.hasCompilationErrors) return null;
 
-							return enhancedResolveCodeAction(resolvedCodeAction, context);
-						},
-						async provideDiagnostics(document, token) {
-							const decoded = context.decodeEmbeddedDocumentUri(URI.parse(document.uri));
-							const sourceScript = decoded && context.language.scripts.get(decoded[0]);
-							const root = sourceScript?.generated?.root;
+	// 							// We'll use this to filter out diagnostics that are outside the mapped range of the TSX
+	// 							tsxLineCount = root.astroMeta.tsxRanges.body.end.line;
+	// 						}
 
-							let tsxLineCount = undefined;
-							if (root instanceof AstroVirtualCode && decoded?.[1] === 'tsx') {
-								// If we have compiler errors, our TSX isn't valid so don't bother showing TS errors
-								if (root.hasCompilationErrors) return null;
+	// 						const diagnostics = await typeScriptPlugin.provideDiagnostics!(document, token);
+	// 						if (!diagnostics) return null;
 
-								// We'll use this to filter out diagnostics that are outside the mapped range of the TSX
-								tsxLineCount = root.astroMeta.tsxRanges.body.end.line;
-							}
-
-							const diagnostics = await typeScriptPlugin.provideDiagnostics!(document, token);
-							if (!diagnostics) return null;
-
-							return enhancedProvideSemanticDiagnostics(diagnostics, tsxLineCount);
-						},
-					};
-				},
-			};
-		}
-		return plugin;
-	});
+	// 						return enhancedProvideSemanticDiagnostics(diagnostics, tsxLineCount);
+	// 					},
+	// 				};
+	// 			},
+	// 		};
+	// 	}
+	// 	return plugin;
+	// });
 };
