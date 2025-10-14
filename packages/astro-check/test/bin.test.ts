@@ -1,12 +1,16 @@
 import { spawnSync } from 'child_process';
+import { fileURLToPath } from 'node:url';
 import { expect } from 'chai';
 import { describe, it } from 'mocha';
 
 describe('astro-check - binary', async () => {
 	it('Can run the binary', async () => {
 		const childProcess = spawnSync('node', ['../dist/bin.js', '--root', './fixture'], {
-			cwd: __dirname,
+			cwd: fileURLToPath(new URL('./', import.meta.url)),
 		});
+
+		console.log(childProcess.stdout.toString());
+		console.log(childProcess.stderr.toString());
 
 		expect(childProcess.status).to.equal(1);
 		expect(childProcess.stdout.toString()).to.contain('Getting diagnostics for Astro files in');
