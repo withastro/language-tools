@@ -51,7 +51,7 @@
     "@astrojs/vue": "^4.0.8",
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
-    "@types/node": "^18.17.8",
+    "@types/node": "^20.9.0",
     "@volar/test-utils": "~2.4.23",
     "@volar/typescript": "~2.4.23",
     "astro": "^4.14.0",

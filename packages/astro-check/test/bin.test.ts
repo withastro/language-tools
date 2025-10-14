@@ -9,9 +9,6 @@ describe('astro-check - binary', async () => {
 			cwd: fileURLToPath(new URL('./', import.meta.url)),
 		});
 
-		console.log(childProcess.stdout.toString());
-		console.log(childProcess.stderr.toString());
-
 		expect(childProcess.status).to.equal(1);
 		expect(childProcess.stdout.toString()).to.contain('Getting diagnostics for Astro files in');
 		expect(childProcess.stdout.toString()).to.contain('1 error');

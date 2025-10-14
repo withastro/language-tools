@@ -38,7 +38,7 @@
   "devDependencies": {
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
-    "@types/node": "^18.17.8",
+    "@types/node": "^20.9.0",
     "@types/semver": "^7.3.13",
     "@vscode/test-electron": "^2.5.2",
     "chai": "^4.3.7",
