@@ -5,7 +5,8 @@ import {
 	type FullDocumentDiagnosticReport,
 	type MarkupContent,
 } from '@volar/language-server';
-import { expect } from 'chai';
+import assert from 'node:assert';
+import { after, before, describe, it } from 'node:test';
 import { mkdir, rm, writeFile } from 'fs/promises';
 import { URI } from 'vscode-uri';
 import { type LanguageServer, getLanguageServer } from '../server.js';
@@ -77,7 +78,8 @@ describe('TypeScript - Cache invalidation', async () => {
 			});
 
 			const labels = completions?.items.map((i) => i.label);
-			expect(labels).to.include(fileName, `Expected ${fileName} to be in the completions`);
+
+			assert.ok(labels && labels.includes(fileName), `Expected ${fileName} to be in the completions`);
 		}
 	});
 
@@ -90,7 +92,7 @@ describe('TypeScript - Cache invalidation', async () => {
 		await removeFile('toBeDeleted.astro');
 
 		const directoryContent = await readdir(path.join(fixtureDir, '/caching'));
-		expect(directoryContent).to.not.include('toBeDeleted.astro');
+		assert.ok(!directoryContent.includes('toBeDeleted.astro'));
 
 		const completions = await languageServer.handle.sendCompletionRequest(document.uri, {
 			line: 1,
@@ -98,10 +100,8 @@ describe('TypeScript - Cache invalidation', async () => {
 		});
 
 		const labels = completions?.items.map((i) => i.label);
-		expect(labels).to.not.include(
-			'toBeDeleted.astro',
-			`Expected toBeDeleted.astro to not be in the completions, since the file was deleted`,
-		);
+
+		assert.ok(labels && !labels.includes('toBeDeleted.astro'), `Expected toBeDeleted.astro to not be in the completions, since the file was deleted`);
 	});
 
 	// TODO: Unskip this once the upstream issue is fixed
@@ -122,9 +122,9 @@ describe('TypeScript - Cache invalidation', async () => {
 				character: 9,
 			});
 
-			const labels = imports?.items.map((i) => i.label);
+			const labels = imports?.items.map((i) => i.labelDetails?.description);
 			const className = fileName.slice(0, -'.astro'.length);
-			expect(labels).to.include(className, `Expected ${className} to be in the auto-imports`);
+			assert.ok(labels && labels.includes(className), `Expected ${className} to be in the auto-imports`);
 		}
 	});
 
@@ -138,7 +138,7 @@ describe('TypeScript - Cache invalidation', async () => {
 			existingDocument.uri,
 		)) as FullDocumentDiagnosticReport;
 
-		expect(existingDiagnostics.items).to.have.length(
+		assert.strictEqual(existingDiagnostics.items.length, 
 			0,
 			'Expected no diagnostics, as the file is part of the project',
 		);
@@ -152,7 +152,7 @@ describe('TypeScript - Cache invalidation', async () => {
 			document.uri,
 		)) as FullDocumentDiagnosticReport;
 
-		expect(diagnostics.items).to.have.length(
+		assert.strictEqual(diagnostics.items.length, 
 			0,
 			'Expected no diagnostics, as new files should have access to the module declaration in the project like already existing files.',
 		);
@@ -162,9 +162,9 @@ describe('TypeScript - Cache invalidation', async () => {
 			character: 22,
 		});
 
-		expect((hoverSuperModule?.contents as MarkupContent).value).to.include(
+		assert.ok((hoverSuperModule?.contents as MarkupContent).value.includes(
 			'module "im-a-super-module"',
-		);
+		));
 	});
 
 	after(async () => {
