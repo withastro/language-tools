@@ -34,13 +34,16 @@ export default async function test() {
 
 	if (!pattern) throw new Error('Missing test glob pattern');
 
-	const files = await glob(pattern, {
+	let files = await glob(pattern, {
 		filesOnly: true,
 		absolute: true,
 		ignore: ['**/node_modules/**'],
 	});
 
+	files.unshift(path.resolve('./test/misc/init.test.ts'));
 	files.push(path.resolve('./test/misc/teardown.ts'));
+
+	files = Array.from(new Set(files));
 
 	// For some reason, the `only` option does not work and we need to explicitly set the CLI flag instead.
 	// Node.js requires opt-in to run .only tests :(
