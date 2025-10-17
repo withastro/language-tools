@@ -24,7 +24,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "node --import tsx --test --test-concurrency=1 test/**/*.test.ts",
+    "test": "node --import tsx --test test/**/*.test.ts",
     "test:match": "pnpm run test --test-name-pattern"
   },
   "dependencies": {
