@@ -242,8 +242,7 @@
   "devDependencies": {
     "@astrojs/language-server": "^2.15.5",
     "@astrojs/ts-plugin": "^1.10.5",
-    "@types/glob": "^8.1.0",
-    "@types/mocha": "^10.0.1",
+    "@types/glob": "^8.0.3",
     "@types/node": "^20.9.0",
     "@types/vscode": "^1.82.0",
     "@volar/language-server": "~2.4.23",
@@ -255,7 +254,6 @@
     "glob": "^8.0.3",
     "js-yaml": "^4.1.0",
     "kleur": "^4.1.5",
-    "mocha": "^10.2.0",
     "vscode-languageclient": "^9.0.1",
     "vscode-tmgrammar-test": "^0.1.2"
   },
