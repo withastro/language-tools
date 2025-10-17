@@ -1,8 +1,8 @@
+import assert from 'node:assert';
 import path from 'node:path';
+import { before, describe, it } from 'node:test';
 import type { LocationLink } from '@volar/language-server';
 import { Position } from '@volar/language-server';
-import assert from 'node:assert';
-import { before, describe, it } from 'node:test';
 import { type LanguageServer, getLanguageServer } from '../server.js';
 import { fixtureDir } from '../utils.js';
 
@@ -23,7 +23,10 @@ describe('Content Intellisense - Go To Everywhere', async () => {
 		)) as LocationLink[];
 
 		const targetUris = definitions?.map((definition) => definition.targetUri);
-		assert.strictEqual(targetUris.every((uri) => uri.endsWith('config.ts')), true);
+		assert.strictEqual(
+			targetUris.every((uri) => uri.endsWith('config.ts')),
+			true,
+		);
 
 		const { targetRange, targetSelectionRange, originSelectionRange } = definitions[0];
 

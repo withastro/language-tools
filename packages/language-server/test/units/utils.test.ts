@@ -1,7 +1,7 @@
-import type { Point } from '@astrojs/compiler/types.js';
-import { Range } from '@volar/language-server';
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
+import type { Point } from '@astrojs/compiler/types.js';
+import { Range } from '@volar/language-server';
 import type { Node } from 'vscode-html-languageservice';
 import * as html from 'vscode-html-languageservice';
 import { getTSXRangesAsLSPRanges, safeConvertToTSX } from '../../dist/core/astro2tsx.js';
@@ -83,17 +83,20 @@ describe('Utilities', async () => {
 		const tsxRanges = getTSXRangesAsLSPRanges(tsx);
 		const astroMetadata = { tsxRanges, ...getAstroMetadata('file.astro', input) };
 
-		assert.deepStrictEqual(utils.ensureRangeIsInFrontmatter(beforeFrontmatterRange, astroMetadata),
+		assert.deepStrictEqual(
+			utils.ensureRangeIsInFrontmatter(beforeFrontmatterRange, astroMetadata),
 			Range.create(2, 0, 2, 0),
 		);
 
 		const insideFrontmatterRange = Range.create(1, 0, 1, 0);
-		assert.deepStrictEqual(utils.ensureRangeIsInFrontmatter(insideFrontmatterRange, astroMetadata),
+		assert.deepStrictEqual(
+			utils.ensureRangeIsInFrontmatter(insideFrontmatterRange, astroMetadata),
 			Range.create(2, 0, 2, 0),
 		);
 
 		const outsideFrontmatterRange = Range.create(6, 0, 6, 0);
-		assert.deepStrictEqual(utils.ensureRangeIsInFrontmatter(outsideFrontmatterRange, astroMetadata),
+		assert.deepStrictEqual(
+			utils.ensureRangeIsInFrontmatter(outsideFrontmatterRange, astroMetadata),
 			Range.create(2, 0, 2, 0),
 		);
 	});

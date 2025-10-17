@@ -66,6 +66,9 @@ describe('parseAstro - Can parse astro files', () => {
 		assert.strictEqual(getAstroMetadata('file.astro', inputOpen).frontmatter.status, 'open');
 
 		const inputNull = `<div>Astro!</div>`;
-		assert.strictEqual(getAstroMetadata('file.astro', inputNull).frontmatter.status, 'doesnt-exist');
+		assert.strictEqual(
+			getAstroMetadata('file.astro', inputNull).frontmatter.status,
+			'doesnt-exist',
+		);
 	});
 });

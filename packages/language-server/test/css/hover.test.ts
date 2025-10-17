@@ -1,6 +1,6 @@
-import { Position } from '@volar/language-server';
 import assert from 'node:assert';
 import { before, describe, it } from 'node:test';
+import { Position } from '@volar/language-server';
 import type { LanguageServer } from '../server.js';
 import { getLanguageServer } from '../server.js';
 

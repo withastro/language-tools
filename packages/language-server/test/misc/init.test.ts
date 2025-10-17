@@ -1,6 +1,6 @@
-import type { InitializeResult, ServerCapabilities } from '@volar/language-server';
 import assert from 'node:assert';
 import { before, describe, it } from 'node:test';
+import type { InitializeResult, ServerCapabilities } from '@volar/language-server';
 import { getLanguageServer } from '../server.js';
 
 describe('Initialize', async () => {

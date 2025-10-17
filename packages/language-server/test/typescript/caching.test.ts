@@ -1,12 +1,12 @@
+import assert from 'node:assert';
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
+import { after, before, describe, it } from 'node:test';
 import {
 	FileChangeType,
 	type FullDocumentDiagnosticReport,
 	type MarkupContent,
 } from '@volar/language-server';
-import assert from 'node:assert';
-import { after, before, describe, it } from 'node:test';
 import { mkdir, rm, writeFile } from 'fs/promises';
 import { URI } from 'vscode-uri';
 import { type LanguageServer, getLanguageServer } from '../server.js';
@@ -79,7 +79,10 @@ describe('TypeScript - Cache invalidation', async () => {
 
 			const labels = completions?.items.map((i) => i.label);
 
-			assert.ok(labels && labels.includes(fileName), `Expected ${fileName} to be in the completions`);
+			assert.ok(
+				labels && labels.includes(fileName),
+				`Expected ${fileName} to be in the completions`,
+			);
 		}
 	});
 
@@ -101,7 +104,10 @@ describe('TypeScript - Cache invalidation', async () => {
 
 		const labels = completions?.items.map((i) => i.label);
 
-		assert.ok(labels && !labels.includes('toBeDeleted.astro'), `Expected toBeDeleted.astro to not be in the completions, since the file was deleted`);
+		assert.ok(
+			labels && !labels.includes('toBeDeleted.astro'),
+			`Expected toBeDeleted.astro to not be in the completions, since the file was deleted`,
+		);
 	});
 
 	// TODO: Unskip this once the upstream issue is fixed
@@ -124,7 +130,10 @@ describe('TypeScript - Cache invalidation', async () => {
 
 			const labels = imports?.items.map((i) => i.labelDetails?.description);
 			const className = fileName.slice(0, -'.astro'.length);
-			assert.ok(labels && labels.includes(className), `Expected ${className} to be in the auto-imports`);
+			assert.ok(
+				labels && labels.includes(className),
+				`Expected ${className} to be in the auto-imports`,
+			);
 		}
 	});
 
@@ -138,7 +147,8 @@ describe('TypeScript - Cache invalidation', async () => {
 			existingDocument.uri,
 		)) as FullDocumentDiagnosticReport;
 
-		assert.strictEqual(existingDiagnostics.items.length, 
+		assert.strictEqual(
+			existingDiagnostics.items.length,
 			0,
 			'Expected no diagnostics, as the file is part of the project',
 		);
@@ -152,7 +162,8 @@ describe('TypeScript - Cache invalidation', async () => {
 			document.uri,
 		)) as FullDocumentDiagnosticReport;
 
-		assert.strictEqual(diagnostics.items.length, 
+		assert.strictEqual(
+			diagnostics.items.length,
 			0,
 			'Expected no diagnostics, as new files should have access to the module declaration in the project like already existing files.',
 		);
@@ -162,9 +173,9 @@ describe('TypeScript - Cache invalidation', async () => {
 			character: 22,
 		});
 
-		assert.ok((hoverSuperModule?.contents as MarkupContent).value.includes(
-			'module "im-a-super-module"',
-		));
+		assert.ok(
+			(hoverSuperModule?.contents as MarkupContent).value.includes('module "im-a-super-module"'),
+		);
 	});
 
 	after(async () => {
