@@ -24,7 +24,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "node --import tsx --test test/**/*.test.ts",
+    "test": "tsx ./test/script.ts \"**/*.test.ts\"",
     "test:match": "pnpm run test --test-name-pattern"
   },
   "dependencies": {
@@ -36,6 +36,7 @@
   "devDependencies": {
     "@types/node": "^20.9.0",
     "@types/yargs": "^17.0.24",
+    "tinyglobby": "^0.2.15",
     "tsx": "^3.12.7"
   },
   "peerDependencies": {

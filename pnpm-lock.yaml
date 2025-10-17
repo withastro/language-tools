@@ -54,6 +54,9 @@ importers:
       '@types/yargs':
         specifier: ^17.0.24
         version: 17.0.24
+      tinyglobby:
+        specifier: ^0.2.15
+        version: 0.2.15
       tsx:
         specifier: ^3.12.7
         version: 3.12.7
@@ -3595,6 +3598,7 @@ packages:
 
   oniguruma-to-js@0.4.3:
     resolution: {integrity: sha512-X0jWUcAlxORhOqqBREgPMgnshB7ZGYszBNspP+tS9hPD3l13CdaXcHbgImoHUHlrvGx/7AvFEkTRhAGYh+jzjQ==}
+    deprecated: use oniguruma-to-es instead
 
   open@10.1.0:
     resolution: {integrity: sha512-mnkeQ1qP5Ue2wd+aivTD3NHd/lZ96Lu0jgf0pwktLPtx6cTZiH7tyeGRRHs0zX0rbrahXPnXlUnbeXyaBBuIaw==}
