@@ -48,24 +48,12 @@ importers:
         specifier: ^17.7.2
         version: 17.7.2
     devDependencies:
-      '@types/chai':
-        specifier: ^4.3.5
-        version: 4.3.5
-      '@types/mocha':
-        specifier: ^10.0.1
-        version: 10.0.1
       '@types/node':
         specifier: ^20.9.0
         version: 20.19.21
       '@types/yargs':
         specifier: ^17.0.24
         version: 17.0.24
-      chai:
-        specifier: ^4.3.7
-        version: 4.3.7
-      mocha:
-        specifier: ^10.2.0
-        version: 10.2.0
       tsx:
         specifier: ^3.12.7
         version: 3.12.7
@@ -247,11 +235,8 @@ importers:
         specifier: ^1.10.5
         version: link:../ts-plugin
       '@types/glob':
-        specifier: ^8.1.0
+        specifier: ^8.0.3
         version: 8.1.0
-      '@types/mocha':
-        specifier: ^10.0.1
-        version: 10.0.1
       '@types/node':
         specifier: ^20.9.0
         version: 20.19.21
@@ -285,9 +270,6 @@ importers:
       kleur:
         specifier: ^4.1.5
         version: 4.1.5
-      mocha:
-        specifier: ^10.2.0
-        version: 10.2.0
       vscode-languageclient:
         specifier: ^9.0.1
         version: 9.0.1
