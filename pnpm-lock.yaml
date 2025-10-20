@@ -238,8 +238,11 @@ importers:
         specifier: ^1.10.5
         version: link:../ts-plugin
       '@types/glob':
-        specifier: ^8.0.3
+        specifier: ^8.1.0
         version: 8.1.0
+      '@types/mocha':
+        specifier: ^10.0.1
+        version: 10.0.1
       '@types/node':
         specifier: ^20.9.0
         version: 20.19.21
@@ -273,6 +276,9 @@ importers:
       kleur:
         specifier: ^4.1.5
         version: 4.1.5
+      mocha:
+        specifier: ^10.2.0
+        version: 10.2.0
       vscode-languageclient:
         specifier: ^9.0.1
         version: 9.0.1
