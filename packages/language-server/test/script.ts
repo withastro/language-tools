@@ -76,6 +76,7 @@ export default async function test() {
 		only: args.values.only,
 		setup: args.values.setup,
 		watch: args.values.watch,
+		forceExit: true,
 		timeout: args.values.timeout ? Number(args.values.timeout) : defaultTimeout, // Node.js defaults to Infinity, so set better fallback
 	})
 		.on('test:fail', () => {
