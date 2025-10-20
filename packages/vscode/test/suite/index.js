@@ -1,33 +1,38 @@
-const path = require('node:path');
+const path = require('path');
+const Mocha = require('mocha');
 const glob = require('glob');
-const { run } = require('node:test');
 
-exports.run = async function () {
+exports.run = function () {
+	// Create the mocha test
+	const mocha = new Mocha({
+		ui: 'tdd',
+		color: true,
+	});
+
 	const testsRoot = path.resolve(__dirname, '..');
 
 	return /** @type {Promise<void>} */ (
-		new Promise((resolve, reject) => {
-			glob('**/**.test.js', { cwd: testsRoot }, async (err, files) => {
+		new Promise((c, e) => {
+			glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
 				if (err) {
-					return reject(err);
+					return e(err);
 				}
 
+				// Add files to the test suite
+				files.forEach((f) => mocha.addFile(path.resolve(testsRoot, f)));
+
 				try {
-					for (const f of files) {
-						require(path.resolve(testsRoot, f));
-					}
-
-					const stream = run({ concurrency: 1 });
-
-					stream.on('test:fail', () => {
-						reject(new Error('Test failed'));
+					// Run the mocha test
+					mocha.run((failures) => {
+						if (failures > 0) {
+							e(new Error(`${failures} tests failed.`));
+						} else {
+							c();
+						}
 					});
-
-					stream.on('test:complete', () => {
-						resolve();
-					});
-				} catch (error) {
-					reject(error);
+					// eslint-disable-next-line @typescript-eslint/no-shadow
+				} catch (err) {
+					e(err);
 				}
 			});
 		})
