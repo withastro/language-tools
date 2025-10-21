@@ -24,7 +24,7 @@ describe('Content Intellisense - Caching', async () => {
 
 		assert.deepStrictEqual(hover?.contents, {
 			kind: 'markdown',
-			value: 'I will be changed\n\nsource',
+			value: 'I will be changed',
 		});
 
 		fs.writeFileSync(
@@ -46,7 +46,7 @@ describe('Content Intellisense - Caching', async () => {
 
 		assert.deepStrictEqual(hover2?.contents, {
 			kind: 'markdown',
-			value: 'I am changed\n\nsource',
+			value: 'I am changed',
 		});
 	});
 
