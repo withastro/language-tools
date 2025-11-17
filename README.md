@@ -1,5 +1,8 @@
 # Astro Language Tools
 
+> [!IMPORTANT]
+> This repo is no longer used for active development of Astro's language tools, its content has been moved to the [Astro monorepo](https://github.com/withastro/astro/tree/main/packages/language-tools). Please submit any new issues or pull requests there.
+
 This repository contains all the editor tooling required for the [Astro](https://astro.build/) language (`.astro` files).
 
 Notably, it contains an implementation of the [Language Server Protocol (LSP)](https://microsoft.github.io/language-server-protocol/) which as of now is used for the [official VSCode Extension](https://marketplace.visualstudio.com/items?itemName=astro-build.astro-vscode) but could also be used to power a plugin for your favorite IDE in the future.
