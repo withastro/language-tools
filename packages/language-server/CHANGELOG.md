@@ -1,5 +1,15 @@
 # @astrojs/language-server
 
+## 2.16.0
+
+### Minor Changes
+
+- 3c7ab17: Allow disabling the Auto Import Cache. The cache can cause an issue where new files are not able to be automatically imported using autocomplete. Workaround for #1038.
+
+### Patch Changes
+
+- 8f7e469: update volar dependencies
+
 ## 2.15.5
 
 ### Patch Changes
